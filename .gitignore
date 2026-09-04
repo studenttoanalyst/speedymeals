@@ -86,3 +86,4 @@ mobile_app/coverage/
 # ============================
 docker-compose.override.yml
 *.pid
+backend/patchfiles/
