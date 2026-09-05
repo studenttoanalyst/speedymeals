@@ -1,89 +1,232 @@
-# ============================
+# ============================================================
+
 # GENERAL
-# ============================
+
+# ============================================================
+
 .DS_Store
 Thumbs.db
+
+# Logs / Temporary files
+
 *.log
 *.tmp
+*.temp
+
+# Environment / Secrets
+
 .env
 .env.*
 !.env.example
+
+# Certificates / Private Keys
+
 *.pem
 *.key
 
-# IDE / Editor
-.vscode/
-.idea/
-*.swp
-*.swo
+# ============================================================
 
-# ============================
-# BACKEND (Python / FastAPI)
-# ============================
-backend/__pycache__/
-backend/**/__pycache__/
-backend/*.pyc
-backend/*.pyo
-backend/*.pyd
-backend/.Python
-backend/venv/
-backend/env/
-backend/.venv/
-backend/*.egg-info/
-backend/.pytest_cache/
-backend/.mypy_cache/
-backend/.ruff_cache/
-backend/.coverage
-backend/htmlcov/
+# PYTHON / FASTAPI
+
+# ============================================================
+
+# Virtual environments
+
+venv/
+.venv/
+env/
+ENV/
+**/venv/
+**/.venv/
+**/env/
+**/ENV/
+
+# Python cache
+
+**pycache**/
+**/**pycache**/
+*.py[cod]
+*$py.class
+
+# Python build / packaging
+
+*.egg
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+wheels/
+
+# Python testing
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checking / linting
+
+.mypy_cache/
+.pyright/
+.ruff_cache/
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# FastAPI / backend generated files
+
 backend/instance/
-backend/*.sqlite3
-backend/.env
-backend/alembic/versions/__pycache__/
+backend/patchfiles/
 
-# ============================
-# ADMIN WEB (Next.js / TypeScript)
-# ============================
+# SQLite databases
+
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================================================
+
+# BACKEND SPECIFIC
+
+# ============================================================
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Alembic cache
+
+backend/alembic/versions/**pycache**/
+
+# ============================================================
+
+# NEXT.JS / TYPESCRIPT ADMIN WEB
+
+# ============================================================
+
 admin_web/node_modules/
 admin_web/.next/
 admin_web/out/
 admin_web/build/
 admin_web/dist/
 admin_web/.turbo/
+
+# TypeScript
+
 admin_web/*.tsbuildinfo
+
+# Environment files
+
 admin_web/.env
-admin_web/.env.local
-admin_web/.env.development.local
-admin_web/.env.production.local
+admin_web/.env.*
+!admin_web/.env.example
+
+# Package manager logs
+
 admin_web/npm-debug.log*
 admin_web/yarn-debug.log*
 admin_web/yarn-error.log*
 admin_web/pnpm-debug.log*
-admin_web/.vercel
 
-# ============================
-# MOBILE APP (Flutter / Dart)
-# ============================
+# Vercel
+
+admin_web/.vercel/
+
+# ============================================================
+
+# FLUTTER / DART MOBILE APP
+
+# ============================================================
+
 mobile_app/.dart_tool/
 mobile_app/.flutter-plugins
 mobile_app/.flutter-plugins-dependencies
 mobile_app/.packages
 mobile_app/.pub-cache/
 mobile_app/.pub/
+
+# Flutter build
+
 mobile_app/build/
+mobile_app/coverage/
+
+# iOS
+
 mobile_app/**/ios/Pods/
 mobile_app/**/ios/.symlinks/
 mobile_app/**/ios/Flutter/Flutter.framework
 mobile_app/**/ios/Flutter/Flutter.podspec
+
+# Android
+
 mobile_app/**/android/.gradle/
 mobile_app/**/android/local.properties
 mobile_app/**/android/**/GeneratedPluginRegistrant.java
+
+# Flutter / IDE
+
 mobile_app/*.iml
 mobile_app/.idea/
-mobile_app/coverage/
 
-# ============================
-# DOCKER / CI
-# ============================
+# ============================================================
+
+# IDE / EDITOR
+
+# ============================================================
+
+.vscode/
+.idea/
+
+*.swp
+*.swo
+*.swn
+
+# ============================================================
+
+# DOCKER
+
+# ============================================================
+
 docker-compose.override.yml
+
 *.pid
-backend/patchfiles/
+
+# ============================================================
+
+# OS / SYSTEM
+
+# ============================================================
+
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================================
+
+# LOCAL DEVELOPMENT
+
+# ============================================================
+
+# Local uploads / generated files
+
+uploads/
+tmp/
+temp/
+
+# ============================================================
+
+# SECRETS / CREDENTIALS
+
+# ============================================================
+
+*.pem
+*.key
+*.crt
+
+# Firebase
+
+serviceAccountKey.json
+google-services.json
+GoogleService-Info.plist
