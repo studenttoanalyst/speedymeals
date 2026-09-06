@@ -69,6 +69,12 @@ Tasks:
   checkout. See Phase 5 note for detail — this keeps Postgres for finalized,
   permanent data only, and gives fast read/write for a state that changes
   constantly before checkout.
+- **Decision: `created_at` kept on every table, including `orders`,
+  `order_items`, `settlements`, `rider_payouts`** even though schema.jpeg's
+  diagram doesn't draw it there (those 4 only show domain-specific
+  timestamps like `placed_at`/`paid_at`). Treated as a harmless generic
+  audit column, not a business field — flagged to and approved by project
+  owner rather than silently added.
 - Run migration, verify tables in Postgres.
 
 Exit check: `alembic upgrade head` clean, all 13 tables exist matching
