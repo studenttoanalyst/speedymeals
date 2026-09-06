@@ -14,17 +14,3 @@ python-dotenv==1.0.1
 python-multipart==0.0.9
 pytest==8.3.3
 pytest-asyncio==0.24.0
-
-# Har package ki wajah (short):
-
-# fastapi + uvicorn — API framework + server
-# sqlalchemy + alembic — DB ORM + migrations
-# psycopg2-binary — Postgres driver
-# pydantic + pydantic-settings — validation + .env config load
-# python-jose + passlib[bcrypt] — JWT + password hash (auth)
-# redis — OTP store, rate limit, rider live location cache
-# boto3 — AWS S3 (doc uploads: CNIC/license/vehicle photo)
-# httpx — Google Maps Distance Matrix API call
-# python-dotenv — local .env load
-# python-multipart — file upload support (FastAPI form-data)
-# pytest + pytest-asyncio — testing
