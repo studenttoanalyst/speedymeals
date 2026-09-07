@@ -13,6 +13,14 @@ sys.path.append(str(Path(__file__).resolve().parents[2]))
 from app.core.config import settings
 from app.core.database import Base
 
+# Import every model module so its classes register onto Base.metadata.
+# Without these imports, Base.metadata stays empty and `alembic revision
+# --autogenerate` would see "no tables" and generate an empty migration.
+from app.platform.auth import models as auth_models  # noqa: F401
+from app.platform.users import models as users_models  # noqa: F401
+from app.platform.wallet_payment import models as wallet_models  # noqa: F401
+from app.modules.food_delivery import models as food_delivery_models  # noqa: F401
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
