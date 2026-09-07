@@ -30,27 +30,55 @@ Exit check: `docker-compose up` → `GET /health` return 200.
 
 ## Phase 1 — Database Schema & Migrations (NOW)
 
-Goal: full DB structure match spec Sec 12, before any endpoint logic.
+Goal: full DB structure match `docs/schema.jpeg` (the locked, approved ERD),
+before any endpoint logic.
+
+**Authoritative source for table design: `docs/schema.jpeg`** — not a
+guess derived from the spec doc alone. Spec doc (Sec 12) gives the business
+intent; schema.jpeg is the actual finalized column-level design. Where the
+two agree (they do, on every money/business field), no conflict. Where
+schema.jpeg has more detail (UUID ids, extra tables like `addresses` and
+`ratings`, selective `updated_at`), schema.jpeg wins.
 
 Tasks:
-- Alembic init (`alembic init migrations`).
-- Base model class (`app/core/base_model.py`) — id, created_at, updated_at.
-- Tables (one model file per module, per existing folder split):
-  - `users` (customer, shared identity fields).
-  - `riders` — wallet_balance, pending_cash_owed, doc verification fields, status.
-  - `restaurants` — email (unique), password_hash, phone_number (unique), commission_rate default 10.00.
-  - `admins` — email, password_hash, role (super_admin/support).
-  - `menu_items` — restaurant_id FK, name, price, category, available bool.
-  - `orders` — customer_id, restaurant_id, rider_id, status, payment_method, delivery_distance_km, commission_amount, restaurant_payable, rider_earning, totals.
-  - `order_items` — order_id FK, menu_item_id FK, qty, price snapshot.
-  - `carts` — customer_id, restaurant_id (multi-cart support, Sec 7 Step 7).
-  - `wallet_transactions` — rider_id, type (recharge/deduction), amount.
-  - `cash_deposits` — rider_id, expected_amount, actual_amount, date, status.
-  - `settlements` — restaurant_id, week_range, total_sales, commission, net_payable, status.
-  - `rider_payouts` — rider_id, week_range, total_earning, status.
+- Alembic init (`alembic init migrations`). ✅ done.
+- Base model (`app/core/base_model.py`) — matches schema.jpeg exactly:
+  - `id`: UUID on every table (not integer — corrected after schema.jpeg
+    review, see Step 2 fix).
+  - `created_at`: on every table.
+  - `updated_at`: NOT automatic on every table — only mixed in via
+    `UpdatedAtMixin` on tables that have it in schema.jpeg (`users`,
+    `riders`, `restaurants`, `orders`).
+- Tables (13 total, per schema.jpeg, one model file per module):
+  - `admins` — email (unique), password_hash, role, is_active.
+  - `users` — phone_number (unique), name, email, wallet_balance, is_active.
+  - `addresses` — user_id FK, label, latitude, longitude, full_address, is_default.
+  - `riders` — phone_number (unique), cnic_number (unique), vehicle info, doc photo URLs, approval_status, wallet_balance, pending_cash_owed, is_online, current_latitude/longitude.
+  - `restaurants` — email (unique), password_hash, phone_number, address, lat/long, commission_rate default 10.00, logo/cover URLs, opening/closing time, status.
+  - `menu_items` — restaurant_id FK, name, description, price, category, photo_url, variants (jsonb), is_available.
+  - `orders` — user_id FK, restaurant_id FK, rider_id FK, delivery_address_id FK, status, payment_method, food_subtotal, delivery_distance_km, delivery_fee, total_amount, commission_amount, restaurant_payable, rider_earning, cancellation fields, placed_at, delivered_at.
+  - `order_items` — order_id FK, menu_item_id FK, quantity, selected_variant, price_at_order.
+  - `ratings` — order_id FK, user_id FK, restaurant_rating, rider_rating, comment.
+  - `wallet_transactions` — rider_id FK, order_id FK, type, amount, balance_after.
+  - `cash_deposits` — rider_id FK, amount_submitted, expected_amount, discrepancy, submission_method, verified_by_admin.
+  - `settlements` — restaurant_id FK, period_start/end, total_sales, commission_deducted, net_payable, status, paid_at.
+  - `rider_payouts` — rider_id FK, period_start/end, total_earning, status, paid_at.
+- **No `carts` table.** Cart is temporary, pre-order state (customer still
+  editing quantities/items) — lives in Redis (`cart:{customer_id}:{restaurant_id}`),
+  not Postgres. It converts into a real `orders` + `order_items` row only at
+  checkout. See Phase 5 note for detail — this keeps Postgres for finalized,
+  permanent data only, and gives fast read/write for a state that changes
+  constantly before checkout.
+- **Decision: `created_at` kept on every table, including `orders`,
+  `order_items`, `settlements`, `rider_payouts`** even though schema.jpeg's
+  diagram doesn't draw it there (those 4 only show domain-specific
+  timestamps like `placed_at`/`paid_at`). Treated as a harmless generic
+  audit column, not a business field — flagged to and approved by project
+  owner rather than silently added.
 - Run migration, verify tables in Postgres.
 
-Exit check: `alembic upgrade head` clean, all tables exist, FK constraints correct.
+Exit check: `alembic upgrade head` clean, all 13 tables exist matching
+schema.jpeg exactly (types, FKs, nullability), no drift.
 
 ---
 
@@ -109,6 +137,7 @@ Tasks:
 - Restaurant list (nearby/sort by distance+rating), search, filter.
 - Menu view by restaurant.
 - Multi-cart logic (Sec 7 Step 7): cart keyed by (customer_id, restaurant_id), independent tabs, no auto-clear.
+  - **Storage: Redis, not Postgres.** Key pattern `cart:{customer_id}:{restaurant_id}`, value = JSON of items/quantities. Reason: cart is temporary, pre-order, changes on every tap (add/remove/qty change) — Redis gives fast read/write without churning Postgres rows. On "Place Order" (Phase 5 checkout step), cart contents are read from Redis, written once as real `orders` + `order_items` rows, then the Redis key is cleared. No `carts` table exists in schema.jpeg for this reason.
 - Checkout: call Google Maps Distance Matrix (restaurant→customer address) → `delivery_distance_km` → fee = 50 + (km×20).
 - Price breakdown response: food subtotal + delivery fee + total.
 - Place order: create `orders` row + `order_items`, compute commission_amount, restaurant_payable (90%), rider_earning (100% delivery fee) — all snapshot at placement.

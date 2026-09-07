@@ -60,14 +60,19 @@ Folder: `app/platform/auth`, `app/platform/users`.
 
 Tasks:
 - OTP flow: phone number in → generate OTP → store in Redis (expiry 5 min) → verify endpoint.
-- JWT issue on OTP verify (customer/rider) — short expiry + refresh token.
-- Restaurant login: email+password OR phone+OTP (spec Sec 9 Step 2) — bcrypt hash password.
+  - SMS provider: **not yet decided** (see ADR-001). Dev/test uses console/log-mode sender (OTP printed to server log, no real SMS sent, zero cost). SMS-sending isolated behind a single function/interface so swapping in a real Pakistani provider later is a one-file change, not a rewrite.
+- OTP resend cooldown: 30–60 sec enforced server-side (not just a disabled frontend button) before a new OTP can be requested for the same phone.
+- JWT issue on OTP verify (customer/rider) — short expiry access token (~15–30 min) + refresh token.
+- Refresh token tracking: every issued refresh token stored (DB or Redis) with a `valid`/`revoked` status. Logout sets it `revoked`. Reusing a revoked refresh token to mint a new access token must be rejected. (Without this, logout does not actually invalidate a session.)
+- Restaurant login: email+password OR phone+OTP (spec Sec 9 Step 2) — bcrypt hash password. Restaurant accounts are created by Admin during manual onboarding (spec Sec 9 Step 1) — no restaurant self-signup in MVP.
 - Admin login: email+password, role field (super_admin/support).
+- First admin account: **auto-seeded on app startup** (see ADR-002), not a manually-run script. On startup, check if any admin row exists; if none, create one from `FIRST_ADMIN_EMAIL` / `FIRST_ADMIN_PASSWORD` env vars (password bcrypt-hashed before insert). No-op if an admin already exists.
+- Password reset (restaurant/admin only — customer/rider have no password, they always re-auth via OTP): no self-serve reset endpoint in MVP; Admin resets restaurant/admin credentials manually from Admin Panel (spec Sec 10 Step 3 already covers this — no new code needed here).
 - Role-based dependency (`get_current_user`, `require_role([...])`) — enforced at API layer, not frontend only.
-- Rate limit OTP + login endpoints (Redis counter, e.g. 5/min per phone).
+- Rate limit OTP + login endpoints (Redis counter, e.g. 5/min per phone/email).
 - `users` module: profile get/update, saved addresses (customer).
 
-Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant, admin) via Postman/Swagger.
+Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant, admin) via Postman/Swagger; logout invalidates the refresh token (reuse attempt is rejected); 6th rapid OTP/login attempt is rate-limited; first admin exists automatically on a fresh database with no manual step.
 
 ---
 
