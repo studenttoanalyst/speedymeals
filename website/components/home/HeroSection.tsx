@@ -54,16 +54,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
       className="relative min-h-screen flex flex-col justify-between pt-24 pb-12 overflow-hidden"
     >
       {/* Hero Content Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto flex flex-col items-center">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="max-w-4xl"
+          className="max-w-4xl w-full flex flex-col items-center text-center"
         >
           {/* Eyebrow: FAST & SAFE TO YOU (mono, tracking-widest, --red, subtle color coupling) */}
-          <motion.div variants={itemVariants} className="flex items-center space-x-3 mb-5">
+          <motion.div variants={itemVariants} className="flex items-center justify-center space-x-3 mb-5">
             <span
               className="inline-block w-2 h-2 transition-colors duration-300"
               style={{ backgroundColor: 'var(--dynamic-accent, #E23A2E)' }}
@@ -81,14 +81,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           </motion.div>
 
           {/* Headline (Archivo Black, huge, --ink): SPEEDYMEALS / FAST. FAIR. GLOBAL. */}
-          <motion.div variants={itemVariants} className="mb-6">
+          <motion.div variants={itemVariants} className="mb-6 text-center w-full">
             <h1
               id="hero-headline"
-              className="font-['Archivo_Black'] text-4xl sm:text-6xl lg:text-7xl xl:text-8xl tracking-tight text-[#15171A] uppercase leading-[0.92]"
+              className="font-display text-4xl sm:text-6xl lg:text-7xl xl:text-8xl tracking-tight text-[#15171A] uppercase leading-[0.95]"
             >
               SPEEDYMEALS
               <br />
-              <span className="text-[#15171A] flex flex-wrap items-center gap-x-3 sm:gap-x-4">
+              <span className="text-[#15171A] flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4">
                 <span>FAST.</span>
                 <span
                   className="transition-colors duration-300"
@@ -104,7 +104,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           {/* Subhead with Sharp Editorial Styling */}
           <motion.div
             variants={itemVariants}
-            className="mb-8 p-6 bg-[#FFFFFF] border-l-2 border-[#15171A] border-y border-r border-[#E4E2DD] max-w-3xl shadow-sm"
+            className="mb-8 p-6 bg-[#FFFFFF] border border-[#E4E2DD] border-t-2 border-t-[#15171A] max-w-3xl w-full mx-auto shadow-sm text-center"
           >
             <p className="text-base sm:text-lg text-[#15171A] leading-relaxed font-sans font-normal">
               A new delivery platform for South Asia & the Middle East — built so riders keep{' '}
@@ -120,7 +120,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           {/* Company detail block (sharp hairline panels, mono labels): editorial not corporate */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-10 max-w-3xl font-mono"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-10 max-w-3xl w-full mx-auto font-mono text-left"
           >
             <div className="p-4 bg-[#FFFFFF] border border-[#E4E2DD] shadow-sm hover:border-[#15171A] transition-colors duration-150">
               <div className="text-[10px] uppercase tracking-wider text-[#5B5F66] flex items-center space-x-1 mb-1.5">
@@ -153,7 +153,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           {/* Two CTAs: RIDE WITH US (--red) / PARTNER YOUR RESTAURANT (--blue outline) */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-8"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-8"
           >
             <button
               id="hero-cta-ride"

@@ -71,7 +71,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="font-['Archivo_Black'] text-2xl tracking-tight text-[#E23A2E] uppercase">
+              <span className="font-display text-2xl tracking-tight text-[#E23A2E] uppercase">
                 SPEEDYMEALS
               </span>
             </div>

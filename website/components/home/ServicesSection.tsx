@@ -65,7 +65,7 @@ export const ServicesSection: React.FC = () => {
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <h2 className="font-['Archivo_Black'] text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-[#15171A]">
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-[#15171A]">
               One platform. <br className="hidden sm:inline" />
               <span
                 className="transition-colors duration-300"
@@ -119,7 +119,7 @@ export const ServicesSection: React.FC = () => {
               <div className="lg:col-span-7">
                 <div className="flex items-center space-x-3 mb-3">
                   <ForkKnife size={28} weight="bold" className="text-[#1E5FA8]" />
-                  <h3 className="font-['Archivo_Black'] text-2xl sm:text-4xl text-[#15171A] uppercase tracking-tight">
+                  <h3 className="font-display text-2xl sm:text-4xl text-[#15171A] uppercase tracking-tight">
                     Food Delivery
                   </h3>
                 </div>
@@ -198,7 +198,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#15171A]">
                 <Package size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Speedy Courier
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">
@@ -228,7 +228,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#15171A]">
                 <Car size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Speedy Drive
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">
@@ -258,7 +258,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#5B5F66]">
                 <ShoppingBag size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Speedy Mall
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">
@@ -288,7 +288,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#5B5F66]">
                 <Cpu size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Technical Services
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">

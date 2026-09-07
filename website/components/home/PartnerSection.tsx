@@ -114,7 +114,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <h2 className="font-['Archivo_Black'] text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-[#15171A]">
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-[#15171A]">
               Direct Partnership. <br className="hidden sm:inline" />
               <span
                 className="transition-colors duration-300"
@@ -156,7 +156,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   COURIER DISPATCH
                 </span>
               </div>
-              <h3 className="font-['Archivo_Black'] text-2xl uppercase tracking-tight text-[#15171A] mb-2">
+              <h3 className="font-display text-2xl uppercase tracking-tight text-[#15171A] mb-2">
                 Ride
               </h3>
               <p className="text-sm text-[#5B5F66] mb-6 leading-relaxed">
@@ -205,7 +205,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   MERCHANT DIRECT
                 </span>
               </div>
-              <h3 className="font-['Archivo_Black'] text-2xl uppercase tracking-tight text-[#15171A] mb-2">
+              <h3 className="font-display text-2xl uppercase tracking-tight text-[#15171A] mb-2">
                 Restaurant
               </h3>
               <p className="text-sm text-[#5B5F66] mb-6 leading-relaxed">
@@ -254,7 +254,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   EARLY ACCESS
                 </span>
               </div>
-              <h3 className="font-['Archivo_Black'] text-2xl uppercase tracking-tight text-[#15171A] mb-2">
+              <h3 className="font-display text-2xl uppercase tracking-tight text-[#15171A] mb-2">
                 Customer
               </h3>
               <p className="text-sm text-[#5B5F66] mb-6 leading-relaxed">
@@ -285,38 +285,38 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           </motion.div>
         </motion.div>
 
-        {/* REGISTRATION FORM PANEL: DARK --INK PANEL (Seed Dark-Mode Pattern) */}
+        {/* REGISTRATION FORM PANEL: LIGHTER TONE OF BLACK */}
         {/* Sharp hairline fields, no rounded inputs */}
         <motion.div
           id="registration-flow-panel"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-[#15171A] text-white border border-[#2D3139] p-6 sm:p-10 lg:p-12"
+          className="bg-[#22252B] text-white border border-[#373C46] p-6 sm:p-10 lg:p-12 shadow-md"
         >
           {/* Top Panel Nav & Title */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#2D3139] mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#373C46] mb-8">
             <div>
               <div className="font-mono text-xs text-[#C7A874] uppercase tracking-widest mb-1 flex items-center space-x-2">
                 <span className="w-2 h-2 bg-[#C7A874] inline-block" />
                 <span>REGISTRATION GATEWAY</span>
               </div>
-              <h3 className="font-['Archivo_Black'] text-2xl sm:text-3xl uppercase tracking-tight text-white">
+              <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-white">
                 {activePersona === 'rider' && 'Rider Application Form'}
                 {activePersona === 'restaurant' && 'Restaurant Partner Onboarding'}
                 {activePersona === 'customer' && 'Customer Early Access Invite'}
               </h3>
             </div>
 
-            {/* Persona Switcher Tabs inside dark panel */}
-            <div className="flex border border-[#2D3139] font-mono text-xs self-start sm:self-auto">
+            {/* Persona Switcher Tabs inside panel */}
+            <div className="flex border border-[#373C46] font-mono text-xs self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => onSelectPersona('rider')}
                 className={`px-4 py-2 uppercase tracking-wider transition-colors ${
                   activePersona === 'rider'
                     ? 'bg-[#E23A2E] text-white font-bold'
-                    : 'bg-[#15171A] text-[#5B5F66] hover:text-white'
+                    : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                 }`}
               >
                 Rider
@@ -324,10 +324,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectPersona('restaurant')}
-                className={`px-4 py-2 uppercase tracking-wider border-l border-[#2D3139] transition-colors ${
+                className={`px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors ${
                   activePersona === 'restaurant'
                     ? 'bg-[#C7A874] text-[#15171A] font-bold'
-                    : 'bg-[#15171A] text-[#5B5F66] hover:text-white'
+                    : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                 }`}
               >
                 Restaurant
@@ -335,10 +335,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectPersona('customer')}
-                className={`px-4 py-2 uppercase tracking-wider border-l border-[#2D3139] transition-colors ${
+                className={`px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors ${
                   activePersona === 'customer'
                     ? 'bg-[#1E5FA8] text-white font-bold'
-                    : 'bg-[#15171A] text-[#5B5F66] hover:text-white'
+                    : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                 }`}
               >
                 Waitlist
@@ -354,11 +354,11 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="border border-[#2D3139] bg-[#1E2126] p-8 max-w-2xl mx-auto font-mono text-left"
+                className="border border-[#373C46] bg-[#2A2E37] p-8 max-w-2xl mx-auto font-mono text-left"
               >
                 <div className="flex items-center space-x-3 mb-4 text-[#C7A874]">
                   <Check size={28} weight="bold" />
-                  <span className="font-['Archivo_Black'] text-xl uppercase tracking-tight text-white">
+                  <span className="font-display text-xl uppercase tracking-tight text-white">
                     Application Received
                   </span>
                 </div>
@@ -367,7 +367,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   Verification review is conducted within 24 hours.
                 </p>
 
-                <div className="p-4 bg-[#15171A] border border-[#2D3139] space-y-2 mb-6">
+                <div className="p-4 bg-[#1E2228] border border-[#373C46] space-y-2 mb-6">
                   <div className="flex justify-between text-xs">
                     <span className="text-[#5B5F66]">REFERENCE CODE:</span>
                     <span className="text-[#C7A874] font-bold tracking-widest">{submittedId}</span>
@@ -424,7 +424,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       placeholder={activePersona === 'restaurant' ? 'e.g. Tariq Al-Mansoor' : 'e.g. Imran Khan'}
-                      className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
+                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
                     />
                   </div>
 
@@ -444,7 +444,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         value={formData.businessName}
                         onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                         placeholder="e.g. Damascus Charcoal Grill"
-                        className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
                       />
                     </div>
                   ) : (
@@ -459,7 +459,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         id="form-vehicle"
                         value={formData.vehicleType}
                         onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })}
-                        className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#E23A2E] transition-colors font-sans"
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#E23A2E] transition-colors font-sans"
                       >
                         <option value="Motorcycle">Motorcycle (125cc - 250cc)</option>
                         <option value="Electric Scooter">Electric Scooter / E-Bike</option>
@@ -484,7 +484,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="contact@domain.com"
-                      className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
+                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
                     />
                   </div>
 
@@ -501,7 +501,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         id="form-country-code"
                         value={formData.countryCode}
                         onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
-                        className="bg-[#1E2126] border border-r-0 border-[#2D3139] px-3 py-3.5 text-xs text-white font-mono focus:outline-none"
+                        className="bg-[#262A32] border border-r-0 border-[#373C46] px-3 py-3.5 text-xs text-white font-mono focus:outline-none"
                       >
                         <option value="+971">🇦🇪 UAE (+971)</option>
                         <option value="+966">🇸🇦 KSA (+966)</option>
@@ -520,7 +520,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="50 123 4567"
-                        className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
                       />
                     </div>
                   </div>
@@ -537,7 +537,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       id="form-city"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#C7A874] transition-colors font-sans"
+                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#C7A874] transition-colors font-sans"
                     >
                       <option value="Dubai">Dubai, UAE</option>
                       <option value="Abu Dhabi">Abu Dhabi, UAE</option>
@@ -569,7 +569,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         value={formData.cuisineType}
                         onChange={(e) => setFormData({ ...formData, cuisineType: e.target.value })}
                         placeholder="e.g. Biryani & Kebabs, Cafe, Pizza"
-                        className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874]"
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874]"
                       />
                     </div>
                   ) : (
@@ -582,7 +582,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       </label>
                       <select
                         id="form-experience"
-                        className="w-full bg-[#15171A] border border-[#2D3139] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#C7A874] font-sans"
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#C7A874] font-sans"
                       >
                         <option>Over 1 Year (Active courier)</option>
                         <option>6 - 12 Months</option>
@@ -608,8 +608,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 </div>
 
                 {/* Submit Action */}
-                <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-[#2D3139]">
-                  <div className="font-mono text-xs text-[#5B5F66]">
+                <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-[#373C46]">
+                  <div className="font-mono text-xs text-[#8C9099]">
                     RESPONSE TIME: <span className="text-[#C7A874]">UNDER 24 HOURS</span>
                   </div>
 
@@ -634,7 +634,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           </AnimatePresence>
 
           {/* Trust Signals repeated near conversion */}
-          <div className="mt-10 pt-8 border-t border-[#2D3139] grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+          <div className="mt-10 pt-8 border-t border-[#373C46] grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
             <div className="flex items-center space-x-3 text-[#A0A4AB]">
               <Coins size={20} weight="bold" className="text-[#E23A2E] shrink-0" />
               <span>100% delivery fee to rider</span>

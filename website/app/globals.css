@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Archivo Black", sans-serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: var(--font-archivo-black), sans-serif;
+  --font-heading: var(--font-archivo), sans-serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --color-red: #E23A2E;
   --color-blue: #1E5FA8;

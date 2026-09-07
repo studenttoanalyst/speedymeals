@@ -50,11 +50,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
   return (
     <header
       id="main-navigation"
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-150 ${
-        isScrolled
-          ? 'bg-[#FFFFFF] border-b border-[#E4E2DD] shadow-sm'
-          : 'bg-transparent border-b border-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-150 ${isScrolled
+        ? 'bg-[#FFFFFF] border-b border-[#E4E2DD] shadow-sm'
+        : 'bg-transparent border-b border-transparent'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Wordmark */}
@@ -74,11 +73,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               className="w-full h-full object-contain p-0.5"
             />
           </div>
-          <span className="font-['Archivo_Black'] text-xl sm:text-2xl tracking-tight text-[#15171A] uppercase flex items-center">
+          <span className="font-display text-xl sm:text-2xl tracking-tight text-[#E23A2E] uppercase flex items-center">
             SPEEDYMEALS
             <span
               className="inline-block w-1.5 h-1.5 ml-1 transition-colors duration-300"
-              style={{ backgroundColor: 'var(--dynamic-accent, #E23A2E)' }}
+              style={{ backgroundColor: 'var(--dynamic-accent, #15171A)' }}
             />
           </span>
         </a>
@@ -89,11 +88,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-link-about"
             type="button"
             onClick={() => handleNavClick('about')}
-            className={`font-mono text-xs uppercase tracking-widest transition-colors duration-150 py-2 border-b ${
-              activeSection === 'about'
-                ? 'text-[#15171A] font-bold border-[#15171A]'
-                : 'text-[#5B5F66] border-transparent hover:text-[#15171A]'
-            }`}
+            className={`font-mono text-xs uppercase tracking-widest transition-colors duration-150 py-2 border-b ${activeSection === 'about'
+              ? 'text-[#15171A] font-bold border-[#15171A]'
+              : 'text-[#5B5F66] border-transparent hover:text-[#15171A]'
+              }`}
           >
             [ 01 ] About Us
           </button>
@@ -102,11 +100,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-link-services"
             type="button"
             onClick={() => handleNavClick('services')}
-            className={`font-mono text-xs uppercase tracking-widest transition-colors duration-150 py-2 border-b ${
-              activeSection === 'services'
-                ? 'text-[#15171A] font-bold border-[#15171A]'
-                : 'text-[#5B5F66] border-transparent hover:text-[#15171A]'
-            }`}
+            className={`font-mono text-xs uppercase tracking-widest transition-colors duration-150 py-2 border-b ${activeSection === 'services'
+              ? 'text-[#15171A] font-bold border-[#15171A]'
+              : 'text-[#5B5F66] border-transparent hover:text-[#15171A]'
+              }`}
           >
             [ 02 ] Services
           </button>
@@ -115,11 +112,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-link-partner"
             type="button"
             onClick={() => handleNavClick('partner')}
-            className={`font-mono text-xs uppercase tracking-widest transition-colors duration-150 py-2 border-b ${
-              activeSection === 'partner'
-                ? 'text-[#15171A] font-bold border-[#15171A]'
-                : 'text-[#5B5F66] border-transparent hover:text-[#15171A]'
-            }`}
+            className={`font-mono text-xs uppercase tracking-widest transition-colors duration-150 py-2 border-b ${activeSection === 'partner'
+              ? 'text-[#15171A] font-bold border-[#15171A]'
+              : 'text-[#5B5F66] border-transparent hover:text-[#15171A]'
+              }`}
           >
             [ 03 ] Partner
           </button>
@@ -133,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             onClick={() => handleNavClick('partner', 'rider')}
             className="px-4 py-2 text-xs font-mono font-semibold tracking-wider uppercase border border-[#E23A2E] text-[#E23A2E] hover:bg-[#E23A2E] hover:text-white transition-colors duration-150 flex items-center space-x-1.5"
           >
-            <span>RIDE 100%</span>
+            <span>RIDER</span>
             <ArrowUpRight size={13} weight="bold" />
           </button>
 
@@ -143,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             onClick={() => handleNavClick('partner', 'restaurant')}
             className="px-4 py-2 text-xs font-mono font-semibold tracking-wider uppercase bg-[#15171A] text-white border border-[#15171A] hover:bg-[#1E5FA8] hover:border-[#1E5FA8] transition-colors duration-150 flex items-center space-x-1.5"
           >
-            <span>PARTNER 10%</span>
+            <span>PARTNER</span>
             <ArrowUpRight size={13} weight="bold" />
           </button>
         </div>
@@ -184,7 +180,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               onClick={() => handleNavClick('services')}
               className="text-left py-2 border-b border-[#E4E2DD] text-[#15171A] flex justify-between items-center"
             >
-              <span>[ 02 ] Services (Ecosystem)</span>
+              <span>[ 02 ] Services</span>
               <span className="text-[#5B5F66]">→</span>
             </button>
             <button
@@ -193,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               onClick={() => handleNavClick('partner')}
               className="text-left py-2 border-b border-[#E4E2DD] text-[#15171A] flex justify-between items-center"
             >
-              <span>[ 03 ] Partner Registration</span>
+              <span>[ 03 ] Partner</span>
               <span className="text-[#5B5F66]">→</span>
             </button>
           </div>
