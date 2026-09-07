@@ -63,17 +63,22 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         >
           {/* Col 1 — Brand */}
           <motion.div variants={itemVariants} className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-[#E23A2E] flex items-center justify-center text-white font-mono font-bold text-xs tracking-tighter border border-[#E23A2E]">
-                SM
+            <div className="flex items-center space-x-3.5">
+              <div className="w-12 h-12 flex items-center justify-center bg-transparent overflow-hidden">
+                <img
+                  src="/favicon.png"
+                  alt="SpeedyMeals Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <span className="font-['Archivo_Black'] text-2xl tracking-tight text-white uppercase">
+              <span className="font-['Archivo_Black'] text-2xl tracking-tight text-[#E23A2E] uppercase">
                 SPEEDYMEALS
               </span>
             </div>
 
-            <div className="font-mono text-xs text-[#C7A874] italic tracking-wide">
-              &ldquo;Fast &amp; safe to you.&rdquo;
+            <div className="font-mono text-xs text-[#2B7FFF] font-medium tracking-wide flex items-center space-x-2">
+              <span className="inline-block w-1.5 h-1.5 bg-[#2B7FFF] rounded-xs" />
+              <span>&ldquo;Fast &amp; safe to you.&rdquo;</span>
             </div>
 
             <p className="text-xs text-[#A0A4AB] leading-relaxed max-w-xs font-sans">

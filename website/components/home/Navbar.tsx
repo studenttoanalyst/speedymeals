@@ -50,9 +50,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
   return (
     <header
       id="main-navigation"
-      className={`fixed top-0 left-0 right-0 z-50 transition-none ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-150 ${
         isScrolled
-          ? 'bg-[#FFFFFF] border-b border-[#E4E2DD]'
+          ? 'bg-[#FFFFFF] border-b border-[#E4E2DD] shadow-sm'
           : 'bg-transparent border-b border-transparent'
       }`}
     >
@@ -67,8 +67,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             handleNavClick('about');
           }}
         >
-          <div className="w-8 h-8 bg-[#15171A] flex items-center justify-center text-white font-mono font-bold text-xs tracking-tighter border border-[#15171A] group-hover:bg-[#E23A2E] transition-colors duration-150">
-            SM
+          <div className="w-8 h-8 bg-white flex items-center justify-center border border-[#15171A] group-hover:border-[#E23A2E] transition-colors duration-150 overflow-hidden shadow-xs">
+            <img
+              src="/favicon.jpeg"
+              alt="SpeedyMeals Logo"
+              className="w-full h-full object-contain p-0.5"
+            />
           </div>
           <span className="font-['Archivo_Black'] text-xl sm:text-2xl tracking-tight text-[#15171A] uppercase flex items-center">
             SPEEDYMEALS

@@ -89,7 +89,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
   return (
     <section
       id="partner"
-      className="relative z-10 py-24 sm:py-32 border-t border-[#E4E2DD] bg-[#FFFFFF]/85"
+      className="relative z-10 py-24 sm:py-32 border-t border-[#E4E2DD] bg-[#FFFFFF]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -137,7 +137,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-[#E4E2DD] mb-12 bg-[#FFFFFF]"
+          className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-[#E4E2DD] mb-12 bg-[#FFFFFF] shadow-sm"
         >
           {/* Column 1: RIDE (--red accent) */}
           <motion.div

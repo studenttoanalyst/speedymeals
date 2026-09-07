@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ReededGlassBackground } from '@/components/home/ReededGlassBackground';
 import { Navbar } from '@/components/home/Navbar';
 import { HeroSection } from '@/components/home/HeroSection';
 import { ServicesSection } from '@/components/home/ServicesSection';
@@ -22,9 +21,6 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen bg-[#FFFFFF] text-[#15171A] overflow-x-hidden selection:bg-[#E23A2E] selection:text-white">
-      {/* Persistent Global Reeded Glass Layer */}
-      <ReededGlassBackground />
-
       {/* Sticky Snap Navbar */}
       <Navbar onSelectPersona={handleSelectPersona} />
 

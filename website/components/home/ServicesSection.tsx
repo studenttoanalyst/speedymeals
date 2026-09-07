@@ -38,7 +38,7 @@ export const ServicesSection: React.FC = () => {
   return (
     <section
       id="services"
-      className="relative z-10 py-24 sm:py-32 border-t border-[#E4E2DD] bg-[#FFFFFF]/90"
+      className="relative z-10 py-24 sm:py-32 border-t border-[#E4E2DD] bg-[#F6F5F3]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -93,7 +93,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-food-delivery"
-            className="border-2 border-[#1E5FA8] bg-[#FFFFFF] p-6 sm:p-10 relative overflow-hidden group"
+            className="border-2 border-[#1E5FA8] bg-[#FFFFFF] p-6 sm:p-10 relative overflow-hidden group shadow-sm"
           >
             {/* Top Bar with Code & Status */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-[#E4E2DD]">
@@ -186,7 +186,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-courier"
-            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
@@ -216,7 +216,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-drive"
-            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
@@ -246,7 +246,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-mall"
-            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
@@ -276,7 +276,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-tech"
-            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
