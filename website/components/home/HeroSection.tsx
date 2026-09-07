@@ -105,7 +105,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               className="font-display text-4xl sm:text-6xl lg:text-7xl xl:text-8xl tracking-tight text-ink uppercase leading-[0.95]"
             >
               <span className="block">SPEEDYMEALS</span>
-              <span className="text-ink flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 mt-2">
+              <span className="text-ink flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 mt-2 sm:mt-3 text-2xl sm:text-4xl lg:text-5xl xl:text-6xl tracking-tight">
                 <motion.span
                   custom={1}
                   variants={wordVariants}
