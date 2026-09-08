@@ -3,7 +3,15 @@ App configuration — loads values from .env file.
 Never hardcode secrets here. This file only defines WHAT settings exist,
 actual values always come from environment (.env locally, Secrets Manager in production).
 """
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Always resolve .env relative to this file's own folder (app/), not the
+# current working directory the app happens to be launched from. Without
+# this, `uvicorn app.main:app` run from backend/ silently fails to find
+# backend/app/.env because pydantic-settings looks in the CWD by default.
+ENV_FILE_PATH = Path(__file__).resolve().parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -27,7 +35,7 @@ class Settings(BaseSettings):
     # Google Maps
     GOOGLE_MAPS_API_KEY: str
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=ENV_FILE_PATH, env_file_encoding="utf-8")
 
 
 # Single shared instance — import this everywhere, don't re-instantiate Settings().
