@@ -46,8 +46,11 @@
 }
 
 /* Scoped exception: floating pill navbar only (see Navbar.tsx). Everything else stays sharp. */
-.nav-pill, .nav-pill * {
+.nav-pill {
   border-radius: 9999px !important;
+}
+.nav-drawer {
+  border-radius: 16px !important;
 }
 
 html {

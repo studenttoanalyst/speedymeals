@@ -35,6 +35,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     businessName: '',
     cuisineType: 'Middle Eastern / Grills',
     branches: '1-3',
+    devicePlatform: 'iOS (Apple TestFlight Beta)',
+    serviceInterest: 'Zero-Markup Food Delivery',
     agreed: true,
   });
 
@@ -61,6 +63,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
       email: '',
       phone: '',
       businessName: '',
+      cuisineType: 'Middle Eastern / Grills',
     });
   };
 
@@ -356,21 +359,48 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 exit={{ opacity: 0 }}
                 className="border border-[#373C46] bg-[#2A2E37] p-8 max-w-2xl mx-auto font-mono text-left"
               >
-                <div className="flex items-center space-x-3 mb-4 text-[#C7A874]">
+                <div
+                  className="flex items-center space-x-3 mb-4"
+                  style={{
+                    color:
+                      activePersona === 'customer'
+                        ? '#1E5FA8'
+                        : activePersona === 'restaurant'
+                        ? '#C7A874'
+                        : '#E23A2E',
+                  }}
+                >
                   <Check size={28} weight="bold" />
                   <span className="font-display text-xl uppercase tracking-tight text-white">
-                    Application Received
+                    {activePersona === 'customer'
+                      ? 'Waitlist Access Reserved'
+                      : activePersona === 'restaurant'
+                      ? 'Merchant Application Received'
+                      : 'Rider Application Received'}
                   </span>
                 </div>
                 <p className="text-sm text-[#A0A4AB] mb-6 font-sans">
-                  Your registration has been logged directly with our regional dispatch operations.
-                  Verification review is conducted within 24 hours.
+                  {activePersona === 'customer'
+                    ? "You are registered for priority early access. We will email your TestFlight / Google Play beta invite as soon as SpeedyMeals goes live in your area."
+                    : 'Your registration has been logged directly with our regional dispatch operations. Verification review is conducted within 24 hours.'}
                 </p>
 
                 <div className="p-4 bg-[#1E2228] border border-[#373C46] space-y-2 mb-6">
                   <div className="flex justify-between text-xs">
                     <span className="text-[#5B5F66]">REFERENCE CODE:</span>
-                    <span className="text-[#C7A874] font-bold tracking-widest">{submittedId}</span>
+                    <span
+                      className="font-bold tracking-widest"
+                      style={{
+                        color:
+                          activePersona === 'customer'
+                            ? '#1E5FA8'
+                            : activePersona === 'restaurant'
+                            ? '#C7A874'
+                            : '#E23A2E',
+                      }}
+                    >
+                      {submittedId}
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-[#5B5F66]">TARGET ROLE:</span>
@@ -386,15 +416,50 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       {formData.city} ({formData.countryCode})
                     </span>
                   </div>
+                  {activePersona === 'customer' && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#5B5F66]">TARGET PLATFORM:</span>
+                      <span className="text-white">{formData.devicePlatform}</span>
+                    </div>
+                  )}
+                  {activePersona === 'restaurant' && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#5B5F66]">BRAND NAME:</span>
+                      <span className="text-white">{formData.businessName}</span>
+                    </div>
+                  )}
+                  {activePersona === 'rider' && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#5B5F66]">TRANSPORT MODE:</span>
+                      <span className="text-white">{formData.vehicleType}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex space-x-3">
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="px-6 py-3 bg-[#E23A2E] text-white text-xs uppercase tracking-widest font-bold border border-[#E23A2E] hover:bg-white hover:text-[#15171A] transition-colors"
+                    className="px-6 py-3 text-xs uppercase tracking-widest font-bold border transition-colors cursor-pointer"
+                    style={{
+                      backgroundColor:
+                        activePersona === 'customer'
+                          ? '#1E5FA8'
+                          : activePersona === 'restaurant'
+                          ? '#C7A874'
+                          : '#E23A2E',
+                      borderColor:
+                        activePersona === 'customer'
+                          ? '#1E5FA8'
+                          : activePersona === 'restaurant'
+                          ? '#C7A874'
+                          : '#E23A2E',
+                      color: activePersona === 'restaurant' ? '#15171A' : '#FFFFFF',
+                    }}
                   >
-                    Submit Another Application
+                    {activePersona === 'customer'
+                      ? 'Register Another User'
+                      : 'Submit Another Application'}
                   </button>
                 </div>
               </motion.div>
@@ -415,7 +480,12 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       htmlFor="form-full-name"
                       className="block font-mono text-xs uppercase tracking-wider text-[#A0A4AB]"
                     >
-                      {activePersona === 'restaurant' ? 'Authorized Representative' : 'Full Legal Name'} *
+                      {activePersona === 'restaurant'
+                        ? 'Authorized Representative'
+                        : activePersona === 'customer'
+                        ? 'Full Name'
+                        : 'Full Legal Name'}{' '}
+                      *
                     </label>
                     <input
                       id="form-full-name"
@@ -423,12 +493,18 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       required
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder={activePersona === 'restaurant' ? 'e.g. Tariq Al-Mansoor' : 'e.g. Imran Khan'}
-                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
+                      placeholder={
+                        activePersona === 'restaurant'
+                          ? 'e.g. Tariq Al-Mansoor'
+                          : activePersona === 'customer'
+                          ? 'e.g. Sarah Jenkins'
+                          : 'e.g. Imran Khan'
+                      }
+                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none transition-colors"
                     />
                   </div>
 
-                  {/* Business Name (for Restaurant) or Vehicle Selection (for Rider) */}
+                  {/* Persona-specific secondary field */}
                   {activePersona === 'restaurant' ? (
                     <div className="space-y-2">
                       <label
@@ -447,13 +523,32 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
                       />
                     </div>
+                  ) : activePersona === 'customer' ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-platform"
+                        className="block font-mono text-xs uppercase tracking-wider text-[#A0A4AB]"
+                      >
+                        Mobile Platform Preference *
+                      </label>
+                      <select
+                        id="form-platform"
+                        value={formData.devicePlatform}
+                        onChange={(e) => setFormData({ ...formData, devicePlatform: e.target.value })}
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#1E5FA8] transition-colors font-sans"
+                      >
+                        <option value="iOS (Apple TestFlight Beta)">iOS (Apple TestFlight Beta)</option>
+                        <option value="Android (Google Play Beta)">Android (Google Play Beta)</option>
+                        <option value="Both iOS & Android">Both iOS & Android</option>
+                      </select>
+                    </div>
                   ) : (
                     <div className="space-y-2">
                       <label
                         htmlFor="form-vehicle"
                         className="block font-mono text-xs uppercase tracking-wider text-[#A0A4AB]"
                       >
-                        Primary Mode of Transport
+                        Primary Mode of Transport *
                       </label>
                       <select
                         id="form-vehicle"
@@ -484,7 +579,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="contact@domain.com"
-                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
+                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -520,7 +615,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="50 123 4567"
-                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors"
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -531,13 +626,18 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       htmlFor="form-city"
                       className="block font-mono text-xs uppercase tracking-wider text-[#A0A4AB]"
                     >
-                      Operating City *
+                      {activePersona === 'customer'
+                        ? 'Preferred Delivery City'
+                        : activePersona === 'restaurant'
+                        ? 'Restaurant Operating City'
+                        : 'Primary Dispatch Zone'}{' '}
+                      *
                     </label>
                     <select
                       id="form-city"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#C7A874] transition-colors font-sans"
+                      className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none transition-colors font-sans"
                     >
                       <option value="Dubai">Dubai, UAE</option>
                       <option value="Abu Dhabi">Abu Dhabi, UAE</option>
@@ -572,6 +672,26 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874]"
                       />
                     </div>
+                  ) : activePersona === 'customer' ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-interest"
+                        className="block font-mono text-xs uppercase tracking-wider text-[#A0A4AB]"
+                      >
+                        Primary Service Interest
+                      </label>
+                      <select
+                        id="form-interest"
+                        value={formData.serviceInterest}
+                        onChange={(e) => setFormData({ ...formData, serviceInterest: e.target.value })}
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#1E5FA8] font-sans"
+                      >
+                        <option value="Zero-Markup Food Delivery">Zero-Markup Food Delivery</option>
+                        <option value="Express Courier & Parcel">Express Courier & Parcel</option>
+                        <option value="Groceries & Daily Essentials">Groceries & Daily Essentials</option>
+                        <option value="All Speedy Services">All Speedy Services</option>
+                      </select>
+                    </div>
                   ) : (
                     <div className="space-y-2">
                       <label
@@ -582,7 +702,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       </label>
                       <select
                         id="form-experience"
-                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#C7A874] font-sans"
+                        className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none focus:border-[#E23A2E] font-sans"
                       >
                         <option>Over 1 Year (Active courier)</option>
                         <option>6 - 12 Months</option>
@@ -599,32 +719,85 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     type="checkbox"
                     checked={formData.agreed}
                     onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
-                    className="mt-1 accent-[#E23A2E]"
+                    className="mt-1"
+                    style={{
+                      accentColor:
+                        activePersona === 'customer'
+                          ? '#1E5FA8'
+                          : activePersona === 'restaurant'
+                          ? '#C7A874'
+                          : '#E23A2E',
+                    }}
                   />
                   <label htmlFor="form-agreed" className="text-xs text-[#A0A4AB] leading-relaxed">
-                    I verify all submitted data is accurate and acknowledge the SpeedyMeals transparent
-                    terms (100% rider fee retention / 10% flat merchant fee).
+                    {activePersona === 'customer' &&
+                      'I agree to receive early beta access invites, launch notifications, and 0% markup perks in my selected city.'}
+                    {activePersona === 'restaurant' &&
+                      'I verify all submitted data is accurate and acknowledge SpeedyMeals transparent merchant terms (flat 10% commission, direct payouts, zero onboarding fee).'}
+                    {activePersona === 'rider' &&
+                      'I verify all submitted data is accurate and acknowledge SpeedyMeals transparent rider terms (100% delivery fee retention, direct wallet deposits, zero equipment deductions).'}
                   </label>
                 </div>
 
                 {/* Submit Action */}
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-[#373C46]">
                   <div className="font-mono text-xs text-[#8C9099]">
-                    RESPONSE TIME: <span className="text-[#C7A874]">UNDER 24 HOURS</span>
+                    {activePersona === 'customer' ? (
+                      <>
+                        WAITLIST STATUS:{' '}
+                        <span className="text-[#1E5FA8] font-bold">PRIORITY BATCH #1</span>
+                      </>
+                    ) : (
+                      <>
+                        RESPONSE TIME:{' '}
+                        <span
+                          className="font-bold"
+                          style={{
+                            color: activePersona === 'restaurant' ? '#C7A874' : '#E23A2E',
+                          }}
+                        >
+                          UNDER 24 HOURS
+                        </span>
+                      </>
+                    )}
                   </div>
 
                   <button
                     type="submit"
                     id="btn-submit-registration"
                     disabled={submitting}
-                    className="px-8 py-4 bg-[#E23A2E] text-white font-mono text-xs uppercase tracking-widest font-bold border border-[#E23A2E] hover:bg-white hover:text-[#15171A] hover:border-white transition-colors duration-150 flex items-center justify-center space-x-2"
+                    className={`px-8 py-4 font-mono text-xs uppercase tracking-widest font-bold border transition-colors duration-150 flex items-center justify-center space-x-2 ${
+                      activePersona === 'customer'
+                        ? 'bg-[#1E5FA8] text-white border-[#1E5FA8] hover:bg-white hover:text-[#1E5FA8] hover:border-white'
+                        : activePersona === 'restaurant'
+                        ? 'bg-[#C7A874] text-[#15171A] border-[#C7A874] hover:bg-white hover:text-[#15171A] hover:border-white'
+                        : 'bg-[#E23A2E] text-white border-[#E23A2E] hover:bg-white hover:text-[#15171A] hover:border-white'
+                    }`}
                   >
                     {submitting ? (
-                      <span>PROCESSING DISPATCH ENROLLMENT...</span>
+                      <span>
+                        {activePersona === 'customer'
+                          ? 'SECURING WAITLIST POSITION...'
+                          : activePersona === 'restaurant'
+                          ? 'PROCESSING MERCHANT ONBOARDING...'
+                          : 'PROCESSING DISPATCH ENROLLMENT...'}
+                      </span>
                     ) : (
                       <>
-                        <ClipboardText size={15} weight="bold" />
-                        <span>SUBMIT PARTNERSHIP APPLICATION</span>
+                        {activePersona === 'customer' ? (
+                          <Users size={15} weight="bold" />
+                        ) : activePersona === 'restaurant' ? (
+                          <Storefront size={15} weight="bold" />
+                        ) : (
+                          <Bicycle size={15} weight="bold" />
+                        )}
+                        <span>
+                          {activePersona === 'customer'
+                            ? 'JOIN CONSUMER WAITLIST →'
+                            : activePersona === 'restaurant'
+                            ? 'SUBMIT PARTNERSHIP APPLICATION →'
+                            : 'SUBMIT RIDER APPLICATION →'}
+                        </span>
                       </>
                     )}
                   </button>
