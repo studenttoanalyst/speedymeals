@@ -17,9 +17,11 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.redis_client import redis_client
+from app.core.security import verify_password
 from app.platform.auth import jwt_utils
 from app.platform.auth.models import RefreshToken
 from app.platform.users.models import User
+from app.modules.food_delivery.models import Restaurant
 
 OTP_EXPIRY_SECONDS = 5 * 60        # Step 2: OTP valid for 5 minutes
 RESEND_COOLDOWN_SECONDS = 45       # Step 4: must wait 45s between resend requests
@@ -155,3 +157,39 @@ def revoke_refresh_token(db: Session, raw_refresh_token: str) -> None:
 
     record.status = "revoked"
     db.commit()
+
+
+def authenticate_restaurant_by_password(db: Session, email: str, password: str) -> Restaurant:
+    """
+    Step 9, Path A — email+password login. Restaurant rows are created by
+    Admin during onboarding (spec Sec 9 Step 1), never by self-signup, so
+    unlike get_or_create_customer there is no "create" branch here: if the
+    email doesn't exist or the password is wrong, both fail the same way
+    (401) so we don't leak which emails are registered.
+    """
+    restaurant = db.query(Restaurant).filter(Restaurant.email == email).first()
+
+    if restaurant is None or not verify_password(password, restaurant.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password.",
+        )
+
+    return restaurant
+
+
+def get_restaurant_by_phone(db: Session, phone_number: str) -> Restaurant:
+    """
+    Step 9, Path B — after OTP verify succeeds, look up the restaurant by
+    phone. No auto-create (unlike get_or_create_customer): a restaurant
+    logging in via OTP must already exist from Admin onboarding.
+    """
+    restaurant = db.query(Restaurant).filter(Restaurant.phone_number == phone_number).first()
+
+    if restaurant is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No restaurant account found for this phone number.",
+        )
+
+    return restaurant

@@ -39,3 +39,20 @@ class TokenResponseSchema(BaseModel):
 class LogoutSchema(BaseModel):
     """Body for POST /auth/logout — Step 6."""
     refresh_token: str
+
+
+class RestaurantLoginSchema(BaseModel):
+    """Step 9, Path A — restaurant email+password login."""
+    email: str
+    password: str
+
+
+class RestaurantOTPVerifySchema(BaseModel):
+    """
+    Step 9, Path B — restaurant phone+OTP login. Separate from the
+    customer/rider OTPVerifySchema because the restaurant must already
+    exist (created by Admin onboarding) — no auto-create like customers get.
+    """
+    phone_number: str
+    country_code: str = "+92"
+    otp_code: str = Field(..., min_length=6, max_length=6)
