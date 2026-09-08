@@ -1,5 +1,7 @@
 """
 OTP business logic — generate, send (console-mode for now), verify, resend-cooldown.
+Also: Step 5/6 — issuing JWT tokens after a successful OTP verify, and
+tracking/revoking refresh tokens (logout).
 
 Per ADR-001 (docs/decisions/ADR-001-otp-sms-provider.md):
 - Real SMS provider is not yet decided.
@@ -7,11 +9,17 @@ Per ADR-001 (docs/decisions/ADR-001-otp-sms-provider.md):
   Pakistani provider is chosen post-MVP, only this function needs to change —
   nothing else in this file, and nothing in routes.py, needs to know about it.
 """
+import hashlib
 import random
+import uuid
 
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 from app.core.redis_client import redis_client
+from app.platform.auth import jwt_utils
+from app.platform.auth.models import RefreshToken
+from app.platform.users.models import User
 
 OTP_EXPIRY_SECONDS = 5 * 60        # Step 2: OTP valid for 5 minutes
 RESEND_COOLDOWN_SECONDS = 45       # Step 4: must wait 45s between resend requests
@@ -77,3 +85,73 @@ def verify_otp(phone_number: str, otp_code: str) -> None:
 
     # One-time use — delete immediately after a successful match.
     redis_client.delete(_otp_key(phone_number))
+
+
+def _hash_token(raw_token: str) -> str:
+    """We store a hash of the refresh token, never the raw value — same
+    principle as password hashing. If the DB leaks, tokens can't be reused."""
+    return hashlib.sha256(raw_token.encode()).hexdigest()
+
+
+def get_or_create_customer(db: Session, phone_number: str, country_code: str) -> User:
+    """
+    Step 5 — after OTP verify succeeds, find the User row for this phone
+    number, or create one if it's their first time (spec Section 7 Step 2:
+    name is collected separately/later, so we use a placeholder here).
+    """
+    user = db.query(User).filter(User.phone_number == phone_number).first()
+    if user is not None:
+        return user
+
+    user = User(
+        phone_number=phone_number,
+        country_code=country_code,
+        name="New User",  # placeholder — updated later via profile endpoint (Step 11)
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def issue_tokens(db: Session, subject_id: uuid.UUID, role: str) -> dict:
+    """
+    Step 5 + Step 6 — create an access token (not persisted, stateless) and
+    a refresh token (persisted as a hash so logout/revocation is possible).
+    """
+    access_token = jwt_utils.create_access_token(subject_id, role)
+    refresh_token, expires_at = jwt_utils.create_refresh_token(subject_id, role)
+
+    db.add(RefreshToken(
+        subject_id=subject_id,
+        role=role,
+        token_hash=_hash_token(refresh_token),
+        status="valid",
+        expires_at=expires_at,
+    ))
+    db.commit()
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+def revoke_refresh_token(db: Session, raw_refresh_token: str) -> None:
+    """
+    Step 6 — logout. Marks the matching RefreshToken row as revoked so it
+    can never be used again to mint a new access token, even though the
+    JWT itself would still decode successfully until its natural expiry.
+    """
+    token_hash = _hash_token(raw_refresh_token)
+    record = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
+
+    if record is None or record.status == "revoked":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or already-revoked refresh token.",
+        )
+
+    record.status = "revoked"
+    db.commit()

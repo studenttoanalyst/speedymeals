@@ -22,6 +22,20 @@ class OTPVerifySchema(BaseModel):
 
 
 class OTPResponseSchema(BaseModel):
-    """Generic response for OTP request/verify — just a status message.
-    JWT tokens are NOT issued here (that's Step 5), this is OTP-mechanism only."""
+    """Generic response for OTP request — just a status message."""
     message: str
+
+
+class TokenResponseSchema(BaseModel):
+    """
+    Step 5 — returned by OTP verify (and later, restaurant/admin login).
+    Same shape across all 4 roles so frontend handles login uniformly.
+    """
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class LogoutSchema(BaseModel):
+    """Body for POST /auth/logout — Step 6."""
+    refresh_token: str

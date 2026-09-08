@@ -1,12 +1,21 @@
 """
-Auth endpoints — Steps 2-4 of Phase 2: OTP request (with resend cooldown)
-and OTP verify. JWT issuing (Step 5) and role-based login (restaurant/admin,
-Steps 9-10) are NOT in this file yet — added on top of this in later steps.
+Auth endpoints — Steps 2-6 of Phase 2: OTP request/verify (with resend
+cooldown), JWT issuing on successful verify, and logout (refresh token
+revocation). Role-based login (restaurant/admin, Steps 9-10) is NOT in
+this file yet — added on top of this in later steps.
 """
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.platform.auth import service
-from app.platform.auth.schemas import OTPRequestSchema, OTPVerifySchema, OTPResponseSchema
+from app.platform.auth.schemas import (
+    OTPRequestSchema,
+    OTPVerifySchema,
+    OTPResponseSchema,
+    TokenResponseSchema,
+    LogoutSchema,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -38,13 +47,29 @@ def request_otp(payload: OTPRequestSchema):
     return OTPResponseSchema(message="OTP sent.")
 
 
-@router.post("/otp/verify", response_model=OTPResponseSchema, status_code=status.HTTP_200_OK)
-def verify_otp(payload: OTPVerifySchema):
+@router.post("/otp/verify", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def verify_otp(payload: OTPVerifySchema, db: Session = Depends(get_db)):
     """
-    Step 3 — verify the OTP the user submitted.
-    NOTE: this only confirms the OTP is correct. It does not issue a JWT and
-    does not create/look up a User row yet — that's Step 5, built on top of this.
+    Step 3 (verify) + Step 5 (issue tokens). On a correct OTP: find-or-create
+    the customer's User row, then issue an access + refresh token pair.
+    Role is hardcoded to "customer" here — rider OTP verify will reuse the
+    same service functions with role="rider" once the rider signup fields
+    (CNIC, vehicle info) are wired in a later step.
     """
     full_number = _build_full_number(payload.country_code, payload.phone_number)
     service.verify_otp(full_number, payload.otp_code)
-    return OTPResponseSchema(message="OTP verified.")
+
+    user = service.get_or_create_customer(db, full_number, payload.country_code)
+    tokens = service.issue_tokens(db, user.id, role="customer")
+    return TokenResponseSchema(**tokens)
+
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+def logout(payload: LogoutSchema, db: Session = Depends(get_db)):
+    """
+    Step 6 — revoke a refresh token so it can't be used again to mint new
+    access tokens. Does not touch already-issued access tokens (those
+    simply expire naturally within JWT_EXPIRE_MINUTES).
+    """
+    service.revoke_refresh_token(db, payload.refresh_token)
+    return {"message": "Logged out."}
