@@ -5,11 +5,30 @@ App entry point. Run with:
 """
 from fastapi import FastAPI
 
+from app.core.database import SessionLocal
+from app.platform.auth import service as auth_service
 from app.platform.auth.routes import router as auth_router
+from app.platform.users.routes import router as users_router
 
 app = FastAPI(title="SpeedyMeals API", version="0.1.0")
 
 app.include_router(auth_router)
+app.include_router(users_router)
+
+
+@app.on_event("startup")
+def seed_first_admin_on_startup() -> None:
+    """
+    Step 10 — auto-seed the first admin account (see ADR-002). Uses its own
+    short-lived DB session (not the get_db() request dependency, which only
+    exists during a request) so this runs once, cleanly, before the app
+    starts accepting traffic.
+    """
+    db = SessionLocal()
+    try:
+        auth_service.seed_first_admin(db)
+    finally:
+        db.close()
 
 
 @app.get("/health")

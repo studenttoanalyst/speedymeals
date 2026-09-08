@@ -17,6 +17,9 @@ from app.platform.auth.schemas import (
     OTPResponseSchema,
     TokenResponseSchema,
     LogoutSchema,
+    RestaurantLoginSchema,
+    RestaurantOTPVerifySchema,
+    AdminLoginSchema,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -91,3 +94,48 @@ def get_me(current_user: CurrentUser = Depends(get_current_user)):
     the server thinks you are. No token / bad token / expired token → 401.
     """
     return {"id": str(current_user.id), "role": current_user.role}
+
+
+@router.post("/restaurant/login", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def restaurant_login(payload: RestaurantLoginSchema, db: Session = Depends(get_db)):
+    """
+    Step 9, Path A — restaurant email+password login (bcrypt verify).
+    Rate-limited by email so an attacker can't brute-force a restaurant's
+    password by spamming this endpoint.
+    """
+    enforce_rate_limit(payload.email, action="restaurant_login")
+    restaurant = service.authenticate_restaurant_by_password(db, payload.email, payload.password)
+    tokens = service.issue_tokens(db, restaurant.id, role="restaurant")
+    return TokenResponseSchema(**tokens)
+
+
+@router.post("/restaurant/otp/verify", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def restaurant_otp_verify(payload: RestaurantOTPVerifySchema, db: Session = Depends(get_db)):
+    """
+    Step 9, Path B — restaurant phone+OTP login. Reuses the same
+    generate/verify OTP mechanism as customer (POST /auth/otp/request is
+    shared — OTP generation doesn't care who's asking). This endpoint only
+    differs in what happens AFTER a correct OTP: look up an existing
+    Restaurant (no auto-create) instead of a User.
+    """
+    full_number = _build_full_number(payload.country_code, payload.phone_number)
+    enforce_rate_limit(full_number, action="restaurant_otp_verify")
+    service.verify_otp(full_number, payload.otp_code)
+
+    restaurant = service.get_restaurant_by_phone(db, full_number)
+    tokens = service.issue_tokens(db, restaurant.id, role="restaurant")
+    return TokenResponseSchema(**tokens)
+
+
+@router.post("/admin/login", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def admin_login(payload: AdminLoginSchema, db: Session = Depends(get_db)):
+    """
+    Step 10 — admin email+password login. Same rate-limit-by-email pattern
+    as restaurant login. First admin exists automatically via seed_first_admin
+    (called on app startup, see main.py) so this endpoint always has at
+    least one valid account to log into on a fresh DB.
+    """
+    enforce_rate_limit(payload.email, action="admin_login")
+    admin = service.authenticate_admin(db, payload.email, payload.password)
+    tokens = service.issue_tokens(db, admin.id, role="admin")
+    return TokenResponseSchema(**tokens)

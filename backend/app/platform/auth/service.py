@@ -16,10 +16,13 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.redis_client import redis_client
+from app.core.security import hash_password, verify_password
 from app.platform.auth import jwt_utils
-from app.platform.auth.models import RefreshToken
+from app.platform.auth.models import Admin, RefreshToken
 from app.platform.users.models import User
+from app.modules.food_delivery.models import Restaurant
 
 OTP_EXPIRY_SECONDS = 5 * 60        # Step 2: OTP valid for 5 minutes
 RESEND_COOLDOWN_SECONDS = 45       # Step 4: must wait 45s between resend requests
@@ -154,4 +157,79 @@ def revoke_refresh_token(db: Session, raw_refresh_token: str) -> None:
         )
 
     record.status = "revoked"
+    db.commit()
+
+
+def authenticate_restaurant_by_password(db: Session, email: str, password: str) -> Restaurant:
+    """
+    Step 9, Path A — email+password login. Restaurant rows are created by
+    Admin during onboarding (spec Sec 9 Step 1), never by self-signup, so
+    unlike get_or_create_customer there is no "create" branch here: if the
+    email doesn't exist or the password is wrong, both fail the same way
+    (401) so we don't leak which emails are registered.
+    """
+    restaurant = db.query(Restaurant).filter(Restaurant.email == email).first()
+
+    if restaurant is None or not verify_password(password, restaurant.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password.",
+        )
+
+    return restaurant
+
+
+def get_restaurant_by_phone(db: Session, phone_number: str) -> Restaurant:
+    """
+    Step 9, Path B — after OTP verify succeeds, look up the restaurant by
+    phone. No auto-create (unlike get_or_create_customer): a restaurant
+    logging in via OTP must already exist from Admin onboarding.
+    """
+    restaurant = db.query(Restaurant).filter(Restaurant.phone_number == phone_number).first()
+
+    if restaurant is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No restaurant account found for this phone number.",
+        )
+
+    return restaurant
+
+
+def authenticate_admin(db: Session, email: str, password: str) -> Admin:
+    """
+    Step 10 — admin email+password login. Same 401-for-both-cases pattern
+    as authenticate_restaurant_by_password, so we never leak whether an
+    email is a registered admin. Also rejects a deactivated admin
+    (is_active=False) with the same generic message.
+    """
+    admin = db.query(Admin).filter(Admin.email == email).first()
+
+    if admin is None or not admin.is_active or not verify_password(password, admin.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password.",
+        )
+
+    return admin
+
+
+def seed_first_admin(db: Session) -> None:
+    """
+    Step 10 — auto-seed on app startup (see ADR-002-first-admin-seed.md).
+    Runs once per startup: no-op if ANY admin row already exists (does not
+    re-check by email, since the whole point is "is the table empty").
+    Password is bcrypt-hashed before insert, same as every other password
+    field — never stored/logged raw.
+    """
+    admin_exists = db.query(Admin).first() is not None
+    if admin_exists:
+        return
+
+    db.add(Admin(
+        email=settings.FIRST_ADMIN_EMAIL,
+        password_hash=hash_password(settings.FIRST_ADMIN_PASSWORD),
+        role="super_admin",
+        is_active=True,
+    ))
     db.commit()
