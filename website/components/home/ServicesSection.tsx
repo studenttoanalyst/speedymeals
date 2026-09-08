@@ -38,7 +38,7 @@ export const ServicesSection: React.FC = () => {
   return (
     <section
       id="services"
-      className="relative z-10 py-24 sm:py-32 border-t border-[#E4E2DD] bg-[#FFFFFF]/90"
+      className="relative z-10 py-24 sm:py-32 border-t border-[#E4E2DD] bg-[#F6F5F3]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -65,7 +65,7 @@ export const ServicesSection: React.FC = () => {
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <h2 className="font-['Archivo_Black'] text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-[#15171A]">
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-[#15171A]">
               One platform. <br className="hidden sm:inline" />
               <span
                 className="transition-colors duration-300"
@@ -93,7 +93,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-food-delivery"
-            className="border-2 border-[#1E5FA8] bg-[#FFFFFF] p-6 sm:p-10 relative overflow-hidden group"
+            className="border-2 border-[#1E5FA8] bg-[#FFFFFF] p-6 sm:p-10 relative overflow-hidden group shadow-sm"
           >
             {/* Top Bar with Code & Status */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-[#E4E2DD]">
@@ -119,7 +119,7 @@ export const ServicesSection: React.FC = () => {
               <div className="lg:col-span-7">
                 <div className="flex items-center space-x-3 mb-3">
                   <ForkKnife size={28} weight="bold" className="text-[#1E5FA8]" />
-                  <h3 className="font-['Archivo_Black'] text-2xl sm:text-4xl text-[#15171A] uppercase tracking-tight">
+                  <h3 className="font-display text-2xl sm:text-4xl text-[#15171A] uppercase tracking-tight">
                     Food Delivery
                   </h3>
                 </div>
@@ -186,7 +186,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-courier"
-            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
@@ -198,7 +198,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#15171A]">
                 <Package size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Speedy Courier
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">
@@ -216,7 +216,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-drive"
-            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E23A2E] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
@@ -228,7 +228,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#15171A]">
                 <Car size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Speedy Drive
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">
@@ -246,7 +246,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-mall"
-            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
@@ -258,7 +258,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#5B5F66]">
                 <ShoppingBag size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Speedy Mall
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">
@@ -276,7 +276,7 @@ export const ServicesSection: React.FC = () => {
           <motion.div
             variants={itemVariants}
             id="service-panel-tech"
-            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between"
+            className="border-l-2 border-l-[#E4E2DD] border-y border-r border-[#E4E2DD] bg-[#FFFFFF] p-6 flex flex-col justify-between shadow-sm"
           >
             <div>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#E4E2DD]">
@@ -288,7 +288,7 @@ export const ServicesSection: React.FC = () => {
               <div className="mb-4 text-[#5B5F66]">
                 <Cpu size={26} weight="bold" />
               </div>
-              <h4 className="font-['Archivo_Black'] text-xl text-[#15171A] uppercase tracking-tight mb-2">
+              <h4 className="font-display text-xl text-[#15171A] uppercase tracking-tight mb-2">
                 Technical Services
               </h4>
               <p className="text-xs text-[#5B5F66] leading-relaxed mb-6 font-sans">

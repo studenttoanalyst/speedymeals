@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Lightning } from '@phosphor-icons/react';
 
 interface HeroSectionProps {
@@ -9,208 +9,7 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // High-performance loopable animated canvas depicting the SpeedyMeals courier delivery to home
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    let t = 0;
-
-    const resize = () => {
-      if (!canvas) return;
-      canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
-      canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const draw = () => {
-      t += 0.015;
-      const w = canvas.width;
-      const h = canvas.height;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // Gradient backdrop with transparency at top and sides so reeded glass shines through
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-      bgGrad.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
-      bgGrad.addColorStop(0.5, 'rgba(246, 245, 243, 0.4)');
-      bgGrad.addColorStop(1, 'rgba(255, 255, 255, 0.95)');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, w, h);
-
-      // Stylized architectural skyline backdrop (South Asia & Middle East silhouette)
-      ctx.strokeStyle = 'rgba(228, 226, 221, 0.5)';
-      ctx.lineWidth = 1;
-      const buildingWidth = 70;
-      const numBuildings = Math.ceil(w / buildingWidth) + 1;
-      for (let i = 0; i < numBuildings; i++) {
-        const bx = i * buildingWidth;
-        const bh = 140 + Math.sin(i * 1.7) * 70;
-        ctx.strokeRect(bx, h - bh - 60, buildingWidth, bh);
-        // Architectural window grids
-        for (let wy = h - bh - 40; wy < h - 70; wy += 22) {
-          if ((i + wy) % 2 === 0) {
-            ctx.fillStyle = 'rgba(199, 168, 116, 0.12)';
-            ctx.fillRect(bx + 14, wy, 16, 12);
-          }
-        }
-      }
-
-      // Ground horizon line
-      ctx.beginPath();
-      ctx.moveTo(0, h - 60);
-      ctx.lineTo(w, h - 60);
-      ctx.strokeStyle = '#E4E2DD';
-      ctx.stroke();
-
-      // Modern Home Entrance (Destination) on the right side
-      const homeX = w * 0.72;
-      const homeY = h - 180;
-      // Home facade outline
-      ctx.fillStyle = 'rgba(246, 245, 243, 0.85)';
-      ctx.fillRect(homeX, homeY, 180, 120);
-      ctx.strokeStyle = '#15171A';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(homeX, homeY, 180, 120);
-
-      // Warm doorway light (symbolizing welcoming delivery)
-      const doorLight = ctx.createRadialGradient(homeX + 50, homeY + 60, 5, homeX + 50, homeY + 60, 70);
-      doorLight.addColorStop(0, 'rgba(199, 168, 116, 0.35)');
-      doorLight.addColorStop(1, 'rgba(199, 168, 116, 0)');
-      ctx.fillStyle = doorLight;
-      ctx.fillRect(homeX - 20, homeY, 140, 120);
-
-      // Door frame
-      ctx.strokeRect(homeX + 35, homeY + 30, 45, 90);
-      ctx.fillStyle = '#15171A';
-      ctx.fillRect(homeX + 37, homeY + 32, 41, 88);
-      // Door handle
-      ctx.fillStyle = '#C7A874';
-      ctx.fillRect(homeX + 70, homeY + 75, 4, 10);
-
-      // Animated Delivery Courier Figure (moving smoothly toward home entrance, loopable)
-      const cycleDuration = 8; // seconds per cycle
-      const cycleProgress = (t % cycleDuration) / cycleDuration;
-      // Courier travels from left (w * 0.25) to destination (homeX + 15), pauses to deliver parcel, then loops
-      let courierX: number;
-      let isDelivering = false;
-
-      if (cycleProgress < 0.65) {
-        // Approaching
-        const p = cycleProgress / 0.65;
-        courierX = w * 0.25 + (homeX - 10 - w * 0.25) * Math.sin((p * Math.PI) / 2);
-      } else if (cycleProgress < 0.85) {
-        // Handover at door
-        courierX = homeX - 10;
-        isDelivering = true;
-      } else {
-        // Fade or loop restart
-        courierX = w * 0.25;
-      }
-
-      const courierY = h - 60;
-
-      // Draw Courier on Electric Delivery Bike / Scooter
-      ctx.save();
-      ctx.translate(courierX, courierY);
-
-      // Wheels
-      const wheelRotation = t * 8;
-      ctx.strokeStyle = '#15171A';
-      ctx.lineWidth = 2.5;
-
-      // Back wheel
-      ctx.beginPath();
-      ctx.arc(-26, -14, 12, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Front wheel
-      ctx.beginPath();
-      ctx.arc(26, -14, 12, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Wheel spokes
-      if (!isDelivering) {
-        ctx.beginPath();
-        ctx.moveTo(-26 + Math.cos(wheelRotation) * 12, -14 + Math.sin(wheelRotation) * 12);
-        ctx.lineTo(-26 - Math.cos(wheelRotation) * 12, -14 - Math.sin(wheelRotation) * 12);
-        ctx.moveTo(26 + Math.cos(wheelRotation) * 12, -14 + Math.sin(wheelRotation) * 12);
-        ctx.lineTo(26 - Math.cos(wheelRotation) * 12, -14 - Math.sin(wheelRotation) * 12);
-        ctx.stroke();
-      }
-
-      // Bike chassis (sharp hairline geometric)
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(-26, -14);
-      ctx.lineTo(0, -18);
-      ctx.lineTo(18, -36);
-      ctx.lineTo(26, -14);
-      ctx.moveTo(0, -18);
-      ctx.lineTo(2, -38);
-      ctx.stroke();
-
-      // SpeedyMeals Insulated Delivery Backpack (Signature --red)
-      ctx.fillStyle = '#E23A2E';
-      ctx.fillRect(-22, -62, 16, 22);
-      ctx.strokeStyle = '#15171A';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(-22, -62, 16, 22);
-      // Bag white reflective stripe
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(-22, -52, 16, 3);
-
-      // Courier Figure
-      // Torso
-      ctx.fillStyle = '#15171A';
-      ctx.fillRect(-6, -58, 14, 26);
-      // Helmet / Head
-      ctx.beginPath();
-      ctx.arc(4, -68, 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#15171A';
-      ctx.fill();
-      // Helmet Visor (reflecting city light)
-      ctx.fillStyle = '#1E5FA8';
-      ctx.fillRect(7, -70, 5, 4);
-
-      // Handlebars and arms
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(4, -50);
-      ctx.lineTo(16, -38);
-      ctx.stroke();
-
-      // Parcel in hand during delivery moment
-      if (isDelivering) {
-        const parcelHover = Math.sin(t * 4) * 2;
-        ctx.fillStyle = '#C7A874';
-        ctx.fillRect(20, -50 + parcelHover, 14, 12);
-        ctx.strokeStyle = '#15171A';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(20, -50 + parcelHover, 14, 12);
-        // Ribbon
-        ctx.fillStyle = '#E23A2E';
-        ctx.fillRect(26, -50 + parcelHover, 2, 12);
-      }
-
-      ctx.restore();
-
-      animId = requestAnimationFrame(draw);
-    };
-
-    draw();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleScrollToPartner = (persona: 'rider' | 'restaurant') => {
     onSelectPersona(persona);
@@ -227,28 +26,44 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
     }
   };
 
-  // Motion variants with staggerChildren: 0.1
+  // Stagger container entrance
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.15,
+        staggerChildren: shouldReduceMotion ? 0 : 0.12,
+        delayChildren: shouldReduceMotion ? 0 : 0.08,
       },
     },
   };
 
+  // Element reveal variants with natural deceleration
   const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.65,
-        ease: [0.16, 1, 0.3, 1] as const, // momentum-forward easing
+        duration: shouldReduceMotion ? 0.01 : 0.6,
+        ease: [0.16, 1, 0.3, 1] as const,
       },
     },
+  };
+
+  // Word pop sequence for FAST. FAIR. GLOBAL.
+  const wordVariants = {
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 14, scale: shouldReduceMotion ? 1 : 0.95 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        delay: shouldReduceMotion ? 0 : 0.25 + i * 0.12,
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1] as const,
+      },
+    }),
   };
 
   return (
@@ -256,165 +71,211 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
       id="about"
       className="relative min-h-screen flex flex-col justify-between pt-24 pb-12 overflow-hidden"
     >
-      {/* BACKGROUND VIDEO / ANIMATED COURIER DELIVERY CANVAS LAYER */}
-      {/* Sits ABOVE reeded glass, but BELOW content scrim */}
-      <div
-        id="hero-video-canvas-layer"
-        className="absolute inset-0 z-0 pointer-events-none opacity-80"
-        aria-hidden="true"
-      >
-        <canvas ref={canvasRef} className="w-full h-full block" />
-        {/* Dark-to-transparent overlay gradient bottom-up over video for legibility */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.75) 45%, rgba(255,255,255,0.98) 85%)',
-          }}
-        />
-      </div>
-
-      {/* Hero Content Container (Semi-opaque 95%+ scrim for pristine readability) */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
+      {/* Hero Content Container */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto flex flex-col items-center">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="max-w-4xl"
+          className="max-w-4xl w-full flex flex-col items-center text-center"
         >
-          {/* Eyebrow: FAST & SAFE TO YOU (mono, tracking-widest, --red, subtle color coupling) */}
-          <motion.div variants={itemVariants} className="flex items-center space-x-3 mb-5">
-            <span
-              className="inline-block w-2 h-2 transition-colors duration-300"
-              style={{ backgroundColor: 'var(--dynamic-accent, #E23A2E)' }}
-            />
+          {/* Eyebrow: FAST & SAFE TO YOU with energetic live status pulse */}
+          <motion.div variants={itemVariants} className="flex items-center justify-center space-x-3 mb-5">
+            <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-full w-full bg-red opacity-75" />
+              <span className="relative inline-flex h-2 w-2 bg-red" />
+            </span>
             <span
               id="hero-eyebrow"
-              className="font-mono text-xs uppercase tracking-[0.25em] font-semibold text-[#E23A2E]"
+              className="font-mono text-xs uppercase tracking-[0.25em] font-semibold text-red"
             >
               FAST & SAFE TO YOU
             </span>
-            <div className="h-px w-12 bg-[#E4E2DD]" />
-            <span className="font-mono text-[11px] text-[#5B5F66] tracking-wider uppercase hidden sm:inline-block">
+            <div className="h-px w-12 bg-line" />
+            <span className="font-mono text-[11px] text-ink-soft tracking-wider uppercase hidden sm:inline-block">
               SOUTH ASIA & MIDDLE EAST NETWORK
             </span>
           </motion.div>
 
-          {/* Headline (Archivo Black, huge, --ink): SPEEDYMEALS / FAST. FAIR. GLOBAL. */}
-          <motion.div variants={itemVariants} className="mb-6">
+          {/* Headline: SPEEDYMEALS with lively staggered word reveal */}
+          <motion.div variants={itemVariants} className="mb-6 text-center w-full">
             <h1
               id="hero-headline"
-              className="font-['Archivo_Black'] text-4xl sm:text-6xl lg:text-7xl xl:text-8xl tracking-tight text-[#15171A] uppercase leading-[0.92]"
+              className="font-display text-4xl sm:text-6xl lg:text-7xl xl:text-8xl tracking-tight text-ink uppercase leading-[0.95]"
             >
-              SPEEDYMEALS
-              <br />
-              <span className="text-[#15171A] flex flex-wrap items-center gap-x-3 sm:gap-x-4">
-                <span>FAST.</span>
-                <span
-                  className="transition-colors duration-300"
-                  style={{ color: 'var(--dynamic-accent, #E23A2E)' }}
+              <span className="block">SPEEDYMEALS</span>
+              <span className="text-ink flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 mt-2 sm:mt-3 text-2xl sm:text-4xl lg:text-5xl xl:text-6xl tracking-tight">
+                <motion.span
+                  custom={1}
+                  variants={wordVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="inline-block hover:text-red hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
+                >
+                  FAST.
+                </motion.span>
+                <motion.span
+                  custom={2}
+                  variants={wordVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="inline-block text-red hover:text-tan hover:scale-105 transition-all duration-200 cursor-default transform origin-center font-extrabold"
                 >
                   FAIR.
-                </span>
-                <span>GLOBAL.</span>
+                </motion.span>
+                <motion.span
+                  custom={3}
+                  variants={wordVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="inline-block hover:text-blue hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
+                >
+                  GLOBAL.
+                </motion.span>
               </span>
             </h1>
           </motion.div>
 
-          {/* Subhead with Scrim background */}
+          {/* Subhead with Sharp Editorial Styling & Interactive Lift */}
           <motion.div
             variants={itemVariants}
-            className="mb-8 p-5 bg-[#FFFFFF]/95 border-l-2 border-[#15171A] border-y border-r border-[#E4E2DD] max-w-3xl"
+            whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
+            className="mb-8 p-6 bg-paper border border-line border-t-2 border-t-ink max-w-3xl w-full mx-auto shadow-sm text-center transition-colors duration-200 hover:border-ink"
           >
-            <p className="text-base sm:text-lg text-[#15171A] leading-relaxed font-sans font-normal">
+            <p className="text-base sm:text-lg text-ink leading-relaxed font-sans font-normal">
               A new delivery platform for South Asia & the Middle East — built so riders keep{' '}
-              <strong className="font-semibold text-[#E23A2E] underline decoration-1 underline-offset-4">
+              <strong className="font-semibold text-red underline decoration-1 underline-offset-4">
                 100% of the delivery fee
               </strong>{' '}
               and restaurants pay a flat{' '}
-              <strong className="font-semibold text-[#1E5FA8]">10%</strong>. No hidden cuts, no
+              <strong className="font-semibold text-blue">10%</strong>. No hidden cuts, no
               extraction.
             </p>
           </motion.div>
 
-          {/* Company detail block (small, mono labels): editorial not corporate */}
+          {/* Company detail block: Interactive Hover Lift, hairline accent borders & icon animations */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10 max-w-3xl font-mono"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-10 max-w-3xl w-full mx-auto font-mono text-left"
           >
-            <div className="p-3 bg-[#FFFFFF]/90 border border-[#E4E2DD]">
-              <div className="text-[10px] uppercase tracking-wider text-[#5B5F66] flex items-center space-x-1 mb-1">
-                <CurrencyCircleDollar size={13} weight="bold" className="text-[#E23A2E]" />
-                <span>RIDER REMUNERATION</span>
+            {/* Metric 1: Rider */}
+            <motion.div
+              whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+              className="group p-4 bg-paper border border-line shadow-sm hover:border-red hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+            >
+              <div className="text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-1.5">
+                <span className="flex items-center space-x-1.5">
+                  <CurrencyCircleDollar size={15} weight="bold" className="text-red group-hover:scale-125 transition-transform duration-200" />
+                  <span>RIDER REMUNERATION</span>
+                </span>
+                <span className="w-1.5 h-1.5 bg-red opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
               </div>
-              <div className="text-sm font-bold text-[#15171A]">100% Retained</div>
-              <div className="text-[11px] text-[#5B5F66]">Zero commission off rider mileage</div>
-            </div>
+              <div className="text-base font-bold text-ink group-hover:text-red transition-colors duration-150">
+                100% Retained
+              </div>
+              <div className="text-[11px] text-ink-soft mt-0.5">Zero commission off rider mileage</div>
+            </motion.div>
 
-            <div className="p-3 bg-[#FFFFFF]/90 border border-[#E4E2DD]">
-              <div className="text-[10px] uppercase tracking-wider text-[#5B5F66] flex items-center space-x-1 mb-1">
-                <ShieldCheck size={13} weight="bold" className="text-[#1E5FA8]" />
-                <span>MERCHANT CONTRACT</span>
+            {/* Metric 2: Merchant */}
+            <motion.div
+              whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+              className="group p-4 bg-paper border border-line shadow-sm hover:border-blue hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+            >
+              <div className="text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-1.5">
+                <span className="flex items-center space-x-1.5">
+                  <ShieldCheck size={15} weight="bold" className="text-blue group-hover:scale-125 transition-transform duration-200" />
+                  <span>MERCHANT CONTRACT</span>
+                </span>
+                <span className="w-1.5 h-1.5 bg-blue opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
               </div>
-              <div className="text-sm font-bold text-[#15171A]">10% Flat Rate</div>
-              <div className="text-[11px] text-[#5B5F66]">No promotion gouging or tiers</div>
-            </div>
+              <div className="text-base font-bold text-ink group-hover:text-blue transition-colors duration-150">
+                10% Flat Rate
+              </div>
+              <div className="text-[11px] text-ink-soft mt-0.5">No promotion gouging or tiers</div>
+            </motion.div>
 
-            <div className="p-3 bg-[#FFFFFF]/90 border border-[#E4E2DD]">
-              <div className="text-[10px] uppercase tracking-wider text-[#5B5F66] flex items-center space-x-1 mb-1">
-                <Lightning size={13} weight="bold" className="text-[#C7A874]" />
-                <span>INFRASTRUCTURE</span>
+            {/* Metric 3: Infrastructure */}
+            <motion.div
+              whileHover={shouldReduceMotion ? {} : { y: -4, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+              className="group p-4 bg-paper border border-line shadow-sm hover:border-tan hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+            >
+              <div className="text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-1.5">
+                <span className="flex items-center space-x-1.5">
+                  <Lightning size={15} weight="bold" className="text-tan group-hover:scale-125 transition-transform duration-200" />
+                  <span>INFRASTRUCTURE</span>
+                </span>
+                <span className="w-1.5 h-1.5 bg-tan opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
               </div>
-              <div className="text-sm font-bold text-[#15171A]">Real-Time Dispatch</div>
-              <div className="text-[11px] text-[#5B5F66]">Direct routing telemetry</div>
-            </div>
+              <div className="text-base font-bold text-ink group-hover:text-tan transition-colors duration-150">
+                Real-Time Dispatch
+              </div>
+              <div className="text-[11px] text-ink-soft mt-0.5">Direct routing telemetry</div>
+            </motion.div>
           </motion.div>
 
           {/* Two CTAs: RIDE WITH US (--red) / PARTNER YOUR RESTAURANT (--blue outline) */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-8"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-8"
           >
-            <button
+            <motion.button
               id="hero-cta-ride"
               type="button"
+              whileHover={shouldReduceMotion ? {} : { scale: 1.03, y: -2 }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.96 }}
               onClick={() => handleScrollToPartner('rider')}
-              className="px-8 py-4 bg-[#E23A2E] text-white font-mono text-xs uppercase tracking-widest font-bold border border-[#E23A2E] hover:bg-[#15171A] hover:border-[#15171A] transition-colors duration-150 flex items-center justify-center space-x-2"
+              className="group px-8 py-4 bg-red text-white font-mono text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md cursor-pointer"
             >
               <span>RIDE WITH US</span>
-              <ArrowRight size={14} weight="bold" />
-            </button>
+              <ArrowRight size={14} weight="bold" className="group-hover:translate-x-1.5 transition-transform duration-200" />
+            </motion.button>
 
-            <button
+            <motion.button
               id="hero-cta-restaurant"
               type="button"
+              whileHover={shouldReduceMotion ? {} : { scale: 1.03, y: -2 }}
+              whileTap={shouldReduceMotion ? {} : { scale: 0.96 }}
               onClick={() => handleScrollToPartner('restaurant')}
-              className="px-8 py-4 bg-transparent text-[#1E5FA8] font-mono text-xs uppercase tracking-widest font-bold border border-[#1E5FA8] hover:bg-[#1E5FA8] hover:text-white transition-colors duration-150 flex items-center justify-center space-x-2"
+              className="group px-8 py-4 bg-transparent text-blue font-mono text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md cursor-pointer"
             >
               <span>PARTNER YOUR RESTAURANT</span>
-              <ArrowRight size={14} weight="bold" />
-            </button>
+              <ArrowRight size={14} weight="bold" className="group-hover:translate-x-1.5 transition-transform duration-200" />
+            </motion.button>
           </motion.div>
         </motion.div>
       </div>
 
-      {/* Bottom-left: "SCROLL TO DISCOVER" mono label + scroll indicator */}
+      {/* Bottom: "SCROLL TO DISCOVER" mono label + scroll indicator with kinetic bounce */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex items-center justify-between pt-4 border-t border-[#E4E2DD]">
-          <button
+        <div className="flex items-center justify-between pt-4 border-t border-line">
+          <motion.button
             id="hero-scroll-indicator"
             type="button"
+            whileHover={shouldReduceMotion ? {} : { y: 2 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
             onClick={handleScrollToServices}
-            className="flex items-center space-x-3 text-[#5B5F66] hover:text-[#15171A] transition-colors duration-150 font-mono text-xs uppercase tracking-widest"
+            className="group flex items-center space-x-3 text-ink-soft hover:text-ink transition-colors duration-150 font-mono text-xs uppercase tracking-widest cursor-pointer"
           >
-            <span className="w-5 h-5 border border-[#15171A] flex items-center justify-center text-[#15171A]">
+            <motion.span
+              animate={shouldReduceMotion ? {} : { y: [0, 4, 0] }}
+              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+              className="w-5 h-5 border border-ink group-hover:bg-ink group-hover:text-white flex items-center justify-center text-ink transition-colors duration-150"
+            >
               <ArrowDown size={12} weight="bold" />
-            </span>
-            <span>SCROLL TO DISCOVER SERVICES</span>
-          </button>
+            </motion.span>
+            <span className="group-hover:underline underline-offset-4 decoration-1">SCROLL TO DISCOVER SERVICES</span>
+          </motion.button>
 
-          <div className="font-mono text-[11px] text-[#5B5F66] tracking-wider hidden sm:block">
-            DEPLOYMENT: DUBAI · DOHA · KARACHI · LAHORE · RIYADH
+          <div className="font-mono text-[11px] text-ink-soft tracking-wider hidden sm:flex items-center space-x-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
+            </span>
+            <span>DEPLOYMENT: DUBAI · DOHA · KARACHI · LAHORE · RIYADH</span>
           </div>
         </div>
       </div>
