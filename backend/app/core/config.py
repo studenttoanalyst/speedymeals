@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     # Google Maps
     GOOGLE_MAPS_API_KEY: str
 
+    # First Admin Auto-Seed (Phase 2, Step 10 - see ADR-002)
+    FIRST_ADMIN_EMAIL: str
+    FIRST_ADMIN_PASSWORD: str
+
     model_config = SettingsConfigDict(env_file=ENV_FILE_PATH, env_file_encoding="utf-8")
 
 

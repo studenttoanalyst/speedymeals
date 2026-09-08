@@ -47,6 +47,14 @@ class RestaurantLoginSchema(BaseModel):
     password: str
 
 
+class AdminLoginSchema(BaseModel):
+    """Step 10 — admin email+password login. Same shape as restaurant login;
+    kept as its own schema (not reused) since the two roles are semantically
+    different subjects even though the fields happen to match today."""
+    email: str
+    password: str
+
+
 class RestaurantOTPVerifySchema(BaseModel):
     """
     Step 9, Path B — restaurant phone+OTP login. Separate from the

@@ -19,6 +19,7 @@ from app.platform.auth.schemas import (
     LogoutSchema,
     RestaurantLoginSchema,
     RestaurantOTPVerifySchema,
+    AdminLoginSchema,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -123,4 +124,18 @@ def restaurant_otp_verify(payload: RestaurantOTPVerifySchema, db: Session = Depe
 
     restaurant = service.get_restaurant_by_phone(db, full_number)
     tokens = service.issue_tokens(db, restaurant.id, role="restaurant")
+    return TokenResponseSchema(**tokens)
+
+
+@router.post("/admin/login", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def admin_login(payload: AdminLoginSchema, db: Session = Depends(get_db)):
+    """
+    Step 10 — admin email+password login. Same rate-limit-by-email pattern
+    as restaurant login. First admin exists automatically via seed_first_admin
+    (called on app startup, see main.py) so this endpoint always has at
+    least one valid account to log into on a fresh DB.
+    """
+    enforce_rate_limit(payload.email, action="admin_login")
+    admin = service.authenticate_admin(db, payload.email, payload.password)
+    tokens = service.issue_tokens(db, admin.id, role="admin")
     return TokenResponseSchema(**tokens)

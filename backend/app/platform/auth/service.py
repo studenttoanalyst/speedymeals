@@ -16,10 +16,11 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.redis_client import redis_client
-from app.core.security import verify_password
+from app.core.security import hash_password, verify_password
 from app.platform.auth import jwt_utils
-from app.platform.auth.models import RefreshToken
+from app.platform.auth.models import Admin, RefreshToken
 from app.platform.users.models import User
 from app.modules.food_delivery.models import Restaurant
 
@@ -193,3 +194,42 @@ def get_restaurant_by_phone(db: Session, phone_number: str) -> Restaurant:
         )
 
     return restaurant
+
+
+def authenticate_admin(db: Session, email: str, password: str) -> Admin:
+    """
+    Step 10 — admin email+password login. Same 401-for-both-cases pattern
+    as authenticate_restaurant_by_password, so we never leak whether an
+    email is a registered admin. Also rejects a deactivated admin
+    (is_active=False) with the same generic message.
+    """
+    admin = db.query(Admin).filter(Admin.email == email).first()
+
+    if admin is None or not admin.is_active or not verify_password(password, admin.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password.",
+        )
+
+    return admin
+
+
+def seed_first_admin(db: Session) -> None:
+    """
+    Step 10 — auto-seed on app startup (see ADR-002-first-admin-seed.md).
+    Runs once per startup: no-op if ANY admin row already exists (does not
+    re-check by email, since the whole point is "is the table empty").
+    Password is bcrypt-hashed before insert, same as every other password
+    field — never stored/logged raw.
+    """
+    admin_exists = db.query(Admin).first() is not None
+    if admin_exists:
+        return
+
+    db.add(Admin(
+        email=settings.FIRST_ADMIN_EMAIL,
+        password_hash=hash_password(settings.FIRST_ADMIN_PASSWORD),
+        role="super_admin",
+        is_active=True,
+    ))
+    db.commit()
