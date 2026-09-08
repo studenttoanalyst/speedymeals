@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.platform.auth import service
+from app.platform.auth.dependencies import get_current_user, CurrentUser
 from app.platform.auth.schemas import (
     OTPRequestSchema,
     OTPVerifySchema,
@@ -73,3 +74,13 @@ def logout(payload: LogoutSchema, db: Session = Depends(get_db)):
     """
     service.revoke_refresh_token(db, payload.refresh_token)
     return {"message": "Logged out."}
+
+
+@router.get("/me", status_code=status.HTTP_200_OK)
+def get_me(current_user: CurrentUser = Depends(get_current_user)):
+    """
+    Step 7 test/utility endpoint — proves the guard works: send an access
+    token in the Authorization header (Bearer <token>) and get back who
+    the server thinks you are. No token / bad token / expired token → 401.
+    """
+    return {"id": str(current_user.id), "role": current_user.role}
