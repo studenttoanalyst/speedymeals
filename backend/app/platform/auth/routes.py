@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.rate_limiter import enforce_rate_limit
 from app.platform.auth import service
 from app.platform.auth.dependencies import get_current_user, CurrentUser
 from app.platform.auth.schemas import (
@@ -42,8 +43,11 @@ def request_otp(payload: OTPRequestSchema):
     """
     Step 2 + Step 4 — generate a new OTP and send it (console mode).
     Rejects with 429 if called again before the resend cooldown (45s) expires.
+    Step 8 — also rate-limited (max 5/min) as a second layer independent of
+    the cooldown, in case cooldown is ever bypassed/changed.
     """
     full_number = _build_full_number(payload.country_code, payload.phone_number)
+    enforce_rate_limit(full_number, action="otp_request")
     service.generate_and_send_otp(full_number)
     return OTPResponseSchema(message="OTP sent.")
 
@@ -53,11 +57,14 @@ def verify_otp(payload: OTPVerifySchema, db: Session = Depends(get_db)):
     """
     Step 3 (verify) + Step 5 (issue tokens). On a correct OTP: find-or-create
     the customer's User row, then issue an access + refresh token pair.
+    Step 8 — rate-limited (max 5/min per phone) so an attacker can't brute-force
+    the 6-digit code by spamming this endpoint with guesses.
     Role is hardcoded to "customer" here — rider OTP verify will reuse the
     same service functions with role="rider" once the rider signup fields
     (CNIC, vehicle info) are wired in a later step.
     """
     full_number = _build_full_number(payload.country_code, payload.phone_number)
+    enforce_rate_limit(full_number, action="otp_verify")
     service.verify_otp(full_number, payload.otp_code)
 
     user = service.get_or_create_customer(db, full_number, payload.country_code)
