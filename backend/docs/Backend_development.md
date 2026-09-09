@@ -1,6 +1,6 @@
 # SpeedyMeals Backend — Development Plan
 
-Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 ✅ done (Step 0-9, 2 tests deferred pending Phase 5 — see below). Structure below builds on top, step by step, no jump ahead.
+Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 ✅ done (Step 0-9, 2 tests deferred pending Phase 5 — see below). Phase 4 ✅ done (all 8 steps, see below). Structure below builds on top, step by step, no jump ahead.
 
 Stack lock: Python + FastAPI, PostgreSQL, Alembic, Redis, AWS S3, JWT auth, Google Maps Distance Matrix.
 
@@ -131,17 +131,23 @@ Exit check: unit test — wallet deduction fires exactly once per delivery, bloc
 
 ---
 
-## Phase 4 — Restaurant Side: Menu & Orders Intake (NOW)
+## Phase 4 — Restaurant Side: Menu & Orders Intake (NOW) ✅ DONE (all 8 steps)
 
 Folder: `app/modules/food_delivery`.
 
-Tasks:
-- Menu CRUD (name, price, description, photo→S3, category, available/sold-out toggle).
-- Restaurant order dashboard endpoints: list new orders, order detail.
-- Status transition: Preparing → Ready for Pickup (triggers rider assignment event).
-- Commission calc at order placement time (10% default, per-restaurant override) — snapshot into `orders.commission_amount`.
+### Step-by-step breakdown (build order, do not skip ahead):
 
-Exit check: restaurant can add menu, receive test order, mark ready, commission number correct in DB.
+- [x] **Step 1 — Menu Schemas** (`schemas.py`): `MenuItemCreate/Update/ResponseSchema` (price > 0 enforced), `MenuItemAvailabilitySchema`. Photo upload kept out of the JSON schemas — it's a separate multipart endpoint (Step 4), schemas only carry `photo_url` as a plain string set after upload.
+- [x] **Step 2 — Menu CRUD** (`service.py`, `routes.py`): full CRUD under `/restaurants/me/menu-items` (GET/POST/PUT/DELETE), restaurant-only via `require_role(["restaurant"])`. Every mutation goes through `_get_owned_menu_item()` — the `restaurant_id` comes from the authenticated token, never the request body/path, and a non-owned id 404s (no existence leak).
+- [x] **Step 3 — Availability Toggle**: `PATCH /restaurants/me/menu-items/{id}/availability` — dedicated sold-out toggle separate from full update.
+- [x] **Step 4 — Menu Photo Upload (S3)**: `POST /restaurants/me/menu-items/{id}/photo` (multipart). New minimal abstraction `app/core/storage.py` — the only S3-touching module (boto3 client singleton, same pattern as `redis_client.py`). Menu photos are customer-facing → stored under the `menu-items/{restaurant_id}/{menu_item_id}.{ext}` prefix with public-read ACL, logically separated from private rider docs (CNIC/license/vehicle, reserved `rider-docs/` prefix, never public-read). Server-side validation: content-type + extension whitelist (JPG/JPEG/PNG), magic-byte check (client content-type not trusted), 5 MB cap enforced by reading only `MAX+1` bytes. S3 upload happens before any DB write — a failed upload leaves `photo_url` untouched; AWS errors surface as a clean 500.
+- [x] **Step 5 — Restaurant Order Dashboard** (`service.py`, `routes.py`, separate `orders_router`): `GET /restaurants/me/orders` (this restaurant's orders only, enforced in the query WHERE clause; optional case-insensitive `?status=` filter and inclusive `?date_from=`/`?date_to=` range on `placed_at`) and `GET /restaurants/me/orders/{id}` (items with menu names, customer name, delivery address, payment method, totals, status — payment fields informational only, no processing). Ownership: `order.id == {id} AND order.restaurant_id == {current_user.id}` — another restaurant's order is indistinguishable from a missing one (404). No new models, no migration (all columns already exist from Phase 1).
+- [x] **Step 6 — Order Status Transition** (`service.py`, `routes.py`): `PATCH /restaurants/me/orders/{id}/status`. State machine is a single transition map — `Accepted → Preparing → Ready for Pickup` — one step at a time; skips, backward moves, and arbitrary values get 400 **before any write** (DB verified unchanged after rejection). Ownership via `_get_owned_order()` (same WHERE-clause pattern as Step 5; another restaurant's order → 404). "Ready for Pickup" is the rider-assignment trigger point, but assignment itself is Phase 6 — this only updates the status. Note (flagged, not silently decided): orders arrive from Phase 5's checkout as "Accepted" — "Placed → Accepted" is not part of this step's machine; if Phase 5 seeds orders as "Placed", that transition gets added when the checkout lands.
+- [x] **Step 7 — Commission Calculation Helper** (`service.py` `calculate_commission(food_subtotal, commission_rate)`): pure helper, NOT wired into order creation (Phase 5 checkout will call it and snapshot results into `orders.commission_amount` / `orders.restaurant_payable`). Formula: `commission = subtotal × rate/100`, `payable = subtotal − commission`. Money handled with `Decimal` (matches the Numeric DB columns, which SQLAlchemy returns as Decimal; inputs converted via `Decimal(str(x))` so float input can't carry binary expansion), quantized to paisa. Validation minimal + mathematically safe: subtotal > 0, rate in [0, 100] (above 100 would make payable negative) — raises `ValueError` (pure helper, not a route). Confirmed vs spec Sec 11: 1000@10% → 100/900, 2500@15% → 375/2125.
+- [x] **Step 8 — Manual Testing / Exit Check**: full walk-through against real Postgres (rolled-back transaction) + real Redis: restaurant login via the real endpoint (bcrypt + rate limiter, wrong creds 401, token role verified), menu CRUD + availability toggle, photo upload (JPG/PNG/415/413 — S3 network call mocked at the boto3 boundary, see note), order dashboard + filters + ownership, status transitions (2 valid, 4 rejected with DB unchanged, cross-restaurant 404), commission examples. 35/35 API checks passed. Automated tests added: `app/tests/test_food_delivery.py` — 18 tests (commission math + edge cases, every transition direction, DB-unchanged-after-rejection, ownership), reusing the Phase 3 conftest `db_session` fixture; full suite 28/28 green.
+  - **Note (not skipped silently)**: the S3 network call itself was NOT executed — `.env` holds placeholder AWS credentials (no real bucket). Verified instead: the real `upload_menu_photo` key/ACL/URL logic with the boto3 `put_object` boundary mocked, plus `photo_url` persistence. Real-bucket upload remains to verify once real AWS credentials are configured (Phase 10/12 scope).
+
+Exit check: restaurant can add menu, receive test order, mark ready, commission number correct in DB. ✅ Confirmed — commission math verified via Step 7 helper + tests; full "receive test order → mark ready" walk-through done in Step 8 (test orders inserted directly, since Phase 5 checkout doesn't exist yet — the order-placement half of the exit check is fully exercisable once Phase 5 lands).
 
 ---
 

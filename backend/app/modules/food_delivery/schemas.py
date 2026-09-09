@@ -1,0 +1,111 @@
+"""
+Menu item request/response shapes — Phase 4, Step 1.
+Photo upload is a separate endpoint (Step 4, multipart) — these schemas
+only carry photo_url as a plain string, set after upload.
+"""
+import uuid
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class MenuItemCreateSchema(BaseModel):
+    name: str
+    description: str | None = None
+    price: float = Field(gt=0)
+    category: str | None = None
+    variants: dict | None = None
+    is_available: bool = True
+
+
+class MenuItemUpdateSchema(BaseModel):
+    """All fields optional — partial update, same pattern as
+    UserProfileUpdateSchema / AddressUpdateSchema."""
+    name: str | None = None
+    description: str | None = None
+    price: float | None = Field(default=None, gt=0)
+    category: str | None = None
+    variants: dict | None = None
+    is_available: bool | None = None
+
+
+class MenuItemAvailabilitySchema(BaseModel):
+    """Step 3 — dedicated toggle body, nothing else editable through it."""
+    is_available: bool
+
+
+class MenuItemResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    restaurant_id: uuid.UUID
+    name: str
+    description: str | None
+    price: float
+    category: str | None
+    photo_url: str | None
+    variants: dict | None
+    is_available: bool
+
+
+# --- Phase 4, Step 5: restaurant order dashboard response shapes ---
+
+
+class RestaurantOrderItemResponseSchema(BaseModel):
+    """One line of an order's items, with the menu item name resolved
+    (order_items only stores menu_item_id + price_at_order snapshot)."""
+    menu_item_id: uuid.UUID
+    name: str
+    quantity: int
+    selected_variant: str | None
+    price_at_order: float
+
+
+class RestaurantOrderDeliveryAddressSchema(BaseModel):
+    """Delivery address as stored on the `addresses` table (Phase 2 Step 11)."""
+    label: str | None
+    full_address: str | None
+    latitude: float
+    longitude: float
+
+
+class OrderStatusUpdateSchema(BaseModel):
+    """Body for PATCH /restaurants/me/orders/{id}/status — Step 6.
+    The requested next status, validated against the order state machine
+    in the service layer."""
+    status: str
+
+
+class RestaurantOrderSummaryResponseSchema(BaseModel):
+    """One row in GET /restaurants/me/orders — dashboard list view."""
+    id: uuid.UUID
+    status: str
+    payment_method: str
+    food_subtotal: float
+    delivery_fee: float
+    total_amount: float
+    placed_at: datetime
+    customer_name: str
+
+
+class RestaurantOrderDetailResponseSchema(BaseModel):
+    """Full view for GET /restaurants/me/orders/{id} — everything a
+    restaurant counter needs to prepare + hand over an order. Payment
+    fields are informational only (spec Sec 9 Step 6); no payment
+    processing happens here."""
+    id: uuid.UUID
+    status: str
+    payment_method: str
+    food_subtotal: float
+    delivery_distance_km: float
+    delivery_fee: float
+    total_amount: float
+    commission_amount: float
+    restaurant_payable: float
+    rider_earning: float
+    special_instructions: str | None
+    placed_at: datetime
+    delivered_at: datetime | None
+    customer_name: str
+    delivery_address: RestaurantOrderDeliveryAddressSchema | None
+    items: list[RestaurantOrderItemResponseSchema]

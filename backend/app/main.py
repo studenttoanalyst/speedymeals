@@ -10,12 +10,15 @@ from app.platform.auth import service as auth_service
 from app.platform.auth.routes import router as auth_router
 from app.platform.users.routes import router as users_router
 from app.platform.wallet_payment.routes import router as wallet_router
+from app.modules.food_delivery.routes import orders_router, router as menu_router
 
 app = FastAPI(title="SpeedyMeals API", version="0.1.0")
 
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(wallet_router)
+app.include_router(menu_router)
+app.include_router(orders_router)
 
 
 @app.on_event("startup")
