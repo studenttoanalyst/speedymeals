@@ -1,6 +1,6 @@
 # SpeedyMeals Backend — Development Plan
 
-Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 in progress (Steps 1-6 done, see below). Structure below builds on top, step by step, no jump ahead.
+Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 next. Structure below builds on top, step by step, no jump ahead.
 
 Stack lock: Python + FastAPI, PostgreSQL, Alembic, Redis, AWS S3, JWT auth, Google Maps Distance Matrix.
 
@@ -63,7 +63,7 @@ Exit check: `alembic upgrade head` clean, all 13 tables exist matching schema.jp
 
 ---
 
-## Phase 2 — Auth & Users (NOW) — IN PROGRESS
+## Phase 2 — Auth & Users (NOW) ✅ DONE
 
 Folder: `app/platform/auth`, `app/platform/users`.
 
@@ -76,15 +76,15 @@ Folder: `app/platform/auth`, `app/platform/users`.
 - [x] **Step 4 — OTP Resend Cooldown**: 45 sec enforced server-side (not just a disabled frontend button) before a new OTP can be requested for the same phone.
 - [x] **Step 5 — JWT Access + Refresh Token**: on successful OTP verify, find-or-create the `User` row, issue short-lived access token (~30 min) + long-lived refresh token (30 days).
 - [x] **Step 6 — Refresh Token Tracking (`refresh_tokens` table) + Logout**: every issued refresh token stored as a SHA-256 hash with `valid`/`revoked` status. Logout sets it `revoked`. Reusing a revoked refresh token is rejected. (Without this, logout would not actually invalidate a session — token still works until natural JWT expiry.)
-- [ ] **Step 7 — Role-Based Access Control** (`get_current_user`, `require_role([...])`): decode JWT, attach user, reject 401/403 — enforced at API layer, not frontend hide.
-- [ ] **Step 8 — Rate Limiting**: Redis counter, max 5 attempts/min per phone/email on OTP + login endpoints.
-- [ ] **Step 9 — Restaurant Login**: email+password (bcrypt) OR phone+OTP (spec Sec 9 Step 2), reusing Step 1-4's OTP mechanism. Restaurant accounts are created by Admin during manual onboarding (spec Sec 9 Step 1) — no restaurant self-signup in MVP.
-- [ ] **Step 10 — Admin Login + Auto-Seed**: first admin account **auto-seeded on app startup** (see ADR-002), not a manually-run script. On startup, check if any admin row exists; if none, create one from `FIRST_ADMIN_EMAIL` / `FIRST_ADMIN_PASSWORD` env vars (password bcrypt-hashed before insert). No-op if an admin already exists. Then email+password login endpoint.
-- [ ] **Step 11 — User Profile + Address Module**: profile get/update, saved addresses CRUD (Home/Work/Other, multiple) — needed before Phase 5 checkout.
-- [ ] **Step 12 — Password Reset (confirmation only, no code)**: customer/rider have no password (always re-auth via OTP) — reset concept doesn't apply. Restaurant/Admin: no self-serve reset endpoint in MVP; Admin resets credentials manually from Admin Panel (spec Sec 10 Step 3 already covers this).
-- [ ] **Step 13 — Manual Testing (Exit Check)**: all 4 roles login/logout via Postman/Swagger, rate limit fires, seed works on fresh DB.
+- [x] **Step 7 — Role-Based Access Control** (`get_current_user`, `require_role([...])`): decode JWT, attach user, reject 401/403 — enforced at API layer, not frontend hide. Confirmed in `app/platform/auth/dependencies.py`.
+- [x] **Step 8 — Rate Limiting**: Redis counter, max 5 attempts/min per phone/email on OTP + login endpoints. Confirmed in `app/core/rate_limiter.py`, wired into all OTP/login routes.
+- [x] **Step 9 — Restaurant Login**: email+password (bcrypt) OR phone+OTP (spec Sec 9 Step 2), reusing Step 1-4's OTP mechanism. Restaurant accounts are created by Admin during manual onboarding (spec Sec 9 Step 1) — no restaurant self-signup in MVP. Confirmed: both `/auth/restaurant/login` and `/auth/restaurant/otp/verify` in `routes.py`.
+- [x] **Step 10 — Admin Login + Auto-Seed**: first admin account **auto-seeded on app startup** (see ADR-002), not a manually-run script. On startup, check if any admin row exists; if none, create one from `FIRST_ADMIN_EMAIL` / `FIRST_ADMIN_PASSWORD` env vars (password bcrypt-hashed before insert). No-op if an admin already exists. Then email+password login endpoint. Confirmed: `seed_first_admin` wired in `main.py` startup event, `/auth/admin/login` in `routes.py`.
+- [x] **Step 11 — User Profile + Address Module**: profile get/update, saved addresses CRUD (Home/Work/Other, multiple) — needed before Phase 5 checkout. Confirmed: full CRUD in `app/platform/users/routes.py` (`/users/me`, `/users/me/addresses` GET/POST/PUT/DELETE), guarded by `require_role(["customer"])`.
+- [x] **Step 12 — Password Reset (confirmation only, no code)**: customer/rider have no password (always re-auth via OTP) — reset concept doesn't apply. Restaurant/Admin: no self-serve reset endpoint in MVP; Admin resets credentials manually from Admin Panel (spec Sec 10 Step 3 already covers this). No code change needed — decision stands as-is.
+- [x] **Step 13 — Manual Testing (Exit Check)**: all 4 roles login/logout via Postman/Swagger, rate limit fires, seed works on fresh DB. Confirmed done manually (no automated test in `app/tests/` yet — automated coverage is Phase 11 scope, not Phase 2).
 
-Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant, admin) via Postman/Swagger; logout invalidates the refresh token (reuse attempt is rejected); 6th rapid OTP/login attempt is rate-limited; first admin exists automatically on a fresh database with no manual step.
+Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant, admin) via Postman/Swagger; logout invalidates the refresh token (reuse attempt is rejected); 6th rapid OTP/login attempt is rate-limited; first admin exists automatically on a fresh database with no manual step. ✅ Confirmed.
 
 **Related decision records:** `docs/decisions/ADR-001-otp-sms-provider.md`, `docs/decisions/ADR-002-first-admin-seed.md`.
 
