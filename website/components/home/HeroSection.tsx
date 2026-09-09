@@ -77,19 +77,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
   return (
     <section
       id="about"
-      className="relative h-[100dvh] min-h-[640px] max-h-[1080px] flex flex-col justify-between pt-14 sm:pt-16 pb-2.5 sm:pb-3 overflow-hidden"
+      className="relative h-[100dvh] min-h-[640px] max-h-[1080px] flex flex-col justify-between pt-22 sm:pt-24 pb-3 sm:pb-3.5 overflow-hidden"
     >
       {/* Dedicated White-ish Gradient Band for Top 35% of Hero (Rule 1) */}
       <div className="pointer-events-none absolute top-0 inset-x-0 h-[35%] bg-gradient-to-b from-paper via-paper/95 to-transparent z-[5]" />
 
-      {/* Background Video Layer at z-0 (Rules 1, 2, 5: bottom-cropped to cut off watermark, feathered edges) */}
-      <div className="absolute top-[14%] sm:top-[15%] md:top-[16%] left-1/2 -translate-x-1/2 w-full max-w-5xl md:max-w-6xl lg:max-w-7xl z-0 pointer-events-none select-none px-2 sm:px-4">
+      {/* Background Video Layer at z-0: fixed to title area like desktop, watermark cropped */}
+      <div className="absolute top-[175px] xs:top-[185px] sm:top-[15%] md:top-[16%] left-1/2 -translate-x-1/2 w-full max-w-5xl md:max-w-6xl lg:max-w-7xl z-0 pointer-events-none select-none px-0 sm:px-4">
         <div
           ref={videoContainerRef}
-          className="relative w-full aspect-[16/8.5] sm:aspect-[16/8] md:aspect-[16/7.2] overflow-hidden will-change-transform"
+          className="relative w-full aspect-[16/8.3] sm:aspect-[16/8] md:aspect-[16/7.2] overflow-hidden will-change-transform"
           style={{
-            maskImage: 'radial-gradient(ellipse 92% 82% at 50% 50%, black 50%, rgba(0,0,0,0.7) 75%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 92% 82% at 50% 50%, black 50%, rgba(0,0,0,0.7) 75%, transparent 100%)',
+            maskImage: 'radial-gradient(ellipse 99% 92% at 50% 50%, black 70%, rgba(0,0,0,0.85) 90%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 99% 92% at 50% 50%, black 70%, rgba(0,0,0,0.85) 90%, transparent 100%)',
           }}
         >
           {/* Bottom-cropped video: h-[120%] object-top inside overflow-hidden eliminates bottom watermark at all breakpoints */}
@@ -108,8 +108,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
         </div>
       </div>
 
-      {/* Hero Foreground Content at z-10: fits inside 100vh fold without scrolling on 900px and 1080px */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto flex flex-col items-center">
+      {/* Hero Foreground Content at z-10: fits inside 100vh fold without scrolling */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-5 xs:pt-7 sm:pt-0 md:my-auto flex flex-col items-center">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -118,20 +118,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
         >
           {/* Top Group: Eyebrow + Headlines in clean negative space above & in sky of video */}
           <div className="w-full flex flex-col items-center text-center">
-            {/* Eyebrow: FAST & SAFE TO YOU */}
-            <motion.div variants={itemVariants} className="flex items-center justify-center space-x-2.5 mb-1 sm:mb-1.5">
-              <span className="relative flex h-2 w-2 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full bg-red opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 bg-red" />
+            {/* Eyebrow: FAST & SAFE TO YOU + SOUTH ASIA & MIDDLE EAST NETWORK */}
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-1 sm:mb-1.5 px-2">
+              <span className="inline-flex items-center space-x-1.5">
+                <span className="relative flex h-2 w-2 items-center justify-center">
+                  <span className="animate-ping absolute inline-flex h-full w-full bg-red opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 bg-red" />
+                </span>
+                <span
+                  id="hero-eyebrow"
+                  className="font-mono text-[9px] xs:text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] font-semibold text-red whitespace-nowrap"
+                >
+                  FAST & SAFE TO YOU
+                </span>
               </span>
-              <span
-                id="hero-eyebrow"
-                className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-semibold text-red"
-              >
-                FAST & SAFE TO YOU
-              </span>
-              <div className="h-px w-6 sm:w-10 bg-line" />
-              <span className="font-mono text-[10px] sm:text-[11px] text-ink-soft tracking-wider uppercase hidden sm:inline-block">
+              <div className="h-px w-4 sm:w-10 bg-line shrink-0" />
+              <span className="font-mono text-[8.5px] xs:text-[9.5px] sm:text-[11px] text-ink-soft tracking-wider uppercase whitespace-nowrap">
                 SOUTH ASIA & MIDDLE EAST NETWORK
               </span>
             </motion.div>
@@ -180,15 +182,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             </motion.div>
           </div>
 
-          {/* Cyan Visual Corridor: ~400px negative space between headline and metric cards */}
-          <div className="w-full h-[320px] sm:h-[360px] md:h-[390px] lg:h-[400px] pointer-events-none" aria-hidden="true" />
+          {/* Cyan Visual Corridor: negative space between headline and metric cards */}
+          <div className="w-full h-[275px] xs:h-[295px] sm:h-[320px] md:h-[380px] lg:h-[400px] pointer-events-none" aria-hidden="true" />
 
           {/* Bottom Group: Metric Cards + CTA Buttons (middle-ground spacing) */}
-          <div className="w-full flex flex-col items-center text-center mb-1 sm:mb-2">
+          <div className="w-full flex flex-col items-center text-center mb-2 sm:mb-2">
             {/* Company detail block: 3 metrics */}
             <motion.div
               variants={itemVariants}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 mb-2 sm:mb-2.5 max-w-3xl w-full mx-auto font-mono text-left"
+              className="grid grid-cols-3 gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-2.5 max-w-3xl w-full mx-auto font-mono text-left"
             >
               {/* Metric 1: Rider */}
               <motion.div
@@ -196,17 +198,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
                 className="group p-2 sm:p-2.5 bg-paper border border-line shadow-sm hover:border-red hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
-                <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
-                  <span className="flex items-center space-x-1.5">
-                    <CurrencyCircleDollar size={13} weight="bold" className="text-red group-hover:scale-125 transition-transform duration-200" />
-                    <span>RIDER REMUNERATION</span>
+                <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
+                  <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
+                    <CurrencyCircleDollar size={13} weight="bold" className="text-red group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                    <span className="truncate">RIDER PAY</span>
                   </span>
-                  <span className="w-1.5 h-1.5 bg-red opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  <span className="w-1.5 h-1.5 bg-red opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-sm sm:text-base font-bold text-ink group-hover:text-red transition-colors duration-150">
+                <div className="text-xs sm:text-base font-bold text-ink group-hover:text-red transition-colors duration-150 truncate">
                   100% Retained
                 </div>
-                <div className="text-[10px] text-ink-soft">Zero commission off rider mileage</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block truncate">Zero mileage cut</div>
               </motion.div>
 
               {/* Metric 2: Merchant */}
@@ -215,17 +217,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
                 className="group p-2 sm:p-2.5 bg-paper border border-line shadow-sm hover:border-blue hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
-                <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
-                  <span className="flex items-center space-x-1.5">
-                    <ShieldCheck size={13} weight="bold" className="text-blue group-hover:scale-125 transition-transform duration-200" />
-                    <span>MERCHANT CONTRACT</span>
+                <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
+                  <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
+                    <ShieldCheck size={13} weight="bold" className="text-blue group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                    <span className="truncate">MERCHANT</span>
                   </span>
-                  <span className="w-1.5 h-1.5 bg-blue opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  <span className="w-1.5 h-1.5 bg-blue opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-sm sm:text-base font-bold text-ink group-hover:text-blue transition-colors duration-150">
+                <div className="text-xs sm:text-base font-bold text-ink group-hover:text-blue transition-colors duration-150 truncate">
                   10% Flat Rate
                 </div>
-                <div className="text-[10px] text-ink-soft">No promotion gouging or tiers</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block truncate">No gouging tiers</div>
               </motion.div>
 
               {/* Metric 3: Infrastructure */}
@@ -234,24 +236,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
                 className="group p-2 sm:p-2.5 bg-paper border border-line shadow-sm hover:border-tan hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
-                <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
-                  <span className="flex items-center space-x-1.5">
-                    <Lightning size={13} weight="bold" className="text-tan group-hover:scale-125 transition-transform duration-200" />
-                    <span>INFRASTRUCTURE</span>
+                <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
+                  <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
+                    <Lightning size={13} weight="bold" className="text-tan group-hover:scale-125 transition-transform duration-200 shrink-0" />
+                    <span className="truncate">NETWORK</span>
                   </span>
-                  <span className="w-1.5 h-1.5 bg-tan opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  <span className="w-1.5 h-1.5 bg-tan opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-sm sm:text-base font-bold text-ink group-hover:text-tan transition-colors duration-150">
-                  Real-Time Dispatch
+                <div className="text-xs sm:text-base font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
+                  Live Dispatch
                 </div>
-                <div className="text-[10px] text-ink-soft">Direct routing telemetry</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block truncate">Direct telemetry</div>
               </motion.div>
             </motion.div>
 
             {/* Two CTAs: RIDE WITH US / PARTNER YOUR RESTAURANT */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-2.5 mb-0"
+              className="flex flex-row items-center justify-center gap-2 sm:gap-2.5 mb-0 w-full max-w-lg"
             >
               <motion.button
                 id="hero-cta-ride"
@@ -259,10 +261,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
                 onClick={() => handleScrollToPartner('rider')}
-                className="group px-5 py-2 sm:py-2.5 bg-red text-white font-mono text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md cursor-pointer"
+                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 bg-red text-white font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
               >
                 <span>RIDE WITH US</span>
-                <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200" />
+                <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
               </motion.button>
 
               <motion.button
@@ -271,19 +273,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
                 onClick={() => handleScrollToPartner('restaurant')}
-                className="group px-5 py-2 sm:py-2.5 bg-transparent text-blue font-mono text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md cursor-pointer"
+                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 bg-transparent text-blue font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
               >
-                <span>PARTNER YOUR RESTAURANT</span>
-                <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200" />
+                <span>PARTNER RESTAURANT</span>
+                <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
               </motion.button>
             </motion.div>
           </div>
         </motion.div>
       </div>
 
-      {/* Bottom: "SCROLL TO DISCOVER" mono label + scroll indicator (always inside 100vh viewport fold) */}
+      {/* Bottom: "SCROLL TO DISCOVER" mono label + scroll indicator + DEPLOYMENT locations on mobile and desktop */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full shrink-0">
-        <div className="flex items-center justify-between pt-2 border-t border-line">
+        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-1.5 sm:gap-4 pt-2 border-t border-line">
           <motion.button
             id="hero-scroll-indicator"
             type="button"
@@ -302,12 +304,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             <span className="group-hover:underline underline-offset-4 decoration-1">SCROLL TO DISCOVER SERVICES</span>
           </motion.button>
 
-          <div className="font-mono text-[10px] sm:text-[11px] text-ink-soft tracking-wider hidden sm:flex items-center space-x-2">
-            <span className="relative flex h-2 w-2">
+          {/* Deployment locations banner — explicitly visible on both mobile and desktop */}
+          <div className="font-mono text-[9px] sm:text-[11px] text-ink-soft tracking-wider flex items-center space-x-2">
+            <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
               <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
             </span>
-            <span>DEPLOYMENT: DUBAI · DOHA · KARACHI · LAHORE · RIYADH</span>
+            <span className="text-center sm:text-right">DEPLOYMENT: DUBAI · DOHA · KARACHI · LAHORE · RIYADH</span>
           </div>
         </div>
       </div>
