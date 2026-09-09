@@ -20,6 +20,7 @@ from app.platform.auth.schemas import (
     RestaurantLoginSchema,
     RestaurantOTPVerifySchema,
     AdminLoginSchema,
+    RiderSignupOTPVerifySchema,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -94,6 +95,32 @@ def get_me(current_user: CurrentUser = Depends(get_current_user)):
     the server thinks you are. No token / bad token / expired token → 401.
     """
     return {"id": str(current_user.id), "role": current_user.role}
+
+
+@router.post("/rider/otp/verify", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def rider_otp_verify(payload: RiderSignupOTPVerifySchema, db: Session = Depends(get_db)):
+    """
+    Phase 3 Step 0 (prerequisite) — rider phone+OTP verify + signup in one
+    call. OTP itself is requested via the same shared POST /auth/otp/request
+    used by customers (OTP generation doesn't care who's asking).
+    First-time phone -> creates Rider row (approval_status="pending").
+    Existing phone -> plain login, signup fields ignored.
+    """
+    full_number = _build_full_number(payload.country_code, payload.phone_number)
+    enforce_rate_limit(full_number, action="rider_otp_verify")
+    service.verify_otp(full_number, payload.otp_code)
+
+    rider = service.get_or_create_rider(
+        db,
+        full_number,
+        payload.country_code,
+        payload.name,
+        payload.cnic_number,
+        payload.vehicle_type,
+        payload.vehicle_registration,
+    )
+    tokens = service.issue_tokens(db, rider.id, role="rider")
+    return TokenResponseSchema(**tokens)
 
 
 @router.post("/restaurant/login", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)

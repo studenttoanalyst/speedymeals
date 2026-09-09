@@ -23,6 +23,7 @@ from app.platform.auth import jwt_utils
 from app.platform.auth.models import Admin, RefreshToken
 from app.platform.users.models import User
 from app.modules.food_delivery.models import Restaurant
+from app.platform.wallet_payment.models import Rider
 
 OTP_EXPIRY_SECONDS = 5 * 60        # Step 2: OTP valid for 5 minutes
 RESEND_COOLDOWN_SECONDS = 45       # Step 4: must wait 45s between resend requests
@@ -115,6 +116,46 @@ def get_or_create_customer(db: Session, phone_number: str, country_code: str) ->
     db.commit()
     db.refresh(user)
     return user
+
+
+def get_or_create_rider(
+    db: Session,
+    phone_number: str,
+    country_code: str,
+    name: str,
+    cnic_number: str,
+    vehicle_type: str | None,
+    vehicle_registration: str | None,
+) -> Rider:
+    """
+    Phase 3 Step 0 (prerequisite) — mirrors get_or_create_customer, but for
+    riders. First-time phone -> create Rider row, approval_status="pending"
+    (Admin approval, spec Sec 8 Step 2, is a separate later step — not
+    enforced here, this only handles account creation + login).
+    Existing phone -> plain login, signup fields in the request are ignored
+    (rider is already on file, no re-submit / no overwrite on every login).
+    """
+    rider = db.query(Rider).filter(Rider.phone_number == phone_number).first()
+    if rider is not None:
+        return rider
+
+    rider = Rider(
+        phone_number=phone_number,
+        country_code=country_code,
+        name=name,
+        cnic_number=cnic_number,
+        vehicle_type=vehicle_type,
+        vehicle_registration=vehicle_registration,
+        approval_status="pending",
+        wallet_balance=0,
+        pending_cash_owed=0,
+        is_online=False,
+        is_active=True,
+    )
+    db.add(rider)
+    db.commit()
+    db.refresh(rider)
+    return rider
 
 
 def issue_tokens(db: Session, subject_id: uuid.UUID, role: str) -> dict:

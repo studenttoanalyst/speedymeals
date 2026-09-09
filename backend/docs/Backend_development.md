@@ -1,6 +1,6 @@
 # SpeedyMeals Backend — Development Plan
 
-Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 in progress (Steps 1-6 done, see below). Structure below builds on top, step by step, no jump ahead.
+Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 ✅ done (Step 0-9, 2 tests deferred pending Phase 5 — see below). Structure below builds on top, step by step, no jump ahead.
 
 Stack lock: Python + FastAPI, PostgreSQL, Alembic, Redis, AWS S3, JWT auth, Google Maps Distance Matrix.
 
@@ -63,7 +63,7 @@ Exit check: `alembic upgrade head` clean, all 13 tables exist matching schema.jp
 
 ---
 
-## Phase 2 — Auth & Users (NOW) — IN PROGRESS
+## Phase 2 — Auth & Users (NOW) ✅ DONE
 
 Folder: `app/platform/auth`, `app/platform/users`.
 
@@ -76,33 +76,58 @@ Folder: `app/platform/auth`, `app/platform/users`.
 - [x] **Step 4 — OTP Resend Cooldown**: 45 sec enforced server-side (not just a disabled frontend button) before a new OTP can be requested for the same phone.
 - [x] **Step 5 — JWT Access + Refresh Token**: on successful OTP verify, find-or-create the `User` row, issue short-lived access token (~30 min) + long-lived refresh token (30 days).
 - [x] **Step 6 — Refresh Token Tracking (`refresh_tokens` table) + Logout**: every issued refresh token stored as a SHA-256 hash with `valid`/`revoked` status. Logout sets it `revoked`. Reusing a revoked refresh token is rejected. (Without this, logout would not actually invalidate a session — token still works until natural JWT expiry.)
-- [ ] **Step 7 — Role-Based Access Control** (`get_current_user`, `require_role([...])`): decode JWT, attach user, reject 401/403 — enforced at API layer, not frontend hide.
-- [ ] **Step 8 — Rate Limiting**: Redis counter, max 5 attempts/min per phone/email on OTP + login endpoints.
-- [ ] **Step 9 — Restaurant Login**: email+password (bcrypt) OR phone+OTP (spec Sec 9 Step 2), reusing Step 1-4's OTP mechanism. Restaurant accounts are created by Admin during manual onboarding (spec Sec 9 Step 1) — no restaurant self-signup in MVP.
-- [ ] **Step 10 — Admin Login + Auto-Seed**: first admin account **auto-seeded on app startup** (see ADR-002), not a manually-run script. On startup, check if any admin row exists; if none, create one from `FIRST_ADMIN_EMAIL` / `FIRST_ADMIN_PASSWORD` env vars (password bcrypt-hashed before insert). No-op if an admin already exists. Then email+password login endpoint.
-- [ ] **Step 11 — User Profile + Address Module**: profile get/update, saved addresses CRUD (Home/Work/Other, multiple) — needed before Phase 5 checkout.
-- [ ] **Step 12 — Password Reset (confirmation only, no code)**: customer/rider have no password (always re-auth via OTP) — reset concept doesn't apply. Restaurant/Admin: no self-serve reset endpoint in MVP; Admin resets credentials manually from Admin Panel (spec Sec 10 Step 3 already covers this).
-- [ ] **Step 13 — Manual Testing (Exit Check)**: all 4 roles login/logout via Postman/Swagger, rate limit fires, seed works on fresh DB.
+- [x] **Step 7 — Role-Based Access Control** (`get_current_user`, `require_role([...])`): decode JWT, attach user, reject 401/403 — enforced at API layer, not frontend hide. Confirmed in `app/platform/auth/dependencies.py`.
+- [x] **Step 8 — Rate Limiting**: Redis counter, max 5 attempts/min per phone/email on OTP + login endpoints. Confirmed in `app/core/rate_limiter.py`, wired into all OTP/login routes.
+- [x] **Step 9 — Restaurant Login**: email+password (bcrypt) OR phone+OTP (spec Sec 9 Step 2), reusing Step 1-4's OTP mechanism. Restaurant accounts are created by Admin during manual onboarding (spec Sec 9 Step 1) — no restaurant self-signup in MVP. Confirmed: both `/auth/restaurant/login` and `/auth/restaurant/otp/verify` in `routes.py`.
+- [x] **Step 10 — Admin Login + Auto-Seed**: first admin account **auto-seeded on app startup** (see ADR-002), not a manually-run script. On startup, check if any admin row exists; if none, create one from `FIRST_ADMIN_EMAIL` / `FIRST_ADMIN_PASSWORD` env vars (password bcrypt-hashed before insert). No-op if an admin already exists. Then email+password login endpoint. Confirmed: `seed_first_admin` wired in `main.py` startup event, `/auth/admin/login` in `routes.py`.
+- [x] **Step 11 — User Profile + Address Module**: profile get/update, saved addresses CRUD (Home/Work/Other, multiple) — needed before Phase 5 checkout. Confirmed: full CRUD in `app/platform/users/routes.py` (`/users/me`, `/users/me/addresses` GET/POST/PUT/DELETE), guarded by `require_role(["customer"])`.
+- [x] **Step 12 — Password Reset (confirmation only, no code)**: customer/rider have no password (always re-auth via OTP) — reset concept doesn't apply. Restaurant/Admin: no self-serve reset endpoint in MVP; Admin resets credentials manually from Admin Panel (spec Sec 10 Step 3 already covers this). No code change needed — decision stands as-is.
+- [x] **Step 13 — Manual Testing (Exit Check)**: all 4 roles login/logout via Postman/Swagger, rate limit fires, seed works on fresh DB. Confirmed done manually (no automated test in `app/tests/` yet — automated coverage is Phase 11 scope, not Phase 2).
 
-Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant, admin) via Postman/Swagger; logout invalidates the refresh token (reuse attempt is rejected); 6th rapid OTP/login attempt is rate-limited; first admin exists automatically on a fresh database with no manual step.
+Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant, admin) via Postman/Swagger; logout invalidates the refresh token (reuse attempt is rejected); 6th rapid OTP/login attempt is rate-limited; first admin exists automatically on a fresh database with no manual step. ✅ Confirmed.
 
 **Related decision records:** `docs/decisions/ADR-001-otp-sms-provider.md`, `docs/decisions/ADR-002-first-admin-seed.md`.
 
 ---
 
-## Phase 3 — Wallet & Payment Core (NOW)
+## Phase 3 — Wallet & Payment Core (NOW) ✅ DONE
 
 Folder: `app/platform/wallet_payment`.
 
-Tasks:
-- Rider wallet recharge endpoint (manual entry MVP, gateway stub for JazzCash/EasyPaisa/card).
-- Enforce min Rs. 500 before "Go Online" toggle (Sec 8 Step 4-5).
-- Auto-deduct Rs. 10 wallet on order "Delivered" status change (instant, both COD/Digital) — write to `wallet_transactions`.
-- Below-min-balance → auto force rider offline (background check or on-toggle check).
-- Cash deposit tracking: `cash_deposits` create daily, compare expected vs actual, flag shortfall.
-- Cash collection cap (e.g. Rs. 10,000) — block new COD assignment once pending_cash_owed hits cap (digital still allowed).
+### Step-by-step breakdown (build order, do not skip ahead):
 
-Exit check: unit test — wallet deduction fires exactly once per delivery, blocks correctly at threshold.
+- [x] **Step 0 — Rider Signup + OTP Verify (prerequisite, not in original task list)**: added in `app/platform/auth/` (`schemas.py`, `service.py`, `routes.py`), not `wallet_payment/`.
+  - **Why**: repo check before Step 2 found rider signup/login was never built in Phase 2 (only customer OTP flow existed — rider path was left as "later step" per an old comment in `routes.py`). Without it, no real rider JWT token exists, so Step 2's `require_role(["rider"])` endpoints have no way to be tested end-to-end.
+  - **What**: `POST /auth/rider/otp/verify` — reuses the same shared `POST /auth/otp/request` OTP mechanism as customer (Phase 2 Step 2-4). First-time phone + signup fields (name, cnic_number, vehicle_type, vehicle_registration) → creates `Rider` row, `approval_status="pending"`. Existing phone → plain login, signup fields ignored (no overwrite on repeat login).
+  - Confirmed working: OTP request → rider verify → JWT issued → used to authorize Step 2 endpoints (manual test pass).
+
+- [x] **Step 1 — Wallet Schemas** (`schemas.py`): `WalletRechargeRequestSchema` (amount, method), `WalletBalanceResponseSchema` (wallet_balance, pending_cash_owed, is_online), `WalletTransactionResponseSchema` (id, type, amount, balance_after, created_at). Contract fixed before any logic — same pattern as Phase 2 Step 1.
+
+- [x] **Step 2 — Wallet Recharge Endpoint** (`service.py`, `routes.py`): `POST /wallet/recharge` (rider-only, manual entry MVP — amount + method validated against `{bank_transfer, jazzcash, easypaisa, card}`, no real gateway call yet — gateway stub is a later task, this only records + credits). Writes `WalletTransaction` type="recharge", updates `rider.wallet_balance`. Also added `GET /wallet/balance` here (not split into its own numbered step — both are trivial reads/writes on the same `Rider` row, and the balance endpoint was needed just to verify Step 2's recharge actually worked).
+  - Confirmed working: recharge credits balance correctly, balance endpoint reflects it, invalid amount/method rejected with 400 (manual test pass).
+
+- [x] **Step 3 — Min-Balance Check on Go-Online** (`schemas.py`, `service.py`, `routes.py`): `PATCH /wallet/status` body `{"is_online": bool}`. Going online rejected (400) if `wallet_balance < 500`; going offline always allowed, no balance check needed that direction.
+  - Confirmed working: low-balance rider rejected with clear error, recharge then retry → 200 OK, `is_online: false` always passes (manual test pass).
+
+- [x] **Step 4 — Auto-Force-Offline Below Min** (`service.py`, `_force_offline_if_below_min()` helper): shared helper called after any balance decrease (currently only Step 5's deduction). Not committed on its own — runs inside the same DB transaction as whatever caused the decrease, so it's atomic with it.
+  - Confirmed working via Step 5's test: rider force-taken-offline the moment deduction drops balance below Rs. 500, no separate toggle call needed.
+
+- [x] **Step 5 — Delivery Deduction Service** (`service.py`, `deduct_delivery_fee(db, rider_id, order_id)`): standalone function, no route (real trigger is order "Delivered" status change — Phase 6's job, not built yet). Deducts Rs. 10 flat, writes `WalletTransaction` type="deduction", calls Step 4's force-offline check same transaction.
+  - Tested via a one-off manual script (`test_step5_deduction.py`, calls the function directly against a real rider row since no endpoint/order exists to trigger it through yet) — deduction amount correct, `WalletTransaction` row correct, force-offline fires when balance drops below Rs. 500 (manual test pass). Proper automated unit test is still Step 9's job — this was a manual sanity check only, not a substitute for it.
+
+- [x] **Step 6 — Cash Deposit Endpoint** (`schemas.py`, `service.py`, `routes.py`): `POST /wallet/cash-deposit` — rider submits daily COD cash, server computes `expected_amount` (sum of COD `Delivered` orders since rider's last deposit — no "already reconciled" flag column exists on `orders`, time-window used instead, flagged in code comment), `discrepancy` = submitted − expected, stored on `cash_deposits`. On success, `pending_cash_owed` reduced by submitted amount (floored at 0).
+  - Confirmed working: deposit recorded, `expected_amount=0` correctly (no orders exist yet — Phase 5 not built), `discrepancy` = full submitted amount as expected, `pending_cash_owed` reduced correctly (manual test pass).
+
+- [x] **Step 7 — Cash Collection Cap Check** (`service.py` `can_assign_cod()`, `get_cod_eligibility()`; `routes.py` `GET /wallet/cod-eligibility`; `config.py` `CASH_COLLECTION_CAP` setting, default Rs. 10,000): reusable function for Phase 6's future assignment logic, exposed via a read endpoint here just so it's testable now.
+  - Confirmed working: below cap → `can_accept_cod: true`; at/above cap → `can_accept_cod: false` (manual test pass, boundary value included).
+
+- [x] **Step 8 — Rider Earnings View Endpoint** (`service.py` `get_rider_earnings_summary()`, `routes.py` `GET /wallet/earnings`): full 3-number view (Sec 8 Step 13) — `earnings_balance` (sum of `rider_earning` on Delivered orders since last `rider_payout`, same time-window pattern as Step 6, same reason), `wallet_balance`, `pending_cash_owed`.
+  - Confirmed working: `earnings_balance=0` correctly (no orders yet), `wallet_balance`/`pending_cash_owed` reflect prior steps' state correctly (manual test pass).
+
+- [x] **Step 9 — Unit Tests** (`app/tests/conftest.py`, `app/tests/test_wallet_payment.py`, `backend/pytest.ini`): 9 automated tests — recharge credits balance, invalid method rejected, go-online blocked below min / allowed above min, offline always allowed, deduction fires exactly once at correct amount, force-offline triggers below min / does not trigger when still above min, cash-cap true below / false at-or-above boundary. All 9 pass.
+  - **Flagged gap, not silently skipped**: cash-deposit discrepancy calc and earnings-summary time-window logic (Step 6/8) are NOT covered by an automated test — both need real `orders` rows (payment_method, status, delivered_at, total_amount, rider_earning) to exercise properly, and Phase 5 (orders) doesn't exist yet. Faking a mock `Order` row now would test against invented data, not real integration. TODO left in `test_wallet_payment.py` to write these once Phase 5 lands — Phase 3 is not glossing over this, it's an explicit known gap.
+
+Exit check: unit test — wallet deduction fires exactly once per delivery, blocks correctly at threshold. ✅ Confirmed (Step 9, `test_deduct_delivery_fee_fires_once_correct_amount`).
 
 ---
 
