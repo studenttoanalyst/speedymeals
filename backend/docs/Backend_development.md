@@ -1,6 +1,6 @@
 # SpeedyMeals Backend — Development Plan
 
-Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 next. Structure below builds on top, step by step, no jump ahead.
+Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 in progress (Step 0-2 done, see below). Structure below builds on top, step by step, no jump ahead.
 
 Stack lock: Python + FastAPI, PostgreSQL, Alembic, Redis, AWS S3, JWT auth, Google Maps Distance Matrix.
 
@@ -90,17 +90,29 @@ Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant,
 
 ---
 
-## Phase 3 — Wallet & Payment Core (NOW)
+## Phase 3 — Wallet & Payment Core (NOW) — IN PROGRESS
 
 Folder: `app/platform/wallet_payment`.
 
-Tasks:
-- Rider wallet recharge endpoint (manual entry MVP, gateway stub for JazzCash/EasyPaisa/card).
-- Enforce min Rs. 500 before "Go Online" toggle (Sec 8 Step 4-5).
-- Auto-deduct Rs. 10 wallet on order "Delivered" status change (instant, both COD/Digital) — write to `wallet_transactions`.
-- Below-min-balance → auto force rider offline (background check or on-toggle check).
-- Cash deposit tracking: `cash_deposits` create daily, compare expected vs actual, flag shortfall.
-- Cash collection cap (e.g. Rs. 10,000) — block new COD assignment once pending_cash_owed hits cap (digital still allowed).
+### Step-by-step breakdown (build order, do not skip ahead):
+
+- [x] **Step 0 — Rider Signup + OTP Verify (prerequisite, not in original task list)**: added in `app/platform/auth/` (`schemas.py`, `service.py`, `routes.py`), not `wallet_payment/`.
+  - **Why**: repo check before Step 2 found rider signup/login was never built in Phase 2 (only customer OTP flow existed — rider path was left as "later step" per an old comment in `routes.py`). Without it, no real rider JWT token exists, so Step 2's `require_role(["rider"])` endpoints have no way to be tested end-to-end.
+  - **What**: `POST /auth/rider/otp/verify` — reuses the same shared `POST /auth/otp/request` OTP mechanism as customer (Phase 2 Step 2-4). First-time phone + signup fields (name, cnic_number, vehicle_type, vehicle_registration) → creates `Rider` row, `approval_status="pending"`. Existing phone → plain login, signup fields ignored (no overwrite on repeat login).
+  - Confirmed working: OTP request → rider verify → JWT issued → used to authorize Step 2 endpoints (manual test pass).
+
+- [x] **Step 1 — Wallet Schemas** (`schemas.py`): `WalletRechargeRequestSchema` (amount, method), `WalletBalanceResponseSchema` (wallet_balance, pending_cash_owed, is_online), `WalletTransactionResponseSchema` (id, type, amount, balance_after, created_at). Contract fixed before any logic — same pattern as Phase 2 Step 1.
+
+- [x] **Step 2 — Wallet Recharge Endpoint** (`service.py`, `routes.py`): `POST /wallet/recharge` (rider-only, manual entry MVP — amount + method validated against `{bank_transfer, jazzcash, easypaisa, card}`, no real gateway call yet — gateway stub is a later task, this only records + credits). Writes `WalletTransaction` type="recharge", updates `rider.wallet_balance`. Also added `GET /wallet/balance` here (not split into its own numbered step — both are trivial reads/writes on the same `Rider` row, and the balance endpoint was needed just to verify Step 2's recharge actually worked).
+  - Confirmed working: recharge credits balance correctly, balance endpoint reflects it, invalid amount/method rejected with 400 (manual test pass).
+
+- [ ] **Step 3 — Min-Balance Check on Go-Online**: toggle endpoint checks `wallet_balance >= 500` (Sec 8 Step 4-5). Below → reject toggle with clear error.
+- [ ] **Step 4 — Auto-Force-Offline Below Min**: after any deduction, if `wallet_balance < 500` → set `is_online = False` immediately.
+- [ ] **Step 5 — Delivery Deduction Service** (`service.py`): `deduct_delivery_fee(rider_id, order_id)` — standalone function, not an endpoint (real trigger is order "Delivered" status change, Phase 6's job — Phase 3 only builds + unit-tests the function, Phase 6 calls it).
+- [ ] **Step 6 — Cash Deposit Endpoint**: rider submits daily cash, system calculates expected amount, stores discrepancy, flags shortfall.
+- [ ] **Step 7 — Cash Collection Cap Check**: reusable `can_assign_cod(rider_id) -> bool`, cap default Rs. 10,000 (env var) — called by Phase 6 assignment logic.
+- [ ] **Step 8 — Rider Earnings View Endpoint**: GET earnings balance + wallet balance + pending cash owed (Sec 8 Step 13, full 3-number view — Step 2's `/wallet/balance` only has 2 of the 3, earnings needs `orders` table which doesn't exist until Phase 5).
+- [ ] **Step 9 — Unit Tests**: deduction fires once per delivery, blocks correct at threshold, cash cap blocks COD correctly, discrepancy calc correct.
 
 Exit check: unit test — wallet deduction fires exactly once per delivery, blocks correctly at threshold.
 
