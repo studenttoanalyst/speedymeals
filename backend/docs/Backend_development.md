@@ -1,6 +1,6 @@
 # SpeedyMeals Backend — Development Plan
 
-Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 in progress (Step 0-5 done, see below). Structure below builds on top, step by step, no jump ahead.
+Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 ✅ done (Step 0-9, 2 tests deferred pending Phase 5 — see below). Structure below builds on top, step by step, no jump ahead.
 
 Stack lock: Python + FastAPI, PostgreSQL, Alembic, Redis, AWS S3, JWT auth, Google Maps Distance Matrix.
 
@@ -90,7 +90,7 @@ Exit check: signup→OTP→login works all 4 roles (customer, rider, restaurant,
 
 ---
 
-## Phase 3 — Wallet & Payment Core (NOW) — IN PROGRESS
+## Phase 3 — Wallet & Payment Core (NOW) ✅ DONE
 
 Folder: `app/platform/wallet_payment`.
 
@@ -115,12 +115,19 @@ Folder: `app/platform/wallet_payment`.
 - [x] **Step 5 — Delivery Deduction Service** (`service.py`, `deduct_delivery_fee(db, rider_id, order_id)`): standalone function, no route (real trigger is order "Delivered" status change — Phase 6's job, not built yet). Deducts Rs. 10 flat, writes `WalletTransaction` type="deduction", calls Step 4's force-offline check same transaction.
   - Tested via a one-off manual script (`test_step5_deduction.py`, calls the function directly against a real rider row since no endpoint/order exists to trigger it through yet) — deduction amount correct, `WalletTransaction` row correct, force-offline fires when balance drops below Rs. 500 (manual test pass). Proper automated unit test is still Step 9's job — this was a manual sanity check only, not a substitute for it.
 
-- [ ] **Step 6 — Cash Deposit Endpoint**: rider submits daily cash, system calculates expected amount, stores discrepancy, flags shortfall.
-- [ ] **Step 7 — Cash Collection Cap Check**: reusable `can_assign_cod(rider_id) -> bool`, cap default Rs. 10,000 (env var) — called by Phase 6 assignment logic.
-- [ ] **Step 8 — Rider Earnings View Endpoint**: GET earnings balance + wallet balance + pending cash owed (Sec 8 Step 13, full 3-number view — Step 2's `/wallet/balance` only has 2 of the 3, earnings needs `orders` table which doesn't exist until Phase 5).
-- [ ] **Step 9 — Unit Tests**: deduction fires once per delivery, blocks correct at threshold, cash cap blocks COD correctly, discrepancy calc correct.
+- [x] **Step 6 — Cash Deposit Endpoint** (`schemas.py`, `service.py`, `routes.py`): `POST /wallet/cash-deposit` — rider submits daily COD cash, server computes `expected_amount` (sum of COD `Delivered` orders since rider's last deposit — no "already reconciled" flag column exists on `orders`, time-window used instead, flagged in code comment), `discrepancy` = submitted − expected, stored on `cash_deposits`. On success, `pending_cash_owed` reduced by submitted amount (floored at 0).
+  - Confirmed working: deposit recorded, `expected_amount=0` correctly (no orders exist yet — Phase 5 not built), `discrepancy` = full submitted amount as expected, `pending_cash_owed` reduced correctly (manual test pass).
 
-Exit check: unit test — wallet deduction fires exactly once per delivery, blocks correctly at threshold.
+- [x] **Step 7 — Cash Collection Cap Check** (`service.py` `can_assign_cod()`, `get_cod_eligibility()`; `routes.py` `GET /wallet/cod-eligibility`; `config.py` `CASH_COLLECTION_CAP` setting, default Rs. 10,000): reusable function for Phase 6's future assignment logic, exposed via a read endpoint here just so it's testable now.
+  - Confirmed working: below cap → `can_accept_cod: true`; at/above cap → `can_accept_cod: false` (manual test pass, boundary value included).
+
+- [x] **Step 8 — Rider Earnings View Endpoint** (`service.py` `get_rider_earnings_summary()`, `routes.py` `GET /wallet/earnings`): full 3-number view (Sec 8 Step 13) — `earnings_balance` (sum of `rider_earning` on Delivered orders since last `rider_payout`, same time-window pattern as Step 6, same reason), `wallet_balance`, `pending_cash_owed`.
+  - Confirmed working: `earnings_balance=0` correctly (no orders yet), `wallet_balance`/`pending_cash_owed` reflect prior steps' state correctly (manual test pass).
+
+- [x] **Step 9 — Unit Tests** (`app/tests/conftest.py`, `app/tests/test_wallet_payment.py`, `backend/pytest.ini`): 9 automated tests — recharge credits balance, invalid method rejected, go-online blocked below min / allowed above min, offline always allowed, deduction fires exactly once at correct amount, force-offline triggers below min / does not trigger when still above min, cash-cap true below / false at-or-above boundary. All 9 pass.
+  - **Flagged gap, not silently skipped**: cash-deposit discrepancy calc and earnings-summary time-window logic (Step 6/8) are NOT covered by an automated test — both need real `orders` rows (payment_method, status, delivered_at, total_amount, rider_earning) to exercise properly, and Phase 5 (orders) doesn't exist yet. Faking a mock `Order` row now would test against invented data, not real integration. TODO left in `test_wallet_payment.py` to write these once Phase 5 lands — Phase 3 is not glossing over this, it's an explicit known gap.
+
+Exit check: unit test — wallet deduction fires exactly once per delivery, blocks correctly at threshold. ✅ Confirmed (Step 9, `test_deduct_delivery_fee_fires_once_correct_amount`).
 
 ---
 

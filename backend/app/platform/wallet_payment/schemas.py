@@ -43,3 +43,39 @@ class WalletTransactionResponseSchema(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CashDepositRequestSchema(BaseModel):
+    """Body for POST /wallet/cash-deposit — Step 6, rider's daily COD cash submit."""
+    amount_submitted: float = Field(..., gt=0)
+    submission_method: str = Field(..., description="'bank_transfer' | 'mobile_wallet' | 'hub'")
+
+
+class CashDepositResponseSchema(BaseModel):
+    """Matches the `cash_deposits` table (schema.jpeg / Phase 1)."""
+    id: uuid.UUID
+    amount_submitted: float
+    expected_amount: float
+    discrepancy: float
+    submission_method: str | None
+    verified_by_admin: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CODEligibilityResponseSchema(BaseModel):
+    """Response for GET /wallet/cod-eligibility — Step 7 cash-cap check,
+    exposed as a read endpoint mainly so it's testable; the real caller
+    is Phase 6's assignment logic calling `can_assign_cod()` directly."""
+    can_accept_cod: bool
+    pending_cash_owed: float
+    cap: float
+
+
+class RiderEarningsResponseSchema(BaseModel):
+    """Response for GET /wallet/earnings — Step 8, spec Sec 8 Step 13's
+    full 3-number view (Step 2's /wallet/balance only had 2 of the 3)."""
+    earnings_balance: float
+    wallet_balance: float
+    pending_cash_owed: float
