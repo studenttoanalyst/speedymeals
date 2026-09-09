@@ -1,6 +1,6 @@
 # SpeedyMeals Backend — Development Plan
 
-Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 in progress (Step 0-2 done, see below). Structure below builds on top, step by step, no jump ahead.
+Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 in progress (Step 0-5 done, see below). Structure below builds on top, step by step, no jump ahead.
 
 Stack lock: Python + FastAPI, PostgreSQL, Alembic, Redis, AWS S3, JWT auth, Google Maps Distance Matrix.
 
@@ -106,9 +106,15 @@ Folder: `app/platform/wallet_payment`.
 - [x] **Step 2 — Wallet Recharge Endpoint** (`service.py`, `routes.py`): `POST /wallet/recharge` (rider-only, manual entry MVP — amount + method validated against `{bank_transfer, jazzcash, easypaisa, card}`, no real gateway call yet — gateway stub is a later task, this only records + credits). Writes `WalletTransaction` type="recharge", updates `rider.wallet_balance`. Also added `GET /wallet/balance` here (not split into its own numbered step — both are trivial reads/writes on the same `Rider` row, and the balance endpoint was needed just to verify Step 2's recharge actually worked).
   - Confirmed working: recharge credits balance correctly, balance endpoint reflects it, invalid amount/method rejected with 400 (manual test pass).
 
-- [ ] **Step 3 — Min-Balance Check on Go-Online**: toggle endpoint checks `wallet_balance >= 500` (Sec 8 Step 4-5). Below → reject toggle with clear error.
-- [ ] **Step 4 — Auto-Force-Offline Below Min**: after any deduction, if `wallet_balance < 500` → set `is_online = False` immediately.
-- [ ] **Step 5 — Delivery Deduction Service** (`service.py`): `deduct_delivery_fee(rider_id, order_id)` — standalone function, not an endpoint (real trigger is order "Delivered" status change, Phase 6's job — Phase 3 only builds + unit-tests the function, Phase 6 calls it).
+- [x] **Step 3 — Min-Balance Check on Go-Online** (`schemas.py`, `service.py`, `routes.py`): `PATCH /wallet/status` body `{"is_online": bool}`. Going online rejected (400) if `wallet_balance < 500`; going offline always allowed, no balance check needed that direction.
+  - Confirmed working: low-balance rider rejected with clear error, recharge then retry → 200 OK, `is_online: false` always passes (manual test pass).
+
+- [x] **Step 4 — Auto-Force-Offline Below Min** (`service.py`, `_force_offline_if_below_min()` helper): shared helper called after any balance decrease (currently only Step 5's deduction). Not committed on its own — runs inside the same DB transaction as whatever caused the decrease, so it's atomic with it.
+  - Confirmed working via Step 5's test: rider force-taken-offline the moment deduction drops balance below Rs. 500, no separate toggle call needed.
+
+- [x] **Step 5 — Delivery Deduction Service** (`service.py`, `deduct_delivery_fee(db, rider_id, order_id)`): standalone function, no route (real trigger is order "Delivered" status change — Phase 6's job, not built yet). Deducts Rs. 10 flat, writes `WalletTransaction` type="deduction", calls Step 4's force-offline check same transaction.
+  - Tested via a one-off manual script (`test_step5_deduction.py`, calls the function directly against a real rider row since no endpoint/order exists to trigger it through yet) — deduction amount correct, `WalletTransaction` row correct, force-offline fires when balance drops below Rs. 500 (manual test pass). Proper automated unit test is still Step 9's job — this was a manual sanity check only, not a substitute for it.
+
 - [ ] **Step 6 — Cash Deposit Endpoint**: rider submits daily cash, system calculates expected amount, stores discrepancy, flags shortfall.
 - [ ] **Step 7 — Cash Collection Cap Check**: reusable `can_assign_cod(rider_id) -> bool`, cap default Rs. 10,000 (env var) — called by Phase 6 assignment logic.
 - [ ] **Step 8 — Rider Earnings View Endpoint**: GET earnings balance + wallet balance + pending cash owed (Sec 8 Step 13, full 3-number view — Step 2's `/wallet/balance` only has 2 of the 3, earnings needs `orders` table which doesn't exist until Phase 5).

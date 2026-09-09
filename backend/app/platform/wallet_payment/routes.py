@@ -9,6 +9,7 @@ from app.core.database import get_db
 from app.platform.auth.dependencies import CurrentUser, require_role
 from app.platform.wallet_payment import service
 from app.platform.wallet_payment.schemas import (
+    OnlineStatusToggleSchema,
     WalletBalanceResponseSchema,
     WalletRechargeRequestSchema,
     WalletTransactionResponseSchema,
@@ -38,3 +39,17 @@ def get_wallet_balance(
     db: Session = Depends(get_db),
 ):
     return service.get_wallet_summary(db, current_user.id)
+
+
+@router.patch("/status", response_model=WalletBalanceResponseSchema)
+def set_online_status(
+    payload: OnlineStatusToggleSchema,
+    current_user: CurrentUser = Depends(require_rider),
+    db: Session = Depends(get_db),
+):
+    """
+    Step 3 — go-online/offline toggle. Going online (is_online=true) is
+    rejected with 400 if wallet_balance < Rs. 500. Going offline
+    (is_online=false) is always allowed.
+    """
+    return service.set_online_status(db, current_user.id, payload.is_online)

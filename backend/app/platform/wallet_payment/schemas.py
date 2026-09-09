@@ -20,6 +20,11 @@ class WalletRechargeRequestSchema(BaseModel):
     method: str = Field(..., description="'bank_transfer' | 'jazzcash' | 'easypaisa' | 'card'")
 
 
+class OnlineStatusToggleSchema(BaseModel):
+    """Body for PATCH /wallet/status — Step 3 go-online/offline toggle."""
+    is_online: bool
+
+
 class WalletBalanceResponseSchema(BaseModel):
     """Response for GET /wallet/balance — the 3 numbers from spec Sec 8 Step 13
     (minus earnings_balance, which needs the orders table — Phase 6 scope)."""
