@@ -16,7 +16,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.core import storage
+from app.core import maps_client, storage
 from app.core.redis_client import redis_client
 from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating, Restaurant
 from app.modules.food_delivery.schemas import (
@@ -717,4 +717,103 @@ def remove_cart_item(
 
     cart.items = remaining
     return save_cart(db, customer_id, restaurant_id, cart)
+
+
+# --- Phase 5, Step 5: checkout price preview (distance + delivery fee) ---
+
+
+DELIVERY_FEE_BASE = Decimal("50")
+DELIVERY_FEE_PER_KM = Decimal("20")
+
+
+def calculate_delivery_fee(delivery_distance_km: Decimal | int | float) -> Decimal:
+    """Locked fee formula (spec Sec 3.3): fee = 50 + (km x 20). Decimal in,
+    Decimal out, quantized to paisa — never binary float."""
+    distance = Decimal(str(delivery_distance_km))
+    return (DELIVERY_FEE_BASE + distance * DELIVERY_FEE_PER_KM).quantize(Decimal("0.01"))
+
+
+def preview_checkout(
+    db: Session,
+    customer_id: uuid.UUID,
+    restaurant_id: uuid.UUID,
+    address_id: uuid.UUID,
+) -> dict:
+    """Checkout CALCULATION PREVIEW — no order row is created, no payment,
+    cart is NOT cleared (Step 6's checkout will consume this math).
+
+    Address ownership: WHERE user_id == customer_id (same pattern as the
+    browse endpoint) — another customer's address_id is a 404. Distance is
+    the real road distance from Maps Distance Matrix (restaurant ->
+    address); a Maps outage surfaces as a clean 503, never a crash, and
+    nothing is written anywhere on failure.
+    """
+    restaurant = _get_active_restaurant(db, restaurant_id)
+
+    address = (
+        db.query(Address)
+        .filter(Address.id == address_id, Address.user_id == customer_id)
+        .first()
+    )
+    if address is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found.")
+
+    cart = CartSchema.model_validate(get_cart(db, customer_id, restaurant_id))
+    if not cart.items:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Cart is empty."
+        )
+    if restaurant.latitude is None or restaurant.longitude is None:
+        # Direct-id carts can bypass browse (which already filters these
+        # out) — without coordinates there is no distance to compute.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Restaurant location is not configured.",
+        )
+
+    # Price every line from the CURRENT menu, grouped by item_id — a cart
+    # line whose menu item has vanished (deleted/sold out since) makes the
+    # whole preview invalid rather than silently mispricing it.
+    lines: dict[uuid.UUID, list[CartItemSchema]] = {}
+    for line in cart.items:
+        lines.setdefault(line.item_id, []).append(line)
+
+    menu_items = (
+        db.query(MenuItem).filter(MenuItem.id.in_(lines.keys())).all()
+    )
+    by_id = {item.id: item for item in menu_items}
+    if len(by_id) != len(lines):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cart contains an item that is no longer on the menu. Please update your cart.",
+        )
+
+    food_subtotal = Decimal("0")
+    for item_id, item_lines in lines.items():
+        item = by_id[item_id]
+        food_subtotal += item.price * sum(line.qty for line in item_lines)
+
+    try:
+        distance_km = maps_client.get_road_distance_km(
+            float(restaurant.latitude),
+            float(restaurant.longitude),
+            float(address.latitude),
+            float(address.longitude),
+        )
+    except maps_client.MapsError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Could not calculate delivery distance. Please try again shortly.",
+        )
+
+    delivery_distance_km = Decimal(str(round(distance_km, 2)))
+    delivery_fee = calculate_delivery_fee(delivery_distance_km)
+    total = (food_subtotal + delivery_fee).quantize(Decimal("0.01"))
+
+    return {
+        "food_subtotal": food_subtotal.quantize(Decimal("0.01")),
+        "delivery_distance_km": delivery_distance_km,
+        "delivery_fee": delivery_fee,
+        "total": total,
+    }
 

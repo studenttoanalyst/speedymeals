@@ -185,3 +185,12 @@ class CartAddItemSchema(BaseModel):
 class CartUpdateItemSchema(BaseModel):
     """Body for PATCH .../cart/items/{item_id} — Step 4 quantity change."""
     qty: int = Field(gt=0)
+
+
+class CheckoutPreviewResponseSchema(BaseModel):
+    """Price breakdown for GET .../cart/checkout-preview — Step 5.
+    Calculation only: no order is placed, nothing is cleared."""
+    food_subtotal: float
+    delivery_distance_km: float
+    delivery_fee: float
+    total: float

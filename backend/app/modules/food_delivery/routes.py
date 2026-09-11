@@ -20,6 +20,7 @@ from app.modules.food_delivery.schemas import (
     CartAddItemSchema,
     CartSchema,
     CartUpdateItemSchema,
+    CheckoutPreviewResponseSchema,
     CustomerMenuCategorySchema,
     CustomerRestaurantResponseSchema,
     MenuItemAvailabilitySchema,
@@ -138,6 +139,23 @@ def clear_cart(
     """Step 4 — delete this restaurant-specific cart entirely. Other
     restaurants' carts are independent and unaffected."""
     service.delete_cart(db, current_user.id, restaurant_id)
+
+
+@customer_router.get(
+    "/{restaurant_id}/cart/checkout-preview", response_model=CheckoutPreviewResponseSchema
+)
+def preview_my_checkout(
+    restaurant_id: uuid.UUID,
+    address_id: uuid.UUID = Query(...),
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 5 — checkout price preview for this restaurant's cart, delivered
+    to one of the customer's OWN addresses (required ?address_id=; another
+    customer's address is a 404). Distance comes from the Google Maps
+    Distance Matrix (restaurant -> address), fee = 50 + (km x 20).
+    Calculation only: no order placed, cart not cleared."""
+    return service.preview_checkout(db, current_user.id, restaurant_id, address_id)
 
 
 @router.get("", response_model=list[MenuItemResponseSchema])
