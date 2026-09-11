@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>Speedy Meals</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700;1,800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-tertiary-fixed": "#2a1700", "primary-fixed": "#ffdad6", "surface-bright": "#faf8ff", "on-primary": "#ffffff", "surface-container-highest": "#dae2fd", "surface-dim": "#d2d9f4", "on-tertiary-fixed-variant": "#653e00", "inverse-surface": "#283044", "secondary": "#1d4ed8", "inverse-on-surface": "#eef0ff", "primary": "#b70011", "secondary-fixed": "#dce1ff", "on-secondary": "#ffffff", "outline": "#916f6b", "error-container": "#ffdad6", "on-tertiary": "#ffffff", "on-primary-fixed": "#410002", "on-surface-variant": "#5c403c", "on-error": "#ffffff", "secondary-fixed-dim": "#b7c4ff", "surface-container-lowest": "#ffffff", "tertiary": "#7f4f00", "surface-container-high": "#e2e7ff", "outline-variant": "#e6bdb8", "primary-container": "#dc2626", "tertiary-container": "#a06500", "surface": "#faf8ff", "tertiary-fixed-dim": "#ffb95f", "surface-variant": "#dae2fd", "on-tertiary-container": "#fff7f1", "on-error-container": "#93000a", "primary-fixed-dim": "#ffb4ab", "surface-container": "#eaedff", "secondary-container": "#4069f2", "on-surface": "#131b2e", "on-primary-fixed-variant": "#93000b", "background": "#faf8ff", "on-secondary-container": "#fffbff", "on-secondary-fixed-variant": "#0039b5", "error": "#ba1a1a", "surface-container-low": "#f2f3ff", "on-primary-container": "#fff6f5", "on-secondary-fixed": "#001551", "surface-tint": "#bf0715", "tertiary-fixed": "#ffddb8", "inverse-primary": "#ffb4ab", "on-background": "#131b2e" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "spacing-2xl": "2rem", "touch-target-min": "2.75rem", "spacing-lg": "1.25rem", "spacing-xl": "1.5rem", "spacing-md": "1rem", "card-gutter": "0.75rem", "screen-edge": "1rem", "spacing-2xs": "0.25rem", "spacing-sm": "0.75rem", "spacing-xs": "0.5rem" }, "fontFamily": { "display-lg": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "price-display": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "display-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"] }, "fontSize": { "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "700" }], "price-display": ["18px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-sm": ["16px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "600" }], "display-md": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style></head><body class="bg-surface text-on-surface font-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-screen-edge flex items-center justify-between gap-spacing-xs"><div class="flex items-center gap-spacing-xs min-w-0"><button aria-label="Go back" class="w-touch-target-min h-touch-target-min -ml-2 flex items-center justify-center text-on-surface hover:text-primary-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span></button><h1 class="font-headline-md text-headline-md text-on-surface truncate">Live Order Tracking</h1></div><div class="flex items-center gap-spacing-xs shrink-0"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Vg5RHvkVwLsYakZ-4B_WX0uFOe66tSDt5tnXY3DpWkJ2F77b8EXixv1Vje1ODJ3pQdfU20KgLEggk_aXwY2O5W5oE2y1ZIfS_UtHF-1JqeTzGvSm0wRFxL9lCcyVw0xKqrUx9LvEdPWPIPSv_KRuG0quV6KZSNJZorVP4msq1j87ykODvCrW_WG1QPB-q0NuFBKPhunYcwqhPg6osH1Ng7skaaZtCxoG_zWePqFn2yaLxMNNlIIoqq4aV37q7bQbwQ-LkPW0Pqhg"/></div></div></header><main class="flex flex-col relative w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full pb-24">
+<!-- Top Order ETA Bar -->
+<div class="px-screen-edge py-spacing-sm bg-surface-container-lowest shadow-sm flex items-center justify-between z-10">
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-spacing-2xs">
+<span class="font-label-sm text-label-sm text-secondary tracking-wider uppercase font-extrabold">Order #SM-89241</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-ping"></span>
+</div>
+<div class="font-headline-lg text-headline-lg text-primary-container font-extrabold tracking-tight">
+        14 Mins <span class="font-body-md text-body-md text-on-surface-variant font-normal">remaining</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Estimated arrival</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">1:42 PM</span>
+</div>
+</div>
+<!-- Interactive Map Canvas View -->
+<div class="relative w-full h-72 overflow-hidden bg-surface-container-high">
+<div class="absolute inset-0 w-full h-full bg-cover bg-center" data-location="Karachi, Pakistan" style=""></div>
+<div class="absolute inset-0 bg-surface/20 backdrop-blur-[1px]"></div>
+<!-- Stylized Route Overlay SVG -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" fill="none" preserveaspectratio="none" viewbox="0 0 375 288">
+<path class="animate-pulse opacity-90" d="M 64 68 Q 120 120 185 140 T 310 220" stroke="#1d4ed8" stroke-dasharray="8 6" stroke-linecap="round" stroke-width="5"></path>
+<path class="opacity-95" d="M 64 68 Q 120 120 185 140" stroke="#dc2626" stroke-linecap="round" stroke-width="5"></path>
+</svg>
+<!-- Restaurant Pin -->
+<div class="absolute top-10 left-8 -translate-x-1/2 flex flex-col items-center group cursor-pointer">
+<div class="bg-surface-container-lowest px-2 py-1 rounded-full shadow-md flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-primary-container text-[14px]">storefront</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold truncate max-w-[100px]">Burger Craze</span>
+</div>
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-[16px]">restaurant</span>
+</div>
+</div>
+<!-- Moving Mascot Rider Pin -->
+<div class="absolute top-[125px] left-[175px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center animate-bounce duration-1000">
+<div class="bg-primary text-on-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 mb-1 whitespace-nowrap">
+<span class="w-2 h-2 rounded-full bg-on-primary animate-pulse"></span>
+<span>Speedy Tariq (2.1 km)</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest p-1 shadow-xl flex items-center justify-center">
+<img alt="Speedy Meals Mascot Rider" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc3pqYHXLUeRIWT9zeM9Mc4G9sQK7ERgK6qIZfxZCztcRlm18AfC0V_ZYswcFe_Ybzw_m6I_5mhgFOBwnHvuv-v5qa1JwVbt5EKB8j-ysKC1J9nlyXAr2IrFfy91EfVCpI858ydOA_ESeMKhQiCTjrNH19KSbng2zGLYL0nUzZO9Tj5FyuTa8up1VUQJGvTSV5Qvv8iqyGk5UjgU0NgHjAIP4E_B7dcVkiRLsRW_pOBwaqDu2WAxFjs00xlSFgVcnO3g"/>
+</div>
+</div>
+<!-- Customer Destination Pin -->
+<div class="absolute bottom-10 right-10 -translate-x-1/2 flex flex-col items-center">
+<div class="bg-surface-container-lowest px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-secondary text-[14px]">home</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold">Home</span>
+</div>
+<div class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-[16px]">pin_drop</span>
+</div>
+</div>
+<!-- Map Floating Controls -->
+<div class="absolute right-screen-edge top-spacing-sm flex flex-col gap-spacing-xs">
+<button aria-label="Recenter map" class="w-10 h-10 rounded-xl bg-surface-container-lowest shadow-md flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">near_me</span>
+</button>
+<button aria-label="Open Fullscreen View" class="w-10 h-10 rounded-xl bg-surface-container-lowest shadow-md flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- Main Scrollable Content Buffer -->
+<div class="px-screen-edge -mt-4 z-20 flex flex-col gap-spacing-md">
+<!-- Multi-Stage Order Progress Card -->
+<div class="bg-surface-container-lowest rounded-xl p-spacing-md shadow-md">
+<div class="flex items-center justify-between mb-spacing-md">
+<div class="flex items-center gap-spacing-xs">
+<div class="w-8 h-8 rounded-full bg-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[18px]">electric_moped</span>
+</div>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Courier is on the move</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Your fresh meal is securely packed</p>
+</div>
+</div>
+<span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm px-2.5 py-1 rounded-full font-bold">Live GPS</span>
+</div>
+<!-- Horizontal Segmented Stepper -->
+<div class="w-full flex items-center justify-between relative py-2">
+<div class="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-surface-container-high rounded-full -z-0">
+<div class="h-full bg-secondary rounded-full" style="width: 75%;"></div>
+</div>
+<!-- Stage 1 -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[12px] font-bold shadow-sm">
+<span class="material-symbols-outlined text-[14px]">done</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Placed</span>
+</div>
+<!-- Stage 2 -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[12px] font-bold shadow-sm">
+<span class="material-symbols-outlined text-[14px]">done</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Confirmed</span>
+</div>
+<!-- Stage 3 -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[12px] font-bold shadow-sm">
+<span class="material-symbols-outlined text-[14px]">done</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Prepared</span>
+</div>
+<!-- Stage 4 (Active) -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-md animate-pulse">
+<span class="material-symbols-outlined text-[16px]">sports_motorsports</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-container font-extrabold">On Delivery</span>
+</div>
+<!-- Stage 5 -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">home</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Delivered</span>
+</div>
+</div>
+</div>
+<!-- Assigned Rider Profile Card -->
+<div class="bg-surface-container-lowest rounded-xl p-spacing-md shadow-md flex flex-col gap-spacing-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-spacing-sm">
+<div class="relative">
+<img class="w-14 h-14 rounded-full object-cover" data-alt="Portrait of a smiling young courier driver wearing a bright red branded Speedy Meals delivery jacket and a safety helmet, friendly warm expression against daylight city background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKSyvzH2530Jp-puetWY9EyWXq-CYXcFTFRLN26t7acOBTtn3GrZ6VDEWrCkmJyeFyajnTkwjToJ6wcSDjtARoyK32n8G_QpngpaE7d8vqQKDL-C7aCSVkiFCshideHwvRBhLHc7oLD7e6P-clwbwYkTF64Atm5v4YBLRLalafa76VhdVKmOfsUa8Tht7eFxu6sxXU9jeTInC3YssoWTfNWldtBw4XyH1i0s3Fa1iAjX0O-xHhBUe3"/>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px]">verified</span>
+</div>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-spacing-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Tariq Mehmood</h3>
+<div class="flex items-center bg-tertiary-fixed text-on-tertiary-fixed px-1.5 py-0.5 rounded-md text-[11px] font-bold">
+<span class="material-symbols-outlined text-[12px] text-tertiary mr-0.5" style="font-variation-settings: 'FILL' 1;">star</span>
+                4.9
+              </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Speedy Rider #104 • Honda 125 (KHI-7821)</p>
+</div>
+</div>
+</div>
+<!-- Quick Action Buttons -->
+<div class="grid grid-cols-2 gap-spacing-xs pt-1">
+<a class="h-11 rounded-xl bg-secondary-fixed text-on-secondary-fixed font-label-lg text-label-lg flex items-center justify-center gap-spacing-xs transition-colors hover:bg-secondary hover:text-on-secondary" href="tel:+923001234567">
+<span class="material-symbols-outlined text-[20px] text-secondary">call</span>
+<span>Call Rider</span>
+</a>
+<button class="h-11 rounded-xl bg-surface-container-high text-on-surface font-label-lg text-label-lg flex items-center justify-center gap-spacing-xs transition-colors hover:bg-surface-container-highest" onclick="document.getElementById('feedback-drawer').classList.remove('translate-y-full')">
+<span class="material-symbols-outlined text-[20px] text-primary-container">chat_bubble</span>
+<span>Chat Rider</span>
+</button>
+</div>
+</div>
+<!-- Order Items Summary Box -->
+<div class="bg-surface-container-low rounded-xl p-spacing-md flex flex-col gap-spacing-xs">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Order Items (2)</span>
+<span class="font-label-md text-label-md text-secondary font-semibold cursor-pointer">View Receipt</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<div class="flex items-center gap-spacing-xs">
+<span class="w-5 h-5 rounded bg-surface-container text-on-surface font-bold text-[11px] flex items-center justify-center">1x</span>
+<span class="font-body-md text-body-md text-on-surface">Double Smash Cheddar Burger</span>
+</div>
+<span class="font-price-display text-price-display text-on-surface font-bold">$12.50</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<div class="flex items-center gap-spacing-xs">
+<span class="w-5 h-5 rounded bg-surface-container text-on-surface font-bold text-[11px] flex items-center justify-center">1x</span>
+<span class="font-body-md text-body-md text-on-surface">Spicy Peri Curly Fries</span>
+</div>
+<span class="font-price-display text-price-display text-on-surface font-bold">$4.20</span>
+</div>
+</div>
+<!-- Trigger Simulated Delivery Complete Prompt -->
+<div class="pt-2">
+<button class="w-full h-12 rounded-xl bg-primary-container text-on-primary font-headline-sm text-headline-sm font-bold shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-spacing-xs" onclick="document.getElementById('feedback-drawer').classList.remove('translate-y-full')">
+<span class="material-symbols-outlined text-[20px]">thumb_up</span>
+<span>Order Delivered? Rate Experience</span>
+</button>
+</div>
+</div>
+<!-- Post-Delivery Rating Modal Overlay / Drawer -->
+<div class="fixed inset-0 z-50 transform translate-y-full transition-transform duration-300 ease-out flex flex-col justify-end bg-inverse-surface/40 backdrop-blur-sm" id="feedback-drawer">
+<div class="w-full bg-surface-container-lowest rounded-t-3xl shadow-2xl p-screen-edge flex flex-col gap-spacing-md max-h-[85vh] overflow-y-auto">
+<!-- Drag handle / close bar -->
+<div class="flex flex-col items-center cursor-pointer" onclick="document.getElementById('feedback-drawer').classList.add('translate-y-full')">
+<div class="w-12 h-1.5 rounded-full bg-surface-container-highest mb-2"></div>
+</div>
+<div class="text-center flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-spacing-xs">
+<span class="material-symbols-outlined text-primary text-[32px]">favorite</span>
+</div>
+<h2 class="font-display-md text-display-md text-on-surface font-extrabold tracking-tight">How was your Speedy Meal?</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Your feedback keeps our couriers and kitchen blazing fast!</p>
+</div>
+<!-- Rating Criterion 1: Food Quality -->
+<div class="bg-surface-container-low rounded-xl p-spacing-sm flex flex-col gap-spacing-xs">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Food Quality &amp; Freshness</span>
+<span class="font-label-md text-label-md text-primary-container font-bold" id="food-rating-text">5.0 Delicious</span>
+</div>
+<div class="flex items-center justify-center gap-3 py-1" id="food-stars">
+<button class="star-food text-tertiary transition-transform active:scale-125" data-val="1" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-food text-tertiary transition-transform active:scale-125" data-val="2" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-food text-tertiary transition-transform active:scale-125" data-val="3" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-food text-tertiary transition-transform active:scale-125" data-val="4" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-food text-tertiary transition-transform active:scale-125" data-val="5" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+</div>
+</div>
+<!-- Rating Criterion 2: Delivery Speed & Service -->
+<div class="bg-surface-container-low rounded-xl p-spacing-sm flex flex-col gap-spacing-xs">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Rider Tariq's Speed</span>
+<span class="font-label-md text-label-md text-secondary font-bold" id="speed-rating-text">Lightning Fast</span>
+</div>
+<div class="flex items-center justify-center gap-3 py-1" id="speed-stars">
+<button class="star-speed text-secondary transition-transform active:scale-125" data-val="1" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-speed text-secondary transition-transform active:scale-125" data-val="2" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-speed text-secondary transition-transform active:scale-125" data-val="3" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-speed text-secondary transition-transform active:scale-125" data-val="4" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="star-speed text-secondary transition-transform active:scale-125" data-val="5" type="button">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+</div>
+</div>
+<!-- Quick Feedback Pills -->
+<div class="flex flex-col gap-spacing-2xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">Highlights</span>
+<div class="flex flex-wrap gap-spacing-xs">
+<button class="h-9 px-3.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-bold transition-colors" onclick="this.classList.toggle('bg-primary-container'); this.classList.toggle('text-on-primary'); this.classList.toggle('bg-surface-container-high');" type="button">
+            Super Fast ⚡
+          </button>
+<button class="h-9 px-3.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-bold transition-colors" onclick="this.classList.toggle('bg-primary-container'); this.classList.toggle('text-on-primary'); this.classList.toggle('bg-surface-container-high');" type="button">
+            Food was Hot 🍔
+          </button>
+<button class="h-9 px-3.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-bold transition-colors" onclick="this.classList.toggle('bg-primary-container'); this.classList.toggle('text-on-primary'); this.classList.toggle('bg-surface-container-high');" type="button">
+            Polite Rider 😊
+          </button>
+<button class="h-9 px-3.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-bold transition-colors" onclick="this.classList.toggle('bg-primary-container'); this.classList.toggle('text-on-primary'); this.classList.toggle('bg-surface-container-high');" type="button">
+            Eco Packaging 🌿
+          </button>
+</div>
+</div>
+<!-- Submit Action Button -->
+<div class="pt-2 flex flex-col gap-spacing-xs">
+<button class="w-full h-12 rounded-xl bg-primary-container text-on-primary font-headline-sm text-headline-sm font-bold shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-spacing-xs" onclick="document.getElementById('feedback-drawer').classList.add('translate-y-full')" type="button">
+<span>Submit Feedback</span>
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+<button class="w-full h-9 rounded-xl text-on-surface-variant font-label-lg text-label-lg flex items-center justify-center" onclick="document.getElementById('feedback-drawer').classList.add('translate-y-full')" type="button">
+          Maybe Later
+        </button>
+</div>
+</div>
+</div>
+<script>
+    // Interactive micro-behavior for 5-star rating systems
+    function setupStarRating(starClass, labelId, messages) {
+      const stars = document.querySelectorAll('.' + starClass);
+      const label = document.getElementById(labelId);
+      stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+          stars.forEach((s, idx) => {
+            const icon = s.querySelector('.material-symbols-outlined');
+            if (idx <= index) {
+              s.style.opacity = '1';
+              icon.style.fontVariationSettings = "'FILL' 1";
+            } else {
+              s.style.opacity = '0.35';
+              icon.style.fontVariationSettings = "'FILL' 0";
+            }
+          });
+          if (label && messages[index]) {
+            label.textContent = messages[index];
+          }
+        });
+      });
+    }
+
+    setupStarRating('star-food', 'food-rating-text', [
+      '1.0 Poor',
+      '2.0 Mediocre',
+      '3.0 Good',
+      '4.0 Very Good',
+      '5.0 Delicious'
+    ]);
+
+    setupStarRating('star-speed', 'speed-rating-text', [
+      'Very Delayed',
+      'Slow',
+      'Standard',
+      'Great Time',
+      'Lightning Fast'
+    ]);
+  </script>
+</div></main></body></html>

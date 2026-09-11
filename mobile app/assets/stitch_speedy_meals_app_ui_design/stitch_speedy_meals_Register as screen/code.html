@@ -1,0 +1,279 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speedy Meals - Register As</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              red: '#DC2626',
+              'red-dark': '#B91C1C',
+              'red-light': '#FEF2F2',
+              blue: '#1D4ED8',
+              yellow: '#F59E0B',
+            }
+          },
+          boxShadow: {
+            'card-default': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03)',
+            'card-active': '0 12px 28px -4px rgba(220, 38, 38, 0.16), 0 4px 12px -2px rgba(220, 38, 38, 0.08)',
+            'btn-shadow': '0 8px 24px -4px rgba(220, 38, 38, 0.35)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 font-sans antialiased min-h-screen flex justify-center selection:bg-red-100 selection:text-red-700">
+  <!-- Mobile Container (390px typical iPhone/Android shell) -->
+  <main class="w-full max-w-[430px] min-h-screen bg-white shadow-2xl relative flex flex-col justify-between overflow-hidden">
+    
+    <!-- Top Decorative Blur / Ambient Glow -->
+    <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 bg-red-100/40 rounded-full blur-3xl pointer-events-none -z-0"></div>
+
+    <!-- Main Content Flow -->
+    <div class="relative z-10 flex-1 flex flex-col px-6 pt-5 pb-8">
+      
+      <!-- Top Bar: Back Button & Step indicator -->
+      <div class="flex items-center justify-between h-11 mb-2">
+        <button type="button" aria-label="Go Back" class="w-10 h-10 -ml-1 rounded-full bg-slate-100/80 hover:bg-slate-200/80 active:scale-95 transition flex items-center justify-center text-slate-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <span class="text-xs font-semibold tracking-wider uppercase text-slate-400">Step 1 of 2</span>
+        <div class="w-10"></div> <!-- Placeholder to balance header -->
+      </div>
+
+      <!-- Brand Logo Header -->
+      <div class="flex flex-col items-center mt-2 mb-6">
+        <div class="relative flex items-center justify-center">
+          <div class="w-24 h-24 bg-white rounded-2xl shadow-md border border-slate-100 p-3.5 flex items-center justify-center"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEuGXuZLoASWYYTUMvv_nM0mt3O-TstPN504FCxUL1s8m2hoc6waNmdYLj8XJJyPhCyK5tjrqhFPzVMW8CXJgq0_clFAm2GTuhCLeeEiu9m4Q0UfU-XEEBsLhswVuc0Q2mATf5N56TR0Y_l2osRrTEFRb4hlc1UV0jxm6BQQlWqCWhQ4kTo9HLBW25BjVcIEa6WOLG-ZII19JdzwXx0jPnY7u4Q9dPru2UjyGd0U4u6e2twgyLujQPvFXRAxAIMqArBQ" alt="Speedy Meals Logo" class="w-full h-full object-contain"></div>
+          <!-- Tiny lightning badge -->
+          <span class="absolute -bottom-1 -right-1 bg-brand-red text-white p-1.5 rounded-full shadow-md"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg></span>
+        </div>
+        
+        <span class="mt-2 text-xs font-bold uppercase tracking-widest text-brand-red">Speedy Meals</span>
+      </div>
+
+      <!-- Screen Title & Subtitle -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
+          Register As
+        </h1>
+        <p class="mt-2 text-[15px] font-medium text-slate-500 max-w-[280px] mx-auto leading-relaxed">
+          Choose how you want to use Speedy Meals
+        </p>
+      </div>
+
+      <!-- Selection Cards -->
+      <div class="flex flex-col gap-4 flex-1">
+
+        <!-- Card 1: Customer (Selected by default) -->
+        <div id="card-customer" onclick="selectRole('customer')" class="role-card group relative p-5 rounded-2xl bg-white border-2 cursor-pointer transition-all duration-200 select-none border-brand-red shadow-card-active">
+          <!-- Selection Radio Pill -->
+          <div class="absolute top-5 right-5">
+            <div id="check-customer" class="w-6 h-6 rounded-full bg-brand-red flex items-center justify-center text-white transition-transform duration-200 scale-100 shadow-sm">
+              <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <div id="uncheck-customer" class="w-6 h-6 rounded-full border-2 border-slate-300 hidden"></div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <!-- Icon Container -->
+            <div id="icon-customer-bg" class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-colors duration-200 bg-red-50 text-brand-red">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <!-- Food Cloche / Burger & Utensils Icon -->
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m-7 4a7 7 0 0114 0v1H5V9zm-2 5h18a1 1 0 011 1v1a2 2 0 01-2 2H4a2 2 0 01-2-2v-1a1 1 0 011-1zm3 5v1a1 1 0 001 1h12a1 1 0 001-1v-1"></path>
+              </svg>
+            </div>
+
+            <!-- Text Content -->
+            <div class="pr-8">
+              <div class="flex items-center gap-2 mb-1">
+                <h2 class="text-lg font-bold text-slate-900">Customer</h2>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-brand-red">
+                  Popular
+                </span>
+              </div>
+              <p class="text-[13.5px] leading-snug text-slate-500 font-medium">
+                Order food and get it delivered to your doorstep
+              </p>
+              
+              <!-- Quick Feature Badges -->
+              <div class="mt-3 flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100/90 px-2 py-1 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 15-25m delivery
+                </span>
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100/90 px-2 py-1 rounded-md">
+                  Exclusive deals
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Delivery Rider -->
+        <div id="card-rider" onclick="selectRole('rider')" class="role-card group relative p-5 rounded-2xl bg-white border-2 cursor-pointer hover:border-slate-300 transition-all duration-200 select-none border-slate-200 shadow-card-default">
+          <!-- Selection Radio Pill -->
+          <div class="absolute top-5 right-5">
+            <div id="check-rider" class="w-6 h-6 rounded-full bg-brand-red flex items-center justify-center text-white transition-transform duration-200 scale-100 shadow-sm hidden">
+              <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <div id="uncheck-rider" class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <!-- Icon Container -->
+            <div id="icon-rider-bg" class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-colors duration-200 bg-slate-100 text-slate-600"><img src="https://lh3.googleusercontent.com/aida/AEtjO1VFbHmPjd2SiE14_4NjODSM8DJAqGLeS71uCW-aaHdtgvdPNjpLGQkvOdYnuaqHV3f0Qp3cImpNQBXKzDB05xcZTJhAYtkbCEb7qxXFyETP_rPIfCdpzpFGK2DqTzHBG6S4M2cYCEmG2m5snqCZvIMbcJ0elmmHSTd5L4DBm-WSPvt9r3SJmlp_cX7ChPRKHWYsKNS0Vs3lcCEEjLf6aIDi5VF4KT0jIvE1cAHj09guFB3xtkpwaHCxYQ" alt="Delivery Rider" class="w-9 h-9 object-contain"></div>
+
+            <!-- Text Content -->
+            <div class="pr-8">
+              <div class="flex items-center gap-2 mb-1">
+                <h2 class="text-lg font-bold text-slate-900">Delivery Rider</h2>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-brand-blue">
+                  Earn Daily
+                </span>
+              </div>
+              <p class="text-[13.5px] leading-snug text-slate-500 font-medium">
+                Deliver orders and earn with Speedy Meals
+              </p>
+              
+              <!-- Quick Feature Badges -->
+              <div class="mt-3 flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100/90 px-2 py-1 rounded-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Flexible hours
+                </span>
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100/90 px-2 py-1 rounded-md">
+                  Instant payouts
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Trust info notice -->
+      <div class="mt-6 text-center">
+        <p class="text-xs text-slate-400 font-medium flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"></path>
+          </svg>
+          You can switch accounts anytime from profile settings
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Sticky Bottom Action Footer -->
+    <div class="p-6 pt-3 bg-white/95 backdrop-blur-md border-t border-slate-100">
+      <button id="btn-continue" type="button" class="w-full py-4 px-6 bg-brand-red hover:bg-brand-red-dark active:scale-[0.99] text-white font-bold text-base rounded-2xl shadow-btn-shadow flex items-center justify-center gap-2 transition-all duration-200">
+        <span class="">Continue</span>
+        <svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </button>
+
+      <!-- Already have an account prompt -->
+      <p class="text-center text-xs text-slate-500 font-semibold mt-4">
+        Already have an account? 
+        <a href="#" class="text-brand-red hover:underline font-bold">Sign In</a>
+      </p>
+    </div>
+
+  </main>
+
+  <!-- Interactive State Script -->
+  <script>
+    let selectedRole = 'customer'; // default selected option
+
+    function selectRole(role) {
+      selectedRole = role;
+      
+      const cardCustomer = document.getElementById('card-customer');
+      const cardRider = document.getElementById('card-rider');
+      const checkCustomer = document.getElementById('check-customer');
+      const uncheckCustomer = document.getElementById('uncheck-customer');
+      const checkRider = document.getElementById('check-rider');
+      const uncheckRider = document.getElementById('uncheck-rider');
+      const iconCustomerBg = document.getElementById('icon-customer-bg');
+      const iconRiderBg = document.getElementById('icon-rider-bg');
+      const btnContinue = document.getElementById('btn-continue');
+
+      if (role === 'customer') {
+        // Activate Customer Card
+        cardCustomer.classList.remove('border-slate-200', 'shadow-card-default');
+        cardCustomer.classList.add('border-brand-red', 'shadow-card-active');
+        checkCustomer.classList.remove('hidden');
+        uncheckCustomer.classList.add('hidden');
+        iconCustomerBg.classList.remove('bg-slate-100', 'text-slate-600');
+        iconCustomerBg.classList.add('bg-red-50', 'text-brand-red');
+
+        // Deactivate Rider Card
+        cardRider.classList.remove('border-brand-red', 'shadow-card-active');
+        cardRider.classList.add('border-slate-200', 'shadow-card-default');
+        checkRider.classList.add('hidden');
+        uncheckRider.classList.remove('hidden');
+        iconRiderBg.classList.remove('bg-red-50', 'text-brand-red');
+        iconRiderBg.classList.add('bg-slate-100', 'text-slate-600');
+      } else if (role === 'rider') {
+        // Activate Rider Card
+        cardRider.classList.remove('border-slate-200', 'shadow-card-default');
+        cardRider.classList.add('border-brand-red', 'shadow-card-active');
+        checkRider.classList.remove('hidden');
+        uncheckRider.classList.add('hidden');
+        iconRiderBg.classList.remove('bg-slate-100', 'text-slate-600');
+        iconRiderBg.classList.add('bg-red-50', 'text-brand-red');
+
+        // Deactivate Customer Card
+        cardCustomer.classList.remove('border-brand-red', 'shadow-card-active');
+        cardCustomer.classList.add('border-slate-200', 'shadow-card-default');
+        checkCustomer.classList.add('hidden');
+        uncheckCustomer.classList.remove('hidden');
+        iconCustomerBg.classList.remove('bg-red-50', 'text-brand-red');
+        iconCustomerBg.classList.add('bg-slate-100', 'text-slate-600');
+      }
+
+      // Update button state (always enabled once an option is selected)
+      if (selectedRole) {
+        btnContinue.disabled = false;
+        btnContinue.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-300');
+        btnContinue.classList.add('bg-brand-red', 'shadow-btn-shadow', 'hover:bg-brand-red-dark');
+      } else {
+        btnContinue.disabled = true;
+        btnContinue.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-300');
+        btnContinue.classList.remove('bg-brand-red', 'shadow-btn-shadow', 'hover:bg-brand-red-dark');
+      }
+    }
+
+    // Set initial state
+    selectRole('customer');
+  </script>
+
+
+
+
+
+
+</body></html>

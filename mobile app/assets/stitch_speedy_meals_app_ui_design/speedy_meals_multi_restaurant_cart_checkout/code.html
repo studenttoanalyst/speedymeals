@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>Speedy Meals</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700;1,800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-tertiary-fixed": "#2a1700", "primary-fixed": "#ffdad6", "surface-bright": "#faf8ff", "on-primary": "#ffffff", "surface-container-highest": "#dae2fd", "surface-dim": "#d2d9f4", "on-tertiary-fixed-variant": "#653e00", "inverse-surface": "#283044", "secondary": "#1d4ed8", "inverse-on-surface": "#eef0ff", "primary": "#b70011", "secondary-fixed": "#dce1ff", "on-secondary": "#ffffff", "outline": "#916f6b", "error-container": "#ffdad6", "on-tertiary": "#ffffff", "on-primary-fixed": "#410002", "on-surface-variant": "#5c403c", "on-error": "#ffffff", "secondary-fixed-dim": "#b7c4ff", "surface-container-lowest": "#ffffff", "tertiary": "#7f4f00", "surface-container-high": "#e2e7ff", "outline-variant": "#e6bdb8", "primary-container": "#dc2626", "tertiary-container": "#a06500", "surface": "#faf8ff", "tertiary-fixed-dim": "#ffb95f", "surface-variant": "#dae2fd", "on-tertiary-container": "#fff7f1", "on-error-container": "#93000a", "primary-fixed-dim": "#ffb4ab", "surface-container": "#eaedff", "secondary-container": "#4069f2", "on-surface": "#131b2e", "on-primary-fixed-variant": "#93000b", "background": "#faf8ff", "on-secondary-container": "#fffbff", "on-secondary-fixed-variant": "#0039b5", "error": "#ba1a1a", "surface-container-low": "#f2f3ff", "on-primary-container": "#fff6f5", "on-secondary-fixed": "#001551", "surface-tint": "#bf0715", "tertiary-fixed": "#ffddb8", "inverse-primary": "#ffb4ab", "on-background": "#131b2e" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "spacing-2xl": "2rem", "touch-target-min": "2.75rem", "spacing-lg": "1.25rem", "spacing-xl": "1.5rem", "spacing-md": "1rem", "card-gutter": "0.75rem", "screen-edge": "1rem", "spacing-2xs": "0.25rem", "spacing-sm": "0.75rem", "spacing-xs": "0.5rem" }, "fontFamily": { "display-lg": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "price-display": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "display-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "label-lg": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"] }, "fontSize": { "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "700" }], "price-display": ["18px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-sm": ["16px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "600" }], "display-md": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style></head><body class="bg-surface text-on-surface font-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-screen-edge flex items-center justify-between gap-spacing-xs"><div class="flex items-center gap-spacing-xs min-w-0"><button aria-label="Go back" class="w-touch-target-min h-touch-target-min -ml-2 flex items-center justify-center text-on-surface hover:text-primary-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span></button><h1 class="font-headline-md text-headline-md text-on-surface truncate">Checkout Flow</h1></div><div class="flex items-center gap-spacing-xs shrink-0"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Vg5RHvkVwLsYakZ-4B_WX0uFOe66tSDt5tnXY3DpWkJ2F77b8EXixv1Vje1ODJ3pQdfU20KgLEggk_aXwY2O5W5oE2y1ZIfS_UtHF-1JqeTzGvSm0wRFxL9lCcyVw0xKqrUx9LvEdPWPIPSv_KRuG0quV6KZSNJZorVP4msq1j87ykODvCrW_WG1QPB-q0NuFBKPhunYcwqhPg6osH1Ng7skaaZtCxoG_zWePqFn2yaLxMNNlIIoqq4aV37q7bQbwQ-LkPW0Pqhg"/></div></div></header><main class="flex flex-col relative w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full pb-32">
+<!-- Multi-Cart Context Banner -->
+<div class="px-screen-edge pt-spacing-sm pb-spacing-xs flex items-center justify-between">
+<div class="flex items-center gap-spacing-xs">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">My Basket</h2>
+<p class="font-body-sm text-body-sm text-outline">Bundled from 2 cloud kitchens</p>
+</div>
+</div>
+<button class="font-label-md text-label-md text-primary hover:opacity-80 transition-opacity flex items-center gap-1 py-1 px-2 rounded-lg hover:bg-error-container/20" id="clear-cart-btn">
+<span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+      Clear
+    </button>
+</div>
+<!-- Express Combined Delivery Pill -->
+<div class="mx-screen-edge my-spacing-xs p-spacing-sm rounded-xl bg-surface-container-high flex items-center gap-spacing-sm shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">bolt</span>
+</div>
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-spacing-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Speedy Route Sync</span>
+<span class="bg-primary text-on-primary font-label-sm text-label-sm px-1.5 py-0.5 rounded-full">1 Rider</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Both hubs are on the same route! Arriving in 25-30 min.</p>
+</div>
+</div>
+<div class="flex flex-col gap-spacing-md px-screen-edge mt-spacing-xs">
+<!-- Kitchen Group 1: Burger Craze -->
+<div class="bg-surface-container-lowest rounded-xl p-spacing-md shadow-sm flex flex-col gap-spacing-sm">
+<div class="flex items-center justify-between pb-spacing-xs border-b-0">
+<div class="flex items-center gap-spacing-xs min-w-0">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[18px]">lunch_dining</span>
+</div>
+<div class="min-w-0">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Burger Craze - Hub 1</h3>
+<span class="font-label-sm text-label-sm text-outline">G-11 Markaz • 1.4 km away</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary-fixed px-2 py-0.5 rounded-full">Order #A</span>
+</div>
+<!-- Item 1.1 -->
+<div class="flex items-center justify-between gap-spacing-sm py-spacing-xs">
+<div class="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Juicy double beef patty burger with melted cheddar cheese, signature red burger sauce, fresh lettuce and toasted brioche bun shot in warm vibrant studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7IP0bPHEvXiQTxRBdf0ahujyRKa1qYVb0JWur1jzbHNfrYWPnXAzEqeZ4bfnp-QIcV874RS_G6LrJfFDi9BpXb92cQSqo4-cr5ZSegFFmVoiV2CKxNvdJN4ImkLZYKw01gE1AMV8Qe0SPYlTQeMo-ucBD-gYWhxxRcpW9dUpiiW0pqyQa9CTXrUf4yVjRMU0f3GSxFo-ElykA9kWZajzsgJ41WmXOnSosSHIN-Yv-rucvgrgKUMj7"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-headline-sm text-on-surface truncate">Mighty Speedy Double Beef</h4>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Rs. 1,140</span>
+</div>
+<div class="flex items-center bg-surface-container rounded-full px-1 py-1 gap-spacing-xs">
+<button aria-label="Decrease quantity" class="w-7 h-7 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="font-label-md text-label-md text-on-surface w-4 text-center">1</span>
+<button aria-label="Increase quantity" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<!-- Item 1.2 -->
+<div class="flex items-center justify-between gap-spacing-sm py-spacing-xs">
+<div class="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Crispy golden crinkle cut french fries covered with melted cheese sauce, grilled caramelized onions, and spicy secret sauce on a parchment paper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWP0vHl4HXHNU947Iy1CCHOwBnjB6yssTJXw0ScXECUMVjb1sJ8EBtwLu9qg4cSPcLahFe5fKcfx9Q8uLF98ykwXC6VTh9uW57Tyohj_hF-OvhYq4sxpTnQnCQsxEIcrJSebp9KbGiR-snvusJqRzeiwepHUb1vJ2q77_5-NK_I1xrC0yn4jQa7SfwyQyQzRGxN1NVzx1H8HGt8ZuCJ8skNHukcKFWoCXbDi8-YpRs9NuHsjXqiN_j"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-headline-sm text-on-surface truncate">Animal Style Fries</h4>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Rs. 480</span>
+</div>
+<div class="flex items-center bg-surface-container rounded-full px-1 py-1 gap-spacing-xs">
+<button aria-label="Decrease quantity" class="w-7 h-7 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="font-label-md text-label-md text-on-surface w-4 text-center">1</span>
+<button aria-label="Increase quantity" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<div class="pt-spacing-xs mt-spacing-xs bg-surface-container-low rounded-lg p-spacing-xs flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Kitchen Subtotal</span>
+<span class="font-label-lg text-label-lg text-on-surface">Rs. 1,620</span>
+</div>
+</div>
+<!-- Kitchen Group 2: Dessert Lab -->
+<div class="bg-surface-container-lowest rounded-xl p-spacing-md shadow-sm flex flex-col gap-spacing-sm">
+<div class="flex items-center justify-between pb-spacing-xs">
+<div class="flex items-center gap-spacing-xs min-w-0">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">cake</span>
+</div>
+<div class="min-w-0">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">Dessert Lab - Cloud Kitchen 3</h3>
+<span class="font-label-sm text-label-sm text-outline">Blue Area • 1.8 km away</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary-fixed px-2 py-0.5 rounded-full">Order #B</span>
+</div>
+<!-- Item 2.1 -->
+<div class="flex items-center justify-between gap-spacing-sm py-spacing-xs">
+<div class="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Decadent chocolate molten lava cake with warm gooey chocolate dripping from the center, dusted with powdered sugar on dark ceramic plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8KiAz4yPOTL-19Y-UfiyHcKkN__uE2CC0lryN4a30fk7oUmc4YXNZEaK3U97n49VF9aik19m62nHGbAVjE7Hsilknw8OVJsKSfp2BVvotxhaHpf_KjOQe25EyRr-D8kZ-t0uwLwgWxAciWM3LESrH62-zlemBv1iKGFviN5psr0qlG_GX5lq7Dpg2HD0o7eT_LS-FDQfswXd3XB9SzYwsK8I9ZFJzaWH1YybUBnPsqaSzRoexeKoz"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-headline-sm text-on-surface truncate">Molten Lava Cake</h4>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Rs. 420</span>
+</div>
+<div class="flex items-center bg-surface-container rounded-full px-1 py-1 gap-spacing-xs">
+<button aria-label="Decrease quantity" class="w-7 h-7 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="font-label-md text-label-md text-on-surface w-4 text-center">1</span>
+<button aria-label="Increase quantity" class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<div class="pt-spacing-xs mt-spacing-xs bg-surface-container-low rounded-lg p-spacing-xs flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Kitchen Subtotal</span>
+<span class="font-label-lg text-label-lg text-on-surface">Rs. 420</span>
+</div>
+</div>
+<!-- Promo Code Section -->
+<div class="bg-surface-container-lowest rounded-xl p-spacing-md shadow-sm flex flex-col gap-spacing-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Voucher &amp; Offers</span>
+<div class="flex items-center gap-spacing-xs">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-3 text-outline text-[20px]">confirmation_number</span>
+<input class="w-full h-11 bg-surface-container pl-10 pr-3 rounded-xl font-label-md text-label-md text-on-surface uppercase focus:outline-none" placeholder="Enter coupon code" type="text" value="SPEEDY30"/>
+</div>
+<button class="h-11 px-spacing-md bg-secondary text-on-secondary rounded-xl font-label-lg text-label-lg active:scale-95 transition-transform">
+          Apply
+        </button>
+</div>
+<!-- Applied Badge Tag -->
+<div class="flex items-center justify-between bg-primary-fixed text-on-primary-fixed px-spacing-sm py-spacing-xs rounded-lg mt-spacing-2xs">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">verified</span>
+<span class="font-label-md text-label-md">SPEEDY30 applied (-Rs. 350)</span>
+</div>
+<button class="text-on-primary-fixed hover:text-primary transition-colors flex items-center">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<!-- Transparent Bill Breakdown Card -->
+<div class="bg-surface-container-lowest rounded-xl p-spacing-md shadow-sm flex flex-col gap-spacing-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface pb-spacing-2xs">Bill Summary</h3>
+<div class="flex justify-between items-center py-1">
+<span class="font-body-md text-body-md text-on-surface-variant">Items Total</span>
+<span class="font-label-lg text-label-lg text-on-surface">Rs. 2,040</span>
+</div>
+<div class="flex justify-between items-center py-1">
+<div class="flex items-center gap-1">
+<span class="font-body-md text-body-md text-on-surface-variant">Delivery Fee</span>
+<span class="material-symbols-outlined text-[16px] text-secondary cursor-pointer" title="Base fee Rs. 50 + 3.2km @ Rs. 20/km">info</span>
+</div>
+<div class="text-right">
+<span class="font-label-lg text-label-lg text-on-surface">Rs. 114</span>
+<div class="font-label-sm text-label-sm text-outline">Base Rs. 50 + 3.2km @ Rs. 20/km</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-1">
+<div class="flex items-center gap-1">
+<span class="font-body-md text-body-md text-on-surface-variant">Platform Service Fee</span>
+<span class="material-symbols-outlined text-[16px] text-outline">help</span>
+</div>
+<span class="font-label-lg text-label-lg text-on-surface">Rs. 25</span>
+</div>
+<div class="flex justify-between items-center py-1">
+<span class="font-body-md text-body-md text-primary">Discount (SPEEDY30)</span>
+<span class="font-label-lg text-label-lg text-primary">-Rs. 350</span>
+</div>
+<div class="my-spacing-2xs h-px bg-surface-container"></div>
+<div class="flex justify-between items-center pt-spacing-2xs">
+<div>
+<span class="font-headline-md text-headline-md text-on-surface">Total Payable</span>
+<p class="font-body-sm text-body-sm text-outline">Incl. all taxes &amp; speed packaging</p>
+</div>
+<span class="font-price-display text-price-display text-primary">Rs. 1,829</span>
+</div>
+</div>
+<!-- Payment Method Selector -->
+<div class="bg-surface-container-lowest rounded-xl p-spacing-md shadow-sm flex flex-col gap-spacing-sm">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Payment Method</h3>
+<span class="font-label-sm text-label-sm text-outline">Select one</span>
+</div>
+<div class="grid grid-cols-2 gap-spacing-xs" id="payment-options">
+<!-- COD -->
+<label class="payment-card flex items-center gap-spacing-xs p-spacing-sm rounded-xl bg-surface-container cursor-pointer transition-colors has-[:checked]:bg-secondary-fixed has-[:checked]:text-on-secondary-fixed">
+<input checked="" class="sr-only" name="payment" type="radio" value="cod"/>
+<div class="w-8 h-8 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div class="min-w-0">
+<div class="font-label-lg text-label-lg truncate">Cash (COD)</div>
+<div class="font-label-sm text-label-sm text-outline">On arrival</div>
+</div>
+</label>
+<!-- Card -->
+<label class="payment-card flex items-center gap-spacing-xs p-spacing-sm rounded-xl bg-surface-container cursor-pointer transition-colors has-[:checked]:bg-secondary-fixed has-[:checked]:text-on-secondary-fixed">
+<input class="sr-only" name="payment" type="radio" value="card"/>
+<div class="w-8 h-8 rounded-lg bg-surface-container-lowest flex items-center justify-center text-secondary shadow-xs">
+<span class="material-symbols-outlined text-[20px]">credit_card</span>
+</div>
+<div class="min-w-0">
+<div class="font-label-lg text-label-lg truncate">Visa/Master</div>
+<div class="font-label-sm text-label-sm text-outline">Debit/Credit</div>
+</div>
+</label>
+<!-- EasyPaisa -->
+<label class="payment-card flex items-center gap-spacing-xs p-spacing-sm rounded-xl bg-surface-container cursor-pointer transition-colors has-[:checked]:bg-secondary-fixed has-[:checked]:text-on-secondary-fixed">
+<input class="sr-only" name="payment" type="radio" value="easypaisa"/>
+<div class="w-8 h-8 rounded-lg bg-surface-container-lowest flex items-center justify-center text-tertiary shadow-xs font-bold text-xs">
+            EP
+          </div>
+<div class="min-w-0">
+<div class="font-label-lg text-label-lg truncate">EasyPaisa</div>
+<div class="font-label-sm text-label-sm text-outline">Mobile Wallet</div>
+</div>
+</label>
+<!-- JazzCash -->
+<label class="payment-card flex items-center gap-spacing-xs p-spacing-sm rounded-xl bg-surface-container cursor-pointer transition-colors has-[:checked]:bg-secondary-fixed has-[:checked]:text-on-secondary-fixed">
+<input class="sr-only" name="payment" type="radio" value="jazzcash"/>
+<div class="w-8 h-8 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs font-bold text-xs">
+            JC
+          </div>
+<div class="min-w-0">
+<div class="font-label-lg text-label-lg truncate">JazzCash</div>
+<div class="font-label-sm text-label-sm text-outline">Mobile Wallet</div>
+</div>
+</label>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Checkout Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl px-screen-edge py-spacing-sm shadow-[0_-8px_24px_rgba(0,0,0,0.08)] pb-safe">
+<div class="max-w-md mx-auto flex items-center justify-between gap-spacing-md">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total</span>
+<span class="font-headline-lg text-headline-lg text-on-surface">Rs. 1,829</span>
+</div>
+<button class="flex-1 h-13 py-3 px-spacing-lg bg-primary-container hover:bg-primary text-on-primary rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-spacing-xs shadow-md active:scale-[0.98] transition-all" id="order-btn">
+<span>Place Order &amp; Pay</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  // Simple micro-interactions for demo delight
+  document.getElementById('order-btn')?.addEventListener('click', function() {
+    this.classList.add('scale-95');
+    setTimeout(() => {
+      this.classList.remove('scale-95');
+      alert('Order placed successfully with Speedy Meals Express routing!');
+    }, 150);
+  });
+
+  document.getElementById('clear-cart-btn')?.addEventListener('click', function() {
+    if (confirm('Clear both kitchens from basket?')) {
+      alert('Basket emptied.');
+    }
+  });
+</script></main></body></html>
