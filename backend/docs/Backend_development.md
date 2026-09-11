@@ -287,7 +287,7 @@ Phase 6 adds the rider delivery lifecycle: live location, eligibility-gated assi
   - **Digital**: `pending_cash_owed` unchanged (no cash changes hands)
   - **delivered_at**: set to `datetime.now(timezone.utc)` on transition to Delivered
   - **Exactly-once**: state machine rejects `Delivered → Delivered`, so side effects fire once
-  - **Transaction safety**: wallet deduction + COD cash update + status change all in one `db.commit()` — no partial financial state
+  - **Transaction safety**: wallet deduction + COD cash update + status change all in one `db.commit()` — no partial financial state. *(Post-review fix: `deduct_delivery_fee()` used to commit internally, which made this two separate transactions, not one — a crash between them could deduct the wallet but lose the COD cash-owed update. Fixed by changing that function to `flush()` instead of `commit()`; the caller's single `db.commit()` now covers status + wallet + cash together. See `platform/wallet_payment/service.py`.)*
   - **Auto-force-offline**: Phase 3's `_force_offline_if_below_min()` fires if wallet drops below Rs. 500 after deduction
   - Tests: 9 tests (Digital: wallet -10, cash unchanged, WalletTransaction created; COD: wallet -10, cash +total, frozen total used, accumulates across deliveries; duplicate delivered rejected, only one transaction; delivered_at timestamp set; Phase 3 deduct still works independently)
 

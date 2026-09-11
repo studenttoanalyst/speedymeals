@@ -141,6 +141,17 @@ def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -
     the Rs. 500 minimum — the minimum is only enforced at the go-online
     gate (Step 3), never blocks a deduction from happening.
     Step 4's force-offline check runs right after, same DB transaction.
+
+    Does NOT commit — the caller commits (Phase 6 review fix, see
+    ADR/Backend_development.md Phase 6 note). This function used to call
+    db.commit() itself; when Phase 6's rider_advance_delivery_status()
+    started chaining a second write (COD pending_cash_owed) after this
+    call and then committing again, that was two separate DB transactions
+    instead of one, so a crash between them could leave the wallet
+    deducted but the COD cash-owed update lost. flush() is enough here —
+    it assigns the transaction's id and makes the row visible to the rest
+    of the same session (db.refresh() below works on a flush, it doesn't
+    require a commit) without closing the transaction early.
     """
     rider = _get_rider_or_404(db, rider_id)
 
@@ -156,7 +167,7 @@ def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -
         balance_after=rider.wallet_balance,
     )
     db.add(txn)
-    db.commit()
+    db.flush()
     db.refresh(txn)
     return txn
 
