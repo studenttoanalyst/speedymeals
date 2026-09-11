@@ -359,6 +359,8 @@ Exit check: full order lifecycle Placed→Delivered walk-through via API calls, 
 ## Phase 7 — Order Tracking & History (NOW)
 
 Tasks:
+- [x] **Step 1 — Customer Live Tracking** (`service.py` `get_order_tracking()`, `routes.py` `customer_orders_router`, `schemas.py` `OrderTrackingResponseSchema`): `GET /orders/{order_id}/track` (customer-only). Poll-based per spec Sec 14 (no push) — plain uncached DB read every call. Ownership enforced in the query itself (`Order.id AND Order.user_id`) — another customer's order 404s, same no-leak pattern as the restaurant-side order lookup (Phase 4). Rider name/phone included only once `rider_id` is set (Step 2 folded into the same endpoint — no separate route needed since tracking already returns the full order view).
+  - Tests (`test_order_tracking.py`): status+totals returned, no rider fields before assignment, rider fields present after assignment, other-customer's order 404, nonexistent order 404, route 200 for owner, missing token 403, wrong role 403.
 - Customer live tracking endpoint (poll-based MVP, no push notif per Sec 14 — in-app refresh only).
 - Rider name+phone exposed once assigned.
 - Order history + "Reorder" (clone previous order into new cart).

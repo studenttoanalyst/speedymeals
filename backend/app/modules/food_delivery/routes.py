@@ -30,6 +30,7 @@ from app.modules.food_delivery.schemas import (
     MenuItemResponseSchema,
     MenuItemUpdateSchema,
     OrderStatusUpdateSchema,
+    OrderTrackingResponseSchema,
     RestaurantOrderDetailResponseSchema,
     RestaurantOrderSummaryResponseSchema,
 )
@@ -40,6 +41,9 @@ orders_router = APIRouter(prefix="/restaurants/me/orders", tags=["restaurant-ord
 # path so the customer and restaurant-facing routes live side by side without
 # colliding with the /restaurants/me/* prefixes above.
 customer_router = APIRouter(prefix="/restaurants", tags=["customer-restaurants"])
+# Phase 7, Step 1: tracking is looked up by order_id directly, not nested
+# under a restaurant — separate router, own prefix.
+customer_orders_router = APIRouter(prefix="/orders", tags=["customer-orders"])
 
 require_restaurant = require_role(["restaurant"])
 require_customer = require_role(["customer"])
@@ -285,3 +289,19 @@ def update_my_order_status(
     updates the status.
     """
     return service.update_order_status(db, current_user.id, order_id, payload.status)
+
+
+@customer_orders_router.get("/{order_id}/track", response_model=OrderTrackingResponseSchema)
+def track_my_order(
+    order_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """
+    Phase 7, Step 1 — poll-based live tracking for the customer's own
+    order. No push notifications (spec Sec 14 exclusion) — the client is
+    expected to poll this. Ownership is enforced in the service layer's
+    query itself; another customer's order_id returns 404, not 403 (same
+    no-leak pattern as the restaurant-side order lookup).
+    """
+    return service.get_order_tracking(db, current_user.id, order_id)

@@ -221,6 +221,69 @@ def list_restaurant_orders(
     ]
 
 
+def get_order_tracking(db: Session, customer_id: uuid.UUID, order_id: uuid.UUID) -> dict:
+    """
+    Phase 7, Step 1 — customer-facing live tracking (poll-based; no push
+    per spec Sec 14 exclusion, so this is a plain read hit fresh every
+    call, never cached, so a client poll always sees the latest status
+    within normal DB read latency).
+
+    Ownership check mirrors get_restaurant_order()'s pattern: the WHERE
+    clause itself scopes to (order_id AND user_id) so another customer's
+    order is indistinguishable from a missing one (404, no leak).
+
+    Rider name/phone are included ONLY once a rider is actually assigned
+    (order.rider_id set) — Step 2 of this phase. Before assignment those
+    two fields are simply absent (None), never a placeholder/fake value.
+    """
+    order = (
+        db.query(Order)
+        .filter(Order.id == order_id, Order.user_id == customer_id)
+        .first()
+    )
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+
+    rider_name = None
+    rider_phone = None
+    if order.rider_id is not None:
+        rider = db.query(Rider).filter(Rider.id == order.rider_id).first()
+        if rider is not None:
+            rider_name = rider.name
+            rider_phone = rider.phone_number
+
+    item_rows = (
+        db.query(OrderItem, MenuItem.name)
+        .join(MenuItem, OrderItem.menu_item_id == MenuItem.id)
+        .filter(OrderItem.order_id == order.id)
+        .all()
+    )
+
+    return {
+        "id": order.id,
+        "status": order.status,
+        "payment_method": order.payment_method,
+        "food_subtotal": order.food_subtotal,
+        "delivery_distance_km": order.delivery_distance_km,
+        "delivery_fee": order.delivery_fee,
+        "total_amount": order.total_amount,
+        "rider_name": rider_name,
+        "rider_phone": rider_phone,
+        "placed_at": order.placed_at,
+        "delivered_at": order.delivered_at,
+        "items": [
+            {
+                "menu_item_id": item.menu_item_id,
+                "name": name,
+                "quantity": item.quantity,
+                "selected_variant": item.selected_variant,
+                "price_at_order": item.price_at_order,
+            }
+            for item, name in item_rows
+        ],
+    }
+
+
 def get_restaurant_order(db: Session, restaurant_id: uuid.UUID, order_id: uuid.UUID) -> dict:
     """
     Full order view for the restaurant counter: items, customer name,

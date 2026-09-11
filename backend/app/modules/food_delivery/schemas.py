@@ -196,6 +196,24 @@ class CheckoutPreviewResponseSchema(BaseModel):
     total: float
 
 
+class OrderTrackingResponseSchema(BaseModel):
+    """Phase 7, Step 1 — poll-based customer tracking. rider_name/rider_phone
+    are only populated once a rider is assigned (Step 2); None before that,
+    never a placeholder."""
+    id: uuid.UUID
+    status: str
+    payment_method: str
+    food_subtotal: float
+    delivery_distance_km: float
+    delivery_fee: float
+    total_amount: float
+    rider_name: str | None
+    rider_phone: str | None
+    placed_at: datetime
+    delivered_at: datetime | None
+    items: list[RestaurantOrderItemResponseSchema]
+
+
 class PlaceOrderSchema(BaseModel):
     """Body for POST .../cart/checkout — Step 6. address ownership and
     payment_method validity are enforced in the service layer."""
