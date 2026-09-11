@@ -857,6 +857,34 @@ VALID_PAYMENT_METHODS = {"COD", "Digital"}
 ORDER_STATUS_ON_PLACEMENT = "Accepted"
 
 
+class DigitalPaymentError(Exception):
+    """Raised when the (simulated) digital payment gateway declines the
+    charge. Kept as its own exception — not an HTTPException directly — so
+    place_order's caller decides the HTTP shape, same separation the Maps
+    client uses (maps_client raises its own error, service layer maps it
+    to a status code)."""
+
+
+def _process_digital_payment(customer_id: uuid.UUID, amount) -> str:
+    """Phase 5 Step 7 — digital payment stub.
+
+    No real JazzCash/EasyPaisa/card gateway in MVP (spec Sec 4 explicitly
+    defers this). Matches Phase 3's `recharge_wallet` convention: trust the
+    amount, record it, move on — no card numbers, CVV, or gateway secrets
+    ever touch this project (none are accepted as input here in the first
+    place). Always succeeds in MVP; kept as a separate function (rather
+    than inlined) purely so a test can monkeypatch a failure without
+    touching order-creation logic at all.
+
+    Returns a fake gateway reference string. Not persisted anywhere (no
+    `payment_reference` column exists on `orders` — spec Sec 12 doesn't
+    define one, and adding a DB column for a value nothing else reads
+    would be scope creep for this step) — it is only echoed back in the
+    API response for the customer's/support's own record-keeping.
+    """
+    return f"STUB-DIGITAL-{uuid.uuid4().hex[:12].upper()}"
+
+
 def place_order(
     db: Session,
     customer_id: uuid.UUID,
@@ -890,6 +918,22 @@ def place_order(
 
     ctx = _build_checkout_context(db, customer_id, restaurant_id, address_id)
     restaurant = ctx["restaurant"]
+
+    # Step 7: for Digital, "pay" BEFORE writing anything. Nothing has been
+    # added to the session yet at this point, so a declined/failed payment
+    # aborts with zero DB side effects — no order, no order_items, no
+    # partial rows to roll back. COD needs no equivalent step here: per
+    # spec Sec 5, cash changes hands at delivery (Phase 6), not at
+    # placement, so there is nothing to charge or reserve right now.
+    payment_reference = None
+    if payment_method == "Digital":
+        try:
+            payment_reference = _process_digital_payment(customer_id, ctx["total"])
+        except DigitalPaymentError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Digital payment failed. Please try again or choose Cash on Delivery.",
+            ) from exc
 
     commission = calculate_commission(ctx["food_subtotal"], restaurant.commission_rate)
     rider_earning = ctx["delivery_fee"]
@@ -936,6 +980,7 @@ def place_order(
         "id": order.id,
         "status": order.status,
         "payment_method": order.payment_method,
+        "payment_reference": payment_reference,
         "food_subtotal": order.food_subtotal,
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,

@@ -209,6 +209,7 @@ class PlaceOrderResponseSchema(BaseModel):
     id: uuid.UUID
     status: str
     payment_method: str
+    payment_reference: str | None = None
     food_subtotal: float
     delivery_distance_km: float
     delivery_fee: float

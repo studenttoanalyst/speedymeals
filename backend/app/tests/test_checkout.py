@@ -633,3 +633,119 @@ def test_place_order_route_end_to_end(db_session, customer, address, track_carts
         json={"address_id": str(address.id), "payment_method": "COD"},
         headers={"Authorization": f"Bearer {wrong_role}"},
     ).status_code == 403
+
+
+# --- Phase 5, Step 7: payment method selection ---
+
+
+def test_place_order_cod_has_no_payment_reference(db_session, customer, address, track_carts, monkeypatch):
+    """COD: no gateway involved, no reference generated — cash is handled
+    at delivery (Phase 6), not at placement (spec Sec 5)."""
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    result = service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+
+    assert result["payment_method"] == "COD"
+    assert result["payment_reference"] is None
+
+
+def test_place_order_digital_success_gets_payment_reference(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """Digital: simulated gateway succeeds, order is created normally, and
+    a fake reference is returned (not persisted — no DB column for it)."""
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    result = service.place_order(db_session, customer.id, restaurant.id, address.id, "Digital")
+
+    assert result["payment_method"] == "Digital"
+    assert result["payment_reference"] is not None
+    assert result["payment_reference"].startswith("STUB-DIGITAL-")
+    assert result["status"] == "Accepted"
+    assert result["total_amount"] == Decimal("1110.00")
+
+
+def test_place_order_digital_gateway_failure_leaves_no_order_and_cart_intact(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """Simulated gateway decline -> 402, and NOTHING is written: no order
+    row, no order_items, cart survives untouched. Payment is checked
+    before any db.add(), so failure here can never leave a partial write."""
+    from app.modules.food_delivery.models import Order
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    def failing_gateway(customer_id, amount):
+        raise service.DigitalPaymentError("simulated decline")
+
+    monkeypatch.setattr(service, "_process_digital_payment", failing_gateway)
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(db_session, customer.id, restaurant.id, address.id, "Digital")
+
+    assert exc_info.value.status_code == 402
+    assert db_session.query(Order).filter(Order.user_id == customer.id).count() == 0
+    assert len(service.get_cart(db_session, customer.id, restaurant.id)["items"]) == 1
+
+
+def test_place_order_digital_route_returns_reference_and_402_on_failure(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    from app.modules.food_delivery.routes import customer_router
+    from app.platform.auth.jwt_utils import create_access_token
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.core.database import get_db
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    app = FastAPI()
+    app.include_router(customer_router)
+    app.dependency_overrides[get_db] = lambda: db_session
+    client = TestClient(app)
+    token = create_access_token(customer.id, "customer")
+
+    ok = client.post(
+        f"/restaurants/{restaurant.id}/cart/checkout",
+        json={"address_id": str(address.id), "payment_method": "Digital"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert ok.status_code == 201
+    assert ok.json()["payment_reference"].startswith("STUB-DIGITAL-")
+
+    # Re-seed cart (previous checkout cleared it), then simulate a decline.
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+
+    def failing_gateway(customer_id, amount):
+        raise service.DigitalPaymentError("simulated decline")
+
+    monkeypatch.setattr(service, "_process_digital_payment", failing_gateway)
+
+    declined = client.post(
+        f"/restaurants/{restaurant.id}/cart/checkout",
+        json={"address_id": str(address.id), "payment_method": "Digital"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert declined.status_code == 402
+
+
+def test_place_order_unauthorized_request_still_blocked_for_digital(checkout_client):
+    """Same auth gate as COD (Step 6) applies regardless of payment_method
+    — Step 7 does not add a bypass."""
+    response = checkout_client.post(
+        f"/restaurants/{uuid.uuid4()}/cart/checkout",
+        json={"address_id": str(uuid.uuid4()), "payment_method": "Digital"},
+    )
+    assert response.status_code == 403
