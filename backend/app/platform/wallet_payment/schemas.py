@@ -79,3 +79,64 @@ class RiderEarningsResponseSchema(BaseModel):
     earnings_balance: float
     wallet_balance: float
     pending_cash_owed: float
+
+
+# --- Phase 6, Step 1: rider live location update ---
+
+
+class RiderLocationUpdateSchema(BaseModel):
+    """Body for PATCH /wallet/location — Phase 6 Step 1.
+    Rider pushes GPS coordinates; stored in Redis with a short TTL.
+    Lat/lng are validated against地理 bounds at the schema boundary."""
+    latitude: float = Field(..., ge=-90, le=90, description="GPS latitude (-90 to 90)")
+    longitude: float = Field(..., ge=-180, le=180, description="GPS longitude (-180 to 180)")
+
+
+class RiderLocationResponseSchema(BaseModel):
+    """Response for PATCH /wallet/location — confirms what was stored."""
+    rider_id: uuid.UUID
+    lat: float
+    lng: float
+    updated_at: str
+
+
+# --- Phase 6, Step 4: rider accept/reject assignment ---
+
+
+class RiderAssignmentActionSchema(BaseModel):
+    """Body for POST /rider/assignments/{order_id}/respond.
+    action must be 'accept' or 'reject'."""
+    action: str = Field(..., pattern="^(accept|reject)$")
+
+
+class RiderAssignmentResponseSchema(BaseModel):
+    """Response after a rider accepts or rejects an assignment."""
+    id: uuid.UUID
+    status: str
+    rider_id: uuid.UUID | None
+    payment_method: str
+    delivery_distance_km: float
+    delivery_fee: float
+    total_amount: float
+    rider_earning: float
+
+
+# --- Phase 6, Step 5: delivery status flow ---
+
+
+class DeliveryStatusUpdateSchema(BaseModel):
+    """Body for PATCH /wallet/deliveries/{order_id}/status.
+    The requested next status, validated against the order state machine."""
+    status: str
+
+
+class DeliveryStatusResponseSchema(BaseModel):
+    """Response after a rider advances delivery status."""
+    id: uuid.UUID
+    status: str
+    rider_id: uuid.UUID | None
+    payment_method: str
+    delivery_distance_km: float
+    delivery_fee: float
+    total_amount: float
+    rider_earning: float

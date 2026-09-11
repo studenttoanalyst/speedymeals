@@ -20,13 +20,16 @@ since the rider's LAST rider_payout period_end (all-time if none yet).
 Correct for MVP single-admin-run settlement cycles; revisit if settlements
 ever run out of strict chronological order.
 """
+import json
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.redis_client import redis_client
 from app.modules.food_delivery.models import Order
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, WalletTransaction
 
@@ -36,6 +39,13 @@ DELIVERY_DEDUCTION_AMOUNT = 10  # spec Sec 3.1 — flat Rs. 10 per completed del
 VALID_RECHARGE_METHODS = {"bank_transfer", "jazzcash", "easypaisa", "card"}
 VALID_DEPOSIT_METHODS = {"bank_transfer", "mobile_wallet", "hub"}
 DELIVERED_STATUS = "Delivered"  # spec Sec 7 Step 10 status flow wording
+
+# Phase 6, Step 1 — rider live location in Redis
+LOCATION_TTL_SECONDS = 45  # ~30-60s window; stale locations auto-expire
+
+
+def _rider_location_key(rider_id: uuid.UUID) -> str:
+    return f"rider_location:{rider_id}"
 
 
 def _get_rider_or_404(db: Session, rider_id: uuid.UUID) -> Rider:
@@ -264,3 +274,81 @@ def get_rider_earnings_summary(db: Session, rider_id: uuid.UUID) -> dict:
         "wallet_balance": float(rider.wallet_balance),
         "pending_cash_owed": float(rider.pending_cash_owed),
     }
+
+
+# --- Phase 6, Step 1: rider live location update ---
+
+
+def update_rider_location(
+    db: Session, rider_id: uuid.UUID, latitude: float, longitude: float
+) -> dict:
+    """
+    Phase 6 Step 1 — store the rider's GPS coordinates in Redis with a
+    short TTL (~45s). Stale locations auto-expire so the system never
+    considers a rider whose phone went silent.
+
+    Does NOT touch the DB — rider current_latitude/current_longitude
+    columns on the Rider model are a separate (optional) concern; this
+    function writes only to Redis for the live-location use case.
+
+    Raises 404 if the rider doesn't exist (ownership check — we verify
+    the rider row exists even though Redis doesn't need it, so a
+    deleted/deactivated rider can't silently push stale locations).
+    """
+    _get_rider_or_404(db, rider_id)
+
+    now = datetime.now(timezone.utc).isoformat()
+    payload = json.dumps({
+        "lat": latitude,
+        "lng": longitude,
+        "updated_at": now,
+    })
+
+    try:
+        redis_client.set(_rider_location_key(rider_id), payload, ex=LOCATION_TTL_SECONDS)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Location service temporarily unavailable. Please try again.",
+        )
+
+    return {
+        "rider_id": rider_id,
+        "lat": latitude,
+        "lng": longitude,
+        "updated_at": now,
+    }
+
+
+# --- Phase 6, Step 2: rider assignment eligibility ---
+
+
+def rider_eligible_for_assignment(db: Session, rider_id: uuid.UUID) -> bool:
+    """
+    Phase 6 Step 2 — three-gate eligibility check for rider assignment.
+    All three conditions must hold simultaneously:
+
+      1. is_online = true   (reuses Phase 3 field)
+      2. wallet_balance >= MIN_WALLET_BALANCE  (reuses Phase 3 constant)
+      3. valid non-expired Redis location key  (from Phase 6 Step 1)
+
+    Reuses: _get_rider_or_404, MIN_WALLET_BALANCE, _rider_location_key,
+    redis_client — no duplicate business logic.
+
+    Phase 6's assignment logic will call this directly (no route needed);
+    same pattern as can_assign_cod() (Step 7).
+    """
+    rider = _get_rider_or_404(db, rider_id)
+
+    if not rider.is_online:
+        return False
+
+    if float(rider.wallet_balance) < MIN_WALLET_BALANCE:
+        return False
+
+    # A non-existent key means either never set or TTL expired — both
+    # mean the rider's location is stale/absent.
+    if not redis_client.exists(_rider_location_key(rider_id)):
+        return False
+
+    return True

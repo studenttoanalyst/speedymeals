@@ -7,18 +7,27 @@ Every function takes the authenticated restaurant_id from CurrentUser, never
 trusts an id from the request path for "whose menu is this" — same
 ownership pattern as platform/users/service.py's addresses.
 """
+import json
 import math
 import uuid
 from datetime import date, datetime, time, timezone
 from decimal import Decimal
 
 from fastapi import HTTPException, status
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from app.core import maps_client, storage
 from app.core.redis_client import redis_client
 from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating, Restaurant
+from app.platform.wallet_payment.models import Rider
+from app.platform.wallet_payment.service import (
+    DELIVERED_STATUS,
+    DELIVERY_DEDUCTION_AMOUNT,
+    _rider_location_key,
+    deduct_delivery_fee,
+    rider_eligible_for_assignment,
+)
 from app.modules.food_delivery.schemas import (
     CartAddItemSchema,
     CartItemSchema,
@@ -286,6 +295,13 @@ def get_restaurant_order(db: Session, restaurant_id: uuid.UUID, order_id: uuid.U
 ORDER_STATUS_TRANSITIONS = {
     "Accepted": {"Preparing"},
     "Preparing": {"Ready for Pickup"},
+    # Phase 6 rider-side transitions
+    "Rider Assigned": {"Accepted by Rider", "Rejected"},
+    "Rejected": {"Rider Assigned"},  # re-assignment after rejection
+    "Accepted by Rider": {"Arrived at Restaurant"},
+    "Arrived at Restaurant": {"Picked Up"},
+    "Picked Up": {"On the Way"},
+    "On the Way": {"Delivered"},
 }
 
 
@@ -303,14 +319,86 @@ def _get_owned_order(db: Session, restaurant_id: uuid.UUID, order_id: uuid.UUID)
     return order
 
 
+def _find_nearest_rider(
+    db: Session,
+    restaurant_lat: float,
+    restaurant_lng: float,
+    exclude_rider_ids: set[uuid.UUID] | None = None,
+) -> Rider | None:
+    """
+    Phase 6 Step 3 — find the nearest eligible rider to the restaurant.
+
+    Eligibility uses the Phase 6 Step 2 check (is_online + wallet >= 500
+    + valid Redis location). Distances are calculated with the existing
+    haversine_km helper. Returns None if no eligible rider exists (no
+    fake rider, no error — the order stays at Ready for Pickup).
+
+    exclude_rider_ids: Step 4 uses this to skip a rider who just rejected
+    the order, preventing immediate re-assignment to the same rider.
+
+    Concurrency: this runs inside the same DB transaction as the order
+    status update. SELECT FOR UPDATE on the order row (in the caller)
+    prevents two processes from assigning the same order.
+    """
+    if exclude_rider_ids is None:
+        exclude_rider_ids = set()
+
+    # Fetch all approved, active riders — eligibility + location
+    # filtering happens in Python (small dataset for MVP).
+    riders = (
+        db.query(Rider)
+        .filter(Rider.approval_status == "approved", Rider.is_active.is_(True))
+        .all()
+    )
+
+    best_rider: Rider | None = None
+    best_distance: float = float("inf")
+
+    for rider in riders:
+        if rider.id in exclude_rider_ids:
+            continue
+
+        if not rider_eligible_for_assignment(db, rider.id):
+            continue
+
+        raw = redis_client.get(_rider_location_key(rider.id))
+        if raw is None:
+            continue  # location expired between eligibility check and read
+
+        try:
+            loc = json.loads(raw)
+        except (json.JSONDecodeError, KeyError):
+            continue
+
+        rider_lat = loc.get("lat")
+        rider_lng = loc.get("lng")
+        if rider_lat is None or rider_lng is None:
+            continue
+
+        distance = haversine_km(restaurant_lat, restaurant_lng, float(rider_lat), float(rider_lng))
+        if distance < best_distance:
+            best_distance = distance
+            best_rider = rider
+
+    return best_rider
+
+
 def update_order_status(
     db: Session, restaurant_id: uuid.UUID, order_id: uuid.UUID, new_status: str
 ) -> dict:
     """
-    Step 6 — advance this restaurant's order by one allowed transition.
-    Ownership is enforced up front (404 for another restaurant's order).
-    An invalid transition raises 400 BEFORE any write, so a rejected
-    request never touches the database.
+    Step 6 + Phase 6 Step 3 — advance this restaurant's order by one
+    allowed transition. Ownership is enforced up front (404 for another
+    restaurant's order). An invalid transition raises 400 BEFORE any write.
+
+    When the transition is "Ready for Pickup", the function also attempts
+    rider assignment: the nearest eligible rider is found and set on the
+    order. If no eligible rider exists, the order stays at "Ready for
+    Pickup" — no fake rider is created.
+
+    Concurrency: SELECT FOR UPDATE locks the order row during the
+    assignment window so two parallel requests cannot assign the same
+    order to different riders.
     """
     order = _get_owned_order(db, restaurant_id, order_id)
 
@@ -322,11 +410,188 @@ def update_order_status(
         )
 
     order.status = new_status
+
+    # Phase 6 Step 3 — trigger rider assignment on Ready for Pickup.
+    # Lock the order row to prevent concurrent assignment of the same order.
+    if new_status == "Ready for Pickup" and order.rider_id is None:
+        restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+        if restaurant is not None and restaurant.latitude is not None and restaurant.longitude is not None:
+            # Lock the order row for the duration of the assignment attempt.
+            db.execute(
+                text("SELECT 1 FROM orders WHERE id = :id FOR UPDATE"),
+                {"id": str(order.id)},
+            )
+            nearest = _find_nearest_rider(db, float(restaurant.latitude), float(restaurant.longitude))
+            if nearest is not None:
+                order.rider_id = nearest.id
+                order.status = "Rider Assigned"
+
     db.commit()
     db.refresh(order)
 
     # Return the full updated view (same shape as GET detail).
     return get_restaurant_order(db, restaurant_id, order_id)
+
+
+def _get_assigned_order(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -> Order:
+    """Fetch an order that is assigned to this specific rider. Returns 404
+    (not 403) if the order doesn't exist or belongs to another rider,
+    following the project's no-leak pattern."""
+    order = (
+        db.query(Order)
+        .filter(Order.id == order_id, Order.rider_id == rider_id)
+        .first()
+    )
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+    return order
+
+
+def rider_respond_to_assignment(
+    db: Session, rider_id: uuid.UUID, order_id: uuid.UUID, action: str
+) -> dict:
+    """
+    Phase 6 Step 4 — rider accepts or rejects an assigned order.
+
+    Accept: Rider Assigned -> Accepted by Rider (only the assigned rider)
+    Reject: Rider Assigned -> Rejected -> find next eligible rider
+            (excluded rider cannot immediately re-receive the same order)
+
+    Concurrency: SELECT FOR UPDATE on the order row prevents two riders
+    from accepting the same order simultaneously.
+    """
+    if action not in ("accept", "reject"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Action must be 'accept' or 'reject'.",
+        )
+
+    order = _get_assigned_order(db, rider_id, order_id)
+
+    if order.status != "Rider Assigned":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot respond to order in '{order.status}' status.",
+        )
+
+    # Lock the order row to prevent concurrent accept from another process.
+    db.execute(
+        text("SELECT 1 FROM orders WHERE id = :id FOR UPDATE"),
+        {"id": str(order.id)},
+    )
+
+    if action == "accept":
+        order.status = "Accepted by Rider"
+    else:
+        # Reject: attempt re-assignment, excluding this rider.
+        order.status = "Rejected"
+        order.rider_id = None
+        restaurant = db.query(Restaurant).filter(Restaurant.id == order.restaurant_id).first()
+        if (
+            restaurant is not None
+            and restaurant.latitude is not None
+            and restaurant.longitude is not None
+        ):
+            nearest = _find_nearest_rider(
+                db,
+                float(restaurant.latitude),
+                float(restaurant.longitude),
+                exclude_rider_ids={rider_id},
+            )
+            if nearest is not None:
+                order.rider_id = nearest.id
+                order.status = "Rider Assigned"
+
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "id": order.id,
+        "status": order.status,
+        "rider_id": order.rider_id,
+        "payment_method": order.payment_method,
+        "delivery_distance_km": order.delivery_distance_km,
+        "delivery_fee": order.delivery_fee,
+        "total_amount": order.total_amount,
+        "rider_earning": order.rider_earning,
+    }
+
+
+# --- Phase 6, Step 5: delivery status flow ---
+
+
+def rider_advance_delivery_status(
+    db: Session, rider_id: uuid.UUID, order_id: uuid.UUID, new_status: str
+) -> dict:
+    """
+    Phase 6 Step 5 + Step 6 — rider advances an accepted order through the
+    delivery status flow. Each call performs exactly one allowed transition:
+
+        Accepted by Rider -> Arrived at Restaurant
+        Arrived at Restaurant -> Picked Up
+        Picked Up -> On the Way
+        On the Way -> Delivered
+
+    On "Delivered" (Step 6), the following side effects fire atomically:
+      - Reuse Phase 3 deduct_delivery_fee(): Rs. 10 wallet deduction
+      - COD: pending_cash_owed += order.total_amount (frozen snapshot)
+      - Digital: pending_cash_owed unchanged
+
+    Exactly-once guarantee: the ORDER_STATUS_TRANSITIONS state machine
+    rejects the transition if the order is already Delivered, so the
+    side effects can only fire once.
+
+    Reuses: ORDER_STATUS_TRANSITIONS, deduct_delivery_fee, DELIVERED_STATUS.
+    """
+    order = (
+        db.query(Order)
+        .filter(Order.id == order_id, Order.rider_id == rider_id)
+        .first()
+    )
+    if order is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found."
+        )
+
+    allowed_next = ORDER_STATUS_TRANSITIONS.get(order.status)
+    if allowed_next is None or new_status not in allowed_next:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot transition order from '{order.status}' to '{new_status}'.",
+        )
+
+    order.status = new_status
+
+    # --- Phase 6 Step 6: Delivered side effects ---
+    # Fires ONLY when transitioning to Delivered, inside the same
+    # transaction as the status update. The state machine prevents
+    # duplicate execution (Delivered -> Delivered is not a valid transition).
+    if new_status == DELIVERED_STATUS:
+        order.delivered_at = datetime.now(timezone.utc)
+
+        # Reuse Phase 3 wallet deduction: Rs. 10 flat per delivery.
+        deduct_delivery_fee(db, rider_id, order.id)
+
+        # COD: add frozen order.total_amount to pending_cash_owed.
+        # Digital: no change.
+        if order.payment_method == "COD":
+            rider = db.query(Rider).filter(Rider.id == rider_id).first()
+            rider.pending_cash_owed = float(rider.pending_cash_owed) + float(order.total_amount)
+            db.add(rider)
+
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "id": order.id,
+        "status": order.status,
+        "rider_id": order.rider_id,
+        "payment_method": order.payment_method,
+        "delivery_distance_km": order.delivery_distance_km,
+        "delivery_fee": order.delivery_fee,
+        "total_amount": order.total_amount,
+        "rider_earning": order.rider_earning,
+    }
 
 
 # --- Step 7: commission calculation helper ---

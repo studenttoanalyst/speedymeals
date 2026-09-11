@@ -1,6 +1,6 @@
 # SpeedyMeals Backend — Development Plan
 
-Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 ✅ done (Step 0-9, 2 tests deferred pending Phase 5 — see below). Phase 4 ✅ done (all 8 steps, see below). Structure below builds on top, step by step, no jump ahead.
+Repo state: Phase 0 ✅ done. Phase 1 ✅ done. Phase 2 ✅ done (all 13 steps, see below). Phase 3 ✅ done (Step 0-9, 2 tests deferred pending Phase 5 — see below). Phase 4 ✅ done (all 8 steps, see below). Phase 5 ✅ done (all 7 steps, see below). Phase 6 ✅ done (all 8 steps, see below). Structure below builds on top, step by step, no jump ahead.
 
 Stack lock: Python + FastAPI, PostgreSQL, Alembic, Redis, AWS S3, JWT auth, Google Maps Distance Matrix.
 
@@ -211,18 +211,148 @@ Exit check: place order both COD + Digital, DB row has correct snapshot math (ma
 
 ---
 
-## Phase 6 — Rider Side: Assignment & Delivery Flow (NOW)
+## Phase 6 — Rider Side: Assignment & Delivery Flow (NOW) ✅ DONE
 
-Folder: `app/modules/food_delivery`, `app/platform/location`.
+Folders: `app/modules/food_delivery` (service logic), `app/platform/wallet_payment` (routes, schemas, location).
 
-Tasks:
-- Nearest-online-rider assignment on "Ready for Pickup" (simple radius query using rider live location in Redis, MVP — no AI optimization per Sec 14 exclusion).
-- Accept/Reject endpoint — reject → reassign to next nearest.
-- Status flow endpoints: Arrived → Picked Up → On the Way → Delivered (each updates order + triggers relevant side effect, e.g. Delivered → wallet deduction Phase 3 logic).
-- Live location update endpoint (rider pushes GPS, store in Redis, short TTL).
-- Rider earnings view: earnings balance, wallet balance, pending cash owed (Sec 8 Step 13).
+### Implementation Overview
 
-Exit check: full order lifecycle Placed→Delivered walk-through via API calls, correct status each step, correct side effects fire.
+Phase 6 adds the rider delivery lifecycle: live location, eligibility-gated assignment, accept/reject, sequential delivery statuses, delivered financial side effects (wallet deduction + COD cash owed), and earnings view. All implemented on top of existing Phase 3–5 infrastructure with zero duplicate business logic.
+
+### Step-by-step breakdown:
+
+- [x] **Step 1 — Live Rider Location Update** (`wallet_payment/service.py`, `wallet_payment/routes.py`, `wallet_payment/schemas.py`, `tests/test_rider_location.py`): `PATCH /wallet/location` — rider pushes GPS coordinates, stored in Redis with 45-second TTL.
+  - Redis key: `rider_location:{rider_id}`
+  - Stored data: `{"lat": float, "lng": float, "updated_at": "ISO8601"}`
+  - TTL: 45 seconds (auto-expired — stale locations never considered for assignment)
+  - Latitude validated: -90 to 90 (Pydantic `ge=-90, le=90`)
+  - Longitude validated: -180 to 180 (Pydantic `ge=-180, le=180`)
+  - Authentication: `require_role(["rider"])` — customer/restaurant/admin get 403
+  - Ownership: rider_id from JWT token, never from request body
+  - Redis failure: returns 503, not silent pretend-success
+  - Tests: 17 tests (Redis storage, TTL, key format, overwrite, unknown rider 404, boundary values, schema validation, route auth, rider isolation, missing fields)
+
+- [x] **Step 2 — Rider Eligibility Check** (`wallet_payment/service.py`, `tests/test_rider_location.py`): `rider_eligible_for_assignment(db, rider_id) -> bool` — reusable helper, no route (same pattern as `can_assign_cod()`).
+  - Three-gate eligibility:
+    1. `is_online = true` (reuses Phase 3 field)
+    2. `wallet_balance >= 500` (reuses Phase 3 `MIN_WALLET_BALANCE` constant)
+    3. Valid non-expired Redis location key (`redis_client.exists()`)
+  - Phase 3 wallet/online logic fully reused — no duplicate constants or checks
+  - Tests: 8 tests (all three conditions met, offline, insufficient wallet, expired location, TTL expiry, reconnect, unknown rider, constant verification)
+
+- [x] **Step 3 — Nearest Rider Assignment** (`food_delivery/service.py`, `tests/test_rider_assignment.py`): triggered automatically when restaurant marks order "Ready for Pickup".
+  - Trigger: `update_order_status()` when `new_status == "Ready for Pickup"` and `order.rider_id is None`
+  - Eligible riders: all `approval_status == "approved"` + `is_active == True` riders, filtered by `rider_eligible_for_assignment()`
+  - Redis locations: read via `redis_client.get(rider_location:{rider_id})`, parsed as JSON
+  - Distance: Haversine formula (existing `haversine_km()` from Phase 5 — no PostGIS, no AI, no traffic routing)
+  - Nearest selection: minimum haversine distance from restaurant coordinates (not delivery address)
+  - Assignment: `order.rider_id = nearest.id`, `order.status = "Rider Assigned"`
+  - No eligible rider: order stays at "Ready for Pickup" (no fake assignment, no error)
+  - Concurrency: `SELECT FOR UPDATE` on order row prevents double assignment
+  - Ownership: restaurant can only trigger assignment on their own orders (404 for other restaurant's order)
+  - Tests: 12 tests (single rider, multiple riders nearest selected, offline ignored, wallet ignored, expired location ignored, no rider, restaurant coords used, no double assignment, wrong restaurant 404, pending approval ignored, non-ready-for-pickup unaffected, route end-to-end)
+
+- [x] **Step 4 — Rider Accept/Reject** (`food_delivery/service.py`, `wallet_payment/routes.py`, `wallet_payment/schemas.py`, `tests/test_rider_accept_reject.py`): `POST /wallet/assignments/{order_id}/respond`.
+  - Accept: `Rider Assigned` → `Accepted by Rider` (only assigned rider can accept)
+  - Reject: `Rider Assigned` → `Rejected` → find next eligible rider (excluding rejected rider)
+  - Rejected rider exclusion: `exclude_rider_ids={rejected_rider_id}` passed to `_find_nearest_rider()`
+  - No next rider: order stays at "Rejected" (rider_id = None)
+  - Double accept prevented: order status no longer "Rider Assigned" after first accept → 400
+  - Accept after reject prevented: same reason → 400
+  - Wrong rider: 404 (not 403 — same no-leak pattern)
+  - Concurrency: `SELECT FOR UPDATE` on order row
+  - Response includes: id, status, rider_id, payment_method, delivery_distance_km, delivery_fee, total_amount, rider_earning
+  - Tests: 14 tests (correct rider accepts, wrong rider 404, reject → next rider, rejected rider excluded, double accept, reject after accept, no next rider, invalid action, invalid status, assignment data, route accept, route reject, missing token, wrong role)
+
+- [x] **Step 5 — Delivery Status Flow** (`food_delivery/service.py`, `wallet_payment/routes.py`, `tests/test_delivery_status.py`): four endpoints, one per transition.
+  - `PATCH /wallet/deliveries/{order_id}/status/arrived` → `Arrived at Restaurant`
+  - `PATCH /wallet/deliveries/{order_id}/status/picked-up` → `Picked Up`
+  - `PATCH /wallet/deliveries/{order_id}/status/on-the-way` → `On the Way`
+  - `PATCH /wallet/deliveries/{order_id}/status/delivered` → `Delivered`
+  - Status flow enforced by `ORDER_STATUS_TRANSITIONS` (same Phase 4 state machine — no duplicate system):
+    ```
+    Accepted by Rider → Arrived at Restaurant → Picked Up → On the Way → Delivered
+    ```
+  - Invalid jumps rejected with 400 (e.g. Accepted → Delivered, Picked Up → Delivered)
+  - Backward transitions rejected (e.g. On the Way → Picked Up)
+  - Wrong rider: 404 (order not assigned to this rider)
+  - Unauthorized user: 404 (rider_id from JWT doesn't match order.rider_id)
+  - Duplicate request: 400 (status already advanced, transition no longer valid)
+  - Authentication: `require_role(["rider"])` on all endpoints
+  - Tests: 17 tests (full happy path, each individual transition, skip rejected, backward rejected, skip-to-delivered rejected, wrong rider, unauthorized, duplicate, route arrived/picked-up/on-the-way/delivered, missing token, wrong role)
+
+- [x] **Step 6 — Delivered Financial Side Effects** (`food_delivery/service.py`, `tests/test_delivered_side_effects.py`): fires atomically inside `rider_advance_delivery_status()` when `new_status == "Delivered"`.
+  - **Wallet deduction**: reuses Phase 3 `deduct_delivery_fee()` — Rs. 10 flat per delivery, creates `WalletTransaction` type="deduction"
+  - **COD**: `pending_cash_owed += order.total_amount` (frozen snapshot from order row, never recalculated)
+  - **Digital**: `pending_cash_owed` unchanged (no cash changes hands)
+  - **delivered_at**: set to `datetime.now(timezone.utc)` on transition to Delivered
+  - **Exactly-once**: state machine rejects `Delivered → Delivered`, so side effects fire once
+  - **Transaction safety**: wallet deduction + COD cash update + status change all in one `db.commit()` — no partial financial state
+  - **Auto-force-offline**: Phase 3's `_force_offline_if_below_min()` fires if wallet drops below Rs. 500 after deduction
+  - Tests: 9 tests (Digital: wallet -10, cash unchanged, WalletTransaction created; COD: wallet -10, cash +total, frozen total used, accumulates across deliveries; duplicate delivered rejected, only one transaction; delivered_at timestamp set; Phase 3 deduct still works independently)
+
+- [x] **Step 7 — Payment Method Selection** (already implemented in Phase 5 Step 7): no changes needed in Phase 6. COD/Digital handling verified as working correctly with Phase 6 delivery flow.
+
+- [x] **Step 8 — Integration Review & Testing** (this step): full lifecycle verified, 186/186 tests pass.
+
+### Full Order Status Flow
+
+```
+Customer places order → "Accepted"
+Restaurant marks "Preparing" → "Preparing"
+Restaurant marks "Ready for Pickup" → auto-assigns nearest eligible rider → "Rider Assigned"
+Rider accepts → "Accepted by Rider"
+Rider arrives → "Arrived at Restaurant"
+Rider picks up → "Picked Up"
+Rider on the way → "On the Way"
+Rider delivers → "Delivered" + wallet deduction + COD cash owed update
+```
+
+### API Endpoints
+
+| Feature | Method | Endpoint | Auth | Purpose |
+|---------|--------|----------|------|---------|
+| Location Update | PATCH | `/wallet/location` | Rider | Push GPS coordinates to Redis |
+| Accept/Reject | POST | `/wallet/assignments/{order_id}/respond` | Rider | Accept or reject assigned order |
+| Arrived | PATCH | `/wallet/deliveries/{order_id}/status/arrived` | Rider | Mark arrived at restaurant |
+| Picked Up | PATCH | `/wallet/deliveries/{order_id}/status/picked-up` | Rider | Mark order picked up |
+| On the Way | PATCH | `/wallet/deliveries/{order_id}/status/on-the-way` | Rider | Mark en route to customer |
+| Delivered | PATCH | `/wallet/deliveries/{order_id}/status/delivered` | Rider | Complete delivery + financial effects |
+| Earnings | GET | `/wallet/earnings` | Rider | View earnings/wallet/cash-owed |
+| Wallet Balance | GET | `/wallet/balance` | Rider | View wallet (Phase 3, still works) |
+| Go Online/Offline | PATCH | `/wallet/status` | Rider | Toggle online status (Phase 3) |
+| Cash Deposit | POST | `/wallet/cash-deposit` | Rider | Submit daily COD cash (Phase 3) |
+| COD Eligibility | GET | `/wallet/cod-eligibility` | Rider | Check cash collection cap (Phase 3) |
+
+### Redis Usage
+
+| Key | Data | TTL | Purpose |
+|-----|------|-----|---------|
+| `rider_location:{rider_id}` | `{"lat", "lng", "updated_at"}` | 45s | Live rider GPS for assignment |
+
+### Security
+
+- All rider endpoints require `require_role(["rider"])` — customer/restaurant/admin get 403
+- Rider identity from JWT token, never from request body
+- Ownership enforced via `Order.rider_id == current_user.id` in WHERE clause (404 for wrong rider)
+- Location update: authenticated rider can only update their own location
+- Accept/reject: only the assigned rider can respond
+- Delivery status: only the assigned rider can advance
+- Assignment: only the restaurant that owns the order can trigger
+
+### Tests
+
+Total Phase 6 tests: **77** (all passing)
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| `test_rider_location.py` | 25 | Location storage, TTL, schema validation, route auth, eligibility checks |
+| `test_rider_assignment.py` | 12 | Nearest rider, eligibility filtering, no-rider case, ownership, concurrency |
+| `test_rider_accept_reject.py` | 14 | Accept, reject, reassignment, exclusion, double-accept, auth |
+| `test_delivery_status.py` | 17 | Full flow, each transition, invalid jumps, wrong rider, duplicate |
+| `test_delivered_side_effects.py` | 9 | Wallet deduction, COD cash owed, Digital, exactly-once, delivered_at |
+
+Exit check: full order lifecycle Placed→Delivered walk-through via API calls, correct status each step, correct side effects fire. ✅ Confirmed — 186/186 total tests pass (77 Phase 6 + 109 Phase 3-5 regression).
 
 ---
 
