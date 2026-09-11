@@ -1,19 +1,23 @@
 """
 Phase 4 routes — Menu CRUD (Step 2), availability toggle (Step 3), photo
-upload (Step 4), and the order dashboard (Step 5). All routes require a
-"restaurant" role token — customer/rider/admin tokens get 403, same RBAC
-pattern as platform/users/routes.py.
+upload (Step 4), the order dashboard (Step 5) — and Phase 5's customer
+browse (Step 1) + menu view (Step 2) endpoints. Restaurant routes require a "restaurant" role
+token; the customer browse route requires "customer" — rider/restaurant/
+admin tokens get 403 either way, same RBAC pattern as
+platform/users/routes.py.
 """
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.platform.auth.dependencies import CurrentUser, require_role
 from app.modules.food_delivery import service
 from app.modules.food_delivery.schemas import (
+    CustomerMenuCategorySchema,
+    CustomerRestaurantResponseSchema,
     MenuItemAvailabilitySchema,
     MenuItemCreateSchema,
     MenuItemResponseSchema,
@@ -25,8 +29,47 @@ from app.modules.food_delivery.schemas import (
 
 router = APIRouter(prefix="/restaurants/me/menu-items", tags=["restaurant-menu"])
 orders_router = APIRouter(prefix="/restaurants/me/orders", tags=["restaurant-orders"])
+# Customer-facing browse (Phase 5, Step 1). Empty prefix + explicit "/restaurants"
+# path so the customer and restaurant-facing routes live side by side without
+# colliding with the /restaurants/me/* prefixes above.
+customer_router = APIRouter(prefix="/restaurants", tags=["customer-restaurants"])
 
 require_restaurant = require_role(["restaurant"])
+require_customer = require_role(["customer"])
+
+
+@customer_router.get("", response_model=list[CustomerRestaurantResponseSchema])
+def browse_restaurants(
+    address_id: uuid.UUID | None = None,
+    search: str | None = Query(default=None, max_length=100),
+    sort: str = Query(default="distance", pattern="^(distance|rating)$"),
+    radius_km: float = Query(default=service.DEFAULT_SEARCH_RADIUS_KM, gt=0, le=50),
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 1 — customer browse: active restaurants within radius_km of one
+    of the customer's OWN addresses (default/most recent when address_id is
+    omitted; another customer's address_id is a 404). Name search +
+    distance/rating sort. Location is mandatory (400 without a saved
+    address) because this is a delivery app — every result carries its
+    distance to the customer."""
+    return service.list_restaurants_for_customer(
+        db, current_user.id, address_id, search, sort, radius_km
+    )
+
+
+@customer_router.get("/{restaurant_id}/menu", response_model=list[CustomerMenuCategorySchema])
+def view_restaurant_menu(
+    restaurant_id: uuid.UUID,
+    category: str | None = None,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 2 — customer menu for one restaurant, grouped by category
+    (optional case-insensitive ?category=Starters filter). Sold-out items
+    are included but flagged is_available=false. Only active restaurants
+    resolve — anything else is a 404."""
+    return service.get_customer_menu(db, restaurant_id, category)
 
 
 @router.get("", response_model=list[MenuItemResponseSchema])

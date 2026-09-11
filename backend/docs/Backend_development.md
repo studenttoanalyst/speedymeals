@@ -165,6 +165,21 @@ Tasks:
 - Place order: create `orders` row + `order_items`, compute commission_amount, restaurant_payable (90%), rider_earning (100% delivery fee) — all snapshot at placement.
 - Payment method select: COD or Digital (stub digital gateway call, mark "Paid — Digital" on success).
 
+### Step-by-step breakdown (build order, do not skip ahead):
+
+- [x] **Step 1 — Customer Restaurant Browse** (`service.py`, `routes.py`, `schemas.py`, `tests/test_restaurant_browse.py`): `GET /restaurants` (customer-only, `require_role(["customer"])`), on a new `customer_router` in the same module (no new module created).
+  - Location mandatory (owner decision): resolved from the customer's OWN address — `?address_id=` (404 if not owned; IDOR-safe via `WHERE user_id == current_user`, same pattern as addresses), else default address, else most recent; 400 when no address exists. Arbitrary client lat/long is never accepted.
+  - Active restaurants only (`status == "active"` — plain string column, no enum exists in the codebase) within radius (default 5 km, `0 < r <= 50`) of `restaurants.latitude/longitude`. Radius = SQL bounding-box prefilter + Python haversine — no PostGIS (stack lock; schema.jpeg stores plain Numeric coords). NULL-coordinate restaurants can never appear (can't be "nearby").
+  - Name search (`?search=`, case-insensitive contains, reuses the Phase 4 `func.lower` pattern) + sort (`?sort=distance|rating`, anything else 422). Rating = `AVG(ratings.restaurant_rating)` joined through orders — `ratings` has NO `restaurant_id` column; `Order.restaurant_id` is the link. Unrated → null, sorts below rated, ties broken by distance.
+  - Response carries public fields only (no email/password_hash/phone_number/commission_rate/status). **Cuisine filter deliberately skipped (owner decision)** — no cuisine column exists on `restaurants`; adding one would mean a migration, deferred rather than invented in this step.
+  - Tests: 13 new automated tests — listing with distance, radius cut-off, inactive + NULL-coords exclusion, distance sort, rating sort (unrated last), case-insensitive search + no-match, no-address 400, other-customer's address 404, and route-level auth via TestClient (customer 200 with no internal fields leaked, missing token 403 [HTTPBearer's existing behavior on every endpoint], invalid token 401, wrong-role 403, invalid sort 422). Full suite 41/41 green (28 pre-existing untouched).
+- [x] **Step 2 — Customer Menu View** (`service.py`, `routes.py`, `schemas.py`, `tests/test_restaurant_browse.py`): `GET /restaurants/{restaurant_id}/menu` (customer-only, same `customer_router` as Step 1), reusing the Phase 4 `menu_items` model — no new menu model.
+  - Grouped response `[{category, items}, ...]` (owner decision), categories alphabetical, unnamed (`category=NULL`) items grouped last, items sorted name-within-category. Optional case-insensitive `?category=Starters` filter (same `func.lower` exact-match pattern as the Phase 4 order-status filter).
+  - Sold-out items included but flagged `is_available=false` (owner decision: Foodpanda-style visibility).
+  - Only ACTIVE restaurants resolve — pending/deactivated restaurant's menu is a 404, indistinguishable from unknown id (no-leak pattern).
+  - Response is customer-facing fields only — no `restaurant_id` per item (implicit in the path), no management data.
+  - Tests: 8 new automated tests — alphabetical grouping, NULL-category last, case-insensitive category filter, sold-out flagged not hidden, unknown + non-active restaurant 404, route flow with no-internal-leak check, missing token 403, wrong-role 403. Full suite 49/49 green (41 pre-existing untouched).
+
 Exit check: place order both COD + Digital, DB row has correct snapshot math (match Sec 11 example).
 
 ---

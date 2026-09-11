@@ -4,7 +4,7 @@ Photo upload is a separate endpoint (Step 4, multipart) — these schemas
 only carry photo_url as a plain string, set after upload.
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, time
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -109,3 +109,44 @@ class RestaurantOrderDetailResponseSchema(BaseModel):
     customer_name: str
     delivery_address: RestaurantOrderDeliveryAddressSchema | None
     items: list[RestaurantOrderItemResponseSchema]
+
+
+# --- Phase 5, Step 1: customer restaurant browse response shape ---
+
+
+class CustomerRestaurantResponseSchema(BaseModel):
+    """One row in GET /restaurants (customer browse). Public fields only —
+    no email, password_hash, phone_number, commission_rate or status."""
+    id: uuid.UUID
+    name: str
+    address: str | None
+    logo_url: str | None
+    cover_photo_url: str | None
+    opening_time: time | None
+    closing_time: time | None
+    distance_km: float
+    avg_rating: float | None
+
+
+# --- Phase 5, Step 2: customer menu view response shapes ---
+
+
+class CustomerMenuItemSchema(BaseModel):
+    """One dish on the customer menu — customer-facing fields only
+    (no restaurant_id — implicit in the path; no management data).
+    Sold-out items are included, flagged via is_available."""
+    id: uuid.UUID
+    name: str
+    description: str | None
+    price: float
+    category: str | None
+    photo_url: str | None
+    variants: dict | None
+    is_available: bool
+
+
+class CustomerMenuCategorySchema(BaseModel):
+    """One category group in GET /restaurants/{id}/menu — items already
+    sorted within the group."""
+    category: str | None
+    items: list[CustomerMenuItemSchema]
