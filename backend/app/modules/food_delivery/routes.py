@@ -1,7 +1,8 @@
 """
 Phase 4 routes — Menu CRUD (Step 2), availability toggle (Step 3), photo
 upload (Step 4), the order dashboard (Step 5) — and Phase 5's customer
-browse (Step 1) + menu view (Step 2) endpoints. Restaurant routes require a "restaurant" role
+endpoints: browse (Step 1), menu view (Step 2), cart CRUD (Step 4).
+Restaurant routes require a "restaurant" role
 token; the customer browse route requires "customer" — rider/restaurant/
 admin tokens get 403 either way, same RBAC pattern as
 platform/users/routes.py.
@@ -16,6 +17,9 @@ from app.core.database import get_db
 from app.platform.auth.dependencies import CurrentUser, require_role
 from app.modules.food_delivery import service
 from app.modules.food_delivery.schemas import (
+    CartAddItemSchema,
+    CartSchema,
+    CartUpdateItemSchema,
     CustomerMenuCategorySchema,
     CustomerRestaurantResponseSchema,
     MenuItemAvailabilitySchema,
@@ -70,6 +74,70 @@ def view_restaurant_menu(
     are included but flagged is_available=false. Only active restaurants
     resolve — anything else is a 404."""
     return service.get_customer_menu(db, restaurant_id, category)
+
+
+# --- Phase 5, Step 4: cart CRUD (multi-cart, Redis-backed) ---
+
+
+@customer_router.get("/{restaurant_id}/cart", response_model=CartSchema)
+def view_my_cart(
+    restaurant_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 4 — view THIS customer's cart for THIS restaurant. Multi-cart:
+    other restaurants' carts are untouched (different Redis keys); an
+    absent cart reads as empty."""
+    return service.get_cart(db, current_user.id, restaurant_id)
+
+
+@customer_router.post("/{restaurant_id}/cart/items", response_model=CartSchema, status_code=status.HTTP_201_CREATED)
+def add_cart_item(
+    restaurant_id: uuid.UUID,
+    payload: CartAddItemSchema,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 4 — add an item line to this restaurant's cart. Menu item must
+    exist, belong to THIS restaurant, and be available; qty >= 1; variant
+    only where the item supports one."""
+    return service.add_cart_item(db, current_user.id, restaurant_id, payload)
+
+
+@customer_router.patch("/{restaurant_id}/cart/items/{item_id}", response_model=CartSchema)
+def update_cart_item(
+    restaurant_id: uuid.UUID,
+    item_id: uuid.UUID,
+    payload: CartUpdateItemSchema,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 4 — set a cart line's quantity. The line must already be in
+    the cart."""
+    return service.update_cart_item(db, current_user.id, restaurant_id, item_id, payload.qty)
+
+
+@customer_router.delete("/{restaurant_id}/cart/items/{item_id}", response_model=CartSchema)
+def remove_cart_item(
+    restaurant_id: uuid.UUID,
+    item_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 4 — remove one line from this restaurant's cart. Removing a
+    sold-out line stays possible (no availability re-check)."""
+    return service.remove_cart_item(db, current_user.id, restaurant_id, item_id)
+
+
+@customer_router.delete("/{restaurant_id}/cart", status_code=status.HTTP_204_NO_CONTENT)
+def clear_cart(
+    restaurant_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 4 — delete this restaurant-specific cart entirely. Other
+    restaurants' carts are independent and unaffected."""
+    service.delete_cart(db, current_user.id, restaurant_id)
 
 
 @router.get("", response_model=list[MenuItemResponseSchema])

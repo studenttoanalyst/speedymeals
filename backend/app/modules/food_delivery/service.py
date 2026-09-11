@@ -17,8 +17,15 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core import storage
+from app.core.redis_client import redis_client
 from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating, Restaurant
-from app.modules.food_delivery.schemas import MenuItemCreateSchema, MenuItemUpdateSchema
+from app.modules.food_delivery.schemas import (
+    CartAddItemSchema,
+    CartItemSchema,
+    CartSchema,
+    MenuItemCreateSchema,
+    MenuItemUpdateSchema,
+)
 from app.platform.users.models import Address, User
 
 # Step 4 — menu photo upload limits (5 MB; JPG/PNG only, spec Sec 9 Step 5)
@@ -543,3 +550,171 @@ def get_customer_menu(
         }
         for group_category in sorted(grouped, key=lambda c: (c is None, c or ""))
     ]
+
+
+# --- Phase 5, Step 3: multi-cart storage (Redis, never a SQL table) ---
+
+
+CART_TTL_SECONDS = 7 * 24 * 60 * 60  # stale carts self-expire after 7 days
+
+
+def _cart_key(customer_id: uuid.UUID, restaurant_id: uuid.UUID) -> str:
+    """Exact key structure required by the Phase 5 multi-cart design:
+    cart:{customer_id}:{restaurant_id} — e.g. cart:25:8, one independent
+    cart per restaurant, never cleared when the customer browses elsewhere
+    (no cross-restaurant coupling exists in this module)."""
+    return f"cart:{customer_id}:{restaurant_id}"
+
+
+def get_cart(db: Session, customer_id: uuid.UUID, restaurant_id: uuid.UUID) -> dict:
+    """Read one restaurant-specific cart. Returns {'restaurant_id': ...,
+    'items': []} when absent — an empty cart is not an error for reads.
+    restaurant_id/ownership validation is Step 4's (endpoints) job; this
+    is the storage primitive."""
+    raw = redis_client.get(_cart_key(customer_id, restaurant_id))
+    if raw is None:
+        # Same JSON shape as a stored cart, so callers see one consistent form.
+        return CartSchema(restaurant_id=restaurant_id, items=[]).model_dump(mode="json")
+    return CartSchema.model_validate_json(raw).model_dump(mode="json")
+
+
+def save_cart(db: Session, customer_id: uuid.UUID, restaurant_id: uuid.UUID, cart: CartSchema) -> dict:
+    """Write a full cart (Step 4's add/update/remove all funnel through
+    read-modify-write here). The schema's restaurant_id is authoritative —
+    it is FORCED to the path/customer-supplied restaurant_id so a payload
+    can never write a cart under another restaurant's key.
+    Every write (re)starts the 7-day TTL — an active cart never dies
+    mid-editing; abandoned ones self-expire so Redis doesn't hoard junk.
+    """
+    cart.restaurant_id = restaurant_id
+    raw = cart.model_dump_json()
+    redis_client.set(_cart_key(customer_id, restaurant_id), raw, ex=CART_TTL_SECONDS)
+    return cart.model_dump(mode="json")
+
+
+def delete_cart(db: Session, customer_id: uuid.UUID, restaurant_id: uuid.UUID) -> None:
+    """Remove the cart key entirely (used on checkout conversion / manual
+    clear in Step 4). No-op if the cart doesn't exist."""
+    redis_client.delete(_cart_key(customer_id, restaurant_id))
+
+
+# --- Phase 5, Step 4: cart CRUD (endpoints; Step 3 primitives underneath) ---
+
+
+def _get_active_restaurant(db: Session, restaurant_id: uuid.UUID) -> Restaurant:
+    """Restaurant exists AND is active — same no-leak 404 pattern as the
+    customer browse/menu endpoints (a deactivated restaurant's cart is
+    indistinguishable from an unknown id)."""
+    restaurant = (
+        db.query(Restaurant)
+        .filter(Restaurant.id == restaurant_id, Restaurant.status == ACTIVE_RESTAURANT_STATUS)
+        .first()
+    )
+    if restaurant is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Restaurant not found.")
+    return restaurant
+
+
+def _get_valid_cart_item(db: Session, restaurant_id: uuid.UUID, item_id: uuid.UUID) -> MenuItem:
+    """The cart item must exist, belong to THIS restaurant, and be
+    available. Wrong-restaurant item is a 404 (no existence leak), same
+    ownership-in-WHERE-clause pattern as _get_owned_menu_item."""
+    menu_item = (
+        db.query(MenuItem)
+        .filter(
+            MenuItem.id == item_id,
+            MenuItem.restaurant_id == restaurant_id,
+        )
+        .first()
+    )
+    if menu_item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Menu item not found.")
+    if not menu_item.is_available:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Menu item is currently sold out.",
+        )
+    return menu_item
+
+
+def _validate_variant(menu_item: MenuItem, variant: dict | None) -> None:
+    """Minimal variant guard (owner decision): the menu model's `variants`
+    JSONB has no locked structure yet, so validation is limited to the one
+    invariant that holds today — an item that defines NO variants cannot
+    receive one. Items that DO define variants are stored as-sent; full
+    option-list validation lands with checkout when the structure is locked."""
+    if variant and not menu_item.variants:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This menu item does not support variants.",
+        )
+
+
+def add_cart_item(
+    db: Session,
+    customer_id: uuid.UUID,
+    restaurant_id: uuid.UUID,
+    payload: CartAddItemSchema,
+) -> dict:
+    """Add one item line to this restaurant's cart. Adding the same
+    item_id + variant again merges quantities (cart stays one line per
+    distinct item/variant pair). All DB validation happens BEFORE the Redis
+    write, so a rejected request never touches the cart."""
+    _get_active_restaurant(db, restaurant_id)
+    menu_item = _get_valid_cart_item(db, restaurant_id, payload.item_id)
+    _validate_variant(menu_item, payload.variant)
+
+    cart = CartSchema.model_validate(get_cart(db, customer_id, restaurant_id))
+    for existing in cart.items:
+        if existing.item_id == payload.item_id and existing.variant == payload.variant:
+            existing.qty += payload.qty
+            break
+    else:
+        cart.items.append(
+            CartItemSchema(item_id=payload.item_id, qty=payload.qty, variant=payload.variant)
+        )
+
+    return save_cart(db, customer_id, restaurant_id, cart)
+
+
+def update_cart_item(
+    db: Session,
+    customer_id: uuid.UUID,
+    restaurant_id: uuid.UUID,
+    item_id: uuid.UUID,
+    qty: int,
+) -> dict:
+    """Set a cart line's quantity (Schema enforces qty >= 1; removing a
+    line is the DELETE endpoint's job, not qty=0). The line must exist in
+    THIS cart, and the underlying item must still be available — a sold-out
+    item can be viewed in the cart (menu decision) but not re-ordered."""
+    _get_active_restaurant(db, restaurant_id)
+    _get_valid_cart_item(db, restaurant_id, item_id)
+
+    cart = CartSchema.model_validate(get_cart(db, customer_id, restaurant_id))
+    for existing in cart.items:
+        if existing.item_id == item_id:
+            existing.qty = qty
+            break
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not in cart.")
+
+    return save_cart(db, customer_id, restaurant_id, cart)
+
+
+def remove_cart_item(
+    db: Session, customer_id: uuid.UUID, restaurant_id: uuid.UUID, item_id: uuid.UUID
+) -> dict:
+    """Drop one line from this restaurant's cart. The line must exist in
+    the cart; the menu item itself is NOT availability-checked — removing
+    a sold-out line must stay possible."""
+    _get_active_restaurant(db, restaurant_id)
+
+    cart = CartSchema.model_validate(get_cart(db, customer_id, restaurant_id))
+    remaining = [existing for existing in cart.items if existing.item_id != item_id]
+    if len(remaining) == len(cart.items):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not in cart.")
+
+    cart.items = remaining
+    return save_cart(db, customer_id, restaurant_id, cart)
+

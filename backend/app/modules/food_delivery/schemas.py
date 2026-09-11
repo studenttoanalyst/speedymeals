@@ -150,3 +150,38 @@ class CustomerMenuCategorySchema(BaseModel):
     sorted within the group."""
     category: str | None
     items: list[CustomerMenuItemSchema]
+
+
+# --- Phase 5, Step 3: multi-cart (Redis) shapes ---
+
+
+class CartItemSchema(BaseModel):
+    """One line in a cart. qty must be at least 1; variant mirrors the
+    menu item's JSONB `variants` shape (validity against the actual item
+    is checked when cart CRUD endpoints land in Step 4)."""
+    item_id: uuid.UUID
+    qty: int = Field(gt=0)
+    variant: dict | None = None
+
+
+class CartSchema(BaseModel):
+    """One restaurant-specific cart (Phase 5 multi-cart model — a customer
+    holds one of these per restaurant simultaneously). Serialized as JSON
+    into Redis under `cart:{customer_id}:{restaurant_id}`; never a SQL row
+    (deliberate Phase 1 decision — cart is temporary pre-order state)."""
+    restaurant_id: uuid.UUID
+    items: list[CartItemSchema]
+
+
+class CartAddItemSchema(BaseModel):
+    """Body for POST .../cart/items — Step 4. item existence/belonging/
+    availability are validated against the DB in the service layer; the
+    schema only enforces shape."""
+    item_id: uuid.UUID
+    qty: int = Field(gt=0)
+    variant: dict | None = None
+
+
+class CartUpdateItemSchema(BaseModel):
+    """Body for PATCH .../cart/items/{item_id} — Step 4 quantity change."""
+    qty: int = Field(gt=0)
