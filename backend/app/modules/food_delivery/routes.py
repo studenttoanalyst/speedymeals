@@ -22,6 +22,8 @@ from app.modules.food_delivery.schemas import (
     CartUpdateItemSchema,
     CheckoutPreviewResponseSchema,
     CustomerMenuCategorySchema,
+    PlaceOrderResponseSchema,
+    PlaceOrderSchema,
     CustomerRestaurantResponseSchema,
     MenuItemAvailabilitySchema,
     MenuItemCreateSchema,
@@ -156,6 +158,22 @@ def preview_my_checkout(
     Distance Matrix (restaurant -> address), fee = 50 + (km x 20).
     Calculation only: no order placed, cart not cleared."""
     return service.preview_checkout(db, current_user.id, restaurant_id, address_id)
+
+
+@customer_router.post("/{restaurant_id}/cart/checkout", response_model=PlaceOrderResponseSchema, status_code=status.HTTP_201_CREATED)
+def place_my_order(
+    restaurant_id: uuid.UUID,
+    payload: PlaceOrderSchema,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """Step 6 — convert this restaurant's cart into a real order. All prices
+    are re-read from the DB and frozen on the order row (commission via the
+    Phase 4 helper, rider earning = 100% of delivery fee). The Redis cart
+    is cleared only after the DB commit succeeds."""
+    return service.place_order(
+        db, current_user.id, restaurant_id, payload.address_id, payload.payment_method
+    )
 
 
 @router.get("", response_model=list[MenuItemResponseSchema])

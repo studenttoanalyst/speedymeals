@@ -733,20 +733,22 @@ def calculate_delivery_fee(delivery_distance_km: Decimal | int | float) -> Decim
     return (DELIVERY_FEE_BASE + distance * DELIVERY_FEE_PER_KM).quantize(Decimal("0.01"))
 
 
-def preview_checkout(
+def _build_checkout_context(
     db: Session,
     customer_id: uuid.UUID,
     restaurant_id: uuid.UUID,
     address_id: uuid.UUID,
 ) -> dict:
-    """Checkout CALCULATION PREVIEW — no order row is created, no payment,
-    cart is NOT cleared (Step 6's checkout will consume this math).
+    """Shared validation + price snapshot for the checkout preview (Step 5)
+    AND order placement (Step 6) — one source of truth for both, so the
+    customer is never shown a price the order would not honor.
 
     Address ownership: WHERE user_id == customer_id (same pattern as the
     browse endpoint) — another customer's address_id is a 404. Distance is
     the real road distance from Maps Distance Matrix (restaurant ->
-    address); a Maps outage surfaces as a clean 503, never a crash, and
-    nothing is written anywhere on failure.
+    address); a Maps outage surfaces as a clean 503, never a crash. Every
+    price is re-read from Postgres — Redis cart and client never supply
+    financial values.
     """
     restaurant = _get_active_restaurant(db, restaurant_id)
 
@@ -773,7 +775,7 @@ def preview_checkout(
 
     # Price every line from the CURRENT menu, grouped by item_id — a cart
     # line whose menu item has vanished (deleted/sold out since) makes the
-    # whole preview invalid rather than silently mispricing it.
+    # whole checkout invalid rather than silently mispricing it.
     lines: dict[uuid.UUID, list[CartItemSchema]] = {}
     for line in cart.items:
         lines.setdefault(line.item_id, []).append(line)
@@ -787,11 +789,17 @@ def preview_checkout(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cart contains an item that is no longer on the menu. Please update your cart.",
         )
+    for item in by_id.values():
+        if not item.is_available:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cart contains a sold-out item. Please update your cart.",
+            )
 
     food_subtotal = Decimal("0")
     for item_id, item_lines in lines.items():
-        item = by_id[item_id]
-        food_subtotal += item.price * sum(line.qty for line in item_lines)
+        food_subtotal += by_id[item_id].price * sum(line.qty for line in item_lines)
+    food_subtotal = food_subtotal.quantize(Decimal("0.01"))
 
     try:
         distance_km = maps_client.get_road_distance_km(
@@ -811,9 +819,140 @@ def preview_checkout(
     total = (food_subtotal + delivery_fee).quantize(Decimal("0.01"))
 
     return {
-        "food_subtotal": food_subtotal.quantize(Decimal("0.01")),
+        "restaurant": restaurant,
+        "address": address,
+        "cart": cart,
+        "by_id": by_id,
+        "food_subtotal": food_subtotal,
         "delivery_distance_km": delivery_distance_km,
         "delivery_fee": delivery_fee,
         "total": total,
+    }
+
+
+def preview_checkout(
+    db: Session,
+    customer_id: uuid.UUID,
+    restaurant_id: uuid.UUID,
+    address_id: uuid.UUID,
+) -> dict:
+    """Checkout CALCULATION PREVIEW — no order row is created, no payment,
+    cart is NOT cleared. See _build_checkout_context for the shared rules."""
+    ctx = _build_checkout_context(db, customer_id, restaurant_id, address_id)
+    return {
+        "food_subtotal": ctx["food_subtotal"],
+        "delivery_distance_km": ctx["delivery_distance_km"],
+        "delivery_fee": ctx["delivery_fee"],
+        "total": ctx["total"],
+    }
+
+
+# --- Phase 5, Step 6: place order (cart -> real order) ---
+
+
+VALID_PAYMENT_METHODS = {"COD", "Digital"}
+# Phase 4 Step 6 convention: checkout lands the order as "Accepted" (the
+# restaurant accepted at placement) — "Placed -> Accepted" is not part of
+# that module's state machine by design.
+ORDER_STATUS_ON_PLACEMENT = "Accepted"
+
+
+def place_order(
+    db: Session,
+    customer_id: uuid.UUID,
+    restaurant_id: uuid.UUID,
+    address_id: uuid.UUID,
+    payment_method: str,
+) -> dict:
+    """Convert the Redis cart into a real order (Step 6).
+
+    Money NEVER comes from Redis or the client — _build_checkout_context
+    re-reads authoritative prices from Postgres. All financial snapshot
+    values (incl. commission via the Phase 4 calculate_commission helper
+    and rider_earning = 100% of the delivery fee, spec Sec 3.3) are FROZEN
+    on the order row at placement, so later changes to a restaurant's
+    commission_rate or the fee formula cannot rewrite history.
+
+    Transaction behavior: orders + order_items are written inside ONE
+    SQLAlchemy session/transaction (the project's existing get_db()
+    pattern — commit makes them atomic). The Redis cart is cleared ONLY
+    AFTER the DB commit succeeds, so a failed order creation never
+    destroys the customer's cart. No idempotency key exists in this
+    project; a duplicate click can at worst place two real orders (each
+    then sees an empty cart and fails with 400) — flagged as acceptable
+    MVP risk instead of building an idempotency system.
+    """
+    if payment_method not in VALID_PAYMENT_METHODS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Payment method must be one of: {sorted(VALID_PAYMENT_METHODS)}.",
+        )
+
+    ctx = _build_checkout_context(db, customer_id, restaurant_id, address_id)
+    restaurant = ctx["restaurant"]
+
+    commission = calculate_commission(ctx["food_subtotal"], restaurant.commission_rate)
+    rider_earning = ctx["delivery_fee"]
+
+    order = Order(
+        user_id=customer_id,
+        restaurant_id=restaurant_id,
+        rider_id=None,  # rider assignment is Phase 6
+        delivery_address_id=address_id,
+        status=ORDER_STATUS_ON_PLACEMENT,
+        payment_method=payment_method,
+        food_subtotal=ctx["food_subtotal"],
+        delivery_distance_km=ctx["delivery_distance_km"],
+        delivery_fee=ctx["delivery_fee"],
+        total_amount=ctx["total"],
+        commission_amount=commission["commission_amount"],
+        restaurant_payable=commission["restaurant_payable"],
+        rider_earning=rider_earning,
+        country_code=restaurant.country_code,
+        currency=restaurant.currency,
+        placed_at=datetime.now(timezone.utc),
+    )
+    db.add(order)
+    db.flush()  # assign order.id before writing order_items
+
+    for line in ctx["cart"].items:
+        db.add(
+            OrderItem(
+                order_id=order.id,
+                menu_item_id=line.item_id,
+                quantity=line.qty,
+                selected_variant=(str(line.variant) if line.variant else None),
+                price_at_order=ctx["by_id"][line.item_id].price,
+            )
+        )
+
+    db.commit()
+    db.refresh(order)
+
+    # Only after a successful commit: the cart's job is done.
+    delete_cart(db, customer_id, restaurant_id)
+
+    return {
+        "id": order.id,
+        "status": order.status,
+        "payment_method": order.payment_method,
+        "food_subtotal": order.food_subtotal,
+        "delivery_distance_km": order.delivery_distance_km,
+        "delivery_fee": order.delivery_fee,
+        "total_amount": order.total_amount,
+        "commission_amount": order.commission_amount,
+        "restaurant_payable": order.restaurant_payable,
+        "rider_earning": order.rider_earning,
+        "placed_at": order.placed_at,
+        "items": [
+            {
+                "menu_item_id": item.menu_item_id,
+                "name": ctx["by_id"][item.menu_item_id].name,
+                "quantity": item.quantity,
+                "selected_variant": item.selected_variant,
+                "price_at_order": item.price_at_order,
+            }
+            for item in db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
+        ],
     }
 

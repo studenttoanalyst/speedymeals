@@ -13,10 +13,12 @@ from decimal import Decimal
 import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 
 from app.core import maps_client
 from app.core.database import get_db
 from app.modules.food_delivery import service
+from app.modules.food_delivery.models import MenuItem
 from app.modules.food_delivery.schemas import CartAddItemSchema
 from app.platform.auth.jwt_utils import create_access_token
 from app.platform.users.models import Address
@@ -356,3 +358,278 @@ def test_checkout_route_end_to_end(db_session, checkout_client, customer, addres
     assert body["delivery_distance_km"] == 3.0
     assert body["delivery_fee"] == 110.0
     assert body["total"] == 1910.0
+
+
+# --- Phase 5, Step 6: place order ---
+
+
+def test_place_order_spec_example_exact_numbers(db_session, customer, address, track_carts, monkeypatch):
+    """Sec 11 example: Rs.1000 food, 3 km, COD -> fee 110, commission 100
+    (10%), payable 900, rider earning 110, total 1110."""
+    from app.modules.food_delivery.models import Order, OrderItem
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    result = service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+
+    assert result["food_subtotal"] == Decimal("1000.00")
+    assert result["delivery_distance_km"] == Decimal("3.00")
+    assert result["delivery_fee"] == Decimal("110.00")
+    assert result["commission_amount"] == Decimal("100.00")
+    assert result["restaurant_payable"] == Decimal("900.00")
+    assert result["rider_earning"] == Decimal("110.00")
+    assert result["total_amount"] == Decimal("1110.00")
+    assert result["status"] == "Accepted"
+    assert result["payment_method"] == "COD"
+
+    # Real rows, frozen values (re-read from the DB, not the return dict).
+    order = db_session.query(Order).get(result["id"])
+    assert order.user_id == customer.id and order.restaurant_id == restaurant.id
+    assert order.delivery_address_id == address.id
+    assert order.commission_amount == Decimal("100.00")
+    assert order.rider_id is None  # rider assignment is Phase 6
+    assert order.placed_at is not None
+    items = db_session.query(OrderItem).filter(OrderItem.order_id == order.id).all()
+    assert len(items) == 1 and items[0].quantity == 1
+    assert items[0].price_at_order == Decimal("1000.00")
+
+
+def test_place_order_multiple_items_variants_quantities(db_session, customer, address, track_carts, monkeypatch):
+    from app.modules.food_delivery.models import OrderItem
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    biryani = _make_menu_item(db_session, restaurant, "Biryani", 500)
+    cola = MenuItem(
+        restaurant_id=restaurant.id, name="Cola", description="drink", price=120,
+        category="Drinks", photo_url=None, variants={"size": ["Regular", "Large"]},
+        is_available=True,
+    )
+    db_session.add(cola)
+    db_session.commit()
+    db_session.refresh(cola)
+
+    service.add_cart_item(db_session, customer.id, restaurant.id,
+                          CartAddItemSchema(item_id=biryani.id, qty=2))
+    service.add_cart_item(db_session, customer.id, restaurant.id,
+                          CartAddItemSchema(item_id=cola.id, qty=3, variant={"size": "Large"}))
+    track_carts(customer.id, restaurant.id)
+    _fake_maps(monkeypatch, 1.0)
+
+    result = service.place_order(db_session, customer.id, restaurant.id, address.id, "Digital")
+
+    # 2x500 + 3x120 = 1360; fee 70; total 1430; 10% -> 136 / 1224; rider 70.
+    assert result["food_subtotal"] == Decimal("1360.00")
+    assert result["total_amount"] == Decimal("1430.00")
+    assert result["commission_amount"] == Decimal("136.00")
+    assert result["restaurant_payable"] == Decimal("1224.00")
+    assert result["rider_earning"] == Decimal("70.00")
+
+    rows = db_session.query(OrderItem).filter(OrderItem.order_id == result["id"]).all()
+    by_name = {r.menu_item_id: r for r in rows}
+    assert by_name[biryani.id].quantity == 2 and by_name[biryani.id].selected_variant is None
+    assert by_name[cola.id].quantity == 3 and "Large" in by_name[cola.id].selected_variant
+    assert by_name[cola.id].price_at_order == Decimal("120.00")
+
+
+def test_place_order_invalid_payment_method_400(db_session, customer, address, track_carts, monkeypatch):
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(db_session, customer.id, restaurant.id, address.id, "crypto")
+    assert exc_info.value.status_code == 400
+    # Cart untouched — nothing was created.
+    assert len(service.get_cart(db_session, customer.id, restaurant.id)["items"]) == 1
+
+
+def test_place_order_clears_cart_only_after_success(db_session, customer, address, track_carts, monkeypatch):
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+    assert service.get_cart(db_session, customer.id, restaurant.id)["items"] == []
+
+
+def test_place_order_cart_survives_maps_failure(db_session, customer, address, track_carts, monkeypatch):
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+
+    def boom(*args):
+        raise maps_client.MapsError("Distance lookup failed.")
+
+    monkeypatch.setattr(maps_client, "get_road_distance_km", boom)
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+    assert exc_info.value.status_code == 503
+    assert len(service.get_cart(db_session, customer.id, restaurant.id)["items"]) == 1
+
+
+def test_place_order_cart_survives_sold_out_item(db_session, customer, address, track_carts, monkeypatch):
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    item.is_available = False  # sold out after being carted
+    db_session.commit()
+    _fake_maps(monkeypatch, 3.0)
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+    assert exc_info.value.status_code == 400
+    assert len(service.get_cart(db_session, customer.id, restaurant.id)["items"]) == 1
+
+
+def test_place_order_empty_cart_400(db_session, customer, address, monkeypatch):
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    _fake_maps(monkeypatch, 3.0)
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+    assert exc_info.value.status_code == 400
+
+
+def test_place_order_other_customers_address_404(db_session, customer, address, track_carts, monkeypatch):
+    from app.platform.users.models import User
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    other = User(phone_number=f"+92329{uuid.uuid4().hex[:8]}", name="Other", country_code="+92")
+    db_session.add(other)
+    db_session.flush()
+    other_address = Address(user_id=other.id, latitude=31.5, longitude=74.3)
+    db_session.add(other_address)
+    db_session.commit()
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(db_session, customer.id, restaurant.id, other_address.id, "COD")
+    assert exc_info.value.status_code == 404
+
+
+def test_place_order_cross_restaurant_isolated_cart_400(db_session, customer, address, track_carts, monkeypatch):
+    """Cart exists under restaurant A; checking out restaurant B (same
+    customer) must not see or consume A's cart — multi-cart isolation."""
+    restaurant_a = _make_restaurant(db_session, "Spot A", latitude=31.53, longitude=74.36)
+    restaurant_b = _make_restaurant(db_session, "Spot B", latitude=31.53, longitude=74.36)
+    item_a = _make_menu_item(db_session, restaurant_a, "Biryani", 1000)
+    _make_menu_item(db_session, restaurant_b, "Pizza", 800)
+    _seed_cart(db_session, customer, restaurant_a, item_a, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(db_session, customer.id, restaurant_b.id, address.id, "COD")
+    assert exc_info.value.status_code == 400
+    # A's cart untouched, B's cart still absent.
+    assert len(service.get_cart(db_session, customer.id, restaurant_a.id)["items"]) == 1
+    assert service.get_cart(db_session, customer.id, restaurant_b.id)["items"] == []
+
+
+def test_place_order_snapshot_frozen_against_commission_change(db_session, customer, address, track_carts, monkeypatch):
+    """Historical snapshot: changing the restaurant's commission_rate AFTER
+    placement must not alter the stored order values."""
+    from app.modules.food_delivery.models import Order
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    result = service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+
+    restaurant.commission_rate = 25  # rate change after placement
+    db_session.commit()
+
+    order = db_session.query(Order).get(result["id"])
+    assert order.commission_amount == Decimal("100.00")
+    assert order.restaurant_payable == Decimal("900.00")
+
+
+def test_place_order_failed_creation_leaves_order_rows_absent_and_cart_intact(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """Transaction behavior: if writing order_items blows up mid-creation,
+    no order row is committed and the Redis cart survives."""
+    from app.modules.food_delivery.models import Order
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    # Save ALL IDs BEFORE the failing operation — after an IntegrityError the
+    # ORM instances' state can be confused; accessing .id on them may trigger
+    # lazy loads that fail with ObjectDeletedError on the expired instance.
+    customer_id = customer.id
+    restaurant_id = restaurant.id
+
+    # A REAL flush failure: quantity=None violates the NOT NULL constraint
+    # at INSERT time (inside db.commit), so the whole transaction rolls
+    # back — no partial order can survive.
+    real_order_item = service.OrderItem
+
+    def broken_order_item(*args, **kwargs):
+        kwargs["quantity"] = None
+        return real_order_item(*args, **kwargs)
+
+    monkeypatch.setattr(service, "OrderItem", broken_order_item)
+    with pytest.raises(IntegrityError):
+        service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+
+    db_session.rollback()
+    assert db_session.query(Order).filter(Order.user_id == customer_id).count() == 0
+    assert len(service.get_cart(db_session, customer_id, restaurant_id)["items"]) == 1
+
+
+def test_place_order_route_end_to_end(db_session, customer, address, track_carts, monkeypatch):
+    from app.modules.food_delivery.routes import customer_router
+    from app.platform.auth.jwt_utils import create_access_token
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.core.database import get_db
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    app = FastAPI()
+    app.include_router(customer_router)
+    app.dependency_overrides[get_db] = lambda: db_session
+    client = TestClient(app)
+    token = create_access_token(customer.id, "customer")
+
+    response = client.post(
+        f"/restaurants/{restaurant.id}/cart/checkout",
+        json={"address_id": str(address.id), "payment_method": "COD"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["food_subtotal"] == 1000.0
+    assert body["delivery_fee"] == 110.0
+    assert body["commission_amount"] == 100.0
+    assert body["restaurant_payable"] == 900.0
+    assert body["rider_earning"] == 110.0
+    assert body["total_amount"] == 1110.0
+    assert body["items"][0]["name"] == "Biryani"
+    # Cart cleared after the successful order.
+    assert service.get_cart(db_session, customer.id, restaurant.id)["items"] == []
+
+    # Missing token / wrong role on the same route.
+    assert client.post(f"/restaurants/{restaurant.id}/cart/checkout", json={}).status_code == 403
+    wrong_role = create_access_token(restaurant.id, "restaurant")
+    assert client.post(
+        f"/restaurants/{restaurant.id}/cart/checkout",
+        json={"address_id": str(address.id), "payment_method": "COD"},
+        headers={"Authorization": f"Bearer {wrong_role}"},
+    ).status_code == 403
