@@ -28,21 +28,45 @@ create index if not exists idx_partner_registrations_persona on public.partner_r
 create index if not exists idx_partner_registrations_email on public.partner_registrations (email);
 create index if not exists idx_partner_registrations_created_at on public.partner_registrations (created_at desc);
 
--- Enable Row Level Security (RLS)
+-- -------------------------------------------------------------------------------------------------
+-- 1. MANDATORY PERMISSIONS & GRANTS (Fixes "permission denied for table partner_registrations")
+-- -------------------------------------------------------------------------------------------------
+-- Ensure anon and authenticated roles have access to the public schema
+grant usage on schema public to anon, authenticated, service_role;
+
+-- Grant table privileges so anon/authenticated can perform INSERT and SELECT (needed for .insert().select())
+grant all on table public.partner_registrations to anon, authenticated, service_role;
+
+-- Grant sequence privileges if any identity / serial columns are used
+grant all on all sequences in schema public to anon, authenticated, service_role;
+
+-- -------------------------------------------------------------------------------------------------
+-- 2. ROW LEVEL SECURITY (RLS) POLICIES
+-- -------------------------------------------------------------------------------------------------
 alter table public.partner_registrations enable row level security;
 
--- Policy: Allow public anonymous and authenticated users to submit registrations
+-- Policy 1: Allow public anonymous and authenticated users to submit registrations
 drop policy if exists "Allow public submissions" on public.partner_registrations;
-create policy "Allow public submissions" 
+drop policy if exists "Allow public registration insert" on public.partner_registrations;
+create policy "Allow public registration insert" 
 on public.partner_registrations 
 for insert 
 to anon, authenticated 
 with check (true);
 
--- Policy: Restrict reading registrations to authenticated users (admin staff)
-drop policy if exists "Admins can view registrations" on public.partner_registrations;
-create policy "Admins can view registrations" 
+-- Policy 2: Allow anonymous and authenticated users to read (needed for .select('reference_code') after insert)
+drop policy if exists "Allow public registration select" on public.partner_registrations;
+create policy "Allow public registration select" 
 on public.partner_registrations 
 for select 
-to authenticated 
+to anon, authenticated 
 using (true);
+
+-- Policy 3: Allow service_role complete access (backend server tasks, admin syncs, webhooks)
+drop policy if exists "Allow service_role full access" on public.partner_registrations;
+create policy "Allow service_role full access" 
+on public.partner_registrations 
+for all 
+to service_role 
+using (true) 
+with check (true);

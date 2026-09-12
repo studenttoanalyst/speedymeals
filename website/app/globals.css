@@ -53,6 +53,17 @@
   border-radius: 16px !important;
 }
 
+/* Hero dynamic video sizing: large on desktop matching reference, prominent on mobile */
+.hero-video-box {
+  max-width: min(520px, 94vw, calc(35dvh * 2.2789));
+}
+
+@media (min-width: 768px) {
+  .hero-video-box {
+    max-width: min(1200px, 94vw, calc(46dvh * 2.2789));
+  }
+}
+
 html {
   scroll-behavior: smooth;
   font-family: var(--font-sans);

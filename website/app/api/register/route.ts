@@ -1,5 +1,16 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
+
+// Use service role key if available on server (bypasses RLS), otherwise fallback to standard client
+const getDbClient = () => {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (serviceRoleKey && url) {
+    return createClient(url, serviceRoleKey);
+  }
+  return supabase;
+};
 
 /**
  * Generate letter-coded 8-digit unique ID:
@@ -38,7 +49,7 @@ export async function POST(request: Request) {
       cuisineType,
       devicePlatform,
       serviceInterest,
-      agreed = true,
+      agreed = false,
     } = body;
 
     const personName = (fullName || name || '').trim();
@@ -53,6 +64,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!agreed) {
+      return NextResponse.json(
+        { error: 'You must review and accept the agreement terms to proceed.' },
+        { status: 400 }
+      );
+    }
+
     if (!['rider', 'restaurant', 'customer'].includes(persona)) {
       return NextResponse.json(
         { error: 'Invalid persona type. Expected rider, restaurant, or customer.' },
@@ -63,7 +81,7 @@ export async function POST(request: Request) {
     // Check if Supabase credentials are populated
     const isConfigured =
       Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-      Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+      (Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) || Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY));
 
     if (!isConfigured) {
       return NextResponse.json(
@@ -95,7 +113,8 @@ export async function POST(request: Request) {
       status: 'pending',
     };
 
-    const { data, error } = await supabase
+    const db = getDbClient();
+    const { data, error } = await db
       .from('partner_registrations')
       .insert([insertPayload])
       .select('reference_code')

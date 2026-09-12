@@ -59,10 +59,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 pb-16 border-b border-[#2D3139]"
+          className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 md:gap-10 lg:gap-8 pb-16 border-b border-[#2D3139]"
         >
           {/* Col 1 — Brand */}
-          <motion.div variants={itemVariants} className="space-y-4">
+          <motion.div variants={itemVariants} className="col-span-2 md:col-span-1 space-y-4">
             <div className="flex items-center space-x-3.5">
               <div className="w-12 h-12 flex items-center justify-center bg-transparent overflow-hidden">
                 <img
@@ -76,8 +76,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               </span>
             </div>
 
-            <div className="font-mono text-xs text-[#2B7FFF] font-medium tracking-wide flex items-center space-x-2">
-              <span className="inline-block w-1.5 h-1.5 bg-[#2B7FFF] rounded-xs" />
+            <div className="font-mono text-xs text-blue font-semibold tracking-wide flex items-center space-x-2">
+              <span className="inline-block w-1.5 h-1.5 bg-blue" />
               <span>&ldquo;Fast &amp; safe to you.&rdquo;</span>
             </div>
 
@@ -88,8 +88,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           </motion.div>
 
           {/* Col 2 — Company */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] font-bold">
+          <motion.div variants={itemVariants} className="col-span-1 space-y-4">
+            <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
               COMPANY
             </div>
             <ul className="space-y-2.5 text-xs font-mono">
@@ -97,7 +97,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <button
                   type="button"
                   onClick={() => handleScrollTo('about')}
-                  className="text-[#A0A4AB] hover:text-white transition-colors"
+                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer"
                 >
                   About Us
                 </button>
@@ -106,14 +106,14 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <button
                   type="button"
                   onClick={() => handleScrollTo('services')}
-                  className="text-[#A0A4AB] hover:text-white transition-colors"
+                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer"
                 >
                   Services
                 </button>
               </li>
               <li>
                 <span className="text-[#5B5F66] cursor-not-allowed">
-                  Careers <span className="text-[10px] text-[#C7A874] ml-1">[HIRING]</span>
+                  Careers <span className="text-[10px] text-tan font-bold ml-1">[HIRING]</span>
                 </span>
               </li>
               <li>
@@ -123,8 +123,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           </motion.div>
 
           {/* Col 3 — Partner */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] font-bold">
+          <motion.div variants={itemVariants} className="col-span-1 space-y-4">
+            <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
               GET STARTED
             </div>
             <ul className="space-y-2.5 text-xs font-mono">
@@ -132,7 +132,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <button
                   type="button"
                   onClick={() => handleScrollTo('partner', 'rider')}
-                  className="text-[#A0A4AB] hover:text-[#E23A2E] transition-colors flex items-center space-x-1"
+                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1 cursor-pointer"
                 >
                   <span>Ride With Us</span>
                   <ArrowUpRight size={11} weight="bold" />
@@ -142,17 +142,16 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <button
                   type="button"
                   onClick={() => handleScrollTo('partner', 'restaurant')}
-                  className="text-[#A0A4AB] hover:text-[#C7A874] transition-colors flex items-center space-x-1"
+                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1 cursor-pointer"
                 >
                   <span>Partner Your Restaurant</span>
                   <ArrowUpRight size={11} weight="bold" />
                 </button>
               </li>
               <li>
-                <div className="flex items-center space-x-2 text-[#A0A4AB]">
-                  <span>Order</span>
-                  {/* Status tag styled per Services convention */}
-                  <span className="border-l-2 border-l-[#E4E2DD] pl-1 text-[10px] text-[#5B5F66] font-mono">
+                <div className="flex flex-wrap items-center gap-1.5 text-[#A0A4AB]">
+                  <span>Customer App</span>
+                  <span className="border-l-2 border-l-tan pl-1 text-[10px] text-tan font-mono font-semibold whitespace-nowrap">
                     ⋯ COMING SOON
                   </span>
                 </div>
@@ -161,8 +160,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           </motion.div>
 
           {/* Col 4 — Contact / Legal */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] font-bold">
+          <motion.div variants={itemVariants} className="col-span-2 md:col-span-1 space-y-4">
+            <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
               CONTACT
             </div>
             <div className="space-y-2 text-xs font-mono">
@@ -170,19 +169,19 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <div>
                 <a
                   href="mailto:partner@speedymeals.com"
-                  className="text-white hover:text-[#E23A2E] transition-colors underline decoration-1 underline-offset-4"
+                  className="text-white hover:text-red transition-colors underline decoration-1 underline-offset-4"
                 >
                   partner@speedymeals.com
                 </a>
               </div>
             </div>
 
-            {/* Social icons row: Phosphor bold icons, square/sharp containers only, hover fills --red */}
+            {/* Social icons row: Brand colors on hover */}
             <div className="pt-2 flex items-center space-x-2">
               <a
                 href="#twitter"
                 aria-label="Twitter / X"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#E23A2E] hover:border-[#E23A2E] transition-colors duration-150"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-blue hover:border-blue transition-colors duration-150"
               >
                 <TwitterLogo size={16} weight="bold" />
               </a>
@@ -190,7 +189,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <a
                 href="#linkedin"
                 aria-label="LinkedIn"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#E23A2E] hover:border-[#E23A2E] transition-colors duration-150"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-blue hover:border-blue transition-colors duration-150"
               >
                 <LinkedinLogo size={16} weight="bold" />
               </a>
@@ -198,7 +197,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <a
                 href="#instagram"
                 aria-label="Instagram"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#E23A2E] hover:border-[#E23A2E] transition-colors duration-150"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-red hover:border-red transition-colors duration-150"
               >
                 <InstagramLogo size={16} weight="bold" />
               </a>
@@ -206,7 +205,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <a
                 href="#github"
                 aria-label="GitHub"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#E23A2E] hover:border-[#E23A2E] transition-colors duration-150"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-tan hover:text-ink hover:border-tan transition-colors duration-150"
               >
                 <GithubLogo size={16} weight="bold" />
               </a>
@@ -214,9 +213,42 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           </motion.div>
         </motion.div>
 
+        {/* Regional Hubs Live Operational Strip */}
+        <div className="py-6 border-b border-[#2D3139] flex flex-wrap items-center justify-between gap-4 font-mono text-xs text-[#A0A4AB]">
+          <div className="flex items-center space-x-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
+            </span>
+            <span className="text-white font-semibold">DEPLOYMENT ZONES:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#10B981]" />
+              <span className="hover:text-white transition-colors">DUBAI (UAE)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#10B981]" />
+              <span className="hover:text-white transition-colors">DOHA (QATAR)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#10B981]" />
+              <span className="hover:text-white transition-colors">KARACHI (PK)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#10B981]" />
+              <span className="hover:text-white transition-colors">LAHORE (PK)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#10B981]" />
+              <span className="hover:text-white transition-colors">RIYADH (KSA)</span>
+            </span>
+          </div>
+        </div>
+
         {/* Bottom bar (hairline top-border) */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-[#5B5F66]">
-          <div>&copy; 2026 SpeedyMeals. All rights reserved.</div>
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-[#5B5F66]">
+          <div>&copy; 2026 SpeedyMeals Network. All rights reserved.</div>
           <div className="flex items-center space-x-4">
             <a href="#privacy" className="hover:underline hover:text-[#A0A4AB] transition-colors">
               Privacy Policy

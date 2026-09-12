@@ -140,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-cta-restaurant"
             type="button"
             onClick={() => handleNavClick('partner', 'restaurant')}
-            className="nav-pill px-4 py-2 text-xs font-mono font-semibold tracking-wider uppercase bg-ink text-white border border-ink hover:bg-blue hover:border-blue transition-colors duration-150 flex items-center space-x-1.5"
+            className="nav-pill px-4 py-2 text-xs font-mono font-semibold tracking-wider uppercase border border-blue text-blue hover:bg-blue hover:text-white transition-colors duration-150 flex items-center space-x-1.5"
           >
             <span>PARTNER</span>
             <ArrowUpRight size={13} weight="bold" />
@@ -210,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               id="mobile-cta-restaurant"
               type="button"
               onClick={() => handleNavClick('partner', 'restaurant')}
-              className="nav-pill w-full py-2.5 text-center border border-tan text-tan hover:bg-tan hover:text-ink transition-colors"
+              className="nav-pill w-full py-2.5 text-center border border-blue text-blue hover:bg-blue hover:text-white transition-colors"
             >
               Partner
             </button>
@@ -218,7 +218,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               id="mobile-cta-customer"
               type="button"
               onClick={() => handleNavClick('partner', 'customer')}
-              className="nav-pill w-full py-2.5 text-center border border-blue text-blue hover:bg-blue hover:text-white transition-colors"
+              className="nav-pill w-full py-2.5 text-center border border-tan text-[#A8874E] hover:bg-tan hover:text-ink transition-colors"
             >
               Waitlist
             </button>

@@ -89,7 +89,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="max-w-5xl w-full flex flex-col items-center text-center shrink-0 pt-1 sm:pt-2 md:pt-3"
+          className="max-w-5xl w-full flex flex-col items-center text-center shrink-0 pt-1 sm:pt-1.5 md:pt-2 z-20 relative"
         >
           {/* Eyebrow: FAST & SAFE TO YOU + SOUTH ASIA & MIDDLE EAST NETWORK */}
           <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 mb-1 sm:mb-1.5 px-2">
@@ -121,9 +121,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             </h1>
           </motion.div>
 
-          {/* Line 2: FAST. FAIR. GLOBAL. positioned cleanly ABOVE the video's gray vacant space */}
+          {/* Line 2: FAST. FAIR. GLOBAL. overlapping cleanly over the video's upper sky canvas */}
           <motion.div variants={itemVariants} className="relative z-20 w-full mb-0">
-            <div className="inline-flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 font-display text-xl sm:text-3xl lg:text-4xl xl:text-5xl [@media(max-height:760px)]:text-2xl [@media(max-height:640px)]:text-xl uppercase leading-none">
+            <div className="inline-flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 font-display text-xl sm:text-3xl lg:text-4xl xl:text-5xl [@media(max-height:760px)]:text-2xl [@media(max-height:640px)]:text-xl uppercase leading-none drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
               <motion.span
                 custom={1}
                 variants={wordVariants}
@@ -155,16 +155,27 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           </motion.div>
         </motion.div>
 
-        {/* Video Animation: Scaled dynamically to preserve ample negative space below on all viewports, sitting cleanly below FAST. FAIR. GLOBAL */}
+        {/* Video Animation: Pulled up to overlap behind FAST. FAIR. GLOBAL. with seamless perimeter fade into white */}
         <div
           ref={videoContainerRef}
-          className="relative w-full aspect-[3840/1685] mt-3.5 sm:mt-5 md:mt-6 overflow-hidden pointer-events-none select-none shrink-0"
+          className="hero-video-box relative w-full aspect-[3840/1685] -mt-5 sm:-mt-8 md:-mt-12 lg:-mt-16 overflow-hidden pointer-events-none select-none shrink-0 z-10"
           style={{
-            maxWidth: 'min(780px, 92vw, calc(34dvh * 2.2789))',
-            maskImage: 'radial-gradient(ellipse 99% 92% at 50% 50%, black 70%, rgba(0,0,0,0.85) 90%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 99% 92% at 50% 50%, black 70%, rgba(0,0,0,0.85) 90%, transparent 100%)',
+            maskImage: 'radial-gradient(ellipse 96% 90% at 50% 50%, black 65%, rgba(0,0,0,0.85) 85%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 96% 90% at 50% 50%, black 65%, rgba(0,0,0,0.85) 85%, transparent 100%)',
           }}
         >
+          {/* Top sky blend: allows FAST. FAIR. GLOBAL. to fade smoothly from white into the gray canvas */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-16 sm:h-24 md:h-32 bg-gradient-to-b from-paper via-paper/60 to-transparent z-10" />
+
+          {/* Left edge blend: dissolves left border seamlessly into white */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-14 sm:w-20 md:w-28 bg-gradient-to-r from-paper via-paper/50 to-transparent z-10" />
+
+          {/* Right edge blend: dissolves right border seamlessly into white */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-14 sm:w-20 md:w-28 bg-gradient-to-l from-paper via-paper/50 to-transparent z-10" />
+
+          {/* Bottom edge blend: subtle softening below road line */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 sm:h-8 bg-gradient-to-t from-paper/80 to-transparent z-10" />
+
           {/* Precise 1685px vertical crop (h-[128.3%] object-top): shows full scene (wheels, pins, road) while cleanly cropping bottom watermark */}
           <video
             ref={videoRef}
@@ -197,14 +208,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border border-line shadow-sm hover:border-red hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border-x border-b border-line border-t-2 border-t-red shadow-sm hover:border-red hover:bg-red/[0.02] hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
                 <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <CurrencyCircleDollar size={13} weight="bold" className="text-red group-hover:scale-125 transition-transform duration-200 shrink-0" />
-                    <span className="truncate">RIDER REMUNERATION</span>
+                    <span className="w-4 h-4 rounded-xs bg-red/10 flex items-center justify-center shrink-0">
+                      <CurrencyCircleDollar size={13} weight="bold" className="text-red group-hover:scale-110 transition-transform duration-200" />
+                    </span>
+                    <span className="truncate font-semibold text-ink">RIDER REMUNERATION</span>
                   </span>
-                  <span className="w-1.5 h-1.5 bg-red opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
+                  <span className="w-1.5 h-1.5 bg-red opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
                 <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-red transition-colors duration-150 truncate">
                   100% Retained
@@ -216,14 +229,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border border-line shadow-sm hover:border-blue hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border-x border-b border-line border-t-2 border-t-blue shadow-sm hover:border-blue hover:bg-blue/[0.02] hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
                 <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <ShieldCheck size={13} weight="bold" className="text-blue group-hover:scale-125 transition-transform duration-200 shrink-0" />
-                    <span className="truncate">MERCHANT CONTRACT</span>
+                    <span className="w-4 h-4 rounded-xs bg-blue/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck size={13} weight="bold" className="text-blue group-hover:scale-110 transition-transform duration-200" />
+                    </span>
+                    <span className="truncate font-semibold text-ink">MERCHANT CONTRACT</span>
                   </span>
-                  <span className="w-1.5 h-1.5 bg-blue opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
+                  <span className="w-1.5 h-1.5 bg-blue opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
                 <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-blue transition-colors duration-150 truncate">
                   10% Flat Rate
@@ -235,14 +250,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border border-line shadow-sm hover:border-tan hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border-x border-b border-line border-t-2 border-t-tan shadow-sm hover:border-tan hover:bg-tan/[0.03] hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
                 <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <Lightning size={13} weight="bold" className="text-tan group-hover:scale-125 transition-transform duration-200 shrink-0" />
-                    <span className="truncate">INFRASTRUCTURE</span>
+                    <span className="w-4 h-4 rounded-xs bg-tan/20 flex items-center justify-center shrink-0">
+                      <Lightning size={13} weight="bold" className="text-tan group-hover:scale-110 transition-transform duration-200" />
+                    </span>
+                    <span className="truncate font-semibold text-ink">INFRASTRUCTURE</span>
                   </span>
-                  <span className="w-1.5 h-1.5 bg-tan opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
+                  <span className="w-1.5 h-1.5 bg-tan opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
                 <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
                   Real-Time Dispatch

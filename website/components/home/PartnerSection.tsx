@@ -20,12 +20,28 @@ interface PartnerSectionProps {
   onSelectPersona: (persona: PersonaType) => void;
 }
 
-export const PartnerSection: React.FC<PartnerSectionProps> = ({
-  activePersona,
-  onSelectPersona,
-}) => {
-  // Form state
-  const [formData, setFormData] = useState({
+interface PersonaFormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+  city: string;
+  vehicleType: string;
+  businessName: string;
+  cuisineType: string;
+  branches: string;
+  devicePlatform: string;
+  serviceInterest: string;
+  agreed: boolean;
+}
+
+interface SubmittedPersonaRecord {
+  referenceCode: string;
+  data: PersonaFormData;
+}
+
+const defaultFormState: Record<PersonaType, PersonaFormData> = {
+  rider: {
     fullName: '',
     email: '',
     phone: '',
@@ -33,20 +49,90 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     city: 'Karachi',
     vehicleType: 'Motorcycle',
     businessName: '',
+    cuisineType: '',
+    branches: '1-3',
+    devicePlatform: '',
+    serviceInterest: '',
+    agreed: false, // Default unchecked
+  },
+  restaurant: {
+    fullName: '',
+    email: '',
+    phone: '',
+    countryCode: '+92',
+    city: 'Karachi',
+    vehicleType: '',
+    businessName: '',
     cuisineType: 'Pakistani / BBQ & Grills',
+    branches: '1-3',
+    devicePlatform: '',
+    serviceInterest: '',
+    agreed: false, // Default unchecked
+  },
+  customer: {
+    fullName: '',
+    email: '',
+    phone: '',
+    countryCode: '+92',
+    city: 'Karachi',
+    vehicleType: '',
+    businessName: '',
+    cuisineType: '',
     branches: '1-3',
     devicePlatform: 'iOS (Apple TestFlight Beta)',
     serviceInterest: 'Zero-Markup Food Delivery',
-    agreed: true,
+    agreed: false, // Default unchecked
+  },
+};
+
+export const PartnerSection: React.FC<PartnerSectionProps> = ({
+  activePersona,
+  onSelectPersona,
+}) => {
+  // Form state partitioned per persona so switching tabs loads dedicated forms
+  const [formsData, setFormsData] = useState<Record<PersonaType, PersonaFormData>>(defaultFormState);
+
+  // Completed submission records partitioned per persona
+  const [submissions, setSubmissions] = useState<Record<PersonaType, SubmittedPersonaRecord | null>>({
+    rider: null,
+    restaurant: null,
+    customer: null,
   });
 
   const [submitting, setSubmitting] = useState(false);
-  const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Active form data getter and updater for current persona
+  const formData = formsData[activePersona];
+  const setFormData = (updater: React.SetStateAction<PersonaFormData> | Partial<PersonaFormData>) => {
+    if (typeof updater === 'function') {
+      setFormsData(prev => ({
+        ...prev,
+        [activePersona]: (updater as (prevForm: PersonaFormData) => PersonaFormData)(prev[activePersona]),
+      }));
+    } else {
+      setFormsData(prev => ({
+        ...prev,
+        [activePersona]: {
+          ...prev[activePersona],
+          ...updater,
+        },
+      }));
+    }
+  };
+
+  // Active submission for currently viewed persona
+  const activeSubmission = submissions[activePersona];
+  const submittedId = activeSubmission ? activeSubmission.referenceCode : null;
+  const submittedData = activeSubmission ? activeSubmission.data : formData;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email || !formData.phone) return;
+    if (!formData.agreed) {
+      setError('Please review and accept the agreement terms to proceed.');
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
@@ -67,7 +153,14 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         throw new Error(data.error || 'Failed to submit registration. Please try again.');
       }
 
-      setSubmittedId(data.referenceCode);
+      // Record successful submission strictly for this persona
+      setSubmissions(prev => ({
+        ...prev,
+        [activePersona]: {
+          referenceCode: data.referenceCode,
+          data: { ...formData },
+        },
+      }));
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(msg);
@@ -76,17 +169,17 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     }
   };
 
-  const handleReset = () => {
-    setSubmittedId(null);
+  const handleReset = (personaToReset?: PersonaType) => {
+    const targetPersona = personaToReset || activePersona;
+    setSubmissions(prev => ({
+      ...prev,
+      [targetPersona]: null,
+    }));
+    setFormsData(prev => ({
+      ...prev,
+      [targetPersona]: { ...defaultFormState[targetPersona] },
+    }));
     setError(null);
-    setFormData({
-      ...formData,
-      fullName: '',
-      email: '',
-      phone: '',
-      businessName: '',
-      cuisineType: 'Middle Eastern / Grills',
-    });
   };
 
   const containerVariants = {
@@ -156,53 +249,53 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           </div>
         </motion.div>
 
-        {/* Persona-Split Entry: Three Hairline-Divided Columns */}
+        {/* Persona-Split Entry: Three Hairline-Divided Columns with Distinct Brand Accents */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-[#E4E2DD] mb-12 bg-[#FFFFFF] shadow-sm"
+          className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-line mb-12 bg-white shadow-sm"
         >
-          {/* Column 1: RIDE (--red accent) */}
+          {/* Column 1: RIDE (Speedy Red accent) */}
           <motion.div
             variants={itemVariants}
             id="persona-col-rider"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#E4E2DD] transition-colors duration-150 ${
-              activePersona === 'rider' ? 'bg-[#F6F5F3]' : 'bg-[#FFFFFF] hover:bg-[#F6F5F3]/50'
+            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-red transition-all duration-150 ${
+              activePersona === 'rider' ? 'bg-paper-off shadow-xs' : 'bg-white hover:bg-paper-off/50'
             }`}
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-[#E23A2E] text-[#E23A2E] flex items-center justify-center bg-[#E23A2E]/5">
+                <div className="w-10 h-10 border border-red/30 text-red flex items-center justify-center bg-red/10">
                   <Bicycle size={24} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#E23A2E] font-bold">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-red font-bold">
                   COURIER DISPATCH
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-[#15171A] mb-2">
+              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
                 Ride
               </h3>
-              <p className="text-sm text-[#5B5F66] mb-6 leading-relaxed">
+              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
                 Keep 100% of your delivery customer fees. Zero platform deduction on distance, zero
                 security deposit, with daily automated payouts.
               </p>
             </div>
 
             <div>
-              <div className="py-2 mb-4 border-t border-b border-[#E4E2DD] font-mono text-xs text-[#15171A] flex justify-between">
-                <span className="text-[#5B5F66]">FEE RETENTION:</span>
-                <span className="font-bold text-[#E23A2E]">100% TO RIDER</span>
+              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
+                <span className="text-ink-soft">FEE RETENTION:</span>
+                <span className="font-bold text-red">100% TO RIDER</span>
               </div>
               <button
                 type="button"
                 id="btn-select-rider"
                 onClick={() => onSelectPersona('rider')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 ${
+                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${
                   activePersona === 'rider'
-                    ? 'bg-[#E23A2E] text-white border-[#E23A2E]'
-                    : 'bg-transparent text-[#15171A] border-[#15171A] hover:bg-[#15171A] hover:text-white'
+                    ? 'bg-red text-white border-red'
+                    : 'bg-transparent text-ink border-ink hover:bg-ink hover:text-white'
                 }`}
               >
                 <span>{activePersona === 'rider' ? 'ACTIVE FORM' : 'APPLY TO RIDE'}</span>
@@ -211,47 +304,47 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             </div>
           </motion.div>
 
-          {/* Column 2: RESTAURANT (--tan accent) */}
+          {/* Column 2: RESTAURANT (Cobalt Blue accent) */}
           <motion.div
             variants={itemVariants}
             id="persona-col-restaurant"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#E4E2DD] transition-colors duration-150 ${
+            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-blue transition-all duration-150 ${
               activePersona === 'restaurant'
-                ? 'bg-[#F6F5F3]'
-                : 'bg-[#FFFFFF] hover:bg-[#F6F5F3]/50'
+                ? 'bg-paper-off shadow-xs'
+                : 'bg-white hover:bg-paper-off/50'
             }`}
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-[#C7A874] text-[#C7A874] flex items-center justify-center bg-[#C7A874]/5">
+                <div className="w-10 h-10 border border-blue/30 text-blue flex items-center justify-center bg-blue/10">
                   <Storefront size={24} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#C7A874] font-bold">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-blue font-bold">
                   MERCHANT DIRECT
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-[#15171A] mb-2">
+              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
                 Restaurant
               </h3>
-              <p className="text-sm text-[#5B5F66] mb-6 leading-relaxed">
+              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
                 Flat 10% commission. No onboarding penalty, no mandatory sponsored placements to
                 stay visible, and complete menu control.
               </p>
             </div>
 
             <div>
-              <div className="py-2 mb-4 border-t border-b border-[#E4E2DD] font-mono text-xs text-[#15171A] flex justify-between">
-                <span className="text-[#5B5F66]">COMMISSION:</span>
-                <span className="font-bold text-[#C7A874]">10% FLAT RATE</span>
+              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
+                <span className="text-ink-soft">COMMISSION:</span>
+                <span className="font-bold text-blue">10% FLAT RATE</span>
               </div>
               <button
                 type="button"
                 id="btn-select-restaurant"
                 onClick={() => onSelectPersona('restaurant')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 ${
+                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${
                   activePersona === 'restaurant'
-                    ? 'bg-[#C7A874] text-white border-[#C7A874]'
-                    : 'bg-transparent text-[#15171A] border-[#15171A] hover:bg-[#15171A] hover:text-white'
+                    ? 'bg-blue text-white border-blue'
+                    : 'bg-transparent text-blue border-blue hover:bg-blue hover:text-white'
                 }`}
               >
                 <span>{activePersona === 'restaurant' ? 'ACTIVE FORM' : 'PARTNER RESTAURANT'}</span>
@@ -260,47 +353,47 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             </div>
           </motion.div>
 
-          {/* Column 3: CUSTOMER (Optional soft anticipation note) */}
+          {/* Column 3: CUSTOMER (Warm Desert Tan accent) */}
           <motion.div
             variants={itemVariants}
             id="persona-col-customer"
-            className={`p-6 sm:p-8 flex flex-col justify-between transition-colors duration-150 ${
+            className={`p-6 sm:p-8 flex flex-col justify-between border-t-2 border-t-tan transition-all duration-150 ${
               activePersona === 'customer'
-                ? 'bg-[#F6F5F3]'
-                : 'bg-[#FFFFFF] hover:bg-[#F6F5F3]/50'
+                ? 'bg-paper-off shadow-xs'
+                : 'bg-white hover:bg-paper-off/50'
             }`}
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-[#1E5FA8] text-[#1E5FA8] flex items-center justify-center bg-[#1E5FA8]/5">
+                <div className="w-10 h-10 border border-tan/30 text-tan flex items-center justify-center bg-tan/20">
                   <Users size={24} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#1E5FA8] font-bold">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#A8874E] font-bold">
                   EARLY ACCESS
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-[#15171A] mb-2">
+              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
                 Customer
               </h3>
-              <p className="text-sm text-[#5B5F66] mb-6 leading-relaxed">
+              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
                 Real food prices without sneaky packaging fees or arbitrary delivery inflation. Get
                 notified when SpeedyMeals launches on iOS & Android in your city.
               </p>
             </div>
 
             <div>
-              <div className="py-2 mb-4 border-t border-b border-[#E4E2DD] font-mono text-xs text-[#15171A] flex justify-between">
-                <span className="text-[#5B5F66]">MARKUP:</span>
-                <span className="font-bold text-[#1E5FA8]">0% MENU MARKUP</span>
+              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
+                <span className="text-ink-soft">MARKUP:</span>
+                <span className="font-bold text-[#A8874E]">0% MENU MARKUP</span>
               </div>
               <button
                 type="button"
                 id="btn-select-customer"
                 onClick={() => onSelectPersona('customer')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 ${
+                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${
                   activePersona === 'customer'
-                    ? 'bg-[#1E5FA8] text-white border-[#1E5FA8]'
-                    : 'bg-transparent text-[#5B5F66] border-[#E4E2DD] hover:border-[#15171A] hover:text-[#15171A]'
+                    ? 'bg-tan text-ink border-tan font-bold'
+                    : 'bg-transparent text-ink border-line hover:border-tan hover:text-[#A8874E]'
                 }`}
               >
                 <span>{activePersona === 'customer' ? 'ACTIVE FORM' : 'JOIN WAITLIST'}</span>
@@ -310,21 +403,47 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           </motion.div>
         </motion.div>
 
-        {/* REGISTRATION FORM PANEL: LIGHTER TONE OF BLACK */}
-        {/* Sharp hairline fields, no rounded inputs */}
+        {/* REGISTRATION FORM PANEL: Styled with dynamic persona color border and accents */}
         <motion.div
           id="registration-flow-panel"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-[#22252B] text-white border border-[#373C46] p-6 sm:p-10 lg:p-12 shadow-md"
+          className={`bg-[#22252B] text-white border p-6 sm:p-10 lg:p-12 shadow-md transition-colors duration-300 ${
+            activePersona === 'rider'
+              ? 'border-t-2 border-t-red border-x-[#373C46] border-b-[#373C46]'
+              : activePersona === 'restaurant'
+              ? 'border-t-2 border-t-blue border-x-[#373C46] border-b-[#373C46]'
+              : 'border-t-2 border-t-tan border-x-[#373C46] border-b-[#373C46]'
+          }`}
         >
           {/* Top Panel Nav & Title */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#373C46] mb-8">
             <div>
-              <div className="font-mono text-xs text-[#C7A874] uppercase tracking-widest mb-1 flex items-center space-x-2">
-                <span className="w-2 h-2 bg-[#C7A874] inline-block" />
-                <span>REGISTRATION GATEWAY</span>
+              <div className="font-mono text-xs uppercase tracking-widest mb-1 flex items-center space-x-2">
+                <span
+                  className="w-2 h-2 inline-block"
+                  style={{
+                    backgroundColor:
+                      activePersona === 'rider'
+                        ? '#E23A2E'
+                        : activePersona === 'restaurant'
+                        ? '#1E5FA8'
+                        : '#C7A874',
+                  }}
+                />
+                <span
+                  style={{
+                    color:
+                      activePersona === 'rider'
+                        ? '#E23A2E'
+                        : activePersona === 'restaurant'
+                        ? '#1E5FA8'
+                        : '#C7A874',
+                  }}
+                >
+                  REGISTRATION GATEWAY
+                </span>
               </div>
               <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-white">
                 {activePersona === 'rider' && 'Rider Application Form'}
@@ -338,9 +457,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectPersona('rider')}
-                className={`px-4 py-2 uppercase tracking-wider transition-colors ${
+                className={`px-4 py-2 uppercase tracking-wider transition-colors cursor-pointer ${
                   activePersona === 'rider'
-                    ? 'bg-[#E23A2E] text-white font-bold'
+                    ? 'bg-red text-white font-bold'
                     : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                 }`}
               >
@@ -349,9 +468,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectPersona('restaurant')}
-                className={`px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors ${
+                className={`px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors cursor-pointer ${
                   activePersona === 'restaurant'
-                    ? 'bg-[#C7A874] text-[#15171A] font-bold'
+                    ? 'bg-blue text-white font-bold'
                     : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                 }`}
               >
@@ -360,9 +479,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectPersona('customer')}
-                className={`px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors ${
+                className={`px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors cursor-pointer ${
                   activePersona === 'customer'
-                    ? 'bg-[#1E5FA8] text-white font-bold'
+                    ? 'bg-tan text-ink font-bold'
                     : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                 }`}
               >
@@ -375,7 +494,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             {submittedId ? (
               /* Success State Ticket */
               <motion.div
-                key="success"
+                key={`success-${activePersona}`}
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
@@ -386,13 +505,13 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   style={{
                     color:
                       activePersona === 'customer'
-                        ? '#1E5FA8'
-                        : activePersona === 'restaurant'
                         ? '#C7A874'
+                        : activePersona === 'restaurant'
+                        ? '#1E5FA8'
                         : '#E23A2E',
                   }}
                 >
-                  <Check size={28} weight="bold" />
+                  <Check size={28} weight="bold" className="text-[#10B981]" />
                   <span className="font-display text-xl uppercase tracking-tight text-white">
                     {activePersona === 'customer'
                       ? 'Waitlist Access Reserved'
@@ -415,9 +534,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       style={{
                         color:
                           activePersona === 'customer'
-                            ? '#1E5FA8'
-                            : activePersona === 'restaurant'
                             ? '#C7A874'
+                            : activePersona === 'restaurant'
+                            ? '#1E5FA8'
                             : '#E23A2E',
                       }}
                     >
@@ -430,30 +549,30 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-[#5B5F66]">CONTACT EMAIL:</span>
-                    <span className="text-white">{formData.email}</span>
+                    <span className="text-white">{submittedData.email}</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-[#5B5F66]">DEPLOYMENT ZONE:</span>
                     <span className="text-white">
-                      {formData.city} ({formData.countryCode})
+                      {submittedData.city} ({submittedData.countryCode})
                     </span>
                   </div>
                   {activePersona === 'customer' && (
                     <div className="flex justify-between text-xs">
                       <span className="text-[#5B5F66]">TARGET PLATFORM:</span>
-                      <span className="text-white">{formData.devicePlatform}</span>
+                      <span className="text-white">{submittedData.devicePlatform}</span>
                     </div>
                   )}
                   {activePersona === 'restaurant' && (
                     <div className="flex justify-between text-xs">
                       <span className="text-[#5B5F66]">BRAND NAME:</span>
-                      <span className="text-white">{formData.businessName}</span>
+                      <span className="text-white">{submittedData.businessName}</span>
                     </div>
                   )}
                   {activePersona === 'rider' && (
                     <div className="flex justify-between text-xs">
                       <span className="text-[#5B5F66]">TRANSPORT MODE:</span>
-                      <span className="text-white">{formData.vehicleType}</span>
+                      <span className="text-white">{submittedData.vehicleType}</span>
                     </div>
                   )}
                 </div>
@@ -461,7 +580,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 <div className="flex space-x-3">
                   <button
                     type="button"
-                    onClick={handleReset}
+                    onClick={() => handleReset(activePersona)}
                     className="px-6 py-3 text-xs uppercase tracking-widest font-bold border transition-colors cursor-pointer"
                     style={{
                       backgroundColor:
@@ -488,7 +607,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             ) : (
               /* Interactive Registration Form */
               <motion.form
-                key="form"
+                key={`form-${activePersona}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -753,15 +872,16 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   <input
                     id="form-agreed"
                     type="checkbox"
+                    required
                     checked={formData.agreed}
                     onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
                     className="mt-1"
                     style={{
                       accentColor:
                         activePersona === 'customer'
-                          ? '#1E5FA8'
-                          : activePersona === 'restaurant'
                           ? '#C7A874'
+                          : activePersona === 'restaurant'
+                          ? '#1E5FA8'
                           : '#E23A2E',
                     }}
                   />
@@ -781,7 +901,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     {activePersona === 'customer' ? (
                       <>
                         WAITLIST STATUS:{' '}
-                        <span className="text-[#1E5FA8] font-bold">PRIORITY BATCH #1</span>
+                        <span className="text-tan font-bold">PRIORITY BATCH #1</span>
                       </>
                     ) : (
                       <>
@@ -789,7 +909,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         <span
                           className="font-bold"
                           style={{
-                            color: activePersona === 'restaurant' ? '#C7A874' : '#E23A2E',
+                            color: activePersona === 'restaurant' ? '#1E5FA8' : '#E23A2E',
                           }}
                         >
                           UNDER 24 HOURS
@@ -802,12 +922,12 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     type="submit"
                     id="btn-submit-registration"
                     disabled={submitting}
-                    className={`px-8 py-4 font-mono text-xs uppercase tracking-widest font-bold border transition-colors duration-150 flex items-center justify-center space-x-2 ${
+                    className={`px-8 py-4 font-mono text-xs uppercase tracking-widest font-bold border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${
                       activePersona === 'customer'
-                        ? 'bg-[#1E5FA8] text-white border-[#1E5FA8] hover:bg-white hover:text-[#1E5FA8] hover:border-white'
+                        ? 'bg-tan text-ink border-tan hover:bg-white hover:text-ink hover:border-white'
                         : activePersona === 'restaurant'
-                        ? 'bg-[#C7A874] text-[#15171A] border-[#C7A874] hover:bg-white hover:text-[#15171A] hover:border-white'
-                        : 'bg-[#E23A2E] text-white border-[#E23A2E] hover:bg-white hover:text-[#15171A] hover:border-white'
+                        ? 'bg-blue text-white border-blue hover:bg-white hover:text-blue hover:border-white'
+                        : 'bg-red text-white border-red hover:bg-white hover:text-red hover:border-white'
                     }`}
                   >
                     {submitting ? (
@@ -845,17 +965,23 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           {/* Trust Signals repeated near conversion */}
           <div className="mt-10 pt-8 border-t border-[#373C46] grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
             <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <Coins size={20} weight="bold" className="text-[#E23A2E] shrink-0" />
+              <div className="w-8 h-8 rounded-xs bg-red/10 border border-red/20 flex items-center justify-center shrink-0">
+                <Coins size={18} weight="bold" className="text-red" />
+              </div>
               <span>100% delivery fee to rider</span>
             </div>
 
             <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <Percent size={20} weight="bold" className="text-[#C7A874] shrink-0" />
-              <span>10% flat commission</span>
+              <div className="w-8 h-8 rounded-xs bg-blue/10 border border-blue/20 flex items-center justify-center shrink-0">
+                <Percent size={18} weight="bold" className="text-blue" />
+              </div>
+              <span>10% flat merchant commission</span>
             </div>
 
             <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <ShieldCheck size={20} weight="bold" className="text-[#1E5FA8] shrink-0" />
+              <div className="w-8 h-8 rounded-xs bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center shrink-0">
+                <ShieldCheck size={18} weight="bold" className="text-[#10B981]" />
+              </div>
               <span>0 security deposit required</span>
             </div>
           </div>
