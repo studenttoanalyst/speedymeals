@@ -53,10 +53,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
   return (
     <header
       id="main-navigation"
-      className="fixed top-4 left-4 right-4 z-50 lg:top-6 lg:left-8 lg:right-8"
+      className="fixed top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-50 lg:top-5 lg:left-8 lg:right-8 [@media(max-height:760px)]:top-2 [@media(max-height:760px)]:left-4 [@media(max-height:760px)]:right-4"
     >
       <div
-        className={`nav-pill mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 h-16 lg:h-[72px] transition-all duration-200 border ${isScrolled
+        className={`nav-pill mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16 lg:h-[70px] [@media(max-height:760px)]:h-12 transition-all duration-200 border ${isScrolled
           ? 'bg-white/85 backdrop-blur-md border-black/10 shadow-[0_4px_24px_rgba(0,0,0,0.08)]'
           : 'bg-white/70 backdrop-blur-sm border-black/5'
           }`}
@@ -74,9 +74,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           <img
             src="/favicon.jpeg"
             alt="SpeedyMeals Logo"
-            className="h-10 sm:h-12 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105"
+            className="h-8 sm:h-10 lg:h-11 [@media(max-height:760px)]:h-8 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105"
           />
-          <span className="font-display text-xl sm:text-2xl tracking-tight text-red uppercase flex items-center">
+          <span className="font-display text-lg sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-lg tracking-tight text-red uppercase flex items-center">
             SPEEDYMEALS
             <span
               className="inline-block w-1.5 h-1.5 ml-1 transition-colors duration-300"

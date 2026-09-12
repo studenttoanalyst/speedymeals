@@ -77,22 +77,95 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
   return (
     <section
       id="about"
-      className="relative h-[100dvh] min-h-[640px] max-h-[1080px] flex flex-col justify-between pt-22 sm:pt-24 pb-3 sm:pb-3.5 overflow-hidden"
+      className="relative h-[100dvh] min-h-[640px] max-h-[1080px] flex flex-col justify-between pt-24 sm:pt-28 lg:pt-32 [@media(max-height:760px)]:pt-20 [@media(max-height:640px)]:pt-16 pb-2.5 sm:pb-3.5 overflow-hidden"
     >
-      {/* Dedicated White-ish Gradient Band for Top 35% of Hero (Rule 1) */}
+      {/* Dedicated White-ish Gradient Band for Top 35% of Hero */}
       <div className="pointer-events-none absolute top-0 inset-x-0 h-[35%] bg-gradient-to-b from-paper via-paper/95 to-transparent z-[5]" />
 
-      {/* Background Video Layer at z-0: fixed to title area like desktop, watermark cropped */}
-      <div className="absolute top-[175px] xs:top-[185px] sm:top-[15%] md:top-[16%] left-1/2 -translate-x-1/2 w-full max-w-5xl md:max-w-6xl lg:max-w-7xl z-0 pointer-events-none select-none px-0 sm:px-4">
+      {/* Hero Content Container in structured vertical flow */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1 flex flex-col items-center justify-between min-h-0">
+        {/* Top: Eyebrow + Headlines — moved down for elegant breathing room below navbar */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-5xl w-full flex flex-col items-center text-center shrink-0 pt-1 sm:pt-2 md:pt-3"
+        >
+          {/* Eyebrow: FAST & SAFE TO YOU + SOUTH ASIA & MIDDLE EAST NETWORK */}
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 mb-1 sm:mb-1.5 px-2">
+            <span className="inline-flex items-center space-x-1.5">
+              <span className="relative flex h-2 w-2 items-center justify-center">
+                <span className="animate-ping absolute inline-flex h-full w-full bg-red opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 bg-red" />
+              </span>
+              <span
+                id="hero-eyebrow"
+                className="font-mono text-[9px] xs:text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] font-semibold text-red whitespace-nowrap"
+              >
+                FAST & SAFE TO YOU
+              </span>
+            </span>
+            <div className="h-px w-4 sm:w-10 bg-line shrink-0" />
+            <span className="font-mono text-[8.5px] xs:text-[9.5px] sm:text-[11px] text-ink-soft tracking-wider uppercase whitespace-nowrap">
+              SOUTH ASIA & MIDDLE EAST NETWORK
+            </span>
+          </motion.div>
+
+          {/* Line 1: SPEEDYMEALS in clean negative space */}
+          <motion.div variants={itemVariants} className="relative z-20 w-full mb-0.5">
+            <h1
+              id="hero-headline"
+              className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl [@media(max-height:760px)]:text-4xl [@media(max-height:640px)]:text-3xl tracking-tight text-ink uppercase leading-none text-center"
+            >
+              SPEEDYMEALS
+            </h1>
+          </motion.div>
+
+          {/* Line 2: FAST. FAIR. GLOBAL. positioned cleanly ABOVE the video's gray vacant space */}
+          <motion.div variants={itemVariants} className="relative z-20 w-full mb-0">
+            <div className="inline-flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 font-display text-xl sm:text-3xl lg:text-4xl xl:text-5xl [@media(max-height:760px)]:text-2xl [@media(max-height:640px)]:text-xl uppercase leading-none">
+              <motion.span
+                custom={1}
+                variants={wordVariants}
+                initial="hidden"
+                animate="visible"
+                className="inline-block hover:text-red hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
+              >
+                FAST.
+              </motion.span>
+              <motion.span
+                custom={2}
+                variants={wordVariants}
+                initial="hidden"
+                animate="visible"
+                className="inline-block text-red hover:text-tan hover:scale-105 transition-all duration-200 cursor-default transform origin-center font-extrabold"
+              >
+                FAIR.
+              </motion.span>
+              <motion.span
+                custom={3}
+                variants={wordVariants}
+                initial="hidden"
+                animate="visible"
+                className="inline-block hover:text-blue hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
+              >
+                GLOBAL.
+              </motion.span>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Video Animation: Scaled dynamically to preserve ample negative space below on all viewports, sitting cleanly below FAST. FAIR. GLOBAL */}
         <div
           ref={videoContainerRef}
-          className="relative w-full aspect-[16/8.3] sm:aspect-[16/8] md:aspect-[16/7.2] overflow-hidden will-change-transform"
+          className="relative w-full aspect-[3840/1685] mt-3.5 sm:mt-5 md:mt-6 overflow-hidden pointer-events-none select-none shrink-0"
           style={{
+            maxWidth: 'min(780px, 92vw, calc(34dvh * 2.2789))',
             maskImage: 'radial-gradient(ellipse 99% 92% at 50% 50%, black 70%, rgba(0,0,0,0.85) 90%, transparent 100%)',
             WebkitMaskImage: 'radial-gradient(ellipse 99% 92% at 50% 50%, black 70%, rgba(0,0,0,0.85) 90%, transparent 100%)',
           }}
         >
-          {/* Bottom-cropped video: h-[120%] object-top inside overflow-hidden eliminates bottom watermark at all breakpoints */}
+          {/* Precise 1685px vertical crop (h-[128.3%] object-top): shows full scene (wheels, pins, road) while cleanly cropping bottom watermark */}
           <video
             ref={videoRef}
             src="/animated_vid.mp4"
@@ -102,151 +175,79 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             playsInline
             preload="auto"
             disablePictureInPicture
-            className="w-full h-[120%] object-cover object-top -translate-y-0"
+            className="w-full h-[128.3%] object-cover object-top"
             aria-hidden="true"
           />
         </div>
-      </div>
 
-      {/* Hero Foreground Content at z-10: fits inside 100vh fold without scrolling */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-5 xs:pt-7 sm:pt-0 md:my-auto flex flex-col items-center">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="max-w-5xl w-full flex flex-col items-center text-center"
-        >
-          {/* Top Group: Eyebrow + Headlines in clean negative space above & in sky of video */}
-          <div className="w-full flex flex-col items-center text-center">
-            {/* Eyebrow: FAST & SAFE TO YOU + SOUTH ASIA & MIDDLE EAST NETWORK */}
-            <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-1 sm:mb-1.5 px-2">
-              <span className="inline-flex items-center space-x-1.5">
-                <span className="relative flex h-2 w-2 items-center justify-center">
-                  <span className="animate-ping absolute inline-flex h-full w-full bg-red opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 bg-red" />
-                </span>
-                <span
-                  id="hero-eyebrow"
-                  className="font-mono text-[9px] xs:text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] font-semibold text-red whitespace-nowrap"
-                >
-                  FAST & SAFE TO YOU
-                </span>
-              </span>
-              <div className="h-px w-4 sm:w-10 bg-line shrink-0" />
-              <span className="font-mono text-[8.5px] xs:text-[9.5px] sm:text-[11px] text-ink-soft tracking-wider uppercase whitespace-nowrap">
-                SOUTH ASIA & MIDDLE EAST NETWORK
-              </span>
-            </motion.div>
-
-            {/* Line 1: SPEEDYMEALS in clean negative space above the video (Rule 1 & 3) */}
-            <motion.div variants={itemVariants} className="relative z-20 w-full mb-0.5">
-              <h1
-                id="hero-headline"
-                className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl tracking-tight text-ink uppercase leading-none text-center"
-              >
-                SPEEDYMEALS
-              </h1>
-            </motion.div>
-
-            {/* Line 2: FAST. FAIR. GLOBAL. positioned in the sky band of video (Rule 2 & 5) */}
-            <motion.div variants={itemVariants} className="relative z-20 w-full mb-0.5">
-              <div className="inline-flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 font-display text-xl sm:text-3xl lg:text-4xl xl:text-5xl uppercase leading-none drop-shadow-[0_2px_12px_rgba(0,0,0,0.15)]">
-                <motion.span
-                  custom={1}
-                  variants={wordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="inline-block hover:text-red hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
-                >
-                  FAST.
-                </motion.span>
-                <motion.span
-                  custom={2}
-                  variants={wordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="inline-block text-red hover:text-tan hover:scale-105 transition-all duration-200 cursor-default transform origin-center font-extrabold"
-                >
-                  FAIR.
-                </motion.span>
-                <motion.span
-                  custom={3}
-                  variants={wordVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="inline-block hover:text-blue hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
-                >
-                  GLOBAL.
-                </motion.span>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Cyan Visual Corridor: negative space between headline and metric cards */}
-          <div className="w-full h-[275px] xs:h-[295px] sm:h-[320px] md:h-[380px] lg:h-[400px] pointer-events-none" aria-hidden="true" />
-
-          {/* Bottom Group: Metric Cards + CTA Buttons (middle-ground spacing) */}
-          <div className="w-full flex flex-col items-center text-center mb-2 sm:mb-2">
-            {/* Company detail block: 3 metrics */}
+        {/* Lower Space: Vertically centered in the middle of the negative space below the video across all viewports */}
+        <div className="w-full flex-1 flex flex-col items-center justify-center min-h-0 my-auto">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="max-w-5xl w-full flex flex-col items-center text-center my-auto"
+          >
+            {/* Company detail block: 3 metrics (Rider, Merchant, Infrastructure) */}
             <motion.div
               variants={itemVariants}
-              className="grid grid-cols-3 gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-2.5 max-w-3xl w-full mx-auto font-mono text-left"
+              className="grid grid-cols-3 gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-3 max-w-3xl w-full mx-auto font-mono text-left"
             >
               {/* Metric 1: Rider */}
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 bg-paper border border-line shadow-sm hover:border-red hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border border-line shadow-sm hover:border-red hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
                 <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
                     <CurrencyCircleDollar size={13} weight="bold" className="text-red group-hover:scale-125 transition-transform duration-200 shrink-0" />
-                    <span className="truncate">RIDER PAY</span>
+                    <span className="truncate">RIDER REMUNERATION</span>
                   </span>
                   <span className="w-1.5 h-1.5 bg-red opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-xs sm:text-base font-bold text-ink group-hover:text-red transition-colors duration-150 truncate">
+                <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-red transition-colors duration-150 truncate">
                   100% Retained
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block truncate">Zero mileage cut</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block [@media(max-height:640px)]:hidden truncate">Zero commission off rider mileage</div>
               </motion.div>
 
               {/* Metric 2: Merchant */}
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 bg-paper border border-line shadow-sm hover:border-blue hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border border-line shadow-sm hover:border-blue hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
                 <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
                     <ShieldCheck size={13} weight="bold" className="text-blue group-hover:scale-125 transition-transform duration-200 shrink-0" />
-                    <span className="truncate">MERCHANT</span>
+                    <span className="truncate">MERCHANT CONTRACT</span>
                   </span>
                   <span className="w-1.5 h-1.5 bg-blue opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-xs sm:text-base font-bold text-ink group-hover:text-blue transition-colors duration-150 truncate">
+                <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-blue transition-colors duration-150 truncate">
                   10% Flat Rate
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block truncate">No gouging tiers</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block [@media(max-height:640px)]:hidden truncate">No promotion gouging or tiers</div>
               </motion.div>
 
               {/* Metric 3: Infrastructure */}
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 bg-paper border border-line shadow-sm hover:border-tan hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border border-line shadow-sm hover:border-tan hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
                 <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
                     <Lightning size={13} weight="bold" className="text-tan group-hover:scale-125 transition-transform duration-200 shrink-0" />
-                    <span className="truncate">NETWORK</span>
+                    <span className="truncate">INFRASTRUCTURE</span>
                   </span>
                   <span className="w-1.5 h-1.5 bg-tan opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-xs sm:text-base font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
-                  Live Dispatch
+                <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
+                  Real-Time Dispatch
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block truncate">Direct telemetry</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block [@media(max-height:640px)]:hidden truncate">Direct routing telemetry</div>
               </motion.div>
             </motion.div>
 
@@ -261,7 +262,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
                 onClick={() => handleScrollToPartner('rider')}
-                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 bg-red text-white font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
+                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 [@media(max-height:760px)]:py-1.5 [@media(max-height:760px)]:px-3.5 bg-red text-white font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
               >
                 <span>RIDE WITH US</span>
                 <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
@@ -273,14 +274,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
                 onClick={() => handleScrollToPartner('restaurant')}
-                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 bg-transparent text-blue font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
+                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 [@media(max-height:760px)]:py-1.5 [@media(max-height:760px)]:px-3.5 bg-transparent text-blue font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
               >
-                <span>PARTNER RESTAURANT</span>
+                <span>PARTNER YOUR RESTAURANT</span>
                 <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
               </motion.button>
             </motion.div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
 
       {/* Bottom: "SCROLL TO DISCOVER" mono label + scroll indicator + DEPLOYMENT locations on mobile and desktop */}
