@@ -361,12 +361,14 @@ Exit check: full order lifecycle Placed→Delivered walk-through via API calls, 
 Tasks:
 - [x] **Step 1 — Customer Live Tracking** (`service.py` `get_order_tracking()`, `routes.py` `customer_orders_router`, `schemas.py` `OrderTrackingResponseSchema`): `GET /orders/{order_id}/track` (customer-only). Poll-based per spec Sec 14 (no push) — plain uncached DB read every call. Ownership enforced in the query itself (`Order.id AND Order.user_id`) — another customer's order 404s, same no-leak pattern as the restaurant-side order lookup (Phase 4). Rider name/phone included only once `rider_id` is set (Step 2 folded into the same endpoint — no separate route needed since tracking already returns the full order view).
   - Tests (`test_order_tracking.py`): status+totals returned, no rider fields before assignment, rider fields present after assignment, other-customer's order 404, nonexistent order 404, route 200 for owner, missing token 403, wrong role 403.
-- Customer live tracking endpoint (poll-based MVP, no push notif per Sec 14 — in-app refresh only).
-- Rider name+phone exposed once assigned.
-- Order history + "Reorder" (clone previous order into new cart).
-- Rating endpoint (1-5 stars + comment) on delivery complete.
+- [x] Customer live tracking endpoint (poll-based MVP, no push notif per Sec 14 — in-app refresh only). *(Step 1)*
+- [x] Rider name+phone exposed once assigned. *(folded into Step 1, see above)*
+- [x] **Step 3 — Order History + Reorder** (`service.py` `list_customer_orders()`, `reorder_order()`; `routes.py` `customer_orders_router`; `schemas.py` `OrderHistoryResponseSchema`, `ReorderResponseSchema`): `GET /orders` (own orders, newest first, restaurant_name joined) and `POST /orders/{order_id}/reorder` (clones a past order's lines into that restaurant's current Redis cart via the existing `add_cart_item()` primitive — merges with whatever's already in the cart; a deleted/sold-out line is skipped, not fatal, and reported in `skipped_items`). Same ownership-in-query 404 pattern as tracking.
+  - Tests (`test_order_history_rating.py`): history lists only own orders, route requires customer role, reorder adds items into cart, reorder skips sold-out item, reorder on other customer's order is 404.
+- [x] **Step 4 — Rating** (`service.py` `submit_rating()`; `routes.py` `customer_orders_router`; `schemas.py` `RatingCreateSchema`, `RatingResponseSchema`; `models.py` `Rating`, already present): `POST /orders/{order_id}/rating` — 1-5 stars for restaurant and/or rider + optional comment. Delivered-only (400 before that), at least one of restaurant_rating/rider_rating required, one rating per order (second submit is 400, not an overwrite).
+  - Tests (`test_order_history_rating.py`): rating succeeds on delivered order, rejected before delivered, rejected when both ratings missing, rejected on second submit, other customer's order is 404, route returns 201.
 
-Exit check: tracking reflects real status change latency < 2s poll; reorder creates valid new cart.
+Exit check: tracking reflects real status change latency < 2s poll (verified manually via swagger — status change reflected on next poll, no cache); reorder creates valid new cart (verified — unit tests + manual swagger walkthrough). ✅ Phase 7 complete — 11/11 new tests pass (plus pre-existing Phase 7 Step 1 tests untouched).
 
 ---
 
