@@ -14,6 +14,7 @@ from app.modules.admin import service
 from app.modules.admin.schemas import (
     AdminOrderDetailResponseSchema,
     AdminOrderSummaryResponseSchema,
+    CashDiscrepancyResponseSchema,
     DashboardSummaryResponseSchema,
     OrderCancelSchema,
     OrderReassignSchema,
@@ -24,7 +25,12 @@ from app.modules.admin.schemas import (
     RestaurantStatusUpdateSchema,
     RiderAdminResponseSchema,
     RiderApprovalUpdateSchema,
+    RiderPayoutPeriodSchema,
+    RiderPayoutResponseSchema,
     RiderStatusUpdateSchema,
+    ReportsResponseSchema,
+    SettlementPeriodSchema,
+    SettlementResponseSchema,
 )
 from app.platform.auth.dependencies import CurrentUser, require_role
 
@@ -202,3 +208,100 @@ def reassign_order_rider(
     """Step 4 — manually assign a specific rider to a stuck order,
     bypassing the automatic nearest-rider search."""
     return service.reassign_order_rider(db, order_id, payload.rider_id)
+
+
+# --- Step 5: weekly restaurant settlement ---
+
+
+@router.post("/settlements/generate", response_model=list[SettlementResponseSchema])
+def generate_settlements(
+    payload: SettlementPeriodSchema,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 5 — compute/upsert settlement rows for every restaurant with
+    Delivered orders in the given period."""
+    return service.generate_settlements(db, payload.period_start, payload.period_end)
+
+
+@router.get("/settlements", response_model=list[SettlementResponseSchema])
+def list_settlements(
+    settlement_status: str | None = Query(default=None, alias="status"),
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 5 — list settlements, optional ?status=Pending|Settled."""
+    return service.list_settlements(db, settlement_status)
+
+
+@router.post("/settlements/{settlement_id}/mark-paid", response_model=SettlementResponseSchema)
+def mark_settlement_paid(
+    settlement_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 5 — record that the restaurant's weekly transfer has been sent
+    (manual transfer, MVP stage)."""
+    return service.mark_settlement_paid(db, settlement_id)
+
+
+# --- Step 6: weekly rider payout + cash reconciliation ---
+
+
+@router.post("/rider-payouts/generate", response_model=list[RiderPayoutResponseSchema])
+def generate_rider_payouts(
+    payload: RiderPayoutPeriodSchema,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 6 — compute/upsert rider payout rows (100% of delivery fee)
+    for every rider with Delivered orders in the given period."""
+    return service.generate_rider_payouts(db, payload.period_start, payload.period_end)
+
+
+@router.get("/rider-payouts", response_model=list[RiderPayoutResponseSchema])
+def list_rider_payouts(
+    payout_status: str | None = Query(default=None, alias="status"),
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 6 — list rider payouts, optional ?status=Pending|Paid."""
+    return service.list_rider_payouts(db, payout_status)
+
+
+@router.post("/rider-payouts/{payout_id}/mark-paid", response_model=RiderPayoutResponseSchema)
+def mark_rider_payout_paid(
+    payout_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 6 — record that the rider's weekly earning transfer has been
+    sent (manual transfer, MVP stage, separate from daily cash deposits)."""
+    return service.mark_rider_payout_paid(db, payout_id)
+
+
+@router.get("/cash-discrepancies", response_model=list[CashDiscrepancyResponseSchema])
+def list_cash_discrepancies(
+    unresolved_only: bool = Query(default=True),
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 6 — flag rider cash deposits where submitted != expected
+    (spec Sec 3.4/6), for admin investigation."""
+    return service.list_cash_discrepancies(db, unresolved_only)
+
+
+# --- Step 7: reports ---
+
+
+@router.get("/reports", response_model=ReportsResponseSchema)
+def get_reports(
+    period_start: date,
+    period_end: date,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 7 — weekly/monthly trends: order count/revenue, top
+    restaurants, rider payout totals, cash discrepancy total, average
+    delivery distance/fee, for the given period."""
+    return service.get_reports(db, period_start, period_end)

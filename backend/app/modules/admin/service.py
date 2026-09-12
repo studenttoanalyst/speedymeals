@@ -4,6 +4,14 @@ Admin business logic — Phase 8.
 Step 1: dashboard summary (read-only aggregates, spec Sec 11 formula).
 Step 2: restaurant management (onboarding, approve/deactivate, commission,
 credential reset) — spec Sec 9 Steps 1-2 + Sec 10 Steps 3, 6.
+Step 3: rider management (approve/deactivate).
+Step 4: order management (list/detail, cancel/reassign overrides).
+Step 5: weekly restaurant settlement (generate + mark-paid) — spec Sec 9
+Step 9, Sec 10 Step 6.
+Step 6: weekly rider payout + cash discrepancy flagging — spec Sec 8
+Step 12, Sec 10 Step 7.
+Step 7: reports — order/revenue trends, top restaurants, rider payout
+totals, cash discrepancy total, avg distance/fee — spec Sec 10 Step 9.
 """
 import uuid
 from datetime import date, datetime, time, timezone
@@ -15,12 +23,15 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password
 from app.modules.food_delivery.models import Order, Restaurant
 from app.platform.users.models import User
-from app.platform.wallet_payment.models import Rider, Settlement
+from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, Settlement
 from app.platform.wallet_payment.service import DELIVERED_STATUS, DELIVERY_DEDUCTION_AMOUNT
 
 ACTIVE_RESTAURANT_STATUS = "active"
 INACTIVE_RESTAURANT_STATUS = "inactive"
+SETTLEMENT_STATUS_PENDING = "Pending"
 SETTLEMENT_STATUS_SETTLED = "Settled"
+RIDER_PAYOUT_STATUS_PENDING = "Pending"
+RIDER_PAYOUT_STATUS_PAID = "Paid"
 
 
 # --- Step 1: dashboard ---
@@ -369,3 +380,346 @@ def reassign_order_rider(db: Session, order_id: uuid.UUID, rider_id: uuid.UUID) 
         order.status = "Rider Assigned"
     db.commit()
     return get_order(db, order_id)
+
+
+# --- Step 5: weekly restaurant settlement ---
+
+
+def _period_utc_bounds(period_start: date, period_end: date) -> tuple[datetime, datetime]:
+    """Same UTC-day convention as _today_utc_bounds, extended to a range."""
+    start = datetime.combine(period_start, time.min, tzinfo=timezone.utc)
+    end = datetime.combine(period_end, time.max, tzinfo=timezone.utc)
+    return start, end
+
+
+def _settlement_to_dict(settlement: Settlement, restaurant_name: str) -> dict:
+    return {
+        "id": settlement.id,
+        "restaurant_id": settlement.restaurant_id,
+        "restaurant_name": restaurant_name,
+        "period_start": settlement.period_start,
+        "period_end": settlement.period_end,
+        "total_sales": float(settlement.total_sales),
+        "commission_deducted": float(settlement.commission_deducted),
+        "net_payable": float(settlement.net_payable),
+        "status": settlement.status,
+        "paid_at": settlement.paid_at,
+    }
+
+
+def generate_settlements(db: Session, period_start: date, period_end: date) -> list[dict]:
+    """POST /admin/settlements/generate — Step 5. For every restaurant with
+    Delivered orders in the period, upsert one Settlement row (spec Sec 9
+    Step 9 math: total_sales = sum(food_subtotal), net_payable = sum
+    restaurant_payable i.e. 90%). Idempotent: re-running the same
+    restaurant+period recomputes the SAME pending row instead of creating
+    a duplicate — but a row already marked Settled is left untouched, so
+    a re-run can never silently reopen a paid settlement."""
+    start, end = _period_utc_bounds(period_start, period_end)
+
+    rows = (
+        db.query(
+            Order.restaurant_id,
+            func.coalesce(func.sum(Order.food_subtotal), 0),
+            func.coalesce(func.sum(Order.commission_amount), 0),
+            func.coalesce(func.sum(Order.restaurant_payable), 0),
+        )
+        .filter(Order.status == DELIVERED_STATUS)
+        .filter(Order.placed_at >= start, Order.placed_at <= end)
+        .group_by(Order.restaurant_id)
+        .all()
+    )
+
+    results = []
+    for restaurant_id, total_sales, commission_deducted, net_payable in rows:
+        existing = (
+            db.query(Settlement)
+            .filter(
+                Settlement.restaurant_id == restaurant_id,
+                Settlement.period_start == period_start,
+                Settlement.period_end == period_end,
+            )
+            .first()
+        )
+        if existing and existing.status == SETTLEMENT_STATUS_SETTLED:
+            results.append(existing)
+            continue
+        if existing:
+            existing.total_sales = total_sales
+            existing.commission_deducted = commission_deducted
+            existing.net_payable = net_payable
+            settlement = existing
+        else:
+            settlement = Settlement(
+                restaurant_id=restaurant_id,
+                period_start=period_start,
+                period_end=period_end,
+                total_sales=total_sales,
+                commission_deducted=commission_deducted,
+                net_payable=net_payable,
+                status=SETTLEMENT_STATUS_PENDING,
+            )
+            db.add(settlement)
+        results.append(settlement)
+
+    db.commit()
+    for s in results:
+        db.refresh(s)
+    return _settlements_with_names(db, results)
+
+
+def _settlements_with_names(db: Session, settlements: list[Settlement]) -> list[dict]:
+    restaurant_names = {
+        r.id: r.name
+        for r in db.query(Restaurant).filter(
+            Restaurant.id.in_([s.restaurant_id for s in settlements])
+        ).all()
+    }
+    return [
+        _settlement_to_dict(s, restaurant_names.get(s.restaurant_id, ""))
+        for s in settlements
+    ]
+
+
+def list_settlements(db: Session, status_filter: str | None) -> list[dict]:
+    """GET /admin/settlements — Step 5, optional ?status=Pending|Settled."""
+    query = db.query(Settlement)
+    if status_filter:
+        query = query.filter(Settlement.status == status_filter)
+    settlements = query.order_by(Settlement.period_start.desc()).all()
+    return _settlements_with_names(db, settlements)
+
+
+def _get_settlement_or_404(db: Session, settlement_id: uuid.UUID) -> Settlement:
+    settlement = db.query(Settlement).filter(Settlement.id == settlement_id).first()
+    if not settlement:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Settlement not found.")
+    return settlement
+
+
+def mark_settlement_paid(db: Session, settlement_id: uuid.UUID) -> dict:
+    """POST /admin/settlements/{id}/mark-paid — Step 5. Manual transfer at
+    MVP stage (spec Sec 14 — automated payout excluded); this just records
+    that the admin has already sent the bank transfer."""
+    settlement = _get_settlement_or_404(db, settlement_id)
+    if settlement.status == SETTLEMENT_STATUS_SETTLED:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Settlement already settled.")
+    settlement.status = SETTLEMENT_STATUS_SETTLED
+    settlement.paid_at = datetime.now(timezone.utc)
+    db.commit()
+    return _settlements_with_names(db, [settlement])[0]
+
+
+# --- Step 6: weekly rider payout + cash reconciliation ---
+
+
+def _payout_to_dict(payout: RiderPayout, rider_name: str) -> dict:
+    return {
+        "id": payout.id,
+        "rider_id": payout.rider_id,
+        "rider_name": rider_name,
+        "period_start": payout.period_start,
+        "period_end": payout.period_end,
+        "total_earning": float(payout.total_earning),
+        "status": payout.status,
+        "paid_at": payout.paid_at,
+    }
+
+
+def _payouts_with_names(db: Session, payouts: list[RiderPayout]) -> list[dict]:
+    rider_names = {
+        r.id: r.name
+        for r in db.query(Rider).filter(
+            Rider.id.in_([p.rider_id for p in payouts])
+        ).all()
+    }
+    return [_payout_to_dict(p, rider_names.get(p.rider_id, "")) for p in payouts]
+
+
+def generate_rider_payouts(db: Session, period_start: date, period_end: date) -> list[dict]:
+    """POST /admin/rider-payouts/generate — Step 6. For every rider with
+    Delivered orders in the period, upsert one RiderPayout row: total_earning
+    = sum(rider_earning), i.e. 100% of delivery fee per spec Sec 3.3/11. Same
+    idempotent-per-period / don't-reopen-a-paid-row rule as settlements."""
+    start, end = _period_utc_bounds(period_start, period_end)
+
+    rows = (
+        db.query(Order.rider_id, func.coalesce(func.sum(Order.rider_earning), 0))
+        .filter(Order.status == DELIVERED_STATUS)
+        .filter(Order.rider_id.isnot(None))
+        .filter(Order.placed_at >= start, Order.placed_at <= end)
+        .group_by(Order.rider_id)
+        .all()
+    )
+
+    results = []
+    for rider_id, total_earning in rows:
+        existing = (
+            db.query(RiderPayout)
+            .filter(
+                RiderPayout.rider_id == rider_id,
+                RiderPayout.period_start == period_start,
+                RiderPayout.period_end == period_end,
+            )
+            .first()
+        )
+        if existing and existing.status == RIDER_PAYOUT_STATUS_PAID:
+            results.append(existing)
+            continue
+        if existing:
+            existing.total_earning = total_earning
+            payout = existing
+        else:
+            payout = RiderPayout(
+                rider_id=rider_id,
+                period_start=period_start,
+                period_end=period_end,
+                total_earning=total_earning,
+                status=RIDER_PAYOUT_STATUS_PENDING,
+            )
+            db.add(payout)
+        results.append(payout)
+
+    db.commit()
+    for p in results:
+        db.refresh(p)
+    return _payouts_with_names(db, results)
+
+
+def list_rider_payouts(db: Session, status_filter: str | None) -> list[dict]:
+    """GET /admin/rider-payouts — Step 6, optional ?status=Pending|Paid."""
+    query = db.query(RiderPayout)
+    if status_filter:
+        query = query.filter(RiderPayout.status == status_filter)
+    payouts = query.order_by(RiderPayout.period_start.desc()).all()
+    return _payouts_with_names(db, payouts)
+
+
+def _get_rider_payout_or_404(db: Session, payout_id: uuid.UUID) -> RiderPayout:
+    payout = db.query(RiderPayout).filter(RiderPayout.id == payout_id).first()
+    if not payout:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rider payout not found.")
+    return payout
+
+
+def mark_rider_payout_paid(db: Session, payout_id: uuid.UUID) -> dict:
+    """POST /admin/rider-payouts/{id}/mark-paid — Step 6, manual transfer
+    at MVP stage, same as restaurant settlement."""
+    payout = _get_rider_payout_or_404(db, payout_id)
+    if payout.status == RIDER_PAYOUT_STATUS_PAID:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Payout already paid.")
+    payout.status = RIDER_PAYOUT_STATUS_PAID
+    payout.paid_at = datetime.now(timezone.utc)
+    db.commit()
+    return _payouts_with_names(db, [payout])[0]
+
+
+def list_cash_discrepancies(db: Session, unresolved_only: bool = True) -> list[dict]:
+    """GET /admin/cash-discrepancies — Step 6. Flags CashDeposit rows
+    (spec Sec 3.4/6: expected vs. actual cash) where a shortfall/overage
+    exists. unresolved_only=True (default) hides ones admin already
+    verified, so the list stays a live action queue."""
+    query = db.query(CashDeposit).filter(CashDeposit.discrepancy != 0)
+    if unresolved_only:
+        query = query.filter(CashDeposit.verified_by_admin.is_(False))
+    deposits = query.order_by(CashDeposit.created_at.desc()).all()
+
+    rider_names = {
+        r.id: r.name
+        for r in db.query(Rider).filter(
+            Rider.id.in_([d.rider_id for d in deposits])
+        ).all()
+    }
+    return [
+        {
+            "id": d.id,
+            "rider_id": d.rider_id,
+            "rider_name": rider_names.get(d.rider_id, ""),
+            "expected_amount": float(d.expected_amount),
+            "amount_submitted": float(d.amount_submitted),
+            "discrepancy": float(d.discrepancy),
+            "verified_by_admin": d.verified_by_admin,
+            "created_at": d.created_at,
+        }
+        for d in deposits
+    ]
+
+
+# --- Step 7: reports ---
+
+
+_TOP_RESTAURANTS_LIMIT = 5
+
+
+def get_reports(db: Session, period_start: date, period_end: date) -> dict:
+    """GET /admin/reports — Step 7. All figures computed directly from
+    Delivered orders / cash deposits in the range (not from generated
+    settlement/payout rows), so a report is accurate even for a period
+    admin hasn't run generate-settlements/generate-rider-payouts on yet."""
+    start, end = _period_utc_bounds(period_start, period_end)
+
+    delivered_orders = (
+        db.query(Order)
+        .filter(Order.status == DELIVERED_STATUS)
+        .filter(Order.placed_at >= start, Order.placed_at <= end)
+        .all()
+    )
+
+    total_orders = len(delivered_orders)
+    total_revenue = sum(float(o.total_amount) for o in delivered_orders)
+    total_rider_payouts = sum(float(o.rider_earning) for o in delivered_orders)
+    average_delivery_distance_km = (
+        sum(float(o.delivery_distance_km) for o in delivered_orders) / total_orders
+        if total_orders else 0.0
+    )
+    average_delivery_fee = (
+        sum(float(o.delivery_fee) for o in delivered_orders) / total_orders
+        if total_orders else 0.0
+    )
+
+    top_rows = (
+        db.query(
+            Order.restaurant_id,
+            func.count(Order.id),
+            func.coalesce(func.sum(Order.total_amount), 0),
+        )
+        .filter(Order.status == DELIVERED_STATUS)
+        .filter(Order.placed_at >= start, Order.placed_at <= end)
+        .group_by(Order.restaurant_id)
+        .order_by(func.coalesce(func.sum(Order.total_amount), 0).desc())
+        .limit(_TOP_RESTAURANTS_LIMIT)
+        .all()
+    )
+    restaurant_names = {
+        r.id: r.name
+        for r in db.query(Restaurant).filter(
+            Restaurant.id.in_([row[0] for row in top_rows])
+        ).all()
+    }
+    top_restaurants = [
+        {
+            "restaurant_id": restaurant_id,
+            "restaurant_name": restaurant_names.get(restaurant_id, ""),
+            "order_count": order_count,
+            "revenue": float(revenue),
+        }
+        for restaurant_id, order_count, revenue in top_rows
+    ]
+
+    cash_discrepancy_total = (
+        db.query(func.coalesce(func.sum(CashDeposit.discrepancy), 0))
+        .filter(CashDeposit.created_at >= start, CashDeposit.created_at <= end)
+        .scalar()
+    )
+
+    return {
+        "period_start": period_start,
+        "period_end": period_end,
+        "total_orders": total_orders,
+        "total_revenue": total_revenue,
+        "top_restaurants": top_restaurants,
+        "total_rider_payouts": total_rider_payouts,
+        "cash_discrepancy_total": float(cash_discrepancy_total),
+        "average_delivery_distance_km": average_delivery_distance_km,
+        "average_delivery_fee": average_delivery_fee,
+    }

@@ -15,12 +15,13 @@ from app.modules.admin import service
 from app.modules.admin.routes import router as admin_router
 from app.modules.food_delivery.models import Restaurant
 from app.platform.auth.jwt_utils import create_access_token
-from app.platform.wallet_payment.models import Rider
+from app.platform.wallet_payment.models import CashDeposit, Rider
 from app.tests.test_order_tracking import (
     _make_address,
     _make_customer,
     _make_order,
     _make_restaurant,
+    _make_rider,
 )
 
 
@@ -352,3 +353,264 @@ def test_cancel_order_route_returns_200(admin_client, db_session, admin_token):
     )
     assert response.status_code == 200
     assert response.json()["status"] == "Cancelled"
+
+
+# --- Step 5: weekly restaurant settlement ---
+
+
+def _period_around_today():
+    from datetime import date, timedelta
+    today = date.today()
+    return today - timedelta(days=1), today + timedelta(days=1)
+
+
+def test_generate_settlements_computes_totals(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+
+    results = service.generate_settlements(db_session, period_start, period_end)
+
+    assert len(results) == 1
+    assert results[0]["restaurant_id"] == restaurant.id
+    assert results[0]["total_sales"] == 1000
+    assert results[0]["commission_deducted"] == 100
+    assert results[0]["net_payable"] == 900
+    assert results[0]["status"] == "Pending"
+
+
+def test_generate_settlements_is_idempotent_and_skips_settled(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+
+    first = service.generate_settlements(db_session, period_start, period_end)
+    service.mark_settlement_paid(db_session, first[0]["id"])
+
+    # A second Delivered order in the same period should NOT reopen the
+    # already-settled row.
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    second = service.generate_settlements(db_session, period_start, period_end)
+
+    assert len(second) == 1
+    assert second[0]["status"] == "Settled"
+    assert second[0]["total_sales"] == 1000  # unchanged, not recomputed
+
+
+def test_mark_settlement_paid_rejects_already_settled(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+    settlement = service.generate_settlements(db_session, period_start, period_end)[0]
+    service.mark_settlement_paid(db_session, settlement["id"])
+
+    from fastapi import HTTPException
+    with pytest.raises(HTTPException) as exc_info:
+        service.mark_settlement_paid(db_session, settlement["id"])
+    assert exc_info.value.status_code == 400
+
+
+def test_settlements_route_requires_admin_role(admin_client, db_session):
+    restaurant = _make_restaurant(db_session)
+    token = create_access_token(restaurant.id, "restaurant")
+
+    response = admin_client.get("/admin/settlements", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 403
+
+
+def test_generate_settlements_route_returns_200(admin_client, db_session, admin_token):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+
+    response = admin_client.post(
+        "/admin/settlements/generate",
+        json={"period_start": period_start.isoformat(), "period_end": period_end.isoformat()},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()[0]["net_payable"] == 900
+
+
+# --- Step 6: weekly rider payout + cash reconciliation ---
+
+
+def test_generate_rider_payouts_computes_totals(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+
+    results = service.generate_rider_payouts(db_session, period_start, period_end)
+
+    assert len(results) == 1
+    assert results[0]["rider_id"] == rider.id
+    assert results[0]["total_earning"] == 110
+    assert results[0]["status"] == "Pending"
+
+
+def test_generate_rider_payouts_is_idempotent_and_skips_paid(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+
+    first = service.generate_rider_payouts(db_session, period_start, period_end)
+    service.mark_rider_payout_paid(db_session, first[0]["id"])
+
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    second = service.generate_rider_payouts(db_session, period_start, period_end)
+
+    assert len(second) == 1
+    assert second[0]["status"] == "Paid"
+    assert second[0]["total_earning"] == 110  # unchanged, not recomputed
+
+
+def test_mark_rider_payout_paid_rejects_already_paid(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+    payout = service.generate_rider_payouts(db_session, period_start, period_end)[0]
+    service.mark_rider_payout_paid(db_session, payout["id"])
+
+    from fastapi import HTTPException
+    with pytest.raises(HTTPException) as exc_info:
+        service.mark_rider_payout_paid(db_session, payout["id"])
+    assert exc_info.value.status_code == 400
+
+
+def test_list_cash_discrepancies_flags_shortfall_only(db_session):
+    rider = _make_rider(db_session)
+    ok_deposit = CashDeposit(
+        rider_id=rider.id, amount_submitted=1000, expected_amount=1000, discrepancy=0,
+    )
+    short_deposit = CashDeposit(
+        rider_id=rider.id, amount_submitted=800, expected_amount=1000, discrepancy=-200,
+    )
+    db_session.add_all([ok_deposit, short_deposit])
+    db_session.commit()
+
+    results = service.list_cash_discrepancies(db_session)
+
+    assert len(results) == 1
+    assert results[0]["discrepancy"] == -200
+
+
+def test_rider_payouts_route_requires_admin_role(admin_client, db_session):
+    restaurant = _make_restaurant(db_session)
+    token = create_access_token(restaurant.id, "restaurant")
+
+    response = admin_client.get("/admin/rider-payouts", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 403
+
+
+def test_cash_discrepancies_route_returns_200(admin_client, db_session, admin_token):
+    rider = _make_rider(db_session)
+    short_deposit = CashDeposit(
+        rider_id=rider.id, amount_submitted=800, expected_amount=1000, discrepancy=-200,
+    )
+    db_session.add(short_deposit)
+    db_session.commit()
+
+    response = admin_client.get(
+        "/admin/cash-discrepancies", headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+
+
+# --- Step 7: reports ---
+
+
+def test_get_reports_computes_trends(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+
+    result = service.get_reports(db_session, period_start, period_end)
+
+    assert result["total_orders"] == 1
+    assert result["total_revenue"] == 1110
+    assert result["total_rider_payouts"] == 110
+    assert result["average_delivery_distance_km"] == 3
+    assert result["average_delivery_fee"] == 110
+    assert len(result["top_restaurants"]) == 1
+    assert result["top_restaurants"][0]["restaurant_id"] == restaurant.id
+    assert result["top_restaurants"][0]["revenue"] == 1110
+
+
+def test_get_reports_includes_cash_discrepancy_total(db_session):
+    rider = _make_rider(db_session)
+    deposit = CashDeposit(
+        rider_id=rider.id, amount_submitted=800, expected_amount=1000, discrepancy=-200,
+    )
+    db_session.add(deposit)
+    db_session.commit()
+    period_start, period_end = _period_around_today()
+
+    result = service.get_reports(db_session, period_start, period_end)
+
+    assert result["cash_discrepancy_total"] == -200
+
+
+def test_get_reports_zero_orders_no_division_error(db_session):
+    period_start, period_end = _period_around_today()
+
+    result = service.get_reports(db_session, period_start, period_end)
+
+    assert result["total_orders"] == 0
+    assert result["average_delivery_distance_km"] == 0.0
+    assert result["average_delivery_fee"] == 0.0
+    assert result["top_restaurants"] == []
+
+
+def test_reports_route_requires_admin_role(admin_client, db_session):
+    restaurant = _make_restaurant(db_session)
+    token = create_access_token(restaurant.id, "restaurant")
+    period_start, period_end = _period_around_today()
+
+    response = admin_client.get(
+        "/admin/reports",
+        params={"period_start": period_start.isoformat(), "period_end": period_end.isoformat()},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 403
+
+
+def test_reports_route_returns_200(admin_client, db_session, admin_token):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session)
+    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
+    period_start, period_end = _period_around_today()
+
+    response = admin_client.get(
+        "/admin/reports",
+        params={"period_start": period_start.isoformat(), "period_end": period_end.isoformat()},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["total_orders"] == 1

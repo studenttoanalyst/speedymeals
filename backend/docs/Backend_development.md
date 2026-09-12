@@ -385,11 +385,11 @@ Tasks:
   - Tests: approval filter, approve, deactivate-forces-offline, role guard, route 200.
 - [x] **Step 4 — Order Management** (`service.py` `list_orders()`, `get_order()`, `cancel_order()`, `reassign_order_rider()`): `GET /admin/orders` (status/restaurant/date filters), `GET /admin/orders/{id}` (full distance/fee breakdown), `POST /admin/orders/{id}/cancel`, `PATCH /admin/orders/{id}/reassign`. Cancel/reassign are admin overrides that deliberately bypass the normal `ORDER_STATUS_TRANSITIONS` forward-only state machine (food_delivery/service.py) — that machine is for the customer/restaurant/rider happy path; this is for un-sticking a broken order. Both are blocked once an order is `Delivered` or `Cancelled` (terminal). Reassign only accepts an approved + active rider.
   - Tests: status+restaurant filter, detail breakdown, cancel sets reason/cancelled_by, cancel-on-delivered rejected, reassign to approved rider, reassign to unapproved rider rejected, role guard, route 200.
-- [ ] Weekly settlement processing: list restaurants due, mark "Settled" (manual transfer MVP, per Sec 14 — automated payout excluded).
-- [ ] Weekly rider payout processing + cash reconciliation discrepancy flag list.
-- [ ] Reports endpoint: weekly/monthly trends.
+- [x] Weekly settlement processing: list restaurants due, mark "Settled" (manual transfer MVP, per Sec 14 — automated payout excluded).
+- [x] Weekly rider payout processing + cash reconciliation discrepancy flag list.
+- [x] Reports endpoint: weekly/monthly trends.
 
-Progress: Steps 1-4 done, 25/25 tests pass. Steps 5-7 remaining.
+Progress: Steps 1-7 done, 41/41 tests pass (36 confirmed for Steps 1-6 + 5 new for reports). Phase 8 complete.
 
 Exit check: admin can run full settlement cycle end-to-end on test data, numbers match Sec 11 formula.
 

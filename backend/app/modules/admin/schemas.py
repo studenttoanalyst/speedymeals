@@ -152,3 +152,114 @@ class OrderReassignSchema(BaseModel):
     """Body for PATCH /admin/orders/{id}/reassign — Step 4 manual rider
     reassignment (e.g. original rider unreachable/stuck)."""
     rider_id: uuid.UUID
+
+
+# --- Step 5: weekly restaurant settlement ---
+
+
+class SettlementPeriodSchema(BaseModel):
+    """Body for POST /admin/settlements/generate — Step 5. Admin picks the
+    week (or any range) to settle; generation is idempotent per
+    restaurant+period (re-running the same range does not double-count)."""
+    period_start: date
+    period_end: date
+
+    @model_validator(mode="after")
+    def _start_before_end(self):
+        if self.period_start > self.period_end:
+            raise ValueError("period_start must be before period_end.")
+        return self
+
+
+class SettlementResponseSchema(BaseModel):
+    id: uuid.UUID
+    restaurant_id: uuid.UUID
+    restaurant_name: str
+    period_start: date
+    period_end: date
+    total_sales: float
+    commission_deducted: float
+    net_payable: float
+    status: str
+    paid_at: datetime | None
+
+
+# --- Step 6: weekly rider payout + cash reconciliation ---
+
+
+class RiderPayoutPeriodSchema(BaseModel):
+    """Body for POST /admin/rider-payouts/generate — Step 6. Same
+    idempotent-per-period generation approach as settlements."""
+    period_start: date
+    period_end: date
+
+    @model_validator(mode="after")
+    def _start_before_end(self):
+        if self.period_start > self.period_end:
+            raise ValueError("period_start must be before period_end.")
+        return self
+
+
+class RiderPayoutResponseSchema(BaseModel):
+    id: uuid.UUID
+    rider_id: uuid.UUID
+    rider_name: str
+    period_start: date
+    period_end: date
+    total_earning: float
+    status: str
+    paid_at: datetime | None
+
+
+class CashDiscrepancyResponseSchema(BaseModel):
+    """One row in GET /admin/cash-discrepancies — Step 6. Flags a rider's
+    daily cash deposit where amount_submitted != expected_amount (spec
+    Sec 3.4 / Sec 6)."""
+    id: uuid.UUID
+    rider_id: uuid.UUID
+    rider_name: str
+    expected_amount: float
+    amount_submitted: float
+    discrepancy: float
+    verified_by_admin: bool
+    created_at: datetime
+
+
+# --- Step 7: reports ---
+
+
+class ReportPeriodSchema(BaseModel):
+    """Query params for GET /admin/reports — Step 7. Same period-range
+    shape as settlements/payouts, so admin can ask for a week, a month,
+    or any custom range."""
+    period_start: date
+    period_end: date
+
+    @model_validator(mode="after")
+    def _start_before_end(self):
+        if self.period_start > self.period_end:
+            raise ValueError("period_start must be before period_end.")
+        return self
+
+
+class TopRestaurantSchema(BaseModel):
+    restaurant_id: uuid.UUID
+    restaurant_name: str
+    order_count: int
+    revenue: float
+
+
+class ReportsResponseSchema(BaseModel):
+    """GET /admin/reports — Step 7. Trends for the given period: order
+    volume/revenue, top restaurants by revenue, rider payout totals, cash
+    discrepancy total, and average delivery distance/fee (spec Sec 10
+    Step 9)."""
+    period_start: date
+    period_end: date
+    total_orders: int
+    total_revenue: float
+    top_restaurants: list[TopRestaurantSchema]
+    total_rider_payouts: float
+    cash_discrepancy_total: float
+    average_delivery_distance_km: float
+    average_delivery_fee: float
