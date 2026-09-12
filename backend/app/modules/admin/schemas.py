@@ -74,3 +74,81 @@ class RestaurantCredentialsResetSchema(BaseModel):
         if self.new_password is None and self.new_email is None and self.new_phone_number is None:
             raise ValueError("Provide at least one of new_password, new_email, new_phone_number.")
         return self
+
+
+# --- Step 3: rider management ---
+
+
+class RiderAdminResponseSchema(BaseModel):
+    id: uuid.UUID
+    name: str
+    phone_number: str
+    cnic_number: str
+    vehicle_type: str | None
+    vehicle_registration: str | None
+    approval_status: str
+    wallet_balance: float
+    pending_cash_owed: float
+    is_online: bool
+    is_active: bool
+    created_at: datetime
+
+
+class RiderApprovalUpdateSchema(BaseModel):
+    """Body for PATCH /admin/riders/{id}/approval — Step 3."""
+    approval_status: str = Field(pattern="^(approved|rejected)$")
+
+
+class RiderStatusUpdateSchema(BaseModel):
+    """Body for PATCH /admin/riders/{id}/status — Step 3 deactivate toggle."""
+    is_active: bool
+
+
+# --- Step 4: order management ---
+
+
+class AdminOrderSummaryResponseSchema(BaseModel):
+    """One row in GET /admin/orders — Step 4 list/filter view."""
+    id: uuid.UUID
+    restaurant_id: uuid.UUID
+    restaurant_name: str
+    rider_id: uuid.UUID | None
+    status: str
+    payment_method: str
+    total_amount: float
+    placed_at: datetime
+
+
+class AdminOrderDetailResponseSchema(BaseModel):
+    """GET /admin/orders/{id} — Step 4 full detail with the distance/fee
+    breakdown admin needs to investigate or reconcile an order."""
+    id: uuid.UUID
+    restaurant_id: uuid.UUID
+    restaurant_name: str
+    customer_name: str
+    rider_id: uuid.UUID | None
+    rider_name: str | None
+    status: str
+    payment_method: str
+    food_subtotal: float
+    delivery_distance_km: float
+    delivery_fee: float
+    total_amount: float
+    commission_amount: float
+    restaurant_payable: float
+    rider_earning: float
+    cancellation_reason: str | None
+    cancelled_by: str | None
+    placed_at: datetime
+    delivered_at: datetime | None
+
+
+class OrderCancelSchema(BaseModel):
+    """Body for POST /admin/orders/{id}/cancel — Step 4."""
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class OrderReassignSchema(BaseModel):
+    """Body for PATCH /admin/orders/{id}/reassign — Step 4 manual rider
+    reassignment (e.g. original rider unreachable/stuck)."""
+    rider_id: uuid.UUID

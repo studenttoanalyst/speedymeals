@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.modules.food_delivery.models import Order, Restaurant
+from app.platform.users.models import User
 from app.platform.wallet_payment.models import Rider, Settlement
 from app.platform.wallet_payment.service import DELIVERED_STATUS, DELIVERY_DEDUCTION_AMOUNT
 
@@ -188,3 +189,183 @@ def reset_restaurant_credentials(db: Session, restaurant_id: uuid.UUID, payload)
     db.commit()
     db.refresh(restaurant)
     return restaurant
+
+
+# --- Step 3: rider management ---
+
+
+def list_riders(db: Session, approval_status_filter: str | None) -> list[Rider]:
+    """GET /admin/riders — optional ?approval_status=pending|approved|rejected
+    filter, matching the same filter pattern as list_restaurants."""
+    query = db.query(Rider)
+    if approval_status_filter:
+        query = query.filter(Rider.approval_status == approval_status_filter)
+    return query.order_by(Rider.created_at.desc()).all()
+
+
+def _get_rider_or_404(db: Session, rider_id: uuid.UUID) -> Rider:
+    rider = db.query(Rider).filter(Rider.id == rider_id).first()
+    if rider is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rider not found.")
+    return rider
+
+
+def get_rider(db: Session, rider_id: uuid.UUID) -> Rider:
+    """GET /admin/riders/{id} — full detail including wallet_balance and
+    pending_cash_owed (spec Sec 10 Step 4)."""
+    return _get_rider_or_404(db, rider_id)
+
+
+def update_rider_approval(db: Session, rider_id: uuid.UUID, approval_status: str) -> Rider:
+    """PATCH /admin/riders/{id}/approval — spec Sec 8 Step 2: admin
+    manually reviews CNIC/license/vehicle docs and approves or rejects.
+    A rejected rider can be re-approved later (no terminal lock) — the
+    documents don't change, only the admin's decision on them."""
+    rider = _get_rider_or_404(db, rider_id)
+    rider.approval_status = approval_status
+    db.commit()
+    db.refresh(rider)
+    return rider
+
+
+def set_rider_status(db: Session, rider_id: uuid.UUID, is_active: bool) -> Rider:
+    """PATCH /admin/riders/{id}/status — deactivate for fraud/repeated
+    violations (spec Sec 6, Sec 10 Step 4). Deactivating also forces the
+    rider offline so they stop receiving new assignments immediately,
+    mirroring the same is_online=false path set_online_status() uses."""
+    rider = _get_rider_or_404(db, rider_id)
+    rider.is_active = is_active
+    if not is_active:
+        rider.is_online = False
+    db.commit()
+    db.refresh(rider)
+    return rider
+
+
+# --- Step 4: order management ---
+
+
+def list_orders(
+    db: Session,
+    status_filter: str | None,
+    restaurant_id: uuid.UUID | None,
+    date_from,
+    date_to,
+) -> list[dict]:
+    """GET /admin/orders — spec Sec 10 Step 5: view all orders (live +
+    history), filter by status/date/restaurant. Same filter shape as the
+    restaurant dashboard's list_restaurant_orders(), just unscoped by
+    restaurant ownership (admin sees everything)."""
+    query = db.query(Order, Restaurant.name).join(Restaurant, Order.restaurant_id == Restaurant.id)
+    if status_filter:
+        query = query.filter(Order.status == status_filter)
+    if restaurant_id:
+        query = query.filter(Order.restaurant_id == restaurant_id)
+    if date_from:
+        query = query.filter(func.date(Order.placed_at) >= date_from)
+    if date_to:
+        query = query.filter(func.date(Order.placed_at) <= date_to)
+
+    rows = query.order_by(Order.placed_at.desc()).all()
+    return [
+        {
+            "id": order.id,
+            "restaurant_id": order.restaurant_id,
+            "restaurant_name": restaurant_name,
+            "rider_id": order.rider_id,
+            "status": order.status,
+            "payment_method": order.payment_method,
+            "total_amount": order.total_amount,
+            "placed_at": order.placed_at,
+        }
+        for order, restaurant_name in rows
+    ]
+
+
+def _get_order_or_404(db: Session, order_id: uuid.UUID) -> Order:
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+    return order
+
+
+def get_order(db: Session, order_id: uuid.UUID) -> dict:
+    """GET /admin/orders/{id} — full detail incl. distance/fee breakdown
+    (spec Sec 10 Step 5)."""
+    order = _get_order_or_404(db, order_id)
+    restaurant = db.query(Restaurant).filter(Restaurant.id == order.restaurant_id).first()
+    customer = db.query(User).filter(User.id == order.user_id).first()
+    rider = db.query(Rider).filter(Rider.id == order.rider_id).first() if order.rider_id else None
+
+    return {
+        "id": order.id,
+        "restaurant_id": order.restaurant_id,
+        "restaurant_name": restaurant.name if restaurant else "",
+        "customer_name": customer.name if customer else "",
+        "rider_id": order.rider_id,
+        "rider_name": rider.name if rider else None,
+        "status": order.status,
+        "payment_method": order.payment_method,
+        "food_subtotal": order.food_subtotal,
+        "delivery_distance_km": order.delivery_distance_km,
+        "delivery_fee": order.delivery_fee,
+        "total_amount": order.total_amount,
+        "commission_amount": order.commission_amount,
+        "restaurant_payable": order.restaurant_payable,
+        "rider_earning": order.rider_earning,
+        "cancellation_reason": order.cancellation_reason,
+        "cancelled_by": order.cancelled_by,
+        "placed_at": order.placed_at,
+        "delivered_at": order.delivered_at,
+    }
+
+
+# Terminal states an order can never be moved out of by an admin action.
+_ORDER_LOCKED_STATUSES = {DELIVERED_STATUS, "Cancelled"}
+
+
+def cancel_order(db: Session, order_id: uuid.UUID, reason: str) -> dict:
+    """POST /admin/orders/{id}/cancel — spec Sec 10 Step 5 manual
+    intervention. Admin can force-cancel from ANY non-terminal status
+    (unlike the restaurant/rider state machine in food_delivery/service.py,
+    which only allows forward steps) — a stuck order is exactly the case
+    this exists for. Delivered/already-cancelled orders are terminal."""
+    order = _get_order_or_404(db, order_id)
+    if order.status in _ORDER_LOCKED_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Order in status '{order.status}' cannot be cancelled.",
+        )
+    order.status = "Cancelled"
+    order.cancellation_reason = reason
+    order.cancelled_by = "admin"
+    db.commit()
+    return get_order(db, order_id)
+
+
+def reassign_order_rider(db: Session, order_id: uuid.UUID, rider_id: uuid.UUID) -> dict:
+    """PATCH /admin/orders/{id}/reassign — spec Sec 10 Step 5. Admin
+    override, so it deliberately skips the normal nearest-rider-search +
+    online/wallet eligibility checks in food_delivery/service.py's
+    _find_nearest_rider() — this is for the "the automatic match is stuck,
+    manually put a specific rider on it" case. Still requires the target
+    rider to be an approved, active account (not a fake/rejected one)."""
+    order = _get_order_or_404(db, order_id)
+    if order.status in _ORDER_LOCKED_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Order in status '{order.status}' cannot be reassigned.",
+        )
+
+    rider = _get_rider_or_404(db, rider_id)
+    if rider.approval_status != "approved" or not rider.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Rider must be approved and active to be assigned.",
+        )
+
+    order.rider_id = rider.id
+    if order.status in {"Ready for Pickup", "Rejected"}:
+        order.status = "Rider Assigned"
+    db.commit()
+    return get_order(db, order_id)

@@ -183,3 +183,172 @@ def test_create_restaurant_route_returns_201(admin_client, admin_token):
     )
     assert response.status_code == 201
     assert response.json()["status"] == "active"
+
+
+# --- Step 3: rider management ---
+
+
+def _make_admin_rider(db, approval_status="pending", is_active=True):
+    unique = uuid.uuid4().hex[:8]
+    r = Rider(
+        phone_number=f"+92306{unique}", name=f"Admin Test Rider {unique}",
+        cnic_number=f"cnic-{unique}", approval_status=approval_status,
+        wallet_balance=100, pending_cash_owed=0, is_online=False,
+        country_code="+92", is_active=is_active,
+    )
+    db.add(r)
+    db.commit()
+    db.refresh(r)
+    return r
+
+
+def test_list_riders_filters_by_approval_status(db_session):
+    _make_admin_rider(db_session, approval_status="pending")
+    _make_admin_rider(db_session, approval_status="approved")
+
+    result = service.list_riders(db_session, "pending")
+
+    assert all(r.approval_status == "pending" for r in result)
+
+
+def test_approve_rider(db_session):
+    rider = _make_admin_rider(db_session, approval_status="pending")
+
+    result = service.update_rider_approval(db_session, rider.id, "approved")
+
+    assert result.approval_status == "approved"
+
+
+def test_deactivate_rider_forces_offline(db_session):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    rider.is_online = True
+    db_session.commit()
+
+    result = service.set_rider_status(db_session, rider.id, False)
+
+    assert result.is_active is False
+    assert result.is_online is False
+
+
+def test_rider_management_route_requires_admin_role(admin_client, db_session):
+    restaurant = _make_restaurant(db_session)
+    token = create_access_token(restaurant.id, "restaurant")
+
+    response = admin_client.get("/admin/riders", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 403
+
+
+def test_rider_approval_route_returns_200(admin_client, db_session, admin_token):
+    rider = _make_admin_rider(db_session, approval_status="pending")
+
+    response = admin_client.patch(
+        f"/admin/riders/{rider.id}/approval",
+        json={"approval_status": "approved"},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["approval_status"] == "approved"
+
+
+# --- Step 4: order management ---
+
+
+def test_list_orders_filters_by_status_and_restaurant(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order1 = _make_order(db_session, customer, restaurant, address, order_status="Accepted")
+    other_restaurant = _make_restaurant(db_session)
+    _make_order(db_session, customer, other_restaurant, address, order_status="Delivered")
+
+    result = service.list_orders(db_session, "Accepted", restaurant.id, None, None)
+
+    assert len(result) == 1
+    assert result[0]["id"] == order1.id
+
+
+def test_get_order_detail_has_distance_and_fee_breakdown(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order = _make_order(db_session, customer, restaurant, address)
+
+    result = service.get_order(db_session, order.id)
+
+    assert result["delivery_distance_km"] == 3
+    assert result["delivery_fee"] == 110
+    assert result["commission_amount"] == 100
+
+
+def test_cancel_order_sets_status_and_reason(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order = _make_order(db_session, customer, restaurant, address, order_status="Preparing")
+
+    result = service.cancel_order(db_session, order.id, "Restaurant unresponsive")
+
+    assert result["status"] == "Cancelled"
+    assert result["cancellation_reason"] == "Restaurant unresponsive"
+    assert result["cancelled_by"] == "admin"
+
+
+def test_cancel_delivered_order_rejected(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order = _make_order(db_session, customer, restaurant, address, order_status="Delivered")
+
+    from fastapi import HTTPException
+    with pytest.raises(HTTPException) as exc_info:
+        service.cancel_order(db_session, order.id, "too late")
+    assert exc_info.value.status_code == 400
+
+
+def test_reassign_order_to_approved_rider(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order = _make_order(db_session, customer, restaurant, address, order_status="Ready for Pickup")
+    new_rider = _make_admin_rider(db_session, approval_status="approved")
+
+    result = service.reassign_order_rider(db_session, order.id, new_rider.id)
+
+    assert result["rider_id"] == new_rider.id
+    assert result["status"] == "Rider Assigned"
+
+
+def test_reassign_order_to_unapproved_rider_rejected(db_session):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order = _make_order(db_session, customer, restaurant, address, order_status="Ready for Pickup")
+    unapproved_rider = _make_admin_rider(db_session, approval_status="pending")
+
+    from fastapi import HTTPException
+    with pytest.raises(HTTPException) as exc_info:
+        service.reassign_order_rider(db_session, order.id, unapproved_rider.id)
+    assert exc_info.value.status_code == 400
+
+
+def test_order_management_route_requires_admin_role(admin_client, db_session):
+    restaurant = _make_restaurant(db_session)
+    token = create_access_token(restaurant.id, "restaurant")
+
+    response = admin_client.get("/admin/orders", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 403
+
+
+def test_cancel_order_route_returns_200(admin_client, db_session, admin_token):
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order = _make_order(db_session, customer, restaurant, address, order_status="Accepted")
+
+    response = admin_client.post(
+        f"/admin/orders/{order.id}/cancel",
+        json={"reason": "Customer requested"},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "Cancelled"

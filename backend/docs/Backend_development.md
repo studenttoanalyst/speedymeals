@@ -377,13 +377,19 @@ Exit check: tracking reflects real status change latency < 2s poll (verified man
 Folder: `app/platform/users`, new `app/modules/admin` (create if missing).
 
 Tasks:
-- Dashboard summary endpoint: today orders, gross revenue, net revenue (commission+wallet), pending settlements, total rider wallet balance, total pending COD cash.
-- Restaurant management: approve/deactivate, set commission_rate, reset login creds.
-- Rider management: approve/reject docs, view wallet/pending cash, deactivate.
-- Order management: view/filter, manual cancel/reassign, view distance+fee breakdown.
-- Weekly settlement processing: list restaurants due, mark "Settled" (manual transfer MVP, per Sec 14 — automated payout excluded).
-- Weekly rider payout processing + cash reconciliation discrepancy flag list.
-- Reports endpoint: weekly/monthly trends.
+- [x] **Step 1 — Dashboard Summary** (`service.py` `get_dashboard_summary()`; `routes.py` `GET /admin/dashboard`; `schemas.py` `DashboardSummaryResponseSchema`): today's order count, gross revenue, net revenue (commission + Rs. 10 wallet deduction per delivered order, spec Sec 11), plus current standing totals — pending restaurant settlements, total rider wallet balance, total pending COD cash.
+  - Tests (`test_admin.py`): today's orders/revenue counted correctly, rider wallet + COD totals included, route 403 for non-admin, route 200 for admin.
+- [x] **Step 2 — Restaurant Management** (`service.py` `create_restaurant()`, `list_restaurants()`, `get_restaurant()`, `set_restaurant_status()`, `update_restaurant_commission()`, `reset_restaurant_credentials()`): `POST/GET /admin/restaurants`, `GET/PATCH /admin/restaurants/{id}` (status, commission), `POST /admin/restaurants/{id}/reset-credentials`. Covers spec Sec 9 Step 1-2 onboarding (previously only possible via a manual DB seed — this closes that gap) plus approve/deactivate/commission-override/credential-reset.
+  - Tests: create succeeds + rejects duplicate email, status toggle, commission update, credential reset (password-only + email-clash rejected), role guard, route 201.
+- [x] **Step 3 — Rider Management** (`service.py` `list_riders()`, `get_rider()`, `update_rider_approval()`, `set_rider_status()`): `GET /admin/riders` (+ `?approval_status=` filter), `GET /admin/riders/{id}`, `PATCH /admin/riders/{id}/approval`, `PATCH /admin/riders/{id}/status`. Deactivating a rider also forces `is_online=false` so they stop receiving new assignments immediately.
+  - Tests: approval filter, approve, deactivate-forces-offline, role guard, route 200.
+- [x] **Step 4 — Order Management** (`service.py` `list_orders()`, `get_order()`, `cancel_order()`, `reassign_order_rider()`): `GET /admin/orders` (status/restaurant/date filters), `GET /admin/orders/{id}` (full distance/fee breakdown), `POST /admin/orders/{id}/cancel`, `PATCH /admin/orders/{id}/reassign`. Cancel/reassign are admin overrides that deliberately bypass the normal `ORDER_STATUS_TRANSITIONS` forward-only state machine (food_delivery/service.py) — that machine is for the customer/restaurant/rider happy path; this is for un-sticking a broken order. Both are blocked once an order is `Delivered` or `Cancelled` (terminal). Reassign only accepts an approved + active rider.
+  - Tests: status+restaurant filter, detail breakdown, cancel sets reason/cancelled_by, cancel-on-delivered rejected, reassign to approved rider, reassign to unapproved rider rejected, role guard, route 200.
+- [ ] Weekly settlement processing: list restaurants due, mark "Settled" (manual transfer MVP, per Sec 14 — automated payout excluded).
+- [ ] Weekly rider payout processing + cash reconciliation discrepancy flag list.
+- [ ] Reports endpoint: weekly/monthly trends.
+
+Progress: Steps 1-4 done, 25/25 tests pass. Steps 5-7 remaining.
 
 Exit check: admin can run full settlement cycle end-to-end on test data, numbers match Sec 11 formula.
 
