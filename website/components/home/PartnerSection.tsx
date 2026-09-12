@@ -29,11 +29,11 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     fullName: '',
     email: '',
     phone: '',
-    countryCode: '+971',
-    city: 'Dubai',
+    countryCode: '+92',
+    city: 'Karachi',
     vehicleType: 'Motorcycle',
     businessName: '',
-    cuisineType: 'Middle Eastern / Grills',
+    cuisineType: 'Pakistani / BBQ & Grills',
     branches: '1-3',
     devicePlatform: 'iOS (Apple TestFlight Beta)',
     serviceInterest: 'Zero-Markup Food Delivery',
@@ -42,21 +42,43 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
   const [submitting, setSubmitting] = useState(false);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email || !formData.phone) return;
 
     setSubmitting(true);
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          persona: activePersona,
+          ...formData,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit registration. Please try again.');
+      }
+
+      setSubmittedId(data.referenceCode);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(msg);
+    } finally {
       setSubmitting(false);
-      const randomRef = `SM-${Math.floor(100000 + Math.random() * 900000)}`;
-      setSubmittedId(randomRef);
-    }, 600);
+    }
   };
 
   const handleReset = () => {
     setSubmittedId(null);
+    setError(null);
     setFormData({
       ...formData,
       fullName: '',
@@ -473,6 +495,19 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 onSubmit={handleSubmit}
                 className="space-y-6"
               >
+                {error && (
+                  <div className="p-4 border border-[#E23A2E]/50 bg-[#E23A2E]/10 text-xs font-mono text-[#E23A2E] flex items-center justify-between">
+                    <span>{error}</span>
+                    <button
+                      type="button"
+                      onClick={() => setError(null)}
+                      className="underline uppercase tracking-wider text-[10px] ml-4 hover:text-white cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Full Name */}
                   <div className="space-y-2">
@@ -598,9 +633,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
                         className="bg-[#262A32] border border-r-0 border-[#373C46] px-3 py-3.5 text-xs text-white font-mono focus:outline-none"
                       >
+                        <option value="+92">🇵🇰 PK (+92)</option>
                         <option value="+971">🇦🇪 UAE (+971)</option>
                         <option value="+966">🇸🇦 KSA (+966)</option>
-                        <option value="+92">🇵🇰 PK (+92)</option>
                         <option value="+91">🇮🇳 IN (+91)</option>
                         <option value="+880">🇧🇩 BD (+880)</option>
                         <option value="+974">🇶🇦 QA (+974)</option>
@@ -614,7 +649,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         required
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="50 123 4567"
+                        placeholder="300 123 4567"
                         className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white placeholder-[#5B5F66] focus:outline-none transition-colors"
                       />
                     </div>
@@ -639,15 +674,16 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       className="w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 text-sm text-white focus:outline-none transition-colors font-sans"
                     >
+                      <option value="Karachi">Karachi, Pakistan</option>
+                      <option value="Lahore">Lahore, Pakistan</option>
+                      <option value="Islamabad">Islamabad, Pakistan</option>
+                      <option value="Rawalpindi">Rawalpindi, Pakistan</option>
                       <option value="Dubai">Dubai, UAE</option>
                       <option value="Abu Dhabi">Abu Dhabi, UAE</option>
                       <option value="Sharjah">Sharjah, UAE</option>
                       <option value="Riyadh">Riyadh, Saudi Arabia</option>
                       <option value="Jeddah">Jeddah, Saudi Arabia</option>
                       <option value="Doha">Doha, Qatar</option>
-                      <option value="Karachi">Karachi, Pakistan</option>
-                      <option value="Lahore">Lahore, Pakistan</option>
-                      <option value="Islamabad">Islamabad, Pakistan</option>
                       <option value="Mumbai">Mumbai, India</option>
                       <option value="Delhi">Delhi NCR, India</option>
                       <option value="Dhaka">Dhaka, Bangladesh</option>
