@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       persona_type: persona,
       full_name: personName,
       email: contactEmail,
-      phone_number: contactPhone,
+      phone: contactPhone,
       country_code: countryCode,
       city,
       vehicle_type: persona === 'rider' ? vehicleType || null : null,
