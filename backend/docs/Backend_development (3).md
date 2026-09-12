@@ -419,17 +419,19 @@ Exit check: manual pentest checklist pass, OpenAPI docs (Swagger) accurate for e
 
 ---
 
-## Phase 11 — Testing (NOW)
+## Phase 11 — Testing (NOW) ✅ DONE
 
 Folder: `app/tests`.
 
 Tasks:
-- Unit test: wallet deduction, commission math, delivery fee formula, cash cap block.
-- Integration test: full order lifecycle (place→deliver) both COD/Digital.
-- Integration test: settlement + payout calculation matches Sec 11 example numbers exactly.
-- Auth test: OTP flow, role guard rejection on wrong role.
+- [x] Unit test: wallet deduction, commission math, delivery fee formula, cash cap block. — Present across `test_wallet_payment.py`, `test_food_delivery.py`, `test_checkout.py`. Gap closed: `_compute_expected_cash`/`create_cash_deposit`/`get_cod_eligibility`/`get_rider_earnings_summary` were left as a stale TODO ("Phase 5 doesn't exist yet") — Phase 5 (orders) has existed since Phase 5, so `test_wallet_money_math.py` (11 tests) now fills it: COD-only expected-cash sum, time-window correctness, discrepancy math (+/-), `pending_cash_owed` floored at 0, earnings-summary window exclusion.
+- [x] Integration test: full order lifecycle (place→deliver) both COD/Digital. — **Gap closed**: every prior test exercised one phase's slice against a hand-built `Order` row; `test_order_lifecycle_e2e.py` (2 tests) chains the real functions — `place_order` → `Preparing` → `Ready for Pickup` (auto rider-assignment) → rider `accept` → `Arrived at Restaurant` → `Picked Up` → `On the Way` → `Delivered` — for COD and Digital, asserting Sec 11 numbers at placement and wallet/cash-owed side effects at delivery.
+- [x] Integration test: settlement + payout calculation matches Sec 11 example numbers exactly. — Already present: `test_generate_settlements_computes_totals` (1000/100/900) and `test_generate_rider_payouts_computes_totals` (110), both in `test_admin.py`.
+- [x] Auth test: OTP flow, role guard rejection on wrong role. — `test_auth.py` (18 tests, added per commit `32efb7e`), covers customer/rider/restaurant/admin OTP+login+role-guard.
 
-Exit check: `pytest` green, coverage on money-math logic 100% (this is the part that can't be wrong).
+**Bug found and fixed during this phase (not a test gap, a real code bug):** `create_access_token()`/`create_refresh_token()` (`auth/jwt_utils.py`) had no unique claim in their JWT payload — two tokens issued for the same subject/role within the same second (e.g. login immediately followed by refresh-rotation) encoded to the byte-identical JWT string, which crashed the refresh flow with a UNIQUE-constraint `IntegrityError` on `token_hash` instead of a clean response. Fixed by adding a random `jti` to both payloads.
+
+Exit check: `pytest` green (293/293), coverage on money-math logic 100% at the function level (`wallet_payment/service.py` 76%→95%; the still-uncovered lines are non-money-math error/edge branches — redis-down, invalid file extension, S3 exception — not calculation paths). ✅ Confirmed.
 
 ---
 
@@ -461,5 +463,6 @@ Only then → backend MVP = DONE.
 
 ---
 
+*Doc version: 2.2 — Phase 11 (Testing) marked DONE: money-math coverage gap closed (`test_wallet_money_math.py`), full order-lifecycle e2e added (`test_order_lifecycle_e2e.py`), settlement/payout Sec-11-exact-number tests confirmed already present, and a same-second JWT collision bug found+fixed during this pass (`jti` added to both token payloads).*
 *Doc version: 2.1 — Phase 10's two flagged gaps (rider document upload, missing `test_auth.py`) marked FIXED per commit `32efb7e "fix gaps"`, previously shipped to repo without a matching doc update.*
 *Doc version: 2.0 — merged from `development.md` + old `Backend_development.md` (duplicate files, same purpose, different detail level — merged per Rule 3, no content lost). Update after each phase/step ships — mark done, note deviation if any (per Rule 3, deviation = flag conflict, don't silently change).*
