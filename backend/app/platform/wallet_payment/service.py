@@ -29,6 +29,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core import storage
 from app.core.redis_client import redis_client
 from app.modules.food_delivery.models import Order
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, WalletTransaction
@@ -39,6 +40,20 @@ DELIVERY_DEDUCTION_AMOUNT = 10  # spec Sec 3.1 — flat Rs. 10 per completed del
 VALID_RECHARGE_METHODS = {"bank_transfer", "jazzcash", "easypaisa", "card"}
 VALID_DEPOSIT_METHODS = {"bank_transfer", "mobile_wallet", "hub"}
 DELIVERED_STATUS = "Delivered"  # spec Sec 7 Step 10 status flow wording
+
+# Gap 2 fix — rider document upload (spec Sec 8 Step 1, Sec 6 Step 1).
+# Same 5MB/JPG/PNG-only validation as the menu photo upload in
+# food_delivery/service.py; duplicated rather than imported since it's a
+# small self-contained check and the two modules shouldn't depend on each
+# other's private helpers.
+MAX_RIDER_DOC_SIZE_BYTES = 5 * 1024 * 1024
+ALLOWED_RIDER_DOC_CONTENT_TYPES = {"image/jpeg", "image/png"}
+ALLOWED_RIDER_DOC_EXTENSIONS = {"jpg", "jpeg", "png"}
+RIDER_DOC_COLUMNS = {
+    "cnic": "cnic_photo_url",
+    "license": "license_photo_url",
+    "vehicle": "vehicle_photo_url",
+}
 
 # Phase 6, Step 1 — rider live location in Redis
 LOCATION_TTL_SECONDS = 45  # ~30-60s window; stale locations auto-expire
@@ -363,3 +378,86 @@ def rider_eligible_for_assignment(db: Session, rider_id: uuid.UUID) -> bool:
         return False
 
     return True
+
+
+# --- Gap 2 fix: rider document upload (spec Sec 8 Step 1, Sec 6 Step 1) ---
+
+
+def _validate_rider_document(data: bytes, content_type: str | None, filename: str | None) -> str:
+    """
+    Same validation shape as food_delivery's _validate_menu_photo: size
+    cap, declared content-type, extension, and a magic-bytes check so the
+    client's claimed content-type can't be trusted on its own. Returns the
+    canonical extension for the S3 key.
+    """
+    if len(data) > MAX_RIDER_DOC_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File too large. Maximum allowed size is 5 MB.",
+        )
+
+    if content_type not in ALLOWED_RIDER_DOC_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Unsupported file type. Only JPG/JPEG and PNG are allowed.",
+        )
+
+    extension = (filename or "").rsplit(".", 1)[-1].lower() if "." in (filename or "") else ""
+    if extension not in ALLOWED_RIDER_DOC_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Unsupported file type. Only JPG/JPEG and PNG are allowed.",
+        )
+
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if data.startswith(b"\xff\xd8\xff"):
+        return "jpg"
+    raise HTTPException(
+        status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        detail="File content does not match a valid JPG/PNG image.",
+    )
+
+
+def upload_rider_document(
+    db: Session,
+    rider_id: uuid.UUID,
+    doc_type: str,
+    data: bytes,
+    content_type: str | None,
+    filename: str | None,
+) -> Rider:
+    """
+    POST /wallet/documents/{doc_type} — a rider uploads their CNIC,
+    license, or vehicle photo (spec Sec 8 Step 1: collected at onboarding;
+    this is the previously-missing upload path for the columns that
+    already existed on the `riders` table). Own account only — no
+    ownership param needed beyond rider_id, since a rider can only ever
+    upload their own doc (route passes current_user.id).
+
+    Order of operations matches upload_menu_item_photo: S3 upload happens
+    BEFORE the DB write, so a failed upload never leaves a half-updated
+    row. Re-uploading the same doc_type overwrites the previous file (same
+    S3 key) and the previous URL is simply replaced, not archived.
+    """
+    if doc_type not in RIDER_DOC_COLUMNS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="doc_type must be one of: cnic, license, vehicle.",
+        )
+
+    rider = _get_rider_or_404(db, rider_id)
+    extension = _validate_rider_document(data, content_type, filename)
+
+    try:
+        photo_url = storage.upload_rider_document(rider.id, doc_type, data, content_type, extension)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Document upload failed. Please try again.",
+        )
+
+    setattr(rider, RIDER_DOC_COLUMNS[doc_type], photo_url)
+    db.commit()
+    db.refresh(rider)
+    return rider
