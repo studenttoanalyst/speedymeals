@@ -214,6 +214,47 @@ class OrderTrackingResponseSchema(BaseModel):
     items: list[RestaurantOrderItemResponseSchema]
 
 
+class OrderHistoryResponseSchema(BaseModel):
+    """One row in GET /orders — Phase 7, Step 3 customer order history.
+    Same summary shape as the restaurant dashboard list, but from the
+    customer's side (restaurant_name instead of customer_name)."""
+    id: uuid.UUID
+    restaurant_id: uuid.UUID
+    restaurant_name: str
+    status: str
+    payment_method: str
+    total_amount: float
+    placed_at: datetime
+
+
+class ReorderResponseSchema(BaseModel):
+    """Response for POST /orders/{id}/reorder — Step 3. Returns the
+    resulting cart for that order's restaurant (Phase 5 cart shape) plus
+    which of the original lines could not be carried over (menu item
+    deleted or currently sold out) so the customer isn't silently short
+    an item."""
+    cart: CartSchema
+    skipped_items: list[uuid.UUID]
+
+
+class RatingCreateSchema(BaseModel):
+    """Body for POST /orders/{id}/rating — Step 4. rider_rating is
+    optional (order may have no assigned rider in edge cases); at least
+    one of restaurant_rating/rider_rating must be given, checked in the
+    service layer since it's a cross-field rule."""
+    restaurant_rating: int | None = Field(default=None, ge=1, le=5)
+    rider_rating: int | None = Field(default=None, ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=1000)
+
+
+class RatingResponseSchema(BaseModel):
+    id: uuid.UUID
+    order_id: uuid.UUID
+    restaurant_rating: int | None
+    rider_rating: int | None
+    comment: str | None
+
+
 class PlaceOrderSchema(BaseModel):
     """Body for POST .../cart/checkout — Step 6. address ownership and
     payment_method validity are enforced in the service layer."""

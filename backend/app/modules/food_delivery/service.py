@@ -1329,3 +1329,134 @@ def place_order(
         ],
     }
 
+
+# --- Phase 7, Step 3: order history + reorder ---
+
+
+def list_customer_orders(db: Session, customer_id: uuid.UUID) -> list[dict]:
+    """GET /orders — Step 3. Own orders only (WHERE user_id = customer_id,
+    same no-leak-by-omission pattern as everywhere else in this module),
+    newest first. Restaurant name is resolved per row since the summary
+    doesn't otherwise touch the restaurants table."""
+    rows = (
+        db.query(Order, Restaurant.name)
+        .join(Restaurant, Order.restaurant_id == Restaurant.id)
+        .filter(Order.user_id == customer_id)
+        .order_by(Order.placed_at.desc())
+        .all()
+    )
+    return [
+        {
+            "id": order.id,
+            "restaurant_id": order.restaurant_id,
+            "restaurant_name": restaurant_name,
+            "status": order.status,
+            "payment_method": order.payment_method,
+            "total_amount": order.total_amount,
+            "placed_at": order.placed_at,
+        }
+        for order, restaurant_name in rows
+    ]
+
+
+def reorder_order(db: Session, customer_id: uuid.UUID, order_id: uuid.UUID) -> dict:
+    """POST /orders/{id}/reorder — Step 3. Clones a past order's lines
+    into that restaurant's CURRENT cart (merges with whatever is already
+    in it, via the existing add_cart_item() primitive — same merge-by-
+    item+variant behavior as manual cart adds). A line whose menu item was
+    deleted or is now sold out is silently skipped rather than failing the
+    whole reorder, and reported back in skipped_items so the customer
+    knows to re-add it manually if a substitute is wanted.
+    """
+    order = (
+        db.query(Order)
+        .filter(Order.id == order_id, Order.user_id == customer_id)
+        .first()
+    )
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+
+    original_items = db.query(OrderItem).filter(OrderItem.order_id == order.id).all()
+
+    skipped_items: list[uuid.UUID] = []
+    cart = None
+    for line in original_items:
+        menu_item = (
+            db.query(MenuItem)
+            .filter(MenuItem.id == line.menu_item_id, MenuItem.restaurant_id == order.restaurant_id)
+            .first()
+        )
+        if menu_item is None or not menu_item.is_available:
+            skipped_items.append(line.menu_item_id)
+            continue
+        cart = add_cart_item(
+            db,
+            customer_id,
+            order.restaurant_id,
+            CartAddItemSchema(
+                item_id=line.menu_item_id,
+                qty=line.quantity,
+                variant=(json.loads(line.selected_variant) if line.selected_variant else None),
+            ),
+        )
+
+    if cart is None:
+        # Every original line was skipped — surface the current (unchanged)
+        # cart rather than a fake empty one, same "read = current state"
+        # contract as get_cart().
+        cart = get_cart(db, customer_id, order.restaurant_id)
+
+    return {"cart": cart, "skipped_items": skipped_items}
+
+
+# --- Phase 7, Step 4: rating ---
+
+
+def submit_rating(
+    db: Session,
+    customer_id: uuid.UUID,
+    order_id: uuid.UUID,
+    restaurant_rating: int | None,
+    rider_rating: int | None,
+    comment: str | None,
+) -> Rating:
+    """POST /orders/{id}/rating — Step 4. Only the order's own customer,
+    only once delivery is complete (spec Sec 7 Step 11: rating prompt
+    fires on "Delivered"), only once per order (a second submit is a 400,
+    not an overwrite — keeps the review history honest)."""
+    order = (
+        db.query(Order)
+        .filter(Order.id == order_id, Order.user_id == customer_id)
+        .first()
+    )
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+
+    if order.status != DELIVERED_STATUS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Order can only be rated after it has been delivered.",
+        )
+
+    if restaurant_rating is None and rider_rating is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Provide at least a restaurant_rating or a rider_rating.",
+        )
+
+    existing = db.query(Rating).filter(Rating.order_id == order.id).first()
+    if existing is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Order already rated.")
+
+    rating = Rating(
+        order_id=order.id,
+        user_id=customer_id,
+        restaurant_rating=restaurant_rating,
+        rider_rating=rider_rating,
+        comment=comment,
+    )
+    db.add(rating)
+    db.commit()
+    db.refresh(rating)
+    return rating
+

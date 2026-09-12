@@ -29,8 +29,12 @@ from app.modules.food_delivery.schemas import (
     MenuItemCreateSchema,
     MenuItemResponseSchema,
     MenuItemUpdateSchema,
+    OrderHistoryResponseSchema,
     OrderStatusUpdateSchema,
     OrderTrackingResponseSchema,
+    RatingCreateSchema,
+    RatingResponseSchema,
+    ReorderResponseSchema,
     RestaurantOrderDetailResponseSchema,
     RestaurantOrderSummaryResponseSchema,
 )
@@ -305,3 +309,49 @@ def track_my_order(
     no-leak pattern as the restaurant-side order lookup).
     """
     return service.get_order_tracking(db, current_user.id, order_id)
+
+
+@customer_orders_router.get("", response_model=list[OrderHistoryResponseSchema])
+def list_my_orders_history(
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """
+    Phase 7, Step 3 — order history. Own orders only, newest first.
+    """
+    return service.list_customer_orders(db, current_user.id)
+
+
+@customer_orders_router.post("/{order_id}/reorder", response_model=ReorderResponseSchema)
+def reorder_my_order(
+    order_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """
+    Phase 7, Step 3 — clone a past order's lines into that restaurant's
+    current cart. Deleted/sold-out lines are skipped, not fatal — see
+    `skipped_items` in the response.
+    """
+    return service.reorder_order(db, current_user.id, order_id)
+
+
+@customer_orders_router.post("/{order_id}/rating", response_model=RatingResponseSchema, status_code=status.HTTP_201_CREATED)
+def rate_my_order(
+    order_id: uuid.UUID,
+    payload: RatingCreateSchema,
+    current_user: CurrentUser = Depends(require_customer),
+    db: Session = Depends(get_db),
+):
+    """
+    Phase 7, Step 4 — rate a delivered order (1-5 stars, restaurant and/or
+    rider, optional comment). Delivered-only, once-only — see service.
+    """
+    return service.submit_rating(
+        db,
+        current_user.id,
+        order_id,
+        payload.restaurant_rating,
+        payload.rider_rating,
+        payload.comment,
+    )
