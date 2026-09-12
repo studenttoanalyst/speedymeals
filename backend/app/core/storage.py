@@ -25,6 +25,7 @@ _s3_client = boto3.client(
 )
 
 MENU_PHOTO_PREFIX = "menu-items"
+RIDER_DOCS_PREFIX = "rider-docs"
 
 
 def upload_menu_photo(
@@ -49,5 +50,35 @@ def upload_menu_photo(
         Body=file_bytes,
         ContentType=content_type,
         ACL="public-read",  # customer-facing asset (spec: menu photos shown to customers)
+    )
+    return f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
+
+
+def upload_rider_document(
+    rider_id: uuid.UUID,
+    doc_type: str,
+    file_bytes: bytes,
+    content_type: str,
+    extension: str,
+) -> str:
+    """
+    Gap 2 fix — CNIC/license/vehicle document upload. Unlike
+    upload_menu_photo, deliberately has NO `ACL="public-read"` — these are
+    private per spec Sec 6 Step 1 (legal-recourse documents, not
+    customer-facing) and per the prefix reservation this file already
+    documented. Bucket policy must keep `rider-docs/` non-public; this
+    function never overrides that with a public ACL, unlike the menu
+    photo path above.
+
+    Key is scoped under rider_id and doc_type (cnic/license/vehicle) so a
+    re-upload of the same doc type overwrites the previous file rather
+    than accumulating orphaned objects.
+    """
+    key = f"{RIDER_DOCS_PREFIX}/{rider_id}/{doc_type}.{extension}"
+    _s3_client.put_object(
+        Bucket=settings.S3_BUCKET_NAME,
+        Key=key,
+        Body=file_bytes,
+        ContentType=content_type,
     )
     return f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"

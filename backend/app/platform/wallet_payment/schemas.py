@@ -140,3 +140,11 @@ class DeliveryStatusResponseSchema(BaseModel):
     delivery_fee: float
     total_amount: float
     rider_earning: float
+
+
+class RiderDocumentUploadResponseSchema(BaseModel):
+    """Response for POST /wallet/documents/{doc_type} — Gap 2 fix."""
+    id: uuid.UUID
+    cnic_photo_url: str | None
+    license_photo_url: str | None
+    vehicle_photo_url: str | None

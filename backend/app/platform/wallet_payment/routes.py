@@ -4,7 +4,7 @@ same guard pattern as users/routes.py Step 11 for customer.
 """
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -19,6 +19,7 @@ from app.platform.wallet_payment.schemas import (
     OnlineStatusToggleSchema,
     RiderAssignmentActionSchema,
     RiderAssignmentResponseSchema,
+    RiderDocumentUploadResponseSchema,
     RiderEarningsResponseSchema,
     RiderLocationResponseSchema,
     RiderLocationUpdateSchema,
@@ -200,4 +201,24 @@ def mark_delivered(
     """Phase 6 Step 5 — order delivered."""
     return food_service.rider_advance_delivery_status(
         db, current_user.id, order_id, "Delivered"
+    )
+
+
+@router.post("/documents/{doc_type}", response_model=RiderDocumentUploadResponseSchema)
+async def upload_my_document(
+    doc_type: str,
+    file: UploadFile = File(...),
+    current_user: CurrentUser = Depends(require_rider),
+    db: Session = Depends(get_db),
+):
+    """
+    Gap 2 fix — upload CNIC/license/vehicle photo (spec Sec 8 Step 1).
+    doc_type must be one of: cnic, license, vehicle. Own account only —
+    current_user.id from the token, no rider_id in the path. File is read
+    with a hard cap (max size + 1 byte), same pattern as the menu photo
+    upload in food_delivery/routes.py.
+    """
+    data = await file.read(service.MAX_RIDER_DOC_SIZE_BYTES + 1)
+    return service.upload_rider_document(
+        db, current_user.id, doc_type, data, file.content_type, file.filename
     )
