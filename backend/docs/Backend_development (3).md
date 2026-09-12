@@ -408,14 +408,14 @@ Tasks:
 - [x] Confirm bcrypt/argon2 on all password fields, none logged anywhere. — `core/security.py` bcrypt via passlib, used for restaurant + admin password fields; customer/rider are OTP-only, no password to leak.
 - [x] JWT short expiry + refresh flow tested. — **Gap found**: `issue_tokens()`/`revoke_refresh_token()` existed but no `/auth/refresh` route/service function actually consumed a refresh token to mint a new access token. Fixed: `refresh_access_token()` (service) + `POST /auth/refresh` (route), rotates the refresh token on every use, `tests/test_auth_refresh.py` added (new/reuse/expired/unknown-token/route cases).
 - [x] Re-check every endpoint has role guard. — Spot-checked all 4 route files (`admin`, `food_delivery`, `wallet_payment`, `users`): every route function takes a `CurrentUser`/`require_role` dependency, none bare.
-- [ ] S3 buckets for CNIC/license/vehicle docs private, not public-read. — **Gap found, NOT fixed in this patch** (feature-sized, not a hardening tweak): `core/storage.py` reserves the `rider-docs/` prefix in a comment and the `Rider` model has `cnic_photo_url`/`license_photo_url`/`vehicle_photo_url` columns, but no `upload_rider_document()` function or upload route exists anywhere — rider document upload was never actually built. Flagging per Rule 5; needs its own task (route + schema + private-ACL S3 call), not silently added here.
+- [x] S3 buckets for CNIC/license/vehicle docs private, not public-read. — **Gap found, now FIXED** (commit `32efb7e "fix gaps"`): `core/storage.py` had only reserved the `rider-docs/` prefix in a comment, no upload function/route ever built. Fixed: `storage.upload_rider_document()` (private object, no `public-read` ACL — deliberately different from `upload_menu_photo()`), `service.upload_rider_document()` (validate size/content-type/magic-bytes, same pattern as menu photo validation, then persist the matching `*_photo_url` column), `POST /wallet/documents/{doc_type}` route (`doc_type` = `cnic`/`license`/`vehicle`, rider-only, own account via token — no `rider_id` in path). Tests added in `tests/test_rider_documents.py`.
 - [x] Confirm rate limit active on all auth endpoints. — `otp_request`, `otp_verify`, `rider_otp_verify`, `restaurant_login`, `restaurant_otp_verify`, `admin_login` all call `enforce_rate_limit`.
 - [x] Confirm Pydantic schema validation on every request body. — every route above takes a typed Pydantic schema, no raw `dict`/`Request` body parsing found.
 - [x] SQLi check. — all queries go through SQLAlchemy ORM (`db.query(...)`), no raw string-concatenated SQL found in any module.
 
-**Also flagged (pre-existing gap, outside this pass's scope):** `tests/` has no `test_auth.py` for the core OTP/login/logout flow (Phase 2) — only the new refresh-token tests added here. Recommend a follow-up task before Phase 13's final checklist.
+**Previously flagged gap, now FIXED (commit `32efb7e "fix gaps"`):** `tests/` had no `test_auth.py` for the core OTP/login/logout flow (Phase 2), rider signup+login (Phase 3 Step 0), restaurant login (Phase 9), and admin login (Phase 10) despite being live since early phases. `test_auth.py` added — 18 tests covering all four flows. Refresh-token rotation stays in its own `test_auth_refresh.py`, not duplicated.
 
-Exit check: manual pentest checklist pass, OpenAPI docs (Swagger) accurate for every route. — Passes except the two flagged items above (rider-doc upload feature, missing core auth test file) — both need separate follow-up tasks, tracked here so they aren't lost.
+Exit check: manual pentest checklist pass, OpenAPI docs (Swagger) accurate for every route. — ✅ Passes. Both previously-flagged gaps (rider-doc upload feature, missing core auth test file) are now closed as of commit `32efb7e`.
 
 ---
 
@@ -461,4 +461,5 @@ Only then → backend MVP = DONE.
 
 ---
 
+*Doc version: 2.1 — Phase 10's two flagged gaps (rider document upload, missing `test_auth.py`) marked FIXED per commit `32efb7e "fix gaps"`, previously shipped to repo without a matching doc update.*
 *Doc version: 2.0 — merged from `development.md` + old `Backend_development.md` (duplicate files, same purpose, different detail level — merged per Rule 3, no content lost). Update after each phase/step ships — mark done, note deviation if any (per Rule 3, deviation = flag conflict, don't silently change).*
