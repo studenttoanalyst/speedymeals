@@ -41,6 +41,13 @@ class LogoutSchema(BaseModel):
     refresh_token: str
 
 
+class RefreshTokenRequestSchema(BaseModel):
+    """Body for POST /auth/refresh — Phase 10 hardening. Same shape as
+    logout (both just need the raw refresh token) but kept as its own
+    schema since the two endpoints do opposite things and may diverge."""
+    refresh_token: str
+
+
 class RestaurantLoginSchema(BaseModel):
     """Step 9, Path A — restaurant email+password login."""
     email: str

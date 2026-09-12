@@ -12,6 +12,7 @@ Per ADR-001 (docs/decisions/ADR-001-otp-sms-provider.md):
 import hashlib
 import random
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -199,6 +200,34 @@ def revoke_refresh_token(db: Session, raw_refresh_token: str) -> None:
 
     record.status = "revoked"
     db.commit()
+
+
+def refresh_access_token(db: Session, raw_refresh_token: str) -> dict:
+    """
+    Phase 10 hardening — Step 6 was missing the actual refresh endpoint:
+    revoke() existed (logout) and issue_tokens() existed (login), but
+    nothing let an expired-access-token client trade a still-valid
+    refresh token for a new pair. Rotates on use (old refresh token is
+    revoked here, a brand new pair is issued) so a leaked-but-unused
+    refresh token has a single-use window, not a 30-day one.
+    """
+    token_hash = _hash_token(raw_refresh_token)
+    record = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
+
+    if record is None or record.status == "revoked":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or revoked refresh token.",
+        )
+    if record.expires_at < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token expired.",
+        )
+
+    record.status = "revoked"
+    db.commit()
+    return issue_tokens(db, record.subject_id, record.role)
 
 
 def authenticate_restaurant_by_password(db: Session, email: str, password: str) -> Restaurant:

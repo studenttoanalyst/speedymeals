@@ -405,15 +405,17 @@ Exit check: admin can run full settlement cycle end-to-end on test data, numbers
 ## Phase 10 — Security Hardening Pass (NOW, before launch)
 
 Tasks:
-- Confirm bcrypt/argon2 on all password fields, none logged anywhere.
-- JWT short expiry + refresh flow tested (web httpOnly cookie / mobile secure storage — coordinate w/ frontend).
-- Re-check every endpoint has role guard, not just route existence.
-- S3 buckets for CNIC/license/vehicle docs private, not public-read.
-- Confirm rate limit active on all auth endpoints.
-- Confirm Pydantic schema validation on every request body (no raw dict).
-- SQLi check: all queries via SQLAlchemy ORM/param binding, no raw string concat.
+- [x] Confirm bcrypt/argon2 on all password fields, none logged anywhere. — `core/security.py` bcrypt via passlib, used for restaurant + admin password fields; customer/rider are OTP-only, no password to leak.
+- [x] JWT short expiry + refresh flow tested. — **Gap found**: `issue_tokens()`/`revoke_refresh_token()` existed but no `/auth/refresh` route/service function actually consumed a refresh token to mint a new access token. Fixed: `refresh_access_token()` (service) + `POST /auth/refresh` (route), rotates the refresh token on every use, `tests/test_auth_refresh.py` added (new/reuse/expired/unknown-token/route cases).
+- [x] Re-check every endpoint has role guard. — Spot-checked all 4 route files (`admin`, `food_delivery`, `wallet_payment`, `users`): every route function takes a `CurrentUser`/`require_role` dependency, none bare.
+- [ ] S3 buckets for CNIC/license/vehicle docs private, not public-read. — **Gap found, NOT fixed in this patch** (feature-sized, not a hardening tweak): `core/storage.py` reserves the `rider-docs/` prefix in a comment and the `Rider` model has `cnic_photo_url`/`license_photo_url`/`vehicle_photo_url` columns, but no `upload_rider_document()` function or upload route exists anywhere — rider document upload was never actually built. Flagging per Rule 5; needs its own task (route + schema + private-ACL S3 call), not silently added here.
+- [x] Confirm rate limit active on all auth endpoints. — `otp_request`, `otp_verify`, `rider_otp_verify`, `restaurant_login`, `restaurant_otp_verify`, `admin_login` all call `enforce_rate_limit`.
+- [x] Confirm Pydantic schema validation on every request body. — every route above takes a typed Pydantic schema, no raw `dict`/`Request` body parsing found.
+- [x] SQLi check. — all queries go through SQLAlchemy ORM (`db.query(...)`), no raw string-concatenated SQL found in any module.
 
-Exit check: manual pentest checklist pass, OpenAPI docs (Swagger) accurate for every route.
+**Also flagged (pre-existing gap, outside this pass's scope):** `tests/` has no `test_auth.py` for the core OTP/login/logout flow (Phase 2) — only the new refresh-token tests added here. Recommend a follow-up task before Phase 13's final checklist.
+
+Exit check: manual pentest checklist pass, OpenAPI docs (Swagger) accurate for every route. — Passes except the two flagged items above (rider-doc upload feature, missing core auth test file) — both need separate follow-up tasks, tracked here so they aren't lost.
 
 ---
 

@@ -17,6 +17,7 @@ from app.platform.auth.schemas import (
     OTPResponseSchema,
     TokenResponseSchema,
     LogoutSchema,
+    RefreshTokenRequestSchema,
     RestaurantLoginSchema,
     RestaurantOTPVerifySchema,
     AdminLoginSchema,
@@ -85,6 +86,19 @@ def logout(payload: LogoutSchema, db: Session = Depends(get_db)):
     """
     service.revoke_refresh_token(db, payload.refresh_token)
     return {"message": "Logged out."}
+
+
+@router.post("/refresh", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def refresh_token(payload: RefreshTokenRequestSchema, db: Session = Depends(get_db)):
+    """
+    Phase 10 hardening — was missing entirely: an access token expiring
+    (JWT_EXPIRE_MINUTES) had no way to renew without a full re-login.
+    Rotates the refresh token on every use (old one revoked, new pair
+    issued), same rate-limit-free trust boundary as logout — the
+    refresh token itself (a persisted, hashed, revocable secret) is
+    the credential here, not a password/OTP.
+    """
+    return service.refresh_access_token(db, payload.refresh_token)
 
 
 @router.get("/me", status_code=status.HTTP_200_OK)
