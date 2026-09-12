@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  ...(process.env.DOCKER_BUILD === 'true' ? { output: 'standalone' } : {}),
   experimental: {
     optimizePackageImports: ['@phosphor-icons/react', 'motion'],
   },
