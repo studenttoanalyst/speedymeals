@@ -117,15 +117,40 @@ Every section below follows the same pattern:
 
 **Cost:** $5–20/month for a VPS capable of running our stack.
 
-**Alternatives:**
+**Decision: we are going with AWS Lightsail** — it matches our long-term plan to migrate fully into AWS's ecosystem (S3 storage, RDS database, etc.) later, so we're not throwing away setup work when we scale up.
+
+**Alternatives (for reference, not chosen):**
 | Provider | Type | Cost/month | Notes |
 |---|---|---|---|
+| **AWS Lightsail (chosen)** | VPS | $10–20 | Matches our future full-AWS migration path |
 | DigitalOcean Droplet | VPS | $12–24 | Easiest VPS for beginners, good docs |
 | Hetzner Cloud | VPS | €5–10 (~$5–11) | Cheapest for the power you get |
-| AWS Lightsail | VPS | $10–20 | Matches our future full-AWS migration path |
 | HosterPK Shared Hosting (current) | Shared | Already paid (~$45/yr) | See full comparison in Section 9 |
 
-**Where to buy:** digitalocean.com or hetzner.com → create account → "Create Droplet/Server" → choose Ubuntu 24 → choose nearest region (Singapore) → pay by card.
+### Which Lightsail plan to buy
+
+| Plan | Specs | Price/month | Verdict |
+|---|---|---|---|
+| Nano | 1 vCPU, 1GB RAM, 40GB SSD, 2TB transfer | $5 | Too tight — backend + Redis + Nginx together will run out of memory under any real concurrent load |
+| **Micro — recommended for pilot** | 2 vCPU, 2GB RAM, 60GB SSD, 3TB transfer | **$10** | Enough to run our backend + Redis + Nginx for the Karachi pilot fleet (the database itself lives separately on Supabase, so this box only needs to handle app logic and live rider GPS, not data storage) |
+| Small | 2 vCPU, 4GB RAM, 80GB SSD, 4TB transfer | $20 | Upgrade to this if we expect more than ~50–100 riders online at once at launch, or want extra breathing room from day one |
+
+The cheapest Lightsail plan technically available is $3.50/month, but that version has no public IP address — since our app needs a stable public address to be reachable, the real starting price for us is $5/month, and the $10/month Micro plan is the one we should actually buy. Lightsail bills by the hour but never charges more than the flat monthly price, so there's no risk of surprise overages from normal usage.
+
+One region note: hosting in Asia-Pacific regions can come with a smaller "included data transfer" allowance than US regions at the same price, so before committing we should double check the exact transfer allowance for the Singapore region (our nearest low-latency choice to Karachi) on AWS's own pricing page.
+
+**Where to buy:**
+1. Go to **lightsail.aws.amazon.com** → sign in or create an AWS account (requires a card on file).
+2. Click **"Create instance."**
+3. Platform: **Linux/Unix**. Blueprint: **"OS Only" → Ubuntu 24.04 LTS** (a clean server, not a pre-built app template).
+4. Region: **Asia Pacific (Singapore)** — closest low-latency option to Karachi.
+5. Plan: select the **$10/month** instance (2GB RAM / 2 vCPU / 60GB SSD).
+6. Give it a clear name, e.g. `speedymeals-backend-prod`, and click **Create**. It's live within about a minute.
+7. Under the instance's **Networking** tab: attach a **free Static IP** (so the server's address never changes on restart) and open ports **22, 80, 443** so the app and our own logins can reach it.
+8. Point our domain at it: in Cloudflare DNS, add an **A record** for `api.speedymeals.com` pointing to this static IP.
+9. Connect via the built-in browser SSH terminal (no extra software needed) and install Docker, then deploy our backend code from GitHub, and set up free auto-renewing HTTPS via Certbot.
+
+**Estimated real monthly cost for this piece:** **$10/month** for the server itself, plus an optional ~20% extra (~$2/month) if we turn on Lightsail's automatic daily backups once real pilot data is flowing — for a realistic total of **$10–12/month**.
 
 ---
 
@@ -254,7 +279,7 @@ Think of HosterPK Plan IV like **renting a desk in a shared co-working space** �
 | 2 | DNS (Cloudflare) | Free | Immediately, with domain |
 | 3 | Website hosting (Vercel free tier) | Free | Immediately |
 | 4 | Database (Supabase free tier) | Free | Immediately, during development |
-| 5 | Backend VPS (DigitalOcean/Hetzner) | $6–12/month | Before pilot launch |
+| 5 | Backend VPS — AWS Lightsail ($10/month Micro plan) | $10–12/month | Before pilot launch |
 | 6 | File storage (Supabase Storage, included) | Free (included above) | Before pilot launch |
 | 7 | Google Workspace email | $7/month | Once investor/partner-facing communication ramps up |
 | 8 | Upgrade Supabase to Pro | $25/month | Once real customer data/traffic exists |
