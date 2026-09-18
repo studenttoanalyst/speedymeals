@@ -86,7 +86,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
 
       {/* Hero Content Container in structured vertical flow */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1 flex flex-col items-center justify-between min-h-0">
-        {/* Top: Eyebrow + Headlines — moved down for elegant breathing room below navbar */}
+        {/* Top: Eyebrow + Headlines: moved down for elegant breathing room below navbar */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -117,7 +117,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           <motion.div variants={itemVariants} className="relative z-20 w-full mb-0.5">
             <h1
               id="hero-headline"
-              className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl [@media(max-height:760px)]:text-4xl [@media(max-height:640px)]:text-3xl tracking-tight text-ink uppercase leading-none text-center"
+              className="font-display text-3xl sm:text-5xl lg:text-6xl xl:text-7xl [@media(max-height:760px)]:text-3xl [@media(max-height:640px)]:text-2xl tracking-tight text-ink uppercase leading-none text-center whitespace-nowrap"
             >
               SPEEDY MEALS
             </h1>
@@ -281,7 +281,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               </motion.div>
             </motion.div>
 
-            {/* Two CTAs: RIDE WITH US / PARTNER YOUR RESTAURANT — Responsive stack on mobile to prevent overflow */}
+            {/* Two CTAs: RIDE WITH US / PARTNER YOUR RESTAURANT: Responsive stack on mobile to prevent overflow */}
             <motion.div
               variants={itemVariants}
               className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-2.5 mb-0 w-full max-w-sm sm:max-w-xl mx-auto px-1"
@@ -364,7 +364,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             <span className="group-hover:underline underline-offset-4 decoration-1">SCROLL TO DISCOVER SERVICES</span>
           </motion.button>
 
-          {/* Deployment locations banner — explicitly visible on both mobile and desktop */}
+          {/* Deployment locations banner: explicitly visible on both mobile and desktop */}
           <div className="font-mono text-[9px] sm:text-[11px] text-ink-soft tracking-wider flex items-center space-x-2">
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />

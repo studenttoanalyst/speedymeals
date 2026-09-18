@@ -126,11 +126,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           : 'bg-white/70 backdrop-blur-sm border-black/5'
           }`}
       >
-        {/* Brand Wordmark: Centered on mobile, left-aligned on desktop, with enlarged logo */}
+        {/* Brand Wordmark: Centered on mobile, left-aligned on desktop, strictly single-line */}
         <Link
           href="/"
           id="brand-logo-link"
-          className="flex items-center space-x-2.5 sm:space-x-3.5 group shrink-0 py-1 max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2"
+          className="flex items-center space-x-2 sm:space-x-3 group shrink-0 py-1 whitespace-nowrap max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2"
           onClick={(e) => {
             if (pathname === '/') {
               e.preventDefault();
@@ -141,9 +141,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           <img
             src="/favicon.jpeg"
             alt="SpeedyMeals Logo"
-            className="h-10 sm:h-12 lg:h-13 [@media(max-height:760px)]:h-9 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105 drop-shadow-xs"
+            className="h-8 sm:h-10 lg:h-12 [@media(max-height:760px)]:h-8 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105 drop-shadow-xs"
           />
-          <span className="font-display text-lg sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-lg tracking-tight text-red uppercase flex items-center">
+          <span className="font-display text-base sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-base tracking-tight text-red uppercase whitespace-nowrap shrink-0">
             SPEEDY MEALS
           </span>
         </Link>
@@ -188,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           })}
         </nav>
 
-        {/* Right Action CTAs — pill shaped on desktop */}
+        {/* Right Action CTAs: pill shaped on desktop */}
         <div className="hidden lg:flex items-center space-x-2.5 shrink-0">
           <button
             id="nav-cta-ride"
@@ -383,7 +383,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
         </div>
       </div>
 
-      {/* Mobile Drawer Panel — floating card with nav-drawer styling */}
+      {/* Mobile Drawer Panel: floating card with nav-drawer styling */}
       {mobileMenuOpen && (
         <div
           id="mobile-drawer-panel"

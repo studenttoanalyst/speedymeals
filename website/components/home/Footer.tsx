@@ -7,7 +7,6 @@ import {
   TwitterLogo,
   LinkedinLogo,
   InstagramLogo,
-  GithubLogo,
   ArrowUpRight,
 } from '@phosphor-icons/react';
 
@@ -61,23 +60,23 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
       className="relative z-20 bg-[#15171A] text-white border-t border-[#2D3139]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-12">
-        {/* 4-Column Clean Responsive Grid */}
+        {/* Responsive Grid: Mobile: SpeedyMeals & Bio above, Company & Get Started side-by-side, Contact below. Desktop: 4 Columns */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-8 lg:gap-8 pb-16 border-b border-[#2D3139]"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-8 pb-16 border-b border-[#2D3139]"
         >
-          {/* Col 1 — Brand */}
-          <motion.div variants={itemVariants} className="col-span-1 sm:col-span-2 lg:col-span-1 space-y-4">
-            <div className="flex items-center space-x-3">
+          {/* Section 1: Speedy Meals Brand & Bio (Full width on mobile/tablet, 4 columns on desktop) */}
+          <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4 space-y-4">
+            <div className="flex items-center space-x-2.5 sm:space-x-3">
               <img
                 src="/favicon.jpeg"
                 alt="SpeedyMeals Logo"
-                className="h-9 sm:h-10 w-auto object-contain shrink-0"
+                className="h-8 sm:h-9 md:h-10 w-auto object-contain shrink-0"
               />
-              <span className="font-display text-xl sm:text-2xl tracking-tight text-[#E23A2E] uppercase">
+              <span className="font-display text-xl sm:text-2xl tracking-tight text-[#E23A2E] uppercase whitespace-nowrap shrink-0">
                 SPEEDY MEALS
               </span>
             </div>
@@ -93,115 +92,118 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             </p>
           </motion.div>
 
-          {/* Col 2 — Company */}
-          <motion.div variants={itemVariants} className="col-span-1 space-y-4">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
-              COMPANY
-            </div>
-            <ul className="space-y-2.5 text-xs font-mono">
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleScrollTo('overview')}
-                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
-                >
-                  Overview
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleScrollTo('services')}
-                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
-                >
-                  Services
-                </button>
-              </li>
-              <li>
-                <Link
-                  id="footer-link-about"
-                  href="/about"
-                  className="text-[#A0A4AB] hover:text-white transition-colors block"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  id="footer-link-terms"
-                  href="/terms"
-                  className="text-[#A0A4AB] hover:text-white transition-colors block"
-                >
-                  Terms of Use
-                </Link>
-              </li>
-              <li>
-                <span className="text-[#5B5F66] cursor-not-allowed block">
-                  Careers <span className="text-[10px] text-tan font-bold ml-1">[HIRING]</span>
-                </span>
-              </li>
-            </ul>
-          </motion.div>
-
-          {/* Col 3 — Partner */}
-          <motion.div variants={itemVariants} className="col-span-1 space-y-4">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
-              GET STARTED
-            </div>
-            <ul className="space-y-2.5 text-xs font-mono">
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleScrollTo('partner', 'rider')}
-                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1.5 cursor-pointer text-left"
-                >
-                  <span>Ride With Us</span>
-                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleScrollTo('partner', 'restaurant')}
-                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5 cursor-pointer text-left"
-                >
-                  <span>Partner Your Restaurant</span>
-                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
-                </button>
-              </li>
-              <li>
-                <div className="flex flex-wrap items-center gap-1.5 text-[#A0A4AB]">
-                  <span>Customer App</span>
-                  <span className="border-l-2 border-l-tan pl-1 text-[10px] text-tan font-mono font-semibold whitespace-nowrap">
-                    ⋯ COMING SOON
+          {/* Section 2: Company & Get Started (Side-by-side 2-col on mobile, 5 cols on desktop) */}
+          <div className="col-span-1 lg:col-span-5 grid grid-cols-2 gap-6 sm:gap-8">
+            {/* Col 2A: Company */}
+            <motion.div variants={itemVariants} className="space-y-4">
+              <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+                COMPANY
+              </div>
+              <ul className="space-y-2.5 text-xs font-mono">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => handleScrollTo('overview')}
+                    className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Overview
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => handleScrollTo('services')}
+                    className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Services
+                  </button>
+                </li>
+                <li>
+                  <Link
+                    id="footer-link-about"
+                    href="/about"
+                    className="text-[#A0A4AB] hover:text-white transition-colors block"
+                  >
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    id="footer-link-terms"
+                    href="/terms"
+                    className="text-[#A0A4AB] hover:text-white transition-colors block"
+                  >
+                    Terms of Use
+                  </Link>
+                </li>
+                <li>
+                  <span className="text-[#5B5F66] cursor-not-allowed block">
+                    Careers <span className="text-[10px] text-tan font-bold ml-1">[HIRING]</span>
                   </span>
-                </div>
-              </li>
-              <li className="pt-2 mt-2 border-t border-[#2D3139]">
-                <Link
-                  id="footer-link-restaurant"
-                  href="/restaurant"
-                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5"
-                >
-                  <span>Restaurant Portal</span>
-                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
-                </Link>
-              </li>
-              <li>
-                <Link
-                  id="footer-link-admin"
-                  href="/admin"
-                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1.5"
-                >
-                  <span>Admin Console</span>
-                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
-                </Link>
-              </li>
-            </ul>
-          </motion.div>
+                </li>
+              </ul>
+            </motion.div>
 
-          {/* Col 4 — Contact / Legal */}
-          <motion.div variants={itemVariants} className="col-span-2 md:col-span-1 space-y-4">
+            {/* Col 2B: Get Started */}
+            <motion.div variants={itemVariants} className="space-y-4">
+              <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+                GET STARTED
+              </div>
+              <ul className="space-y-2.5 text-xs font-mono">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => handleScrollTo('partner', 'rider')}
+                    className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1.5 cursor-pointer text-left"
+                  >
+                    <span>Ride With Us</span>
+                    <ArrowUpRight size={12} weight="bold" className="shrink-0" />
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => handleScrollTo('partner', 'restaurant')}
+                    className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5 cursor-pointer text-left"
+                  >
+                    <span>Partner Your Restaurant</span>
+                    <ArrowUpRight size={12} weight="bold" className="shrink-0" />
+                  </button>
+                </li>
+                <li>
+                  <div className="flex flex-wrap items-center gap-1.5 text-[#A0A4AB]">
+                    <span>Customer App</span>
+                    <span className="border-l-2 border-l-tan pl-1 text-[10px] text-tan font-mono font-semibold whitespace-nowrap">
+                      ⋯ COMING SOON
+                    </span>
+                  </div>
+                </li>
+                <li className="pt-2 mt-2 border-t border-[#2D3139]">
+                  <Link
+                    id="footer-link-restaurant"
+                    href="/restaurant"
+                    className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5"
+                  >
+                    <span>Restaurant Portal</span>
+                    <ArrowUpRight size={12} weight="bold" className="shrink-0" />
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    id="footer-link-admin"
+                    href="/admin"
+                    className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1.5"
+                  >
+                    <span>Admin Console</span>
+                    <ArrowUpRight size={12} weight="bold" className="shrink-0" />
+                  </Link>
+                </li>
+              </ul>
+            </motion.div>
+          </div>
+
+          {/* Section 3: Contact (Below on mobile, 3 cols on desktop) */}
+          <motion.div variants={itemVariants} className="col-span-1 lg:col-span-3 space-y-4">
             <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
               CONTACT
             </div>
@@ -247,14 +249,6 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-red hover:border-red transition-colors duration-150"
               >
                 <InstagramLogo size={16} weight="bold" />
-              </a>
-
-              <a
-                href="#github"
-                aria-label="GitHub"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-tan hover:text-ink hover:border-tan transition-colors duration-150"
-              >
-                <GithubLogo size={16} weight="bold" />
               </a>
             </div>
           </motion.div>

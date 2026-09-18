@@ -29,14 +29,14 @@ export default function AboutPage() {
       {/* Sticky Snap Navbar */}
       <Navbar />
 
-      {/* Full-Color Transparent SpeedyMeals Favicon Watermark (Fixed in viewport, visible on white dotted canvas, hidden behind solid non-white space) */}
-      <div className="fixed inset-0 pointer-events-none select-none flex items-center justify-center z-0 overflow-hidden">
+      {/* Static Transparent SpeedyMeals Favicon Watermark (Anchored statically to the canvas, no viewport-tracking jitter) */}
+      <div className="absolute top-44 sm:top-56 md:top-64 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0 overflow-hidden">
         <Image
           src="/favicon.jpeg"
           alt="SpeedyMeals Favicon Watermark"
           width={900}
           height={900}
-          className="w-[72vw] max-w-[940px] md:max-w-[920px] h-auto object-contain opacity-10 select-none pointer-events-none"
+          className="w-[82vw] max-w-[760px] md:max-w-[820px] h-auto object-contain opacity-10 select-none pointer-events-none"
           priority
         />
       </div>
@@ -322,15 +322,15 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Pakistan Zone */}
-            <div className="p-6 sm:p-8 bg-paper border-t-4 border-t-red border-x border-b border-line shadow-xs">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div className="p-5 sm:p-8 bg-paper border-t-4 border-t-red border-x border-b border-line shadow-xs">
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 mb-4">
                 <div className="flex items-center space-x-2 min-w-0">
                   <span className="text-xl shrink-0">🇵🇰</span>
-                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink whitespace-nowrap">
+                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink break-words">
                     Pakistan Operational Grid
                   </span>
                 </div>
-                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 font-bold uppercase shrink-0">
+                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 font-bold uppercase shrink-0 w-fit">
                   ACTIVE &amp; EXPANDING
                 </span>
               </div>
@@ -338,35 +338,35 @@ export default function AboutPage() {
                 Active operations deployed across primary commercial arteries with rapid expansion underway across secondary manufacturing and culinary epicenters.
               </p>
               <div className="font-mono text-xs space-y-2">
-                <div className="flex justify-between border-b border-line pb-1.5">
-                  <span className="text-ink font-semibold">Tier-1 Metros (Live):</span>
-                  <span className="text-ink-soft">Karachi, Lahore, Islamabad, Rawalpindi</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-line pb-2 pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Tier-1 Metros (Live):</span>
+                  <span className="text-ink-soft sm:text-right">Karachi, Lahore, Islamabad, Rawalpindi</span>
                 </div>
-                <div className="flex justify-between border-b border-line pb-1.5">
-                  <span className="text-ink font-semibold">Northern Corridor:</span>
-                  <span className="text-ink-soft">Peshawar, Jhelum, Abbottabad</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-line pb-2 pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Northern Corridor:</span>
+                  <span className="text-ink-soft sm:text-right">Peshawar, Jhelum, Abbottabad</span>
                 </div>
-                <div className="flex justify-between border-b border-line pb-1.5">
-                  <span className="text-ink font-semibold">Industrial Belt:</span>
-                  <span className="text-ink-soft">Faisalabad, Gujranwala, Sialkot, Kamoki</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-line pb-2 pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Industrial Belt:</span>
+                  <span className="text-ink-soft sm:text-right">Faisalabad, Gujranwala, Sialkot, Kamoki</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-ink font-semibold">Southern Region:</span>
-                  <span className="text-ink-soft">Multan, Hyderabad, Khanewal, Kasur</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Southern Region:</span>
+                  <span className="text-ink-soft sm:text-right">Multan, Hyderabad, Khanewal, Kasur</span>
                 </div>
               </div>
             </div>
 
             {/* Saudi Arabia Zone */}
-            <div className="p-6 sm:p-8 bg-paper border-t-4 border-t-tan border-x border-b border-line shadow-xs">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div className="p-5 sm:p-8 bg-paper border-t-4 border-t-tan border-x border-b border-line shadow-xs">
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 mb-4">
                 <div className="flex items-center space-x-2 min-w-0">
                   <span className="text-xl shrink-0">🇸🇦</span>
-                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink whitespace-nowrap">
+                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink break-words">
                     Kingdom of Saudi Arabia (KSA)
                   </span>
                 </div>
-                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 font-bold uppercase shrink-0">
+                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 font-bold uppercase shrink-0 w-fit">
                   DEPLOYMENT ONBOARDING
                 </span>
               </div>
@@ -374,21 +374,21 @@ export default function AboutPage() {
                 Tailored for Vision 2030 smart mobility standards, supporting high-density commercial kitchens, cloud restaurant operators, and zero-emissions delivery fleets.
               </p>
               <div className="font-mono text-xs space-y-2">
-                <div className="flex justify-between border-b border-line pb-1.5">
-                  <span className="text-ink font-semibold">Capital District:</span>
-                  <span className="text-ink-soft">Riyadh (Central Logistics Node)</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-line pb-2 pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Capital District:</span>
+                  <span className="text-ink-soft sm:text-right">Riyadh (Central Logistics Node)</span>
                 </div>
-                <div className="flex justify-between border-b border-line pb-1.5">
-                  <span className="text-ink font-semibold">Western Region:</span>
-                  <span className="text-ink-soft">Jeddah, Taif</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-line pb-2 pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Western Region:</span>
+                  <span className="text-ink-soft sm:text-right">Jeddah, Taif</span>
                 </div>
-                <div className="flex justify-between border-b border-line pb-1.5">
-                  <span className="text-ink font-semibold">Holy Cities Zone:</span>
-                  <span className="text-ink-soft">Makkah Al-Mukarramah, Al-Madinah</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline border-b border-line pb-2 pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Holy Cities Zone:</span>
+                  <span className="text-ink-soft sm:text-right">Makkah Al-Mukarramah, Al-Madinah</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-ink font-semibold">Eastern Province:</span>
-                  <span className="text-ink-soft">Dammam, Khobar, Dhahran</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline pt-1 gap-1 sm:gap-2">
+                  <span className="text-ink font-semibold shrink-0">Eastern Province:</span>
+                  <span className="text-ink-soft sm:text-right">Dammam, Khobar, Dhahran</span>
                 </div>
               </div>
             </div>

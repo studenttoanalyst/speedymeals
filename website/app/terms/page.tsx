@@ -69,13 +69,13 @@ export default function TermsOfUsePage() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-2.5 sm:space-x-3 group">
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group shrink-0 whitespace-nowrap">
               <img
                 src="/favicon.jpeg"
                 alt="SpeedyMeals"
-                className="h-9 sm:h-11 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105"
+                className="h-8 sm:h-10 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105"
               />
-              <span className="font-display text-lg sm:text-xl tracking-tight uppercase text-ink group-hover:text-red transition-colors">
+              <span className="font-display text-base sm:text-xl tracking-tight uppercase text-ink group-hover:text-red transition-colors whitespace-nowrap shrink-0">
                 SPEEDY MEALS
               </span>
             </Link>
@@ -289,7 +289,7 @@ export default function TermsOfUsePage() {
                       <strong>6.3 Cash on Delivery (COD):</strong> Refusing delivery or failing to pay for confirmed COD orders causes immediate restriction or removal of COD privileges from your account.
                     </p>
                     <p>
-                      <strong>6.4 Reporting Discrepancies:</strong> Missing items, damaged merchandise, or incorrect dishes must be reported with photographic evidence via in-app support <strong>within twenty-four (24) hours of delivery</strong>.
+                      <strong>6.4 Reporting Discrepancies:</strong> Missing items, damaged merchandise, or incorrect dishes must be reported with photographic evidence via in-app support <strong>within [X hours, e.g., 24 hours] of delivery</strong>.
                     </p>
                   </div>
                 </section>
@@ -309,7 +309,7 @@ export default function TermsOfUsePage() {
                     <div className="p-3 bg-paper border border-line font-mono text-xs">
                       <span className="text-red font-bold uppercase block mb-1">Standard Delivery Fee Formula:</span>
                       <code className="text-ink font-bold block text-xs sm:text-sm">
-                        Delivery Fee = Base Fee (Rs. 50) + [ Distance in KM &times; Rs. 20 ]
+                        Delivery Fee = Base Fee (Rs. 50, or Rs. [50/100, to be confirmed]) + [ Distance in KM &times; Rs. 20 ]
                       </code>
                       <span className="text-[11px] text-[#5B5F66] block mt-1">
                         100% of the customer delivery fee is paid directly to the assigned courier.
@@ -369,7 +369,10 @@ export default function TermsOfUsePage() {
                         SpeedyMeals is solely a digital platform and last-mile logistics provider. <strong>SpeedyMeals does not cook, prepare, package, or inspect food items sold by independent Restaurant Partners.</strong>
                       </p>
                       <p>
-                        Exclusive legal responsibility for culinary hygiene, food safety, ingredient freshness, and adherence to Provincial Food Authorities (Sindh Food Authority, Punjab Food Authority, and KP Food Safety Authority) rests with the Restaurant Partner.
+                        To the fullest extent permitted by applicable law, statutory and operational responsibility for food preparation, hygiene, safety, allergen disclosure, and adherence to Provincial Food Authority regulations (including the Sindh Food Authority, Punjab Food Authority, and Khyber Pakhtunkhwa Food Safety and Halal Food Authority) rests exclusively with the Restaurant Partner. SpeedyMeals facilitates digital ordering and transport and does not manufacture or package food items.
+                      </p>
+                      <p>
+                        Nothing in this clause or these Terms shall limit or exclude any statutory liability that cannot lawfully be excluded under applicable consumer protection legislation or provincial food safety regulations, including liability for death or personal injury resulting directly from proven gross negligence or willful misconduct of SpeedyMeals.
                       </p>
                       <p>
                         Customers with food allergies or medical dietary constraints must contact the restaurant kitchen directly before placing an order.
@@ -388,10 +391,16 @@ export default function TermsOfUsePage() {
                   </div>
                   <div className="space-y-2 text-sm text-ink-soft leading-relaxed font-sans">
                     <p>
-                      The platform is provided &ldquo;as is&rdquo; without warranties of uninterrupted availability. To the maximum extent permitted by Pakistani law, SpeedyMeals excludes liability for indirect or consequential damages.
+                      The platform is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties of uninterrupted availability. To the maximum extent permitted by Pakistani law, SpeedyMeals excludes liability for indirect, incidental, or consequential damages.
                     </p>
                     <p>
-                      In any matter where liability is established, the total financial liability of SpeedyMeals is capped at the gross value of the specific order in dispute.
+                      Subject to non-excludable statutory rights, where liability is established in a court of competent jurisdiction, the total aggregate financial liability of SpeedyMeals arising out of any specific claim or Order shall not exceed the gross value of that specific Order giving rise to the claim.
+                    </p>
+                    <p>
+                      <strong>11.3 Partner Conduct:</strong> Couriers and Restaurant Partners operate as independent parties. SpeedyMeals bears no liability for unlawful acts committed by third-party partners, but enforces immediate termination and cooperates with law enforcement.
+                    </p>
+                    <p>
+                      <strong>11.4 Non-Excludable Statutory Rights:</strong> Nothing in these Terms shall limit or exclude any statutory rights, guarantees, or remedies that cannot lawfully be excluded, restricted, or modified under the substantive laws of Pakistan, including liability for death or personal injury caused by proven gross negligence, fraud, or willful misconduct.
                     </p>
                   </div>
                 </section>
@@ -412,13 +421,13 @@ export default function TermsOfUsePage() {
                       <strong>12.2 Full Earnings Retention:</strong> Couriers receive 100% of customer delivery fees for completed trips, disbursed weekly.
                     </p>
                     <p>
-                      <strong>12.3 Working Balance &amp; Maintenance:</strong> Couriers maintain a nominal prepaid wallet float of <strong>Rs. 500</strong> for telemetry dispatch. A platform maintenance fee of <strong>Rs. 10</strong> is deducted per completed order.
+                      <strong>12.3 Working Balance &amp; Maintenance:</strong> Couriers maintain a minimum prepaid wallet float of <strong>Rs. 500</strong> to remain active on the dispatch network. A platform software maintenance fee of <strong>Rs. 10</strong> is deducted automatically per completed order.
                     </p>
                     <p>
-                      <strong>12.4 Equipment Deposit:</strong> Delivery boxes and safety uniforms are provided against a security deposit of <strong>Rs. 4,000</strong>, fully refundable upon account closure and return of undamaged equipment.
+                      <strong>12.4 Equipment Deposit:</strong> Delivery boxes and safety uniforms are provided against a security deposit of <strong>Rs. [4,000]</strong>, fully refundable upon account closure and return of undamaged equipment.
                     </p>
                     <p>
-                      <strong>12.5 Cash Remittance:</strong> Cash on Delivery collections must be reconciled within required operational shift windows. Failure to deposit collected funds constitutes a material breach and results in immediate deactivation.
+                      <strong>12.5 Cash Remittance:</strong> Couriers collecting Cash-on-Delivery (COD) payments must remit and deposit collected cash within the required operational shift window. Failure to do so constitutes a material breach and shall result in immediate account suspension, permanent platform blacklisting, and the registration of a First Information Report (FIR) with relevant law enforcement authorities for unlawful conversion.
                     </p>
                   </div>
                 </section>
@@ -436,7 +445,7 @@ export default function TermsOfUsePage() {
                       <strong>13.1 Quality &amp; Hygiene:</strong> Restaurant Partners warrant that all dishes comply with provincial food safety standards and represent genuine dine-in retail quality.
                     </p>
                     <p>
-                      <strong>13.2 Flat 10% Commission:</strong> SpeedyMeals operates a flat merchant commission of <strong>10%</strong> on fulfilled orders, settled weekly. No forced ad auction fees or search placement surcharges apply.
+                      <strong>13.2 Transparent 10% Commission:</strong> SpeedyMeals charges a commission of <strong>10%</strong> calculated strictly on the food subtotal, excluding customer delivery fees and applicable taxes. The assigned courier receives 100% of the customer delivery fee. SpeedyMeals settles partner earnings weekly regardless of whether the Order was paid via digital payment or Cash-on-Delivery (COD). No forced ad auction fees or search placement surcharges apply.
                     </p>
                     <p>
                       <strong>13.3 Timely Pickup:</strong> Kitchens must mark orders as ready only when packaged, avoiding courier wait times.
@@ -535,7 +544,7 @@ export default function TermsOfUsePage() {
                       These Terms are governed by the substantive laws of the <strong>Islamic Republic of Pakistan</strong>.
                     </p>
                     <p>
-                      Disputes not resolved through internal mediation shall fall under the exclusive jurisdiction of the competent courts of <strong>Karachi, Sindh, Pakistan</strong>.
+                      Disputes not resolved through internal mediation shall fall under the exclusive jurisdiction of the competent courts of <strong>[City, e.g., Karachi], Pakistan</strong>.
                     </p>
                   </div>
                 </section>
@@ -576,7 +585,7 @@ export default function TermsOfUsePage() {
                       <strong>22.3 Prohibited Parcels:</strong> Hazardous materials, firearms, narcotics, cash, and contraband are strictly prohibited.
                     </p>
                     <p>
-                      <strong>22.4 Liability Limit:</strong> In the absence of declared insurance, maximum carrier liability for parcel damage or loss is capped at <strong>Rs. 5,000 per parcel or declared invoice value, whichever is lower</strong>.
+                      <strong>22.4 Liability Limit:</strong> In the absence of declared insurance, maximum carrier liability for parcel damage or loss is capped at <strong>Rs. [amount to be defined, e.g., Rs. 5,000]</strong> per parcel or declared invoice value, whichever is lower.
                     </p>
                   </div>
                 </section>

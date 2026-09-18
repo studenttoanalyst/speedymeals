@@ -1,8 +1,8 @@
-# SpeedyMeals — Terms of Use
+# SpeedyMeals: Terms of Use
 
-**Published: [Insert Date]**
+**Published: September 2026**
 
-These Terms of Use (including all policies, notices, guidelines, and forms referenced herein or otherwise made available on the Platform) ("Terms") govern your use of the website and mobile application(s) provided by [SpeedyMeals Legal Entity Name] ("SpeedyMeals," "we," "us," or "our") (collectively, the "Platform"). The "Services" we provide include (a) the Platform, and (b) the services provided through the Platform, including food delivery, courier delivery, ride-hailing, on-demand technical services, and marketplace services, where applicable. Any new features added to the Services are also subject to these Terms.
+These Terms of Use (including all policies, notices, guidelines, and forms referenced herein or otherwise made available on the Platform) ("Terms") govern your use of the website and mobile application(s) provided by SpeedyMeals Network (Private) Limited ("SpeedyMeals," "we," "us," or "our") (collectively, the "Platform"). The "Services" we provide include (a) the Platform, and (b) the services provided through the Platform, including food delivery, courier delivery, ride-hailing, on-demand technical services, and marketplace services, where applicable. Any new features added to the Services are also subject to these Terms.
 
 Please read these Terms carefully. By accessing and using the Platform, you agree that you have read, understood, and accepted these Terms, and you consent to the processing of your personal data in accordance with our Privacy Policy. If you do not agree with these Terms, please do not access or use the Platform or the Services.
 
@@ -19,7 +19,7 @@ All photos and images of food, products, or services shown on the Platform are f
 ## 1. SpeedyMeals
 
 ### 1.1 Who We Are
-These Terms form the contract between you and **[SpeedyMeals Legal Entity Name]**, operating the SpeedyMeals Platform in Pakistan.
+These Terms form the contract between you and **SpeedyMeals Network (Private) Limited**, operating the SpeedyMeals Platform in Pakistan under the primary domain **speedymealservices.com**.
 
 ### 1.2 What We Do
 Through the Platform, SpeedyMeals connects Customers with independent Restaurant Partners, Riders, sellers, and service providers ("Partners") for the ordering, delivery, and fulfilment of food, parcels, marketplace goods, rides, and on-demand technical services (collectively, "Goods and Services"). SpeedyMeals acts as a technology facilitator to process, coordinate, and, in most cases, deliver an Order between the Customer and the Partner. SpeedyMeals is not the manufacturer, preparer, or provider of the underlying Goods and Services unless expressly stated (e.g. Speedy Kitchen).
@@ -94,7 +94,7 @@ SpeedyMeals and Restaurant Partners will make reasonable efforts to accommodate 
 SpeedyMeals is not obligated to provide, and does not guarantee the accuracy of, ingredient or allergen information displayed on the Platform. **Customers with allergies or dietary restrictions must contact the Restaurant Partner directly before placing an Order.** See also Section 10 (Food Safety Disclaimer).
 
 ### 6.5 Placing the Order
-You must review and confirm all Order details — items, quantities, delivery address, and payment method — before submitting. An Order is placed once you receive in-app or SMS confirmation.
+You must review and confirm all Order details: items, quantities, delivery address, and payment method before submitting. An Order is placed once you receive in-app or SMS confirmation.
 
 ### 6.6 Cancelling an Order
 You may cancel an Order free of charge only if the Restaurant Partner has not yet accepted it. Once accepted, cancellation may not be possible or may be subject to a cancellation charge to compensate the Restaurant Partner and/or Rider for preparation or dispatch already undertaken.
@@ -110,7 +110,7 @@ Cancellation rights mirror digital Orders. Repeated unjustified cancellations or
 ### 6.8 SpeedyMeals reserves the right to cancel any Order and/or suspend an account where fraudulent activity is reasonably suspected.
 
 ### 6.9 Wrong Order, Missing Items, or Defective Goods
-Report any issue (wrong item, missing item, damaged Goods) via in-app support within [X hours] of delivery. SpeedyMeals may request photographic evidence to investigate and determine an appropriate resolution (partial refund, replacement, or credit), at its reasonable discretion.
+Report any issue (wrong item, missing item, damaged Goods) via in-app support within [X hours, e.g., 24 hours] of delivery. SpeedyMeals may request photographic evidence to investigate and determine an appropriate resolution (partial refund, replacement, or credit), at its reasonable discretion.
 
 ---
 
@@ -123,10 +123,10 @@ Report any issue (wrong item, missing item, damaged Goods) via in-app support wi
 7.3 **Delivery Fee Formula.** Unless otherwise stated or covered by a promotional voucher, delivery fees are calculated as:
 
 ```
-Delivery Fee = Base Fee + (Distance in KM × Per-KM Rate)
+Delivery Fee = Base Fee + (Distance in KM * Per-KM Rate)
 ```
 
-Current rates: Base Fee **Rs. [50/100 — to be confirmed]**, Per-KM Rate **Rs. 20**, calculated using a third-party mapping/distance service. SpeedyMeals reserves the right to revise this formula and rates at any time, with reasonable notice.
+Current rates: Base Fee **Rs. 50 (or Rs. [50/100, to be confirmed])**, Per-KM Rate **Rs. 20**, calculated using a third-party mapping/distance service. SpeedyMeals reserves the right to revise this formula and rates at any time, with reasonable notice.
 
 7.4 A full price breakdown (food/goods subtotal, delivery fee, applicable charges, total) is displayed before checkout. Placing an Order constitutes agreement to the displayed total.
 
@@ -150,10 +150,10 @@ Estimated delivery times shown on the Platform are estimates only and are affect
 Where you place Orders from more than one Restaurant Partner simultaneously, each is treated as an independent Order with its own Rider assignment, delivery fee, and delivery timeline, in accordance with the Platform's multi-cart functionality.
 
 ### 8.4 Unsuccessful or Failed Deliveries
-Where delivery cannot be completed due to reasons attributable to you — including but not limited to: no one available to receive the Order, the Customer being uncontactable, incorrect or inaccessible address, or refusal to pay for a COD Order — SpeedyMeals reserves the right to cancel the Order without refund. If you remain uncontactable or unavailable for more than **ten (10) minutes** after Rider arrival, the Order may be cancelled without refund or remedy.
+Where delivery cannot be completed due to reasons attributable to you (including but not limited to: no one available to receive the Order, the Customer being uncontactable, incorrect or inaccessible address, or refusal to pay for a COD Order), SpeedyMeals reserves the right to cancel the Order without refund. If you remain uncontactable or unavailable for more than **ten (10) minutes** after Rider arrival, the Order may be cancelled without refund or remedy.
 
 ### 8.5 Rider Conduct During Delivery
-Riders will hand over Goods without requiring any payment exchange with the Restaurant Partner. Riders are instructed to behave professionally; conduct concerns should be reported via in-app support (see also Section 12 — Rider Terms).
+Riders will hand over Goods without requiring any payment exchange with the Restaurant Partner. Riders are instructed to behave professionally; conduct concerns should be reported via in-app support (see also Section 12: Rider Terms).
 
 ---
 
@@ -175,7 +175,7 @@ Riders will hand over Goods without requiring any payment exchange with the Rest
 
 10.1 SpeedyMeals is solely a technology and logistics platform connecting Customers with independently operated Restaurant Partners. **SpeedyMeals does not prepare, cook, handle, or inspect any food items** sold through the Platform.
 
-10.2 **SpeedyMeals shall bear no liability for food quality, hygiene, contamination, allergic reaction, food poisoning, or any illness or injury arising from consumption of food ordered through the Platform.** Responsibility for food safety and quality rests exclusively with the Restaurant Partner.
+10.2 **To the fullest extent permitted by applicable law, statutory and operational responsibility for food preparation, hygiene, safety, allergen disclosure, and adherence to Provincial Food Authority regulations (including the Sindh Food Authority, Punjab Food Authority, and Khyber Pakhtunkhwa Food Safety and Halal Food Authority) rests exclusively with the Restaurant Partner.** SpeedyMeals facilitates digital ordering and transport and does not manufacture or package food items. Nothing in this clause or these Terms shall limit or exclude any statutory liability that cannot lawfully be excluded under applicable consumer protection legislation or provincial food safety regulations, including liability for death or personal injury resulting directly from proven gross negligence or willful misconduct of SpeedyMeals.
 
 10.3 Complaints relating to food safety or health effects should be reported to SpeedyMeals support for facilitation purposes; SpeedyMeals may, at its sole discretion, assist in mediating with the Restaurant Partner, without this constituting an admission of liability.
 
@@ -189,10 +189,13 @@ Riders will hand over Goods without requiring any payment exchange with the Rest
 The Platform and its content are provided on an "as is" and "as available" basis. SpeedyMeals does not warrant that the Platform will be uninterrupted, secure, or error-free, and does not warrant the accuracy of Restaurant Partner menus, images, or descriptions.
 
 ### 11.2 Limitation of Liability
-To the maximum extent permitted by law, SpeedyMeals (including its employees, directors, and agents) excludes liability for indirect, incidental, or consequential loss arising from use of the Platform. Where liability is established, SpeedyMeals' total liability shall not exceed the value of the specific Order giving rise to the claim.
+To the maximum extent permitted by applicable law, SpeedyMeals (including its officers, directors, employees, and agents) excludes liability for indirect, incidental, punitive, or consequential losses, loss of business profits, or data loss arising out of or in connection with the Platform or Services. Subject to Section 11.4, where liability is established in a court of competent jurisdiction, SpeedyMeals' total aggregate liability arising out of any specific claim or Order shall not exceed the monetary value of that specific Order giving rise to the claim.
 
 ### 11.3 Partner Actions
-SpeedyMeals shall not be liable for the acts, omissions, negligence, or misconduct of any Restaurant Partner, Rider, seller, or independent service provider using the Platform, including any illegal activity, fraud, or criminal conduct committed by such individuals. **Riders and Restaurant Partners operate independently and are solely responsible for their own conduct; SpeedyMeals bears no liability for illegal acts committed by a Rider or Partner**, though SpeedyMeals will cooperate fully with law enforcement and will terminate any account involved in such conduct.
+SpeedyMeals shall not be liable for the independent acts, omissions, negligence, or misconduct of any Restaurant Partner, Rider, seller, or independent service provider using the Platform. Riders and Restaurant Partners operate independently and are solely responsible for their own conduct; SpeedyMeals bears no liability for illegal acts committed by a Rider or Partner, though SpeedyMeals will cooperate fully with law enforcement and will terminate any account involved in such conduct.
+
+### 11.4 Non-Excludable Statutory Rights
+Nothing in these Terms shall limit or exclude any statutory rights, guarantees, or remedies that cannot lawfully be excluded, restricted, or modified under the substantive laws of Pakistan, including liability for death or personal injury caused by proven negligence, fraud, or willful misconduct.
 
 ---
 
@@ -200,13 +203,13 @@ SpeedyMeals shall not be liable for the acts, omissions, negligence, or miscondu
 
 12.1 **Independent Status.** Riders operate as independent contractors, not employees of SpeedyMeals, and are solely responsible for compliance with traffic laws, vehicle roadworthiness, and personal conduct.
 
-12.2 **Wallet Requirement.** Riders must maintain a minimum prepaid wallet balance of **Rs. [500]** to remain active. A fee of **Rs. [10]** is deducted automatically from the wallet upon completion of each delivery, representing SpeedyMeals' per-delivery earning from the Rider side.
+12.2 **Wallet Requirement.** Riders must maintain a minimum prepaid wallet float of **Rs. 500** to remain active on the dispatch network. A platform maintenance fee of **Rs. 10** is deducted automatically from the wallet upon completion of each delivery, supporting dispatch infrastructure and operational telemetry.
 
 12.3 **Delivery Earnings.** Riders receive 100% of the calculated delivery fee for each completed delivery, paid via weekly payout.
 
 12.4 **Equipment/Kit Deposit (if applicable).** Where SpeedyMeals issues a branded uniform and delivery box against a refundable deposit of **Rs. [4,000]**, this deposit is refundable only upon return of the equipment in acceptable condition and formal closure of the Rider's account, subject to deduction for damage, loss, or non-return. *[Refund timeline and deduction schedule to be finalized before publishing.]*
 
-12.5 **Cash Handling.** Riders collecting COD payments must deposit collected cash to SpeedyMeals within the required daily window. Failure to do so is a material breach and may result in immediate suspension, forfeiture of pending payout amounts owed as recovery (to the extent legally permissible), and legal action.
+12.5 **Cash Handling.** Riders collecting Cash-on-Delivery (COD) payments must remit and deposit collected cash to SpeedyMeals within the required operational shift window. Failure to do so constitutes a material breach and shall result in immediate account suspension, permanent platform blacklisting, and the registration of a First Information Report (FIR) with relevant law enforcement authorities for unlawful conversion.
 
 12.6 **Illegal Activity.** SpeedyMeals bears no liability for any illegal act, criminal conduct, or traffic violation committed by a Rider. Any Rider found engaging in illegal activity will be immediately and permanently terminated, blacklisted, and reported to law enforcement using the identification documents collected at onboarding.
 
@@ -218,7 +221,7 @@ SpeedyMeals shall not be liable for the acts, omissions, negligence, or miscondu
 
 13.1 Restaurant Partners are solely responsible for food quality, hygiene, accurate pricing, and compliance with applicable food safety regulations.
 
-13.2 SpeedyMeals charges a commission of **10%** (or the rate agreed in the individual partnership agreement) on each completed Order, settled weekly.
+13.2 **Commission and Settlement.** SpeedyMeals charges a transparent commission of **10%** (or the rate agreed in the individual partnership agreement) calculated strictly on the food subtotal, excluding customer delivery fees and applicable taxes. The assigned Rider receives 100% of the customer delivery fee. SpeedyMeals settles partner earnings weekly regardless of whether the Order was settled via digital payment or Cash-on-Delivery (COD).
 
 13.3 Restaurant Partners must mark Orders "Ready for Pickup" only when genuinely ready, to avoid delivery delays and Rider wait-time disputes.
 
@@ -273,7 +276,7 @@ If any provision of these Terms is held invalid by a court of competent jurisdic
 
 ## 20. Governing Law and Jurisdiction
 
-These Terms are governed by the laws of the **Islamic Republic of Pakistan**. Any dispute shall first be addressed through SpeedyMeals' internal grievance process; unresolved disputes shall be subject to the exclusive jurisdiction of the courts of **[City, e.g., Karachi]**, Pakistan.
+These Terms are governed by the laws of the **Islamic Republic of Pakistan**. Any dispute shall first be addressed through SpeedyMeals' internal grievance process; unresolved disputes shall be subject to the exclusive jurisdiction of the competent courts of **[City, e.g., Karachi]**, Pakistan.
 
 ---
 
@@ -301,11 +304,11 @@ For questions or comments, please reach out via the in-app Help Center or email 
 
 22.6 SpeedyMeals and the assigned Rider reserve the right to inspect any parcel where there is reasonable suspicion of a prohibited item, and to refuse or report such items to law enforcement.
 
-22.7 SpeedyMeals' liability for loss or damage to a parcel is limited to the amount stated in the applicable delivery insurance option (where purchased) or, absent such insurance, to a maximum of **Rs. [amount to be defined]** per parcel, at SpeedyMeals' sole discretion, following investigation.
+22.7 SpeedyMeals' liability for loss or damage to a parcel is limited to the amount stated in the applicable delivery insurance option (where purchased) or, absent such insurance, to a maximum of **Rs. [amount to be defined, e.g., Rs. 5,000]** per parcel, at SpeedyMeals' sole discretion, following investigation.
 
 ---
 
-## 23. Speedy Drive (Ride-Hailing) — *[Future Service, if activated]*
+## 23. Speedy Drive (Ride-Hailing): *[Future Service, if activated]*
 
 23.1 Where enabled, Speedy Drive connects riders/passengers with independent drivers for on-demand transport (car, bike, rickshaw).
 
@@ -315,7 +318,7 @@ For questions or comments, please reach out via the in-app Help Center or email 
 
 ---
 
-## 24. Speedy Mall (Marketplace) — *[Future Service, if activated]*
+## 24. Speedy Mall (Marketplace): *[Future Service, if activated]*
 
 24.1 Speedy Mall allows independent sellers to list and sell goods to Customers through the Platform.
 
@@ -325,7 +328,7 @@ For questions or comments, please reach out via the in-app Help Center or email 
 
 ---
 
-## 25. Technical Services (On-Demand Skilled Workers) — *[Future Service, if activated]*
+## 25. Technical Services (On-Demand Skilled Workers): *[Future Service, if activated]*
 
 25.1 Where enabled, the Platform connects Customers with independent technicians (e.g. electricians, plumbers, HVAC, appliance repair) for on-demand service bookings.
 
@@ -339,5 +342,5 @@ In the event of any dispute regarding interpretation of these Terms, the **Engli
 
 ---
 
-### ⚠️ Legal Review Notice
-This document is a structured internal draft modeled on standard multi-service delivery-platform terms (industry pattern, not copied text). Before publishing live, it **must** be reviewed by a licensed Pakistani legal counsel for compliance with: Consumer Protection laws, Provincial Food Authority regulations (food safety disclaimers), Electronic Transactions Ordinance, PECA (data/privacy provisions), and independent-contractor classification for Riders and Drivers. Placeholder values (marked in brackets) must be finalized and confirmed against the locked product specification before this becomes the published version.
+### Legal Review Notice
+This document is a structured internal draft modeled on standard multi-service delivery-platform terms. Before publishing live, it must be reviewed by licensed Pakistani legal counsel for compliance with: Consumer Protection laws, Provincial Food Authority regulations (food safety disclaimers), Electronic Transactions Ordinance, PECA (data/privacy provisions), and independent-contractor classification for Riders and Drivers. Placeholder values (marked in brackets) must be finalized and confirmed against the locked product specification before this becomes the published version.

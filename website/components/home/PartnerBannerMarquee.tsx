@@ -66,7 +66,7 @@ export const PartnerBannerMarquee: React.FC = () => {
       <div className="pointer-events-none absolute inset-y-0 left-0 w-10 sm:w-20 md:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-20" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-10 sm:w-20 md:w-28 bg-gradient-to-l from-white via-white/80 to-transparent z-20" />
 
-      {/* Seamless Continuous Moving Tape — No text headers, no popping out, connected end-to-end */}
+      {/* Seamless Continuous Moving Tape: No text headers, no popping out, connected end-to-end */}
       <div className="animate-marquee flex items-center flex-nowrap shrink-0">
         {marqueeItems.map((banner, idx) => (
           <div
