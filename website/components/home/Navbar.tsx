@@ -64,6 +64,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
       }
     };
 
+    // Clean #overview from address bar immediately if present
+    if (typeof window !== 'undefined' && window.location.hash === '#overview') {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => {
@@ -91,6 +96,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
     if (persona && onSelectPersona) {
       onSelectPersona(persona);
     }
+    if (sectionId === 'overview') {
+      if (pathname === '/') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (typeof window !== 'undefined' && window.location.hash) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      } else {
+        window.location.href = '/';
+      }
+      return;
+    }
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -105,16 +121,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
       className="fixed top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-50 lg:top-5 lg:left-8 lg:right-8 [@media(max-height:760px)]:top-2 [@media(max-height:760px)]:left-4 [@media(max-height:760px)]:right-4"
     >
       <div
-        className={`nav-pill mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16 lg:h-[70px] [@media(max-height:760px)]:h-12 transition-all duration-200 border ${isScrolled
+        className={`nav-pill mx-auto max-w-7xl flex items-center justify-between px-3 sm:px-6 h-15 sm:h-16 lg:h-[72px] [@media(max-height:760px)]:h-12 transition-all duration-200 border relative ${isScrolled
           ? 'bg-white/85 backdrop-blur-md border-black/10 shadow-[0_4px_24px_rgba(0,0,0,0.08)]'
           : 'bg-white/70 backdrop-blur-sm border-black/5'
           }`}
       >
-        {/* Brand Wordmark with Clean Enlarged Logo without circular frame */}
+        {/* Brand Wordmark: Centered on mobile, left-aligned on desktop, with enlarged logo */}
         <Link
           href="/"
           id="brand-logo-link"
-          className="flex items-center space-x-3 group shrink-0 py-1"
+          className="flex items-center space-x-2.5 sm:space-x-3.5 group shrink-0 py-1 max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2"
           onClick={(e) => {
             if (pathname === '/') {
               e.preventDefault();
@@ -125,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           <img
             src="/favicon.jpeg"
             alt="SpeedyMeals Logo"
-            className="h-8 sm:h-10 lg:h-11 [@media(max-height:760px)]:h-8 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105"
+            className="h-10 sm:h-12 lg:h-13 [@media(max-height:760px)]:h-9 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105 drop-shadow-xs"
           />
           <span className="font-display text-lg sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-lg tracking-tight text-red uppercase flex items-center">
             SPEEDY MEALS

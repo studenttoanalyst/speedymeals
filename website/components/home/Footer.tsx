@@ -20,6 +20,13 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
     if (persona && onSelectPersona) {
       onSelectPersona(persona);
     }
+    if (sectionId === 'overview') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (typeof window !== 'undefined' && window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      return;
+    }
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -53,27 +60,25 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
       id="main-footer"
       className="relative z-20 bg-[#15171A] text-white border-t border-[#2D3139]"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        {/* 4-Column Hairline-Divided Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-12">
+        {/* 4-Column Clean Responsive Grid */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 md:gap-10 lg:gap-8 pb-16 border-b border-[#2D3139]"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-8 lg:gap-8 pb-16 border-b border-[#2D3139]"
         >
           {/* Col 1 — Brand */}
-          <motion.div variants={itemVariants} className="col-span-2 md:col-span-1 space-y-4">
-            <div className="flex items-center space-x-3.5">
-              <div className="w-12 h-12 flex items-center justify-center bg-transparent overflow-hidden">
-                <img
-                  src="/favicon.png"
-                  alt="SpeedyMeals Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <span className="font-display text-2xl tracking-tight text-[#E23A2E] uppercase">
-                SPEEDYMEALS
+          <motion.div variants={itemVariants} className="col-span-1 sm:col-span-2 lg:col-span-1 space-y-4">
+            <div className="flex items-center space-x-3">
+              <img
+                src="/favicon.jpeg"
+                alt="SpeedyMeals Logo"
+                className="h-9 sm:h-10 w-auto object-contain shrink-0"
+              />
+              <span className="font-display text-xl sm:text-2xl tracking-tight text-[#E23A2E] uppercase">
+                SPEEDY MEALS
               </span>
             </div>
 
@@ -82,7 +87,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <span>&ldquo;Fast &amp; safe to you.&rdquo;</span>
             </div>
 
-            <p className="text-xs text-[#A0A4AB] leading-relaxed max-w-xs font-sans">
+            <p className="text-xs text-[#A0A4AB] leading-relaxed max-w-sm font-sans">
               A high-velocity, fair-split delivery and logistics platform engineered specifically
               for South Asia and the Middle East.
             </p>
@@ -98,7 +103,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <button
                   type="button"
                   onClick={() => handleScrollTo('overview')}
-                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer"
+                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Overview
                 </button>
@@ -107,7 +112,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <button
                   type="button"
                   onClick={() => handleScrollTo('services')}
-                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer"
+                  className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
                 >
                   Services
                 </button>
@@ -116,18 +121,24 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <Link
                   id="footer-link-about"
                   href="/about"
-                  className="text-[#A0A4AB] hover:text-white transition-colors"
+                  className="text-[#A0A4AB] hover:text-white transition-colors block"
                 >
                   About Us
                 </Link>
               </li>
               <li>
-                <span className="text-[#5B5F66] cursor-not-allowed">
-                  Careers <span className="text-[10px] text-tan font-bold ml-1">[HIRING]</span>
-                </span>
+                <Link
+                  id="footer-link-terms"
+                  href="/terms"
+                  className="text-[#A0A4AB] hover:text-white transition-colors block"
+                >
+                  Terms of Use
+                </Link>
               </li>
               <li>
-                <span className="text-[#5B5F66] cursor-not-allowed">Press Kit</span>
+                <span className="text-[#5B5F66] cursor-not-allowed block">
+                  Careers <span className="text-[10px] text-tan font-bold ml-1">[HIRING]</span>
+                </span>
               </li>
             </ul>
           </motion.div>
@@ -142,20 +153,20 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <button
                   type="button"
                   onClick={() => handleScrollTo('partner', 'rider')}
-                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1 cursor-pointer"
+                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1.5 cursor-pointer text-left"
                 >
                   <span>Ride With Us</span>
-                  <ArrowUpRight size={11} weight="bold" />
+                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
                 </button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={() => handleScrollTo('partner', 'restaurant')}
-                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1 cursor-pointer"
+                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5 cursor-pointer text-left"
                 >
                   <span>Partner Your Restaurant</span>
-                  <ArrowUpRight size={11} weight="bold" />
+                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
                 </button>
               </li>
               <li>
@@ -170,20 +181,20 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <Link
                   id="footer-link-restaurant"
                   href="/restaurant"
-                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1"
+                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5"
                 >
                   <span>Restaurant Portal</span>
-                  <ArrowUpRight size={11} weight="bold" />
+                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
                 </Link>
               </li>
               <li>
                 <Link
                   id="footer-link-admin"
                   href="/admin"
-                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1"
+                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1.5"
                 >
                   <span>Admin Console</span>
-                  <ArrowUpRight size={11} weight="bold" />
+                  <ArrowUpRight size={12} weight="bold" className="shrink-0" />
                 </Link>
               </li>
             </ul>
@@ -198,12 +209,18 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <div className="text-[#A0A4AB]">Serving South Asia &amp; the Middle East</div>
               <div>
                 <a
-                  href="mailto:partner@speedymeals.com"
+                  href="mailto:info@speedymealservices.com"
                   className="text-white hover:text-red transition-colors underline decoration-1 underline-offset-4"
                 >
-                  partner@speedymeals.com
+                  info@speedymealservices.com
                 </a>
               </div>
+              <a
+                href="mailto:support@speedymealservices.com"
+                className="text-white hover:text-red transition-colors underline decoration-1 underline-offset-4"
+              >
+                support@speedymealservices.com
+              </a>
             </div>
 
             {/* Social icons row: Brand colors on hover */}
@@ -296,13 +313,13 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-[#5B5F66]">
           <div>&copy; 2026 SpeedyMeals Network. All rights reserved.</div>
           <div className="flex items-center space-x-4">
-            <a href="#privacy" className="hover:underline hover:text-[#A0A4AB] transition-colors">
+            <span className="hover:text-[#A0A4AB] transition-colors cursor-default">
               Privacy Policy
-            </a>
+            </span>
             <span>&middot;</span>
-            <a href="#terms" className="hover:underline hover:text-[#A0A4AB] transition-colors">
-              Terms of Service
-            </a>
+            <Link href="/terms" className="hover:underline hover:text-[#A0A4AB] transition-colors">
+              Terms of Use
+            </Link>
           </div>
         </div>
       </div>

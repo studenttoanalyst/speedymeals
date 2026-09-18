@@ -119,7 +119,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               id="hero-headline"
               className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl [@media(max-height:760px)]:text-4xl [@media(max-height:640px)]:text-3xl tracking-tight text-ink uppercase leading-none text-center"
             >
-              SPEEDYMEALS
+              SPEEDY MEALS
             </h1>
           </motion.div>
 
@@ -202,78 +202,89 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             className="max-w-5xl w-full flex flex-col items-center text-center my-auto"
           >
             {/* Company detail block: 3 metrics (Rider, Merchant, Infrastructure) */}
+            {/* Company detail block: 3 metrics (Rider, Merchant, Infrastructure) */}
             <motion.div
               variants={itemVariants}
-              className="grid grid-cols-3 gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-3 max-w-3xl w-full mx-auto font-mono text-left"
+              className="grid grid-cols-3 gap-1 sm:gap-2.5 mb-2.5 sm:mb-3 max-w-3xl w-full mx-auto font-mono text-left"
             >
               {/* Metric 1: Rider */}
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border-x border-b border-line border-t-2 border-t-red shadow-sm hover:border-red hover:bg-red/[0.02] hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-1.5 sm:p-2.5 bg-paper border-x border-b border-line border-t-2 border-t-red shadow-xs hover:border-red hover:bg-red/[0.02] transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
-                <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
+                <div className="text-[7.5px] xs:text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <span className="w-4 h-4 rounded-xs bg-red/10 flex items-center justify-center shrink-0">
-                      <CurrencyCircleDollar size={13} weight="bold" className="text-red group-hover:scale-110 transition-transform duration-200" />
+                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-xs bg-red/10 flex items-center justify-center shrink-0">
+                      <CurrencyCircleDollar size={12} weight="bold" className="text-red group-hover:scale-110 transition-transform duration-200" />
                     </span>
-                    <span className="truncate font-semibold text-ink">RIDER REMUNERATION</span>
+                    <span className="truncate font-semibold text-ink">
+                      <span className="xs:hidden">RIDER</span>
+                      <span className="hidden xs:inline">RIDER REMUNERATION</span>
+                    </span>
                   </span>
                   <span className="w-1.5 h-1.5 bg-red opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-red transition-colors duration-150 truncate">
+                <div className="text-[10px] xs:text-xs sm:text-base font-bold text-ink group-hover:text-red transition-colors duration-150 truncate">
                   100% Retained
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block [@media(max-height:640px)]:hidden truncate">Zero commission off rider mileage</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">Zero commission on mileage</div>
               </motion.div>
 
               {/* Metric 2: Merchant */}
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border-x border-b border-line border-t-2 border-t-blue shadow-sm hover:border-blue hover:bg-blue/[0.02] hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-1.5 sm:p-2.5 bg-paper border-x border-b border-line border-t-2 border-t-blue shadow-xs hover:border-blue hover:bg-blue/[0.02] transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
-                <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
+                <div className="text-[7.5px] xs:text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <span className="w-4 h-4 rounded-xs bg-blue/10 flex items-center justify-center shrink-0">
-                      <ShieldCheck size={13} weight="bold" className="text-blue group-hover:scale-110 transition-transform duration-200" />
+                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-xs bg-blue/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck size={12} weight="bold" className="text-blue group-hover:scale-110 transition-transform duration-200" />
                     </span>
-                    <span className="truncate font-semibold text-ink">MERCHANT CONTRACT</span>
+                    <span className="truncate font-semibold text-ink">
+                      <span className="xs:hidden">MERCHANT</span>
+                      <span className="hidden xs:inline">MERCHANT CONTRACT</span>
+                    </span>
                   </span>
                   <span className="w-1.5 h-1.5 bg-blue opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-blue transition-colors duration-150 truncate">
+                <div className="text-[10px] xs:text-xs sm:text-base font-bold text-ink group-hover:text-blue transition-colors duration-150 truncate">
                   10% Flat Rate
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block [@media(max-height:640px)]:hidden truncate">No promotion gouging or tiers</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">No gouging tiers</div>
               </motion.div>
 
               {/* Metric 3: Infrastructure */}
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-2 sm:p-2.5 [@media(max-height:760px)]:p-1.5 [@media(max-height:640px)]:p-1 bg-paper border-x border-b border-line border-t-2 border-t-tan shadow-sm hover:border-tan hover:bg-tan/[0.03] hover:shadow-md transition-all duration-200 text-left relative overflow-hidden cursor-default"
+                className="group p-1.5 sm:p-2.5 bg-paper border-x border-b border-line border-t-2 border-t-tan shadow-xs hover:border-tan hover:bg-tan/[0.03] transition-all duration-200 text-left relative overflow-hidden cursor-default"
               >
-                <div className="text-[8px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
+                <div className="text-[7.5px] xs:text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <span className="w-4 h-4 rounded-xs bg-tan/20 flex items-center justify-center shrink-0">
-                      <Lightning size={13} weight="bold" className="text-tan group-hover:scale-110 transition-transform duration-200" />
+                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-xs bg-tan/20 flex items-center justify-center shrink-0">
+                      <Lightning size={12} weight="bold" className="text-tan group-hover:scale-110 transition-transform duration-200" />
                     </span>
-                    <span className="truncate font-semibold text-ink">INFRASTRUCTURE</span>
+                    <span className="truncate font-semibold text-ink">
+                      <span className="xs:hidden">DISPATCH</span>
+                      <span className="hidden xs:inline">INFRASTRUCTURE</span>
+                    </span>
                   </span>
                   <span className="w-1.5 h-1.5 bg-tan opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
-                <div className="text-xs sm:text-base [@media(max-height:760px)]:text-xs [@media(max-height:640px)]:text-[11px] font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
-                  Real-Time Dispatch
+                <div className="text-[10px] xs:text-xs sm:text-base font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
+                  <span className="xs:hidden">Real-Time</span>
+                  <span className="hidden xs:inline">Real-Time Dispatch</span>
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden xs:block [@media(max-height:640px)]:hidden truncate">Direct routing telemetry</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">Direct telemetry</div>
               </motion.div>
             </motion.div>
 
-            {/* Two CTAs: RIDE WITH US / PARTNER YOUR RESTAURANT */}
+            {/* Two CTAs: RIDE WITH US / PARTNER YOUR RESTAURANT — Responsive stack on mobile to prevent overflow */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-row items-center justify-center gap-2 sm:gap-2.5 mb-0 w-full max-w-lg"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-2.5 mb-0 w-full max-w-sm sm:max-w-xl mx-auto px-1"
             >
               <motion.button
                 id="hero-cta-ride"
@@ -281,7 +292,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
                 onClick={() => handleScrollToPartner('rider')}
-                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 [@media(max-height:760px)]:py-1.5 [@media(max-height:760px)]:px-3.5 bg-red text-white font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
+                className="group w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-red text-white font-mono text-[11px] sm:text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-2 shadow-xs hover:shadow-md cursor-pointer whitespace-nowrap"
               >
                 <span>RIDE WITH US</span>
                 <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
@@ -293,42 +304,39 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
                 onClick={() => handleScrollToPartner('restaurant')}
-                className="group flex-1 sm:flex-none px-3 sm:px-5 py-2.5 sm:py-2.5 [@media(max-height:760px)]:py-1.5 [@media(max-height:760px)]:px-3.5 bg-transparent text-blue font-mono text-[10px] sm:text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-sm hover:shadow-md cursor-pointer truncate"
+                className="group w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-transparent text-blue font-mono text-[11px] sm:text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-2 shadow-xs hover:shadow-md cursor-pointer whitespace-nowrap"
               >
                 <span>PARTNER YOUR RESTAURANT</span>
                 <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
               </motion.button>
             </motion.div>
 
-            {/* Strategic Partner Authority Badge: Partnered with Pakistan Post */}
+            {/* Strategic Partner Authority Badge: Partnered with Pakistan Post (Logo-Only) */}
             <motion.div
               variants={itemVariants}
               className="mt-2.5 sm:mt-3 [@media(max-height:760px)]:mt-1.5 [@media(max-height:640px)]:mt-1 flex items-center justify-center"
             >
               <div
                 id="hero-partner-badge"
-                className="inline-flex items-center space-x-2 sm:space-x-2.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-paper/90 border border-line shadow-xs hover:border-red/40 hover:shadow-sm transition-all duration-200 cursor-default group"
+                className="inline-flex items-center space-x-2.5 sm:space-x-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-paper/95 border border-line shadow-xs hover:border-red/40 hover:shadow-sm transition-all duration-200 cursor-default group"
               >
                 <div className="flex items-center space-x-1.5">
-                  <Image
-                    src="/assets/pakistan-post.png"
-                    alt="Pakistan Post"
-                    width={18}
-                    height={18}
-                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain rounded-xs shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-xs"
-                  />
-                  <span className="font-mono text-[8.5px] sm:text-[10px] uppercase tracking-wider text-ink-soft font-semibold">
+                  <span className="w-1.5 h-1.5 bg-red animate-pulse shrink-0" />
+                  <span className="font-mono text-[9px] sm:text-[10.5px] uppercase tracking-wider text-ink-soft font-bold">
                     PARTNERED WITH
                   </span>
                 </div>
-                <div className="h-3 w-px bg-line" />
-                <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-ink tracking-wide">
-                  PAKISTAN POST
-                </span>
-                <div className="h-3 w-px bg-line hidden xs:block" />
-                <span className="font-mono text-[8px] sm:text-[9px] text-red font-semibold tracking-wider uppercase hidden xs:inline">
-                  OFFICIAL LOGISTICS ALLIANCE
-                </span>
+                <div className="h-5 sm:h-6 w-px bg-line" />
+                <div className="flex items-center">
+                  <Image
+                    src="/assets/pakistan-post.png"
+                    alt="Pakistan Post Official Partner"
+                    width={96}
+                    height={36}
+                    className="h-6 sm:h-7 md:h-8 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform duration-200"
+                    priority
+                  />
+                </div>
               </div>
             </motion.div>
           </motion.div>

@@ -49,14 +49,16 @@ export const ServicesSection: React.FC = () => {
           viewport={{ once: true }}
           className="mb-12 sm:mb-16"
         >
-          <div className="flex items-center space-x-3 mb-3">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#5B5F66]">
-              [ <span className="text-[#5B5F66]">02</span> ]
-            </span>
-            <span className="font-mono text-xs uppercase tracking-widest text-[#15171A] font-bold">
-              Services
-            </span>
-            <div className="h-px flex-1 bg-[#E4E2DD]" />
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex items-center space-x-2 shrink-0">
+              <span className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] whitespace-nowrap">
+                [ 02 ]
+              </span>
+              <span className="font-mono text-xs uppercase tracking-widest text-[#15171A] font-bold whitespace-nowrap">
+                Services
+              </span>
+            </div>
+            <div className="hidden sm:block h-px flex-1 bg-[#E4E2DD] mx-3" />
             {/* Legend row as plain mono key */}
             <div className="font-mono text-xs text-[#5B5F66] tracking-wider hidden sm:block">
               <span className="text-[#E23A2E] font-bold">—</span> LIVE &nbsp;&nbsp;

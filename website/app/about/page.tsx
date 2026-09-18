@@ -17,6 +17,8 @@ import {
   Scales,
   CheckCircle,
   GlobeHemisphereWest,
+  Compass,
+  Target,
 } from '@phosphor-icons/react';
 import { Navbar } from '@/components/home/Navbar';
 import { Footer } from '@/components/home/Footer';
@@ -27,12 +29,24 @@ export default function AboutPage() {
       {/* Sticky Snap Navbar */}
       <Navbar />
 
+      {/* Full-Color Transparent SpeedyMeals Favicon Watermark (Fixed in viewport, visible on white dotted canvas, hidden behind solid non-white space) */}
+      <div className="fixed inset-0 pointer-events-none select-none flex items-center justify-center z-0 overflow-hidden">
+        <Image
+          src="/favicon.jpeg"
+          alt="SpeedyMeals Favicon Watermark"
+          width={900}
+          height={900}
+          className="w-[72vw] max-w-[940px] md:max-w-[920px] h-auto object-contain opacity-10 select-none pointer-events-none"
+          priority
+        />
+      </div>
+
       <main className="relative z-10 pt-28 sm:pt-32 lg:pt-36 pb-20">
         {/* Background Subtle Grid Texture */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#E2E4E8_1px,transparent_1px)] [background-size:24px_24px] opacity-60 -z-10" />
 
         {/* Hero Section of About Us */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24">
+        <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24 overflow-hidden">
           <div className="max-w-4xl">
             {/* Breadcrumb & Mono Eyebrow */}
             <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-[#5B5F66] mb-4">
@@ -46,17 +60,18 @@ export default function AboutPage() {
             <div className="inline-flex items-center space-x-2 px-3 py-1 bg-paper border border-line mb-6">
               <span className="w-2 h-2 bg-red inline-block" />
               <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink">
-                ESTABLISHED IN 2026 · SOUTH ASIA &amp; MIDDLE EAST
+                ESTABLISHED IN 2023 · SOUTH ASIA &amp; MIDDLE EAST
               </span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight text-ink leading-none mb-6">
+            {/* Compact, responsive title: fits on one line per quote without wrapping overflow */}
+            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[44px] uppercase tracking-tight text-ink leading-tight mb-6 sm:whitespace-nowrap">
               ENGINEERED FOR SPEED. <br />
               <span className="text-red">ARCHITECTED FOR FAIRNESS.</span>
             </h1>
 
-            <p className="font-sans text-lg sm:text-xl text-ink-soft leading-relaxed max-w-3xl">
-              SpeedyMeals was founded in 2026 as a direct institutional countermeasure to predatory aggregator monopolization. We build high-velocity last-mile logistics infrastructure that guarantees fair splits for restaurant partners, 100% retained pay for couriers, and radical transparency for customers.
+            <p className="font-sans text-base sm:text-lg text-ink-soft leading-relaxed max-w-3xl">
+              SpeedyMeals was founded in 2023 as a direct institutional countermeasure to predatory aggregator monopolization. We build high-velocity last-mile logistics infrastructure that guarantees fair splits for restaurant partners, 100% retained pay for couriers, and radical transparency for customers.
             </p>
           </div>
 
@@ -64,7 +79,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 border-y border-line py-6 font-mono">
             <div>
               <div className="text-xs text-[#8C9099] uppercase">FOUNDING YEAR</div>
-              <div className="text-2xl font-bold text-ink mt-1">2026</div>
+              <div className="text-2xl font-bold text-ink mt-1">2023</div>
               <div className="text-[11px] text-[#5B5F66]">Incorporated Network</div>
             </div>
             <div>
@@ -85,6 +100,97 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Foundational Directives: Vision, Mission & Tagline */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20 sm:mb-24">
+          {/* Section Header with Tagline */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-line mb-10">
+            <div>
+              <div className="flex items-center space-x-2 font-mono text-xs uppercase tracking-widest text-red font-semibold mb-2">
+                <span className="w-2 h-2 bg-red inline-block" />
+                <span>FOUNDATIONAL DIRECTIVES</span>
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl uppercase tracking-tight text-ink leading-tight">
+                OUR VISION &amp; MISSION
+              </h2>
+            </div>
+
+            <div className="font-display italic text-blue text-2xl sm:text-3xl tracking-tight">
+              &ldquo;Fast &amp; Safe To You.&rdquo;
+            </div>
+          </div>
+
+          {/* 2-Column Vision & Mission Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Vision Card */}
+            <div className="relative p-8 sm:p-10 bg-paper border border-line shadow-xs flex flex-col justify-between group hover:border-blue transition-colors duration-200">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-blue" />
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 bg-blue/10 text-blue border border-blue/20 flex items-center justify-center">
+                    <Compass size={28} weight="bold" />
+                  </div>
+                  <span className="font-mono text-xs font-bold uppercase tracking-widest text-blue">
+                    VISION STATEMENT
+                  </span>
+                </div>
+
+                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-ink mb-4">
+                  Pakistan&apos;s Unified Multi-Service Platform
+                </h3>
+
+                <p className="font-sans text-base sm:text-lg text-ink-soft leading-relaxed mb-6 font-medium">
+                  To become Pakistan&apos;s most trusted multi-service platform, connecting people, restaurants, couriers, and local businesses through one fast, transparent, and reliable logistics network.
+                </p>
+              </div>
+
+              <div className="pt-6 border-t border-line font-mono text-xs text-[#5B5F66] space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-blue" />
+                  <span>Unifying food, express parcels, and neighborhood commerce</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-blue" />
+                  <span>Sovereign infrastructure backed by Pakistan Post alliance</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Mission Card */}
+            <div className="relative p-8 sm:p-10 bg-paper border border-line shadow-xs flex flex-col justify-between group hover:border-red transition-colors duration-200">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-red" />
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 bg-red/10 text-red border border-red/20 flex items-center justify-center">
+                    <Target size={28} weight="bold" />
+                  </div>
+                  <span className="font-mono text-xs font-bold uppercase tracking-widest text-red">
+                    MISSION STATEMENT
+                  </span>
+                </div>
+
+                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-ink mb-4">
+                  Everyday Urban Life, Made Simpler &amp; Fairer
+                </h3>
+
+                <p className="font-sans text-base sm:text-lg text-ink-soft leading-relaxed mb-6">
+                  SpeedyMeals exists to make everyday urban life simpler. We connect customers with the meals, deliveries, and services they rely on daily, while providing restaurants with sustainable partnerships and couriers with transparent, competitive earnings. We are committed to speed without compromising trust, and growth without sacrificing fairness.
+                </p>
+              </div>
+
+              <div className="pt-6 border-t border-line font-mono text-xs text-[#5B5F66] space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-red" />
+                  <span>Permanent 10% flat merchant rate with zero hidden ad bidding</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-red" />
+                  <span>100% courier fee payout with direct daily withdrawals</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Our Motivation Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 items-start">
@@ -99,7 +205,7 @@ export default function AboutPage() {
                 Over the past decade, multinational food delivery aggregators turned a promise of convenience into a regime of economic extraction. Restaurants across South Asia and the Middle East saw commissions rise to ruinous rates between 30% and 35%, forcing culinary entrepreneurs to dilute portion sizes, raise retail prices, or shut their doors completely.
               </p>
               <p className="font-sans text-base text-ink-soft leading-relaxed">
-                Simultaneously, delivery couriers were treated as disposable gig cogs—bearing the full burden of fuel spikes, wear-and-tear, and risk while platforms took arbitrary slices off their hard-earned mileage pay. We founded SpeedyMeals to dismantle this model from first principles.
+                Simultaneously, delivery couriers were treated as disposable gig cogs, bearing the full burden of fuel spikes, wear-and-tear, and risk while platforms took arbitrary slices off their hard-earned mileage pay. We founded SpeedyMeals to dismantle this model from first principles.
               </p>
             </div>
 
@@ -217,14 +323,14 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Pakistan Zone */}
             <div className="p-6 sm:p-8 bg-paper border-t-4 border-t-red border-x border-b border-line shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">🇵🇰</span>
-                  <span className="font-display text-xl uppercase tracking-tight text-ink">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <span className="text-xl shrink-0">🇵🇰</span>
+                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink whitespace-nowrap">
                     Pakistan Operational Grid
                   </span>
                 </div>
-                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 font-bold uppercase">
+                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 font-bold uppercase shrink-0">
                   ACTIVE &amp; EXPANDING
                 </span>
               </div>
@@ -253,14 +359,14 @@ export default function AboutPage() {
 
             {/* Saudi Arabia Zone */}
             <div className="p-6 sm:p-8 bg-paper border-t-4 border-t-tan border-x border-b border-line shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">🇸🇦</span>
-                  <span className="font-display text-xl uppercase tracking-tight text-ink">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <span className="text-xl shrink-0">🇸🇦</span>
+                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink whitespace-nowrap">
                     Kingdom of Saudi Arabia (KSA)
                   </span>
                 </div>
-                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 font-bold uppercase">
+                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 font-bold uppercase shrink-0">
                   DEPLOYMENT ONBOARDING
                 </span>
               </div>
@@ -306,7 +412,7 @@ export default function AboutPage() {
                 All proprietary software, routing telemetry algorithms, dispatch architectures, digital brand marks, and operational interfaces are protected under international copyright, trademark, and intellectual property conventions.
               </p>
               <p className="pt-2 text-ink font-semibold">
-                &copy; 2026 SpeedyMeals Network. All rights reserved across South Asia, the GCC, and associated logistics territories.
+                &copy; 2023&ndash;2026 SpeedyMeals Network. All rights reserved across South Asia, the GCC, and associated logistics territories.
               </p>
             </div>
           </div>

@@ -28,6 +28,9 @@ export interface TranslationPhrases {
   submit: string;
   registrationGateway: string;
   agreementLabel: string;
+  agreementPrefix: string;
+  termsLink: string;
+  agreementSuffix: string;
   submitting: string;
 }
 
@@ -59,7 +62,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     priorityBatch: 'PRIORITY BATCH',
     submit: 'Submit',
     registrationGateway: 'REGISTRATION GATEWAY',
-    agreementLabel: 'I agree to the terms of partnership and service dispatch policy.',
+    agreementLabel: 'I agree to the Terms of Use and service dispatch policy.',
+    agreementPrefix: 'I agree to the ',
+    termsLink: 'Terms of Use',
+    agreementSuffix: ' and service dispatch policy.',
     submitting: 'Submitting...',
   },
   ur: {
@@ -90,6 +96,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     submit: 'جمع کرائیں',
     registrationGateway: 'رجسٹریشن گیٹ وے',
     agreementLabel: 'میں شراکت داری کی شرائط اور سروس ڈسپیچ پالیسی سے اتفاق کرتا ہوں۔',
+    agreementPrefix: 'میں سروس ڈسپیچ پالیسی اور ',
+    termsLink: 'استعمال کی شرائط (Terms of Use)',
+    agreementSuffix: ' سے اتفاق کرتا ہوں۔',
     submitting: 'جمع کروایا جا رہا ہے...',
   },
   ar: {
@@ -120,6 +129,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     submit: 'إرسال',
     registrationGateway: 'بوابة التسجيل',
     agreementLabel: 'أوافق على شروط الشراكة وسياسة توزيع الخدمة.',
+    agreementPrefix: 'أوافق على سياسة توزيع الخدمة و',
+    termsLink: 'شروط الاستخدام (Terms of Use)',
+    agreementSuffix: ' الرسمية.',
     submitting: 'جارٍ الإرسال...',
   },
 };
