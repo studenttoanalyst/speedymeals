@@ -1,9 +1,28 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Storefront, Lock, EnvelopeSimple, Phone, ArrowRight, WarningCircle, CheckCircle } from '@phosphor-icons/react';
-import { loginRestaurant, requestRestaurantOTP, verifyRestaurantOTP } from '@/lib/auth';
+import {
+  Storefront,
+  Lock,
+  EnvelopeSimple,
+  Phone,
+  ArrowRight,
+  WarningCircle,
+  CheckCircle,
+  ArrowLeft,
+  ChefHat,
+  Eye,
+  EyeSlash,
+} from '@phosphor-icons/react';
+import {
+  loginRestaurant,
+  requestRestaurantOTP,
+  verifyRestaurantOTP,
+  getStoredRole,
+  getStoredAccessToken,
+} from '@/lib/auth';
 
 export default function RestaurantLoginPage() {
   const router = useRouter();
@@ -12,6 +31,7 @@ export default function RestaurantLoginPage() {
   // Password Login State
   const [email, setEmail] = useState('contact@karachibiryani.pk');
   const [password, setPassword] = useState('Partner@123');
+  const [showPassword, setShowPassword] = useState(false);
 
   // OTP Login State
   const [phoneNumber, setPhoneNumber] = useState('3001112233');
@@ -22,6 +42,24 @@ export default function RestaurantLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Auto-redirect to dashboard if previously logged in
+  useEffect(() => {
+    const role = getStoredRole();
+    const token = getStoredAccessToken();
+    if (role === 'restaurant' && token) {
+      router.replace('/restaurant/dashboard');
+    }
+
+    const savedEmail = localStorage.getItem('sm_remembered_restaurant_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+    const savedPhone = localStorage.getItem('sm_remembered_restaurant_phone');
+    if (savedPhone) {
+      setPhoneNumber(savedPhone);
+    }
+  }, [router]);
 
   useEffect(() => {
     let timer: any;
@@ -37,6 +75,9 @@ export default function RestaurantLoginPage() {
     setIsLoading(true);
 
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sm_remembered_restaurant_email', email);
+      }
       await loginRestaurant({ email, password });
       router.push('/restaurant/dashboard');
     } catch (err: any) {
@@ -58,9 +99,9 @@ export default function RestaurantLoginPage() {
       const res = await requestRestaurantOTP({ phone_number: phoneNumber });
       setOtpSent(true);
       setCooldown(45);
-      setSuccessMsg(res.message || 'OTP sent successfully to your mobile.');
+      setSuccessMsg(res.message || 'OTP sent successfully to your registered phone.');
     } catch (err: any) {
-      setError(err.message || 'Failed to request OTP. Ensure your number is registered.');
+      setError(err.message || 'Failed to request OTP. Ensure your phone number is registered.');
     } finally {
       setIsLoading(false);
     }
@@ -68,10 +109,15 @@ export default function RestaurantLoginPage() {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!otpCode) return;
+
     setError(null);
     setIsLoading(true);
 
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sm_remembered_restaurant_phone', phoneNumber);
+      }
       await verifyRestaurantOTP({ phone_number: phoneNumber, otp_code: otpCode });
       router.push('/restaurant/dashboard');
     } catch (err: any) {
@@ -82,31 +128,35 @@ export default function RestaurantLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-paper-off">
-      <div
-        className="w-full max-w-md bg-paper border border-line shadow-sm p-8"
-        style={{ borderRadius: '0px' }}
-      >
-        {/* Header Branding */}
-        <div className="flex items-center justify-between pb-6 mb-6 border-b border-line">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/70">
+      <div className="w-full max-w-md mb-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium"
+        >
+          <ArrowLeft size={13} weight="bold" />
+          <span>Return to SpeedyMeals Home</span>
+        </Link>
+      </div>
+
+      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm p-8">
+        {/* Branding Header */}
+        <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-100">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-red inline-block" style={{ borderRadius: '0px' }} />
-              <span className="font-display font-black text-xl tracking-wider text-ink">
-                SPEEDY<span className="text-red">MEALS</span>
-              </span>
+            <div className="font-bold text-xl tracking-tight text-slate-900">
+              SPEEDY<span className="text-rose-600">MEALS</span>
             </div>
-            <p className="font-mono text-[11px] uppercase tracking-widest text-ink-soft mt-1">
+            <p className="text-xs text-slate-400 mt-0.5">
               Restaurant Partner Portal
             </p>
           </div>
-          <div className="p-2 border border-line bg-paper-off text-ink">
-            <Storefront size={20} weight="bold" />
+          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+            <ChefHat size={22} weight="bold" />
           </div>
         </div>
 
-        {/* Tab Toggle: Password vs OTP */}
-        <div className="grid grid-cols-2 gap-0 border border-line mb-6" style={{ borderRadius: '0px' }}>
+        {/* Tab Toggle */}
+        <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl mb-6 text-xs font-semibold">
           <button
             type="button"
             onClick={() => {
@@ -114,8 +164,10 @@ export default function RestaurantLoginPage() {
               setError(null);
               setSuccessMsg(null);
             }}
-            className={`py-2 text-xs font-mono font-semibold uppercase tracking-wider transition-colors ${
-              tab === 'password' ? 'bg-ink text-paper' : 'bg-paper text-ink-soft hover:text-ink'
+            className={`py-2 rounded-lg transition-all ${
+              tab === 'password'
+                ? 'bg-white text-slate-900 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Email & Password
@@ -127,169 +179,178 @@ export default function RestaurantLoginPage() {
               setError(null);
               setSuccessMsg(null);
             }}
-            className={`py-2 text-xs font-mono font-semibold uppercase tracking-wider transition-colors ${
-              tab === 'otp' ? 'bg-ink text-paper' : 'bg-paper text-ink-soft hover:text-ink'
+            className={`py-2 rounded-lg transition-all ${
+              tab === 'otp'
+                ? 'bg-white text-slate-900 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            Mobile OTP
+            Mobile OTP Login
           </button>
         </div>
 
         {error && (
-          <div
-            className="mb-6 p-3 border border-[#F5C2BC] bg-[#FDF0EE] text-[#C92A2A] text-xs font-mono flex items-start gap-2"
-            style={{ borderRadius: '0px' }}
-          >
-            <WarningCircle size={16} className="shrink-0 mt-0.5" />
+          <div className="mb-5 p-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs flex items-start gap-2">
+            <WarningCircle size={16} weight="bold" className="shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div
-            className="mb-6 p-3 border border-[#BCE4C7] bg-[#EBF7EE] text-[#1E7E34] text-xs font-mono flex items-start gap-2"
-            style={{ borderRadius: '0px' }}
-          >
-            <CheckCircle size={16} className="shrink-0 mt-0.5" />
+          <div className="mb-5 p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs flex items-start gap-2">
+            <CheckCircle size={16} weight="bold" className="shrink-0 mt-0.5" />
             <span>{successMsg}</span>
           </div>
         )}
 
-        {/* Form A: Password Login */}
+        {/* Form 1: Password */}
         {tab === 'password' && (
-          <form onSubmit={handlePasswordLogin} className="space-y-4">
+          <form onSubmit={handlePasswordLogin} className="space-y-4 text-xs">
             <div>
-              <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1.5 font-semibold">
-                Partner Email
+              <label className="block font-semibold text-slate-700 mb-1">
+                Storefront Email
               </label>
               <div className="relative">
-                <EnvelopeSimple size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft" />
+                <EnvelopeSimple size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="contact@restaurant.pk"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-paper border border-line text-ink placeholder:text-ink-soft focus:outline-none focus:border-ink font-sans transition-colors"
-                  style={{ borderRadius: '0px' }}
+                  placeholder="contact@karachibiryani.pk"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1.5 font-semibold">
-                Portal Password
+              <label className="block font-semibold text-slate-700 mb-1">
+                Store Password
               </label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft" />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-paper border border-line text-ink placeholder:text-ink-soft focus:outline-none focus:border-ink font-sans transition-colors"
-                  style={{ borderRadius: '0px' }}
+                  className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-mono"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-hidden transition-colors cursor-pointer"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-2.5 px-4 font-mono text-xs font-semibold uppercase tracking-wider bg-red text-paper hover:bg-[#C92A2E] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-              style={{ borderRadius: '0px' }}
+              className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {isLoading ? (
-                <span className="w-4 h-4 border-2 border-paper border-t-transparent animate-spin inline-block" />
-              ) : (
-                <>
-                  <span>Sign In as Restaurant</span>
-                  <ArrowRight size={14} weight="bold" />
-                </>
-              )}
+              <span>{isLoading ? 'Authenticating Partner...' : 'Enter Kitchen Console'}</span>
+              <ArrowRight size={14} weight="bold" />
             </button>
           </form>
         )}
 
-        {/* Form B: Phone + OTP Login */}
+        {/* Form 2: Mobile OTP */}
         {tab === 'otp' && (
-          <div className="space-y-4">
-            <form onSubmit={handleRequestOTP}>
-              <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1.5 font-semibold">
-                Registered Mobile Number
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-ink font-semibold">
-                    +92
+          <div className="space-y-4 text-xs">
+            {!otpSent ? (
+              <form onSubmit={handleRequestOTP} className="space-y-4">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Store Registered Mobile (Pakistan)
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="px-3 py-2.5 border border-slate-200 bg-slate-100 rounded-xl font-mono text-slate-600 font-semibold">
+                      +92
+                    </div>
+                    <div className="relative flex-1">
+                      <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="tel"
+                        required
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                        placeholder="3001112233"
+                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono font-medium focus:bg-white focus:ring-2 focus:ring-rose-500/20"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="tel"
-                    required
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="3001234567"
-                    className="w-full pl-12 pr-3 py-2 text-sm bg-paper border border-line text-ink placeholder:text-ink-soft focus:outline-none focus:border-ink font-mono transition-colors"
-                    style={{ borderRadius: '0px' }}
-                  />
                 </div>
+
                 <button
                   type="submit"
-                  disabled={isLoading || cooldown > 0}
-                  className="py-2 px-3 font-mono text-xs font-semibold border border-line bg-paper-off hover:bg-paper text-ink transition-colors disabled:opacity-50 shrink-0"
-                  style={{ borderRadius: '0px' }}
+                  disabled={isLoading || !phoneNumber}
+                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {cooldown > 0 ? `${cooldown}s` : otpSent ? 'Resend' : 'Send Code'}
+                  <span>{isLoading ? 'Sending SMS OTP...' : 'Send Verification OTP'}</span>
+                  <ArrowRight size={14} weight="bold" />
                 </button>
-              </div>
-            </form>
-
-            {otpSent && (
-              <form onSubmit={handleVerifyOTP} className="space-y-4 pt-2 border-t border-line">
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOTP} className="space-y-4">
                 <div>
-                  <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1.5 font-semibold">
-                    6-Digit Verification Code
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-semibold text-slate-700">Enter 6-Digit OTP</label>
+                    <button
+                      type="button"
+                      onClick={() => setOtpSent(false)}
+                      className="text-[11px] text-rose-600 hover:underline font-semibold"
+                    >
+                      Change Number
+                    </button>
+                  </div>
                   <input
                     type="text"
                     required
                     maxLength={6}
                     value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="123456"
-                    className="w-full text-center tracking-[0.5em] py-2.5 text-lg font-mono font-bold bg-paper border border-line text-ink focus:outline-none focus:border-ink transition-colors"
-                    style={{ borderRadius: '0px' }}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="••••••"
+                    className="w-full text-center tracking-[0.5em] font-mono text-xl py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-bold focus:bg-white focus:ring-2 focus:ring-rose-500/20"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isLoading || otpCode.length !== 6}
-                  className="w-full py-2.5 px-4 font-mono text-xs font-semibold uppercase tracking-wider bg-red text-paper hover:bg-[#C92A2E] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                  style={{ borderRadius: '0px' }}
+                  disabled={isLoading || otpCode.length < 4}
+                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {isLoading ? (
-                    <span className="w-4 h-4 border-2 border-paper border-t-transparent animate-spin inline-block" />
-                  ) : (
-                    <>
-                      <span>Verify & Access Kitchen</span>
-                      <ArrowRight size={14} weight="bold" />
-                    </>
-                  )}
+                  <span>{isLoading ? 'Verifying OTP...' : 'Verify OTP & Log In'}</span>
+                  <ArrowRight size={14} weight="bold" />
                 </button>
+
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    disabled={cooldown > 0 || isLoading}
+                    onClick={handleRequestOTP}
+                    className="text-slate-400 hover:text-slate-700 text-[11px] disabled:opacity-50 font-medium"
+                  >
+                    {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP to Mobile'}
+                  </button>
+                </div>
               </form>
             )}
           </div>
         )}
 
-        <div className="mt-8 pt-4 border-t border-line text-center">
-          <p className="font-mono text-[11px] text-ink-soft">
-            FastAPI Auth: <span className="font-bold text-ink">POST /auth/restaurant/login</span>
-          </p>
-          <p className="font-mono text-[10px] text-ink-soft/70 mt-1">
-            Need partner credentials? Contact SpeedyMeals Platform Support.
-          </p>
+        <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+          <span>Are you a Platform Admin?</span>
+          <Link
+            href="/admin/login"
+            className="text-rose-600 font-semibold hover:underline"
+          >
+            Admin Portal Login →
+          </Link>
         </div>
       </div>
     </div>

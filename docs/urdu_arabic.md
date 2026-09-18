@@ -1,0 +1,80 @@
+Incorporate these phrases into the UI of the respective pages. The phrases are for both English, Urdu and Arabic.
+- Rider
+- Restaurant
+- Waitlist
+- Rider Application Form
+- Full Legal Name
+- Primary Mode of Transport
+- Email Address
+- Phone Number
+- Primary Dispatch Zone
+- Delivery Experience
+- Restaurant Partner Onboarding
+- Authorized Representative
+- Restaurant Brand Name
+- Restaurant Operating City
+- Primary Cuisine Category (in english)
+- Customer Early Access Invite
+- Full Name
+- Mobile Platform Preference
+- Preferred Delivery City
+- Primary Service Interest
+- Response Time
+- Under 24 hours
+- WAITLIST STATUS
+- PRIORITY BATCH
+- Submit
+
+ARABIC TRANSLATIONS:
+
+- مطعم
+- قائمة الانتظار
+- نموذج الطلب لمندوب توصيل
+- اسم القانوني كامل 
+- وسيلة النقل الاساسية
+- عنوان بريد الالكتروني
+- رقم الهاتف
+- منطقة التوزيع الأساسية
+- الخبرة في مجال التوصيل
+- تسجيل شريك المطعم
+- الممثل المفوّض
+- الاسم التجاري للمطعم
+- مدينة تشغيل المطعم
+- الفئة الرئيسية للطعام باللغة الإنجليزية
+- دعوة العملاء للوصول المبكر
+- الاسم الكامل
+- المنصة المفضلة للهاتف
+- مدينة التوصيل المفضلة
+- الخدمة الرئيسية محل الاهتمام
+- مدة الاستجابة
+- أقل من ٢٤ ساعة
+- حالة قائمة الانتظار
+- الدفعة ذات الأولوية
+- إرسال
+
+URDU TRANSLATIONS:
+- ڈیلیوری رائیڈر
+- ریسٹورنٹ
+- انتظار کی فہرست 
+- رائڈر درخواست فارم
+- مکمل قانونی نام
+- بنیادی وسیلہ نقل
+- ای میل کا پتہ
+- فون نمبر 
+- بنیادی ڈسپیچ زون
+- ڈیلیوری کا تجربہ
+- ریسٹورنٹ پارٹنر آن بورڈنگ
+- مجاز نمائندہ
+- ریسٹورنٹ کا تجارتی نام
+- ریسٹورنٹ کے آپریشن کا شہر
+- نیادی کھانوں قسموں کے نام (انگریزی میں)
+- صارفین کے لیے ابتدائی رسائی کی دعوت
+- مکمل نام
+- ترجیحی موبائل پلیٹ فارم
+- ترجیحی ڈیلیوری شہر
+- بنیادی دلچسپی کی سروس
+- جواب کی مدت
+- ۲۴ گھنٹے سے کم
+- انتظار کی فہرست کا حال
+- ترجیحی بیچ
+- جمع کرائیں

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
   TwitterLogo,
@@ -96,10 +97,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <li>
                 <button
                   type="button"
-                  onClick={() => handleScrollTo('about')}
+                  onClick={() => handleScrollTo('overview')}
                   className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer"
                 >
-                  About Us
+                  Overview
                 </button>
               </li>
               <li>
@@ -110,6 +111,15 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 >
                   Services
                 </button>
+              </li>
+              <li>
+                <Link
+                  id="footer-link-about"
+                  href="/about"
+                  className="text-[#A0A4AB] hover:text-white transition-colors"
+                >
+                  About Us
+                </Link>
               </li>
               <li>
                 <span className="text-[#5B5F66] cursor-not-allowed">
@@ -155,6 +165,26 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                     ⋯ COMING SOON
                   </span>
                 </div>
+              </li>
+              <li className="pt-2 mt-2 border-t border-[#2D3139]">
+                <Link
+                  id="footer-link-restaurant"
+                  href="/restaurant"
+                  className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1"
+                >
+                  <span>Restaurant Portal</span>
+                  <ArrowUpRight size={11} weight="bold" />
+                </Link>
+              </li>
+              <li>
+                <Link
+                  id="footer-link-admin"
+                  href="/admin"
+                  className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1"
+                >
+                  <span>Admin Console</span>
+                  <ArrowUpRight size={11} weight="bold" />
+                </Link>
               </li>
             </ul>
           </motion.div>
@@ -220,17 +250,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
               <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
             </span>
-            <span className="text-white font-semibold">DEPLOYMENT ZONES:</span>
+            <span className="text-[#A0A4AB] font-semibold">DEPLOYMENT ZONES:</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#10B981]" />
-              <span className="hover:text-white transition-colors">DUBAI (UAE)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#10B981]" />
-              <span className="hover:text-white transition-colors">DOHA (QATAR)</span>
-            </span>
             <span className="flex items-center space-x-1.5">
               <span className="w-1.5 h-1.5 bg-[#10B981]" />
               <span className="hover:text-white transition-colors">KARACHI (PK)</span>
@@ -241,7 +263,31 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             </span>
             <span className="flex items-center space-x-1.5">
               <span className="w-1.5 h-1.5 bg-[#10B981]" />
+              <span className="hover:text-white transition-colors">ISLAMABAD (PK)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#10B981]" />
+              <span className="hover:text-white transition-colors">PESHAWAR (PK)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
               <span className="hover:text-white transition-colors">RIYADH (KSA)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
+              <span className="hover:text-white transition-colors">MAKKAH & MADINAH (KSA)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
+              <span className="hover:text-white transition-colors">JEDDAH (KSA)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
+              <span className="hover:text-white transition-colors">TAIF (KSA)</span>
+            </span>
+            <span className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
+              <span className="hover:text-white transition-colors">DAMMAM (KSA)</span>
             </span>
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Lightning } from '@phosphor-icons/react';
 
@@ -76,9 +77,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
 
   return (
     <section
-      id="about"
+      id="overview"
       className="relative h-[100dvh] min-h-[640px] max-h-[1080px] flex flex-col justify-between pt-24 sm:pt-28 lg:pt-32 [@media(max-height:760px)]:pt-20 [@media(max-height:640px)]:pt-16 pb-2.5 sm:pb-3.5 overflow-hidden"
     >
+      <span id="about" className="absolute top-0 pointer-events-none" />
       {/* Dedicated White-ish Gradient Band for Top 35% of Hero */}
       <div className="pointer-events-none absolute top-0 inset-x-0 h-[35%] bg-gradient-to-b from-paper via-paper/95 to-transparent z-[5]" />
 
@@ -297,6 +299,38 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
               </motion.button>
             </motion.div>
+
+            {/* Strategic Partner Authority Badge: Partnered with Pakistan Post */}
+            <motion.div
+              variants={itemVariants}
+              className="mt-2.5 sm:mt-3 [@media(max-height:760px)]:mt-1.5 [@media(max-height:640px)]:mt-1 flex items-center justify-center"
+            >
+              <div
+                id="hero-partner-badge"
+                className="inline-flex items-center space-x-2 sm:space-x-2.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-paper/90 border border-line shadow-xs hover:border-red/40 hover:shadow-sm transition-all duration-200 cursor-default group"
+              >
+                <div className="flex items-center space-x-1.5">
+                  <Image
+                    src="/assets/pakistan-post.png"
+                    alt="Pakistan Post"
+                    width={18}
+                    height={18}
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain rounded-xs shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-xs"
+                  />
+                  <span className="font-mono text-[8.5px] sm:text-[10px] uppercase tracking-wider text-ink-soft font-semibold">
+                    PARTNERED WITH
+                  </span>
+                </div>
+                <div className="h-3 w-px bg-line" />
+                <span className="font-mono text-[9px] sm:text-[10.5px] font-bold text-ink tracking-wide">
+                  PAKISTAN POST
+                </span>
+                <div className="h-3 w-px bg-line hidden xs:block" />
+                <span className="font-mono text-[8px] sm:text-[9px] text-red font-semibold tracking-wider uppercase hidden xs:inline">
+                  OFFICIAL LOGISTICS ALLIANCE
+                </span>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -328,7 +362,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
               <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
             </span>
-            <span className="text-center sm:text-right">DEPLOYMENT: DUBAI · DOHA · KARACHI · LAHORE · RIYADH</span>
+            <span className="text-center sm:text-right">DEPLOYMENT: KARACHI · LAHORE · ISLAMABAD · PESHAWAR · RIYADH · MAKKAH</span>
           </div>
         </div>
       </div>

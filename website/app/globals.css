@@ -40,17 +40,12 @@
   --dynamic-accent-soft: rgba(226, 58, 46, 0.15);
 }
 
-/* Strictly enforce sharp, precision hairline aesthetic: no rounded corners anywhere */
-*, *::before, *::after {
-  border-radius: 0px !important;
-}
-
-/* Scoped exception: floating pill navbar only (see Navbar.tsx). Everything else stays sharp. */
+/* Scoped pill navbar exceptions */
 .nav-pill {
-  border-radius: 9999px !important;
+  border-radius: 9999px;
 }
 .nav-drawer {
-  border-radius: 16px !important;
+  border-radius: 16px;
 }
 
 /* Hero dynamic video sizing: large on desktop matching reference, prominent on mobile */
@@ -71,9 +66,7 @@ html {
   color: var(--ink);
 }
 
-
-
-/* Sharp custom scrollbar */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -85,9 +78,78 @@ html {
 
 ::-webkit-scrollbar-thumb {
   background: var(--line);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ink-soft);
+}
+
+/* ==========================================================================
+   Print & PDF Export Stylesheet
+   Ensures exports/prints contain ONLY the clean main screen report content,
+   hiding the sidebar navigation, topbar action buttons, and sticky headers.
+   ========================================================================== */
+@media print {
+  @page {
+    margin: 12mm 15mm;
+    size: auto;
+  }
+
+  /* 1. Hide Sidebar, Navigation, and Interactive Action Buttons */
+  aside,
+  nav,
+  button,
+  input,
+  select,
+  [role="complementary"],
+  .no-print,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* 2. Expand Main Viewport to 100% Full Width */
+  html,
+  body,
+  #__next,
+  main,
+  .flex-1 {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  /* 3. Remove Sticky Headers & Collision */
+  header,
+  [class*="sticky"],
+  [class*="fixed"] {
+    position: static !important;
+    box-shadow: none !important;
+    z-index: auto !important;
+  }
+
+  /* 4. Page Break & Shading Controls for Cards & Tables */
+  .grid,
+  .card,
+  table,
+  tr,
+  [class*="rounded-2xl"],
+  [class*="rounded-xl"] {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* 5. Ensure Table and StatCard Borders Print Clearly */
+  .border,
+  [class*="border-"] {
+    border-color: #E2E8F0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
