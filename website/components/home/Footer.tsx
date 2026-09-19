@@ -257,52 +257,42 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           </motion.div>
         </motion.div>
 
-        {/* Regional Hubs Live Operational Strip */}
-        <div className="py-6 border-b border-[#2D3139] flex flex-wrap items-center justify-between gap-4 font-mono text-xs text-[#A0A4AB]">
+        {/* Regulatory Registration Section */}
+        <div className="py-6 border-b border-[#2D3139] flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-[#A0A4AB]">
           <div className="flex items-center space-x-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
               <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
             </span>
-            <span className="text-[#A0A4AB] font-semibold">DEPLOYMENT ZONES:</span>
+            <span className="text-white font-bold uppercase tracking-widest text-[11px] sm:text-xs">
+              REGISTERED WITH:
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#10B981]" />
-              <span className="hover:text-white transition-colors">KARACHI (PK)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#10B981]" />
-              <span className="hover:text-white transition-colors">LAHORE (PK)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#10B981]" />
-              <span className="hover:text-white transition-colors">ISLAMABAD (PK)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#10B981]" />
-              <span className="hover:text-white transition-colors">PESHAWAR (PK)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
-              <span className="hover:text-white transition-colors">RIYADH (KSA)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
-              <span className="hover:text-white transition-colors">MAKKAH & MADINAH (KSA)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
-              <span className="hover:text-white transition-colors">JEDDAH (KSA)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
-              <span className="hover:text-white transition-colors">TAIF (KSA)</span>
-            </span>
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-[#F59E0B]" />
-              <span className="hover:text-white transition-colors">DAMMAM (KSA)</span>
-            </span>
+
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4">
+            <div className="flex items-center space-x-3 bg-[#1A1D23] px-3.5 py-1.5 border border-[#2D3139] hover:border-[#4B515D] transition-colors">
+              <img
+                src="/assets/rw/SECP_logo.png"
+                alt="Securities and Exchange Commission of Pakistan"
+                className="h-7 sm:h-8 w-auto object-contain brightness-95"
+              />
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] sm:text-[11px] text-white font-semibold font-mono tracking-wider">SECP</span>
+                <span className="text-[8px] sm:text-[9px] text-[#8C9099] font-mono leading-tight">Securities &amp; Exchange Commission</span>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3 bg-[#1A1D23] px-3.5 py-1.5 border border-[#2D3139] hover:border-[#4B515D] transition-colors">
+              <img
+                src="/assets/rw/fbr-logo.png"
+                alt="Federal Board of Revenue"
+                className="h-7 sm:h-8 w-auto object-contain brightness-95"
+              />
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] sm:text-[11px] text-white font-semibold font-mono tracking-wider">FBR</span>
+                <span className="text-[8px] sm:text-[9px] text-[#8C9099] font-mono leading-tight">Federal Board of Revenue</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -310,9 +300,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-[#5B5F66]">
           <div>&copy; 2026 SpeedyMeals Network. All rights reserved.</div>
           <div className="flex items-center space-x-4">
-            <span className="hover:text-[#A0A4AB] transition-colors cursor-default">
+            <Link href="/privacy" className="hover:underline hover:text-[#A0A4AB] transition-colors">
               Privacy Policy
-            </span>
+            </Link>
             <span>&middot;</span>
             <Link href="/terms" className="hover:underline hover:text-[#A0A4AB] transition-colors">
               Terms of Use

@@ -1,10 +1,23 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Lightning } from '@phosphor-icons/react';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+
+const COVERED_COUNTRIES = [
+  {
+    name: 'Pakistan',
+    code: 'PK',
+    cities: ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Peshawar', 'Faisalabad'],
+  },
+  {
+    name: 'Saudi Arabia',
+    code: 'KSA',
+    cities: ['Riyadh', 'Jeddah', 'Makkah', 'Madinah', 'Dammam', 'Taif'],
+  },
+];
 
 interface HeroSectionProps {
   onSelectPersona: (persona: 'rider' | 'restaurant') => void;
@@ -15,6 +28,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
   const isMobile = useIsMobile();
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [activeCountry, setActiveCountry] = useState<string | null>(null);
+  const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTouchStart = (code: string) => {
+    touchTimerRef.current = setTimeout(() => {
+      setActiveCountry(code);
+    }, 150);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchTimerRef.current) {
+      clearTimeout(touchTimerRef.current);
+    }
+  };
 
   useEffect(() => {
     if (videoRef.current) {
@@ -391,13 +418,95 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             <span className="group-hover:underline underline-offset-4 decoration-1">SCROLL TO DISCOVER SERVICES</span>
           </motion.button>
 
-          {/* Deployment locations banner: explicitly visible on both mobile and desktop */}
-          <div className="font-mono text-[9px] sm:text-[11px] text-ink-soft tracking-wider flex items-center space-x-2">
+          {/* WE ARE HERE: Interactive Country Marquee Popup */}
+          <div className="relative flex items-center space-x-2 font-mono text-[9px] sm:text-[11px]">
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
               <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
             </span>
-            <span className="text-center sm:text-right">DEPLOYMENT: KARACHI · LAHORE · ISLAMABAD · PESHAWAR · RIYADH · MAKKAH</span>
+            <span className="text-ink-soft uppercase tracking-wider font-bold shrink-0">WE ARE HERE:</span>
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
+              {COVERED_COUNTRIES.map((item) => {
+                const isActive = activeCountry === item.code;
+                return (
+                  <div
+                    key={item.code}
+                    className="relative"
+                    onMouseEnter={() => setActiveCountry(item.code)}
+                    onMouseLeave={() => setActiveCountry(null)}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setActiveCountry(isActive ? null : item.code)}
+                      onTouchStart={() => handleTouchStart(item.code)}
+                      onTouchEnd={handleTouchEnd}
+                      className={`px-2 py-0.5 border text-[10px] sm:text-[11px] font-bold tracking-wider uppercase transition-all duration-150 cursor-pointer flex items-center space-x-1 ${
+                        isActive
+                          ? 'bg-ink text-white border-ink shadow-sm'
+                          : 'bg-paper text-ink border-line hover:border-ink hover:text-red'
+                      }`}
+                      aria-label={`View operating cities in ${item.name}`}
+                    >
+                      <span>{item.name}</span>
+                      <span className="text-[8px] sm:text-[9px] opacity-70">({item.code})</span>
+                    </button>
+
+                    {/* Popover displaying all active cities in marquee */}
+                    {isActive && (
+                      <div
+                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 w-[280px] sm:w-[350px] bg-[#16181D] text-white border border-[#2D3139] shadow-2xl p-2.5 z-50 pointer-events-auto"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* Little triangle arrow pointing down */}
+                        <div className="absolute -bottom-1.5 left-1/2 sm:left-auto sm:right-6 -translate-x-1/2 w-3 h-3 bg-[#16181D] border-b border-r border-[#2D3139] rotate-45" />
+
+                        {/* Popover Header */}
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#2D3139] text-[9px] sm:text-[10px] font-mono">
+                          <div className="flex items-center space-x-1.5">
+                            <span className="w-1.5 h-1.5 bg-[#10B981] inline-block" />
+                            <span className="font-bold text-white tracking-wider uppercase">
+                              {item.name} OPERATIONAL HUBS
+                            </span>
+                          </div>
+                          <span className="text-[#8C9099] text-[8px] sm:text-[9px]">
+                            {item.cities.length} ACTIVE CITIES
+                          </span>
+                        </div>
+
+                        {/* Marquee list of cities */}
+                        <div className="overflow-hidden relative bg-[#1F232B] py-1.5 px-1 border border-[#2D3139]/80">
+                          <motion.div
+                            className="flex items-center w-max space-x-2 whitespace-nowrap"
+                            animate={{ x: ['0%', '-50%'] }}
+                            transition={{
+                              repeat: Infinity,
+                              ease: 'linear',
+                              duration: item.cities.length * 2,
+                            }}
+                          >
+                            {/* Duplicate array twice for smooth infinite loop */}
+                            {[...item.cities, ...item.cities].map((city, idx) => (
+                              <span
+                                key={`${city}-${idx}`}
+                                className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#2A2F3A] text-white text-[9px] sm:text-[10px] font-mono uppercase tracking-wider border border-white/10"
+                              >
+                                <span className="w-1 h-1 bg-[#10B981] rounded-full inline-block" />
+                                <span>{city}</span>
+                              </span>
+                            ))}
+                          </motion.div>
+                        </div>
+
+                        <div className="pt-1.5 flex items-center justify-between text-[8px] text-[#8C9099] font-mono">
+                          <span>Real-time logistics & delivery</span>
+                          <span className="sm:hidden text-[#10B981]">Tap to dismiss</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
