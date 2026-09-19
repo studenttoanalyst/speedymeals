@@ -330,10 +330,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
-          variants={containerVariants}
+          variants={isMobile ? undefined : containerVariants}
           initial={isMobile ? false : "hidden"}
-          whileInView={isMobile ? undefined : "visible"}
-          viewport={isMobile ? undefined : { once: true }}
+          whileInView="visible"
+          viewport={{ once: true }}
           className="mb-12 sm:mb-16"
         >
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -371,15 +371,15 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
         {/* Persona-Split Entry: Three Hairline-Divided Columns with Distinct Brand Accents */}
         <motion.div
-          variants={containerVariants}
+          variants={isMobile ? undefined : containerVariants}
           initial={isMobile ? false : "hidden"}
-          whileInView={isMobile ? undefined : "visible"}
-          viewport={isMobile ? undefined : { once: true }}
+          whileInView="visible"
+          viewport={{ once: true }}
           className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-line mb-12 bg-white shadow-sm"
         >
           {/* Column 1: RIDE (Speedy Red accent) */}
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="persona-col-rider"
             className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-red transition-all duration-150 ${activePersona === 'rider' ? 'bg-paper-off shadow-xs' : 'bg-white hover:bg-paper-off/50'
               }`}
@@ -424,7 +424,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
           {/* Column 2: RESTAURANT (Cobalt Blue accent) */}
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="persona-col-restaurant"
             className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-blue transition-all duration-150 ${activePersona === 'restaurant'
                 ? 'bg-paper-off shadow-xs'
@@ -482,7 +482,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
           {/* Column 3: CUSTOMER (Warm Desert Tan accent) */}
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="persona-col-customer"
             className={`p-6 sm:p-8 flex flex-col justify-between border-t-2 border-t-tan transition-all duration-150 ${activePersona === 'customer'
                 ? 'bg-paper-off shadow-xs'
@@ -532,8 +532,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         <motion.div
           id="registration-flow-panel"
           initial={isMobile ? false : { opacity: 0, y: 20 }}
-          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-          viewport={isMobile ? undefined : { once: true }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           className={`bg-[#22252B] text-white border p-6 sm:p-10 lg:p-12 shadow-md transition-colors duration-300 ${activePersona === 'rider'
               ? 'border-t-2 border-t-red border-x-[#373C46] border-b-[#373C46]'
               : activePersona === 'restaurant'

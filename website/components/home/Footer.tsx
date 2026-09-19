@@ -65,14 +65,14 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-12">
         {/* Responsive Grid: Mobile: SpeedyMeals & Bio above, Company & Get Started side-by-side, Contact below. Desktop: 4 Columns */}
         <motion.div
-          variants={containerVariants}
+          variants={isMobile ? undefined : containerVariants}
           initial={isMobile ? false : "hidden"}
-          whileInView={isMobile ? undefined : "visible"}
-          viewport={isMobile ? undefined : { once: true }}
+          whileInView="visible"
+          viewport={{ once: true }}
           className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-8 pb-16 border-b border-[#2D3139]"
         >
           {/* Section 1: Speedy Meals Brand & Bio (Full width on mobile/tablet, 4 columns on desktop) */}
-          <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4 space-y-4">
+          <motion.div variants={isMobile ? undefined : itemVariants} className="col-span-1 lg:col-span-4 space-y-4">
             <div className="flex items-center space-x-2.5 sm:space-x-3">
               <img
                 src="/favicon.jpeg"
@@ -98,7 +98,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           {/* Section 2: Company & Get Started (Side-by-side 2-col on mobile, 5 cols on desktop) */}
           <div className="col-span-1 lg:col-span-5 grid grid-cols-2 gap-6 sm:gap-8">
             {/* Col 2A: Company */}
-            <motion.div variants={itemVariants} className="space-y-4">
+            <motion.div variants={isMobile ? undefined : itemVariants} className="space-y-4">
               <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
                 COMPANY
               </div>
@@ -148,7 +148,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             </motion.div>
 
             {/* Col 2B: Get Started */}
-            <motion.div variants={itemVariants} className="space-y-4">
+            <motion.div variants={isMobile ? undefined : itemVariants} className="space-y-4">
               <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
                 GET STARTED
               </div>
@@ -206,7 +206,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           </div>
 
           {/* Section 3: Contact (Below on mobile, 3 cols on desktop) */}
-          <motion.div variants={itemVariants} className="col-span-1 lg:col-span-3 space-y-4">
+          <motion.div variants={isMobile ? undefined : itemVariants} className="col-span-1 lg:col-span-3 space-y-4">
             <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
               CONTACT
             </div>

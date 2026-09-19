@@ -66,6 +66,16 @@
   scroll-margin-top: 80px;
 }
 
+/* Mobile-only: Force immediate visibility for services & partner cards so they never vanish or lag */
+@media (max-width: 767px) {
+  #services [id^="service-panel-"],
+  #partner [id^="persona-col-"],
+  #registration-flow-panel {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* Continuous Marquee Animation for Logistics Alliance Banners */
 @keyframes marquee-scroll {
   0% {

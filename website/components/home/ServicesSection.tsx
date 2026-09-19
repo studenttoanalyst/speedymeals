@@ -46,10 +46,10 @@ export const ServicesSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
-          variants={containerVariants}
+          variants={isMobile ? undefined : containerVariants}
           initial={isMobile ? false : "hidden"}
-          whileInView={isMobile ? undefined : "visible"}
-          viewport={isMobile ? undefined : { once: true }}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.05 }}
           className="mb-6 sm:mb-8"
         >
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
@@ -95,14 +95,14 @@ export const ServicesSection: React.FC = () => {
 
         {/* Primary Row: Food Delivery (Compact hairline-bordered panel, Speedy Red accent) */}
         <motion.div
-          variants={containerVariants}
+          variants={isMobile ? undefined : containerVariants}
           initial={isMobile ? false : "hidden"}
-          whileInView={isMobile ? undefined : "visible"}
-          viewport={isMobile ? undefined : { once: true }}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.05 }}
           className="mb-3 sm:mb-4"
         >
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="service-panel-food-delivery"
             className="border-2 border-red bg-white p-4 sm:p-6 lg:p-7 relative overflow-hidden group shadow-xs hover:shadow-md transition-all duration-200"
           >
@@ -192,15 +192,15 @@ export const ServicesSection: React.FC = () => {
 
         {/* Secondary Grid: 4 Hairline-Divided Panels Side-by-Side (2 cols on mobile, 4 on desktop) */}
         <motion.div
-          variants={containerVariants}
+          variants={isMobile ? undefined : containerVariants}
           initial={isMobile ? false : "hidden"}
-          whileInView={isMobile ? undefined : "visible"}
-          viewport={isMobile ? undefined : { once: true }}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.05 }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4"
         >
           {/* Panel 02: Speedy Courier (Cobalt Transit Blue) */}
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="service-panel-courier"
             className="border-l-2 border-l-blue border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-blue/[0.015] transition-all duration-200"
           >
@@ -231,7 +231,7 @@ export const ServicesSection: React.FC = () => {
 
           {/* Panel 03: Speedy Drive (Warm Desert Tan) */}
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="service-panel-drive"
             className="border-l-2 border-l-tan border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-tan/[0.02] transition-all duration-200"
           >
@@ -262,7 +262,7 @@ export const ServicesSection: React.FC = () => {
 
           {/* Panel 04: Speedy Mall (Fresh Emerald) */}
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="service-panel-mall"
             className="border-l-2 border-l-[#10B981] border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-[#10B981]/[0.015] transition-all duration-200"
           >
@@ -287,13 +287,13 @@ export const ServicesSection: React.FC = () => {
             </div>
             <div className="pt-2 border-t border-line font-mono text-[10px] sm:text-[11px] text-[#10B981] flex justify-between items-center font-semibold">
               <span>PHASE 2 ROADMAP</span>
-              <span className="font-mono">⋯</span>
+              <span className="font-mono">...</span>
             </div>
           </motion.div>
 
           {/* Panel 05: Technical Services (Cobalt Infrastructure) */}
           <motion.div
-            variants={itemVariants}
+            variants={isMobile ? undefined : itemVariants}
             id="service-panel-tech"
             className="border-l-2 border-l-blue border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-blue/[0.015] transition-all duration-200"
           >
