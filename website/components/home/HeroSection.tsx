@@ -20,16 +20,10 @@ const COVERED_COUNTRIES = [
     cities: ['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah', 'Taif'],
   },
   {
-    name: 'Qatar',
-    code: 'QA',
+    name: 'Coming soon...',
+    code: 'COMING_SOON',
     isActive: false,
-    cities: [],
-  },
-  {
-    name: 'UAE',
-    code: 'AE',
-    isActive: false,
-    cities: [],
+    cities: ['Qatar', 'UAE', 'Oman', 'Bahrain', 'UK'],
   },
 ];
 
@@ -461,15 +455,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                       onTouchStart={() => handleTouchStart(item.code)}
                       onTouchEnd={handleTouchEnd}
                       className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider transition-colors duration-150 cursor-pointer underline underline-offset-4 decoration-1 ${isActiveHover
-                          ? activeColorClass
-                          : `text-ink ${hoverClass}`
+                        ? activeColorClass
+                        : `text-ink ${hoverClass}`
                         }`}
                       aria-label={`Coverage info for ${item.name}`}
                     >
-                      {item.name} ({item.code})
+                      {item.isActive ? `${item.name} (${item.code})` : item.name}
                     </button>
 
-                    {/* Single Marquee Moving Strip or Coming Soon Message */}
+                    {/* Single Marquee Moving Strip for Active or Coming Soon */}
                     {isActiveHover && (
                       <div
                         className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 z-50 pointer-events-none"
@@ -495,10 +489,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                             </div>
                           </div>
                         ) : (
-                          /* Non-Active Country: Single Strip with Yellow Hover Text */
-                          <div className="bg-[#16181D] text-[#F59E0B] border border-[#2D3139] px-3 py-1.5 shadow-xl font-mono text-[9px] sm:text-[10px] whitespace-nowrap flex items-center space-x-1.5">
-                            <span className="w-1.5 h-1.5 bg-[#F59E0B] rounded-full inline-block animate-pulse" />
-                            <span className="font-semibold">Coming soon in your neighborhood...</span>
+                          /* Coming Soon: Single Strip of Continuous Marquee Moving Text for Pending Territories */
+                          <div className="w-[280px] sm:w-[350px] bg-[#16181D] text-white border border-[#2D3139] px-2.5 py-1.5 shadow-xl overflow-hidden flex items-center space-x-2">
+                            <span className="w-1.5 h-1.5 bg-[#F59E0B] shrink-0 rounded-full inline-block animate-pulse" />
+                            <div className="overflow-hidden relative w-full flex">
+                              <div
+                                className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
+                                style={{
+                                  animationDuration: `${Math.max(10, item.cities.length * 2.2)}s`,
+                                }}
+                              >
+                                {[...item.cities, ...item.cities, ...item.cities].map((country, cIdx) => (
+                                  <span key={`${country}-${cIdx}`} className="inline-flex items-center space-x-2">
+                                    <span className="text-white font-semibold">{country}</span>
+                                    <span className="text-[#8C9099]">·</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
