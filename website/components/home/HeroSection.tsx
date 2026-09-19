@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Lightning } from '@phosphor-icons/react';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface HeroSectionProps {
   onSelectPersona: (persona: 'rider' | 'restaurant') => void;
@@ -11,6 +12,7 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobile();
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -18,6 +20,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
     if (videoRef.current) {
       videoRef.current.play().catch(() => { });
     }
+
+    // Video auto-pause/resume observer when scrolled out of viewport to save mobile resources
+    const videoEl = videoRef.current;
+    if (!videoEl || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoEl.play().catch(() => {});
+        } else {
+          videoEl.pause();
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(videoEl);
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   const handleScrollToPartner = (persona: 'rider' | 'restaurant') => {
@@ -89,7 +111,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
         {/* Top: Eyebrow + Headlines: moved down for elegant breathing room below navbar */}
         <motion.div
           variants={containerVariants}
-          initial="hidden"
+          initial={isMobile ? false : "hidden"}
           animate="visible"
           className="max-w-5xl w-full flex flex-col items-center text-center shrink-0 pt-1 sm:pt-1.5 md:pt-2 z-20 relative"
         >
@@ -162,8 +184,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           ref={videoContainerRef}
           className="hero-video-box relative w-full aspect-[3840/1685] -mt-5 sm:-mt-8 md:-mt-12 lg:-mt-16 overflow-hidden pointer-events-none select-none shrink-0 z-10"
           style={{
-            maskImage: 'radial-gradient(ellipse 96% 90% at 50% 50%, black 65%, rgba(0,0,0,0.85) 85%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 96% 90% at 50% 50%, black 65%, rgba(0,0,0,0.85) 85%, transparent 100%)',
+            maskImage: isMobile
+              ? undefined
+              : 'radial-gradient(ellipse 96% 90% at 50% 50%, black 65%, rgba(0,0,0,0.85) 85%, transparent 100%)',
+            WebkitMaskImage: isMobile
+              ? undefined
+              : 'radial-gradient(ellipse 96% 90% at 50% 50%, black 65%, rgba(0,0,0,0.85) 85%, transparent 100%)',
+            transform: 'translateZ(0)',
           }}
         >
           {/* Top sky blend: allows FAST. FAIR. GLOBAL. to fade smoothly from white into the gray canvas */}
@@ -197,7 +224,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
         <div className="w-full flex-1 flex flex-col items-center justify-center min-h-0 my-auto">
           <motion.div
             variants={containerVariants}
-            initial="hidden"
+            initial={isMobile ? false : "hidden"}
             animate="visible"
             className="max-w-5xl w-full flex flex-col items-center text-center my-auto"
           >

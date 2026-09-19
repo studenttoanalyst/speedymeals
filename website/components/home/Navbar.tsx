@@ -46,22 +46,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
     };
     document.addEventListener('mousedown', handleClickOutside);
 
-    // Snap-not-fade behavior on scroll
+    // Snap-not-fade behavior on scroll, throttled with requestAnimationFrame
+    let rafId: number | null = null;
     const handleScroll = () => {
-      const scrollPos = window.scrollY;
-      setIsScrolled(scrollPos > 40);
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const scrollPos = window.scrollY;
+        setIsScrolled(scrollPos > 40);
 
-      // Section spy
-      const servicesEl = document.getElementById('services');
-      const partnerEl = document.getElementById('partner');
+        // Section spy is desktop-only since the nav pill buttons are hidden on mobile (hidden md:flex)
+        if (window.innerWidth >= 768) {
+          const servicesEl = document.getElementById('services');
+          const partnerEl = document.getElementById('partner');
 
-      if (partnerEl && partnerEl.getBoundingClientRect().top <= 160) {
-        setActiveSection('partner');
-      } else if (servicesEl && servicesEl.getBoundingClientRect().top <= 160) {
-        setActiveSection('services');
-      } else {
-        setActiveSection('overview');
-      }
+          if (partnerEl && partnerEl.getBoundingClientRect().top <= 160) {
+            setActiveSection('partner');
+          } else if (servicesEl && servicesEl.getBoundingClientRect().top <= 160) {
+            setActiveSection('services');
+          } else {
+            setActiveSection('overview');
+          }
+        }
+      });
     };
 
     // Clean #overview from address bar immediately if present
@@ -72,6 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -122,8 +130,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
     >
       <div
         className={`nav-pill mx-auto max-w-7xl flex items-center justify-between px-3 sm:px-6 h-15 sm:h-16 lg:h-[72px] [@media(max-height:760px)]:h-12 transition-all duration-200 border relative ${isScrolled
-          ? 'bg-white/85 backdrop-blur-md border-black/10 shadow-[0_4px_24px_rgba(0,0,0,0.08)]'
-          : 'bg-white/70 backdrop-blur-sm border-black/5'
+          ? 'bg-white/95 md:bg-white/85 md:backdrop-blur-md border-black/10 shadow-[0_4px_24px_rgba(0,0,0,0.08)]'
+          : 'bg-white/95 md:bg-white/70 md:backdrop-blur-sm border-black/5'
           }`}
       >
         {/* Brand Wordmark: Centered on mobile, left-aligned on desktop, strictly single-line */}

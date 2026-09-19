@@ -59,6 +59,13 @@
   }
 }
 
+/* Smooth anchor scrolling offsets for fixed header */
+#services,
+#partner,
+#overview {
+  scroll-margin-top: 80px;
+}
+
 /* Continuous Marquee Animation for Logistics Alliance Banners */
 @keyframes marquee-scroll {
   0% {

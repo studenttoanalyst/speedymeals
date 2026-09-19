@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import {
   TwitterLogo,
   LinkedinLogo,
@@ -15,6 +16,8 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
+  const isMobile = useIsMobile();
+
   const handleScrollTo = (sectionId: string, persona?: 'rider' | 'restaurant') => {
     if (persona && onSelectPersona) {
       onSelectPersona(persona);
@@ -63,9 +66,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         {/* Responsive Grid: Mobile: SpeedyMeals & Bio above, Company & Get Started side-by-side, Contact below. Desktop: 4 Columns */}
         <motion.div
           variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? undefined : "visible"}
+          viewport={isMobile ? undefined : { once: true }}
           className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-8 pb-16 border-b border-[#2D3139]"
         >
           {/* Section 1: Speedy Meals Brand & Bio (Full width on mobile/tablet, 4 columns on desktop) */}

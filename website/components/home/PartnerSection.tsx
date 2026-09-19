@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import {
   Bicycle,
   Storefront,
@@ -109,6 +110,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
   activePersona,
   onSelectPersona,
 }) => {
+  const isMobile = useIsMobile();
+
   // Form state partitioned per persona so switching tabs loads dedicated forms
   const [formsData, setFormsData] = useState<Record<PersonaType, PersonaFormData>>(defaultFormState);
 
@@ -328,9 +331,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         {/* Section Header */}
         <motion.div
           variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? undefined : "visible"}
+          viewport={isMobile ? undefined : { once: true }}
           className="mb-12 sm:mb-16"
         >
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -369,9 +372,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         {/* Persona-Split Entry: Three Hairline-Divided Columns with Distinct Brand Accents */}
         <motion.div
           variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? undefined : "visible"}
+          viewport={isMobile ? undefined : { once: true }}
           className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-line mb-12 bg-white shadow-sm"
         >
           {/* Column 1: RIDE (Speedy Red accent) */}
@@ -528,9 +531,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         {/* REGISTRATION FORM PANEL: Styled with dynamic persona color border and accents */}
         <motion.div
           id="registration-flow-panel"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
+          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+          viewport={isMobile ? undefined : { once: true }}
           className={`bg-[#22252B] text-white border p-6 sm:p-10 lg:p-12 shadow-md transition-colors duration-300 ${activePersona === 'rider'
               ? 'border-t-2 border-t-red border-x-[#373C46] border-b-[#373C46]'
               : activePersona === 'restaurant'
