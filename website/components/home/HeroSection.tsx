@@ -16,6 +16,18 @@ const COVERED_COUNTRIES = [
   {
     name: 'Saudi Arabia',
     code: 'KSA',
+    isActive: true,
+    cities: ['Riyadh', 'Jeddah', 'Dammam', 'Makkah', 'Madinah', 'Taif'],
+  },
+  {
+    name: 'Qatar',
+    code: 'QA',
+    isActive: false,
+    cities: [],
+  },
+  {
+    name: 'UAE',
+    code: 'AE',
     isActive: false,
     cities: [],
   },
@@ -419,13 +431,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           </motion.button>
 
           {/* WE ARE HERE: Interactive Country Links with Single Marquee Strip */}
-          <div className="relative flex items-center space-x-2 font-mono text-[9px] sm:text-[11px]">
+          <div className="relative flex items-center flex-wrap justify-center sm:justify-start gap-y-1 gap-x-2 font-mono text-[9px] sm:text-[11px]">
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
               <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
             </span>
             <span className="text-ink-soft uppercase tracking-wider font-bold shrink-0">WE ARE HERE:</span>
-            <div className="flex items-center space-x-2 sm:space-x-2.5">
+            <div className="flex items-center flex-wrap gap-y-1 gap-x-1.5 sm:gap-x-2">
               {COVERED_COUNTRIES.map((item, idx) => {
                 const isActiveHover = activeCountry === item.code;
                 const hoverClass = item.isActive
@@ -442,7 +454,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                     onMouseEnter={() => setActiveCountry(item.code)}
                     onMouseLeave={() => setActiveCountry(null)}
                   >
-                    {idx > 0 && <span className="text-ink-soft/40 mr-2 sm:mr-2.5 select-none">·</span>}
+                    {idx > 0 && <span className="text-ink-soft/40 mr-1.5 sm:mr-2 select-none">·</span>}
                     <button
                       type="button"
                       onClick={() => setActiveCountry(isActiveHover ? null : item.code)}
