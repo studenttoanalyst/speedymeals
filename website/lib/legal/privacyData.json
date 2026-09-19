@@ -1,0 +1,318 @@
+{
+  "meta": {
+    "title": "Speedy Meals - Privacy Policy",
+    "version": "1.0",
+    "effectiveDate": "Pre-Launch Phase 2026",
+    "jurisdiction": "Islamic Republic of Pakistan",
+    "intro": [
+      "This Privacy Policy explains how Speedy Meals Delivery Services, a business registered in Pakistan, trading as Speedy Meals, collects, uses, shares, stores and protects your personal data.",
+      "This Policy forms part of our Terms and Conditions. Terms not defined here have the meaning given in those Terms.",
+      "Current status: Speedy Meals is in a pre-launch phase. Today, people can register their interest in becoming a Customer, Rider or Restaurant Partner. Food ordering and delivery have not started. This Policy describes the data we handle now. Section 14 explains what will change at launch."
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-1",
+      "num": "1",
+      "title": "Who We Are and What This Policy Covers",
+      "paragraphs": [
+        "This Privacy Policy explains how Speedy Meals Delivery Services, a business registered in Pakistan, trading as Speedy Meals, collects, uses, shares, stores and protects your personal data.",
+        "This Policy forms part of our Terms and Conditions. Terms not defined here have the meaning given in those Terms.",
+        "Current status: Speedy Meals is in a pre-launch phase. Today, people can register their interest in becoming a Customer, Rider or Restaurant Partner. Food ordering and delivery have not started. This Policy describes the data we handle now. Section 14 explains what will change at launch."
+      ]
+    },
+    {
+      "id": "sec-2",
+      "num": "2",
+      "title": "Summary in Plain Language",
+      "paragraphs": [
+        "Quick overview of our core privacy commitments during the pre-launch registration phase:"
+      ],
+      "tableType": "qa",
+      "qaTable": [
+        {
+          "q": "Does the App collect my personal data?",
+          "a": "No. The App shows a landing screen and opens our Website in your browser. It does not collect personal data."
+        },
+        {
+          "q": "Where is my data collected?",
+          "a": "On the Website, when you submit the registration form."
+        },
+        {
+          "q": "What do you collect?",
+          "a": "The details on the form (such as name, mobile number, city, and role or business details) plus basic technical data."
+        },
+        {
+          "q": "Do you ask for CNIC or documents now?",
+          "a": "No. Documents are requested only after launch, when you create an account and complete verification."
+        },
+        {
+          "q": "Do you sell my data?",
+          "a": "No."
+        },
+        {
+          "q": "Can I delete my data?",
+          "a": "Yes. Email support@speedymealservices.com."
+        },
+        {
+          "q": "How long do you keep it?",
+          "a": "Up to 12 months if you are not approved or services have not launched, unless you ask for earlier deletion."
+        }
+      ]
+    },
+    {
+      "id": "sec-3",
+      "num": "3",
+      "title": "Data We Collect",
+      "subsections": [
+        {
+          "title": "3.1 Data you give us on the Website",
+          "content": "When you submit the registration form, we collect the information the form asks for. This is currently:",
+          "bullets": [
+            "your name;",
+            "your mobile number;",
+            "your city or area;",
+            "your role (Customer, Rider or Restaurant Partner) and, for a Restaurant Partner, your business details such as the business name; and",
+            "any message or information you choose to send us."
+          ]
+        },
+        {
+          "title": "3.2 Data collected automatically on the Website",
+          "content": "When you visit or use the Website, our systems may record basic technical data needed to run and protect it, such as:",
+          "bullets": [
+            "IP address, browser type and version, device type and operating system;",
+            "pages visited and date and time of access;",
+            "security and error logs."
+          ]
+        },
+        {
+          "title": "3.3 Records of your consent and communications",
+          "content": "We keep a record that you accepted our Terms and this Policy, including the version accepted and the date and time. We also keep messages you send us and our replies (for example, support emails)."
+        },
+        {
+          "title": "3.4 What the App collects",
+          "content": "The App does not collect, store or transmit your personal data. It does not use analytics or advertising tools. It requests only the permission to access the internet, so that it can open the Website in your browser. It does not request access to your location, contacts, camera, microphone, SMS or storage. When you tap a registration or Terms/Privacy link in the App, your phone's browser opens the Website. From that point, the Website's handling of data applies."
+        },
+        {
+          "title": "3.5 What we do not collect now",
+          "content": "At this stage we do not collect: identity documents (CNIC, licence), photos, precise location, payment or bank details, or contact lists."
+        }
+      ]
+    },
+    {
+      "id": "sec-4",
+      "num": "4",
+      "title": "Why We Use Your Data",
+      "paragraphs": [
+        "We use your data only for these purposes, or for purposes that are compatible with them. We do not use it for anything unrelated without asking you first."
+      ],
+      "tableType": "why_use",
+      "whyUseTable": [
+        {
+          "purpose": "Review, verify and manage your registration",
+          "data": "Form details, consent records"
+        },
+        {
+          "purpose": "Contact you about onboarding and the launch",
+          "data": "Name, mobile number"
+        },
+        {
+          "purpose": "Prevent fake, duplicate and automated registrations, and protect the Website",
+          "data": "Form details, technical data, security logs"
+        },
+        {
+          "purpose": "Respond to your questions and complaints",
+          "data": "Communications you send us"
+        },
+        {
+          "purpose": "Keep proof of your acceptance of our Terms and Policy",
+          "data": "Consent records"
+        },
+        {
+          "purpose": "Plan our launch (for example, demand by city)",
+          "data": "City and role, in aggregated form where possible"
+        },
+        {
+          "purpose": "Meet legal, tax, regulatory or law-enforcement requirements",
+          "data": "As required"
+        }
+      ]
+    },
+    {
+      "id": "sec-5",
+      "num": "5",
+      "title": "Who We Share Data With",
+      "paragraphs": [
+        "We do not sell your personal data. We share it only in these cases:",
+        "Service providers who help us run the Website and our operations, for example hosting and infrastructure, database, messaging or email providers. They may process data only on our instructions and to provide their service to us.",
+        "Legal and safety reasons, where required by law, court order or a lawful request from a regulator or law-enforcement body, or to protect our rights, our users or the public from fraud or harm.",
+        "Business changes, if Speedy Meals is merged with, or its business is transferred to, another entity. We will make sure your data stays protected and will tell you of material changes.",
+        "With your consent, where you ask us to share your data.",
+        "Our staff can access your data only where they need it for the purposes above."
+      ]
+    },
+    {
+      "id": "sec-6",
+      "num": "6",
+      "title": "Contacting You and Marketing",
+      "paragraphs": [
+        "We may contact you by phone, WhatsApp, SMS or email for onboarding and launch updates that relate to your Registration.",
+        "We send marketing or promotional messages only if you opt in. You may opt out at any time by replying 'STOP' (or the equivalent) or by emailing support@speedymealservices.com.",
+        "Opting out of marketing does not stop service messages that we need to send (such as a launch or account notice relating to your Registration)."
+      ]
+    },
+    {
+      "id": "sec-7",
+      "num": "7",
+      "title": "How Long We Keep Your Data",
+      "paragraphs": [
+        "We retain personal data strictly in accordance with purpose limitation and statutory compliance:",
+        "We may keep limited data for longer where needed for fraud prevention, security, resolving disputes, tax or accounting records, or to comply with the law. When we no longer need data, we delete or anonymise it."
+      ],
+      "tableType": "retention",
+      "retentionTable": [
+        {
+          "data": "Registration data (if not approved, or services have not launched)",
+          "period": "Up to 12 months from Registration, or earlier if you ask us to delete it"
+        },
+        {
+          "data": "Registration data of approved users",
+          "period": "Until launch onboarding is complete, then under the applicable account data rules in an updated Policy"
+        },
+        {
+          "data": "Consent records",
+          "period": "For as long as needed to prove your acceptance, and for legal and dispute purposes"
+        },
+        {
+          "data": "Security and error logs",
+          "period": "Only as long as needed for security and troubleshooting"
+        },
+        {
+          "data": "Support communications",
+          "period": "As long as needed to handle your request and any follow-up"
+        }
+      ]
+    },
+    {
+      "id": "sec-8",
+      "num": "8",
+      "title": "Your Rights and Choices",
+      "paragraphs": [
+        "You may ask us to:",
+        "- access the personal data we hold about you;",
+        "- correct data that is wrong or incomplete;",
+        "- delete your data (see Section 9);",
+        "- withdraw your Registration or your consent to contact;",
+        "- opt out of marketing at any time.",
+        "To exercise these rights, email support@speedymealservices.com from the email address or phone number you registered with, or tell us the details you used so we can verify it is you. We may ask for reasonable information to confirm your identity. We aim to respond within 30 days. If we cannot fully act on a request (for example, where the law requires us to keep some data), we will explain why."
+      ]
+    },
+    {
+      "id": "sec-9",
+      "num": "9",
+      "title": "Data Deletion",
+      "paragraphs": [
+        "You can ask us to delete your data and withdraw your Registration at any time.",
+        "How to request deletion:",
+        "1. Send an email to support@speedymealservices.com with the subject 'Delete my data'.",
+        "2. Include the name and mobile number you used to register.",
+        "3. We will confirm your identity and then process your request.",
+        "What happens:",
+        "- We delete or anonymise your registration data and any account data we hold about you.",
+        "- We may keep limited data where we must or need to, for fraud prevention, security, resolving disputes, tax or accounting, or legal compliance. We keep it only for as long as necessary.",
+        "- We will confirm to you once your request has been completed.",
+        "Deleting your data ends your Registration. You can register again later if you wish."
+      ]
+    },
+    {
+      "id": "sec-10",
+      "num": "10",
+      "title": "How We Protect Your Data",
+      "paragraphs": [
+        "We use reasonable technical and organisational measures to protect your data, including:",
+        "- encrypted connections (HTTPS) between your device and the Website;",
+        "- access to personal data limited to authorised people who need it;",
+        "- security logging and monitoring for abuse and fake registrations;",
+        "- secure storage with our providers.",
+        "No method of transmission or storage is completely secure. We cannot guarantee absolute security. If a data breach affects you and the law requires it, we will notify you and the relevant authority."
+      ]
+    },
+    {
+      "id": "sec-11",
+      "num": "11",
+      "title": "Cookies and Similar Technologies",
+      "paragraphs": [
+        "The Website may use cookies or similar technologies that are necessary for it to work and stay secure (for example, to remember your form input or protect against abuse). If we later add analytics or advertising tools, we will update this Policy and, where required, ask for your consent first.",
+        "You can control cookies through your browser settings. Blocking necessary cookies may affect how the Website works."
+      ]
+    },
+    {
+      "id": "sec-12",
+      "num": "12",
+      "title": "Children",
+      "paragraphs": [
+        "Speedy Meals is for people aged 18 and over. We do not knowingly collect data from anyone under 18. If you believe a minor has registered, contact support@speedymealservices.com and we will delete the data."
+      ]
+    },
+    {
+      "id": "sec-13",
+      "num": "13",
+      "title": "Storage Location and Transfers Outside Pakistan",
+      "paragraphs": [
+        "Our service providers may store or process data on servers located outside Pakistan. Where we transfer data, we take reasonable steps to make sure it stays protected in line with this Policy and applicable law."
+      ]
+    },
+    {
+      "id": "sec-14",
+      "num": "14",
+      "title": "What Will Change at Launch",
+      "paragraphs": [
+        "When Speedy Meals launches ordering and delivery, we will collect more data, so this Policy will be updated before we start collecting it. For your information, we expect this may include:",
+        "At that time we will also update the App's data disclosures on Google Play. We will ask you to accept the updated Terms and Policy before you use the services."
+      ],
+      "tableType": "launch_changes",
+      "launchTable": [
+        {
+          "group": "Customers",
+          "data": "Name, mobile number, delivery addresses, location for delivery, order history, ratings, and payment information (handled by payment providers)"
+        },
+        {
+          "group": "Riders",
+          "data": "Identity and vehicle documents (such as CNIC, licence, vehicle registration), photos, live location while online, delivery and earnings records, Wallet and cash-deposit records, bank or mobile wallet details"
+        },
+        {
+          "group": "Restaurant Partners",
+          "data": "Business and food-licence documents, menu and sales data, bank details"
+        }
+      ]
+    },
+    {
+      "id": "sec-15",
+      "num": "15",
+      "title": "Third-Party Links",
+      "paragraphs": [
+        "The App and Website may link to third-party sites. We are not responsible for their content or privacy practices. Please read their policies."
+      ]
+    },
+    {
+      "id": "sec-16",
+      "num": "16",
+      "title": "Changes to This Policy",
+      "paragraphs": [
+        "We may update this Policy. We will post the new version on the Website with a new version number and effective date, and give reasonable notice of material changes (for example, by email or a notice on the Website). Continuing to use the Website after the effective date means you accept the update."
+      ]
+    },
+    {
+      "id": "sec-17",
+      "num": "17",
+      "title": "Contact and Complaints",
+      "paragraphs": [
+        "Speedy Meals Delivery Services",
+        "Email: support@speedymealservices.com",
+        "Website: www.speedymealservices.com",
+        "Send privacy questions, data requests and complaints to the email above. We will acknowledge within 24 hours and aim to respond within 30 days for data requests.",
+        "This Policy is governed by the laws of the Islamic Republic of Pakistan."
+      ]
+    }
+  ]
+}

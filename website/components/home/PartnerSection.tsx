@@ -329,13 +329,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          variants={isMobile ? undefined : containerVariants}
-          initial={isMobile ? false : "hidden"}
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="mb-12 sm:mb-16"
-        >
+        <div className="mb-12 sm:mb-16">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center space-x-2 shrink-0">
               <span className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] whitespace-nowrap">
@@ -353,9 +347,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
             <h2 className="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase tracking-tight text-[#15171A] leading-tight">
-              Direct Partnership. <br className="hidden sm:inline" />
+              <span className="block">Direct Partnership.</span>
               <span
-                className="transition-colors duration-300"
+                className="block transition-colors duration-300"
                 style={{ color: 'var(--dynamic-accent, #E23A2E)' }}
               >
                 No Extraction.
@@ -367,19 +361,12 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               Middle East.
             </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Persona-Split Entry: Three Hairline-Divided Columns with Distinct Brand Accents */}
-        <motion.div
-          variants={isMobile ? undefined : containerVariants}
-          initial={isMobile ? false : "hidden"}
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-line mb-12 bg-white shadow-sm"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-line mb-12 bg-white shadow-sm">
           {/* Column 1: RIDE (Speedy Red accent) */}
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+          <div
             id="persona-col-rider"
             className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-red transition-all duration-150 ${activePersona === 'rider' ? 'bg-paper-off shadow-xs' : 'bg-white hover:bg-paper-off/50'
               }`}
@@ -420,11 +407,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 <ArrowRight size={13} weight="bold" />
               </button>
             </div>
-          </motion.div>
+          </div>
 
           {/* Column 2: RESTAURANT (Cobalt Blue accent) */}
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+          <div
             id="persona-col-restaurant"
             className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-blue transition-all duration-150 ${activePersona === 'restaurant'
                 ? 'bg-paper-off shadow-xs'
@@ -478,11 +464,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 </Link>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Column 3: CUSTOMER (Warm Desert Tan accent) */}
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+          <div
             id="persona-col-customer"
             className={`p-6 sm:p-8 flex flex-col justify-between border-t-2 border-t-tan transition-all duration-150 ${activePersona === 'customer'
                 ? 'bg-paper-off shadow-xs'
@@ -525,15 +510,12 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 <ArrowRight size={13} weight="bold" />
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* REGISTRATION FORM PANEL: Styled with dynamic persona color border and accents */}
-        <motion.div
+        <div
           id="registration-flow-panel"
-          initial={isMobile ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
           className={`bg-[#22252B] text-white border p-6 sm:p-10 lg:p-12 shadow-md transition-colors duration-300 ${activePersona === 'rider'
               ? 'border-t-2 border-t-red border-x-[#373C46] border-b-[#373C46]'
               : activePersona === 'restaurant'
@@ -1263,7 +1245,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <span>4000 security deposit required</span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

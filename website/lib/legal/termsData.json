@@ -1,0 +1,1088 @@
+{
+  "meta": {
+    "title": "Speedy Meals - Terms and Conditions",
+    "version": "1.0",
+    "effectiveDate": "Pre-Launch Phase 2026",
+    "governingLaw": "Islamic Republic of Pakistan",
+    "jurisdiction": "Exclusive jurisdiction of the courts of Karachi, Pakistan",
+    "preamble": [
+      "Welcome to Speedy Meals.",
+      "These Terms and Conditions (\"Terms\") form a binding agreement between you and Speedy Meals Delivery Services, a business registered in Pakistan, trading as Speedy Meals (\"Speedy Meals\", \"we\", \"us\" or \"our\").",
+      "By accessing our website at www.speedymealservices.com, using our mobile application (\"App\") or registering with us, you agree to these Terms and our Privacy Policy.",
+      "STRUCTURE OF THESE TERMS:",
+      "Part A - General Terms: Apply to everyone who visits or uses the Platform.",
+      "Part B - Pre-Launch Registration Terms: Apply during the pre-launch phase to everyone who registers.",
+      "Part C - Customer Terms: Apply from the Launch Date to Customers placing Orders.",
+      "Part D - Rider Terms: Apply from the Launch Date to Riders delivering Orders.",
+      "Part E - Restaurant Partner Terms: Apply from the Launch Date to Restaurant Partners fulfilling Orders.",
+      "Schedule 1 - Key Rates and Limits.",
+      "Schedule 2 - Failed Order Allocation."
+    ]
+  },
+  "parts": [
+    {
+      "id": "part-a",
+      "title": "PART A - GENERAL TERMS",
+      "scope": "Applies to everyone who visits or uses our website, app, or platform.",
+      "sections": [
+        {
+          "id": "sec-a1",
+          "code": "A1",
+          "title": "About Speedy Meals",
+          "clauses": [
+            {
+              "num": "A1.1",
+              "text": "Speedy Meals is a technology and logistics platform. It connects Customers with independent Restaurant Partners and Riders for the ordering and delivery of food."
+            },
+            {
+              "num": "A1.2",
+              "text": "Speedy Meals does not prepare, cook or inspect food, and is not the producer or seller of food unless expressly stated. Restaurant Partners and Riders are independent businesses or contractors. They are not employees, agents or partners of Speedy Meals."
+            }
+          ]
+        },
+        {
+          "id": "sec-a2",
+          "code": "A2",
+          "title": "Eligibility and Accounts",
+          "clauses": [
+            {
+              "num": "A2.1",
+              "text": "You must be at least 18 years old, or a legal entity acting through an authorised representative, to use the Platform."
+            },
+            {
+              "num": "A2.2",
+              "text": "From the Launch Date, you must create an account using accurate information, including a valid mobile number. Access is by one-time password (OTP) or, for Restaurant Partners, email and password. Registration under Part B does not create an account."
+            },
+            {
+              "num": "A2.3",
+              "text": "You are responsible for keeping your login credentials confidential and for all activity under your account, except where you can show fraud that is not attributable to you. Notify us immediately of any unauthorised use."
+            },
+            {
+              "num": "A2.4",
+              "text": "Speedy Meals is not liable for delivery failures caused by incomplete, incorrect or outdated information you provide, including your address and contact number."
+            },
+            {
+              "num": "A2.5",
+              "text": "Speedy Meals may carry out identity and background verification on Riders and Restaurant Partners at onboarding and afterwards, and may suspend or terminate an account that fails verification."
+            }
+          ]
+        },
+        {
+          "id": "sec-a3",
+          "code": "A3",
+          "title": "Acceptable Use",
+          "clauses": [
+            {
+              "num": "A3.1",
+              "text": "You must not: use the Platform for any unlawful, fraudulent or deceptive purpose; impersonate any person or entity, or provide false information or documents; post or transmit content that is unlawful, obscene, defamatory, threatening, abusive or infringes the rights of others; harass, threaten or abuse any Customer, Rider, Restaurant Partner or Speedy Meals staff; harvest or misuse the personal data of other users; interfere with, reverse-engineer or attempt to gain unauthorised access to the Platform, or submit automated or bulk registrations; circumvent the Platform's payment, Wallet or commission systems, including by arranging off-Platform transactions with a person introduced through the Platform to avoid fees."
+            },
+            {
+              "num": "A3.2",
+              "text": "Speedy Meals may investigate suspected violations, monitor Platform activity for safety, fraud and compliance purposes, remove content, and restrict or suspend access."
+            }
+          ]
+        },
+        {
+          "id": "sec-a4",
+          "code": "A4",
+          "title": "Intellectual Property",
+          "clauses": [
+            {
+              "num": "",
+              "text": "The \"Speedy Meals\" name, logo, brand elements and Platform content belong to Speedy Meals or its licensors. You may not copy, reproduce or use them without our prior written consent. Restaurant Partners grant Speedy Meals a non-exclusive licence to display their names, logos, menus and images on the Platform for the purpose of providing the services."
+            }
+          ]
+        },
+        {
+          "id": "sec-a5",
+          "code": "A5",
+          "title": "Privacy and Data",
+          "clauses": [
+            {
+              "num": "A5.1",
+              "text": "We collect and process personal data as described in our Privacy Policy, which forms part of these Terms."
+            },
+            {
+              "num": "A5.2",
+              "text": "From the Launch Date, to fulfil an Order: the assigned Rider's name, phone number and live location are visible to the Customer; the Customer's name, phone number and delivery address are visible to the Restaurant Partner and Rider."
+            },
+            {
+              "num": "A5.3",
+              "text": "Rider and Restaurant Partner identity and business documents (such as CNIC, licence, vehicle and food-business documents) are collected at verification after the Launch Date, stored securely and used only for verification, fraud prevention and legal compliance."
+            },
+            {
+              "num": "A5.4",
+              "text": "Speedy Meals does not sell personal data. We may share data with service providers who help us operate the Platform (such as hosting, payment, mapping and messaging providers), and with law enforcement or regulators where legally required."
+            },
+            {
+              "num": "A5.5",
+              "text": "By using the Platform you consent to receive OTP, service and onboarding messages by SMS, WhatsApp, phone call or email. Marketing messages are sent only if you opt in, and you may opt out at any time."
+            },
+            {
+              "num": "A5.6",
+              "text": "Data deletion. You may ask us to delete your personal data and any account at any time by emailing support@speedymealservices.com from the email address or phone number you registered with, or by using any deletion request page or in-app option we provide. We will act on verified requests within a reasonable time. We may retain limited data where needed for fraud prevention, security, resolving disputes, tax or accounting records, or legal compliance, and only for as long as necessary. Deactivating an account is not the same as deletion; on a deletion request we delete or anonymise the data we are not required to keep."
+            }
+          ]
+        },
+        {
+          "id": "sec-a6",
+          "code": "A6",
+          "title": "Third-Party Services",
+          "clauses": [
+            {
+              "num": "",
+              "text": "The Platform relies on third-party services, including hosting, payment gateways and mapping services. Speedy Meals is not responsible for the content, security or practices of third parties. Links to third-party sites are provided for convenience only."
+            }
+          ]
+        },
+        {
+          "id": "sec-a7",
+          "code": "A7",
+          "title": "Disclaimers and Limitation of Liability",
+          "clauses": [
+            {
+              "num": "A7.1",
+              "text": "The Platform is provided \"as is\" and \"as available\". Speedy Meals does not guarantee that it will be uninterrupted or error-free."
+            },
+            {
+              "num": "A7.2",
+              "text": "To the maximum extent permitted by law, Speedy Meals excludes liability for indirect or consequential loss. Where Speedy Meals is found liable, its total liability for a claim relating to an Order is limited to the value of that Order."
+            },
+            {
+              "num": "A7.3",
+              "text": "Nothing in these Terms excludes or limits liability for fraud, for death or personal injury caused by negligence, or for any liability that cannot be excluded under applicable law."
+            },
+            {
+              "num": "A7.4",
+              "text": "Restaurant Partners and Riders act independently and are responsible for their own conduct. Speedy Meals is not liable for their unlawful acts. Speedy Meals will suspend or terminate involved accounts and cooperate with law enforcement. This clause does not limit Speedy Meals' own responsibilities stated in Clause C9."
+            }
+          ]
+        },
+        {
+          "id": "sec-a8",
+          "code": "A8",
+          "title": "Indemnity",
+          "clauses": [
+            {
+              "num": "",
+              "text": "You agree to compensate Speedy Meals for losses, claims and reasonable costs arising from your breach of these Terms, your unlawful use of the Platform, or your infringement of third-party rights."
+            }
+          ]
+        },
+        {
+          "id": "sec-a9",
+          "code": "A9",
+          "title": "Suspension and Termination",
+          "clauses": [
+            {
+              "num": "A9.1",
+              "text": "Speedy Meals may restrict, suspend or terminate access, or reject or remove a registration or account, where it reasonably believes that: someone other than the account holder is using it; these Terms or Speedy Meals policies have been breached; verification or background checks were not satisfactorily completed; or fraudulent, abusive, unsafe or illegal conduct is suspected or confirmed."
+            },
+            {
+              "num": "A9.2",
+              "text": "Speedy Meals may act without prior notice for serious breaches (including fraud, safety risk or illegality). You may close your account or withdraw your registration at any time, subject to settlement of amounts owed under these Terms."
+            }
+          ]
+        },
+        {
+          "id": "sec-a10",
+          "code": "A10",
+          "title": "Changes to These Terms",
+          "clauses": [
+            {
+              "num": "",
+              "text": "Speedy Meals may update these Terms. We will post the updated version on the Platform with a new version number and effective date, and will give reasonable notice of material changes. Continued use after the effective date means acceptance. If you disagree, you must stop using the Platform. Speedy Meals records the version and time of your acceptance."
+            }
+          ]
+        },
+        {
+          "id": "sec-a11",
+          "code": "A11",
+          "title": "Force Majeure",
+          "clauses": [
+            {
+              "num": "",
+              "text": "Speedy Meals is not liable for delay or failure caused by events beyond its reasonable control, including natural disasters, severe weather, strikes, civil unrest, government action, power or network failures, or third-party service outages."
+            }
+          ]
+        },
+        {
+          "id": "sec-a12",
+          "code": "A12",
+          "title": "General",
+          "clauses": [
+            {
+              "num": "A12.1",
+              "text": "Severability. If any provision is held invalid, the rest remain in force. A12.2 Entire agreement. These Terms and the policies they reference are the entire agreement between you and Speedy Meals on their subject. A12.3 No waiver. A failure to enforce a provision is not a waiver of it. A12.4 Language. The English version prevails over any translation or summary."
+            }
+          ]
+        },
+        {
+          "id": "sec-a13",
+          "code": "A13",
+          "title": "Complaints and Dispute Resolution",
+          "clauses": [
+            {
+              "num": "A13.1",
+              "text": "Raise complaints through support@speedymealservices.com (and, from the Launch Date, the in-app Help Center). Speedy Meals will acknowledge a complaint within 24 hours and aims to respond substantively within 7 working days."
+            },
+            {
+              "num": "A13.2",
+              "text": "These Terms are governed by the laws of the Islamic Republic of Pakistan. If a dispute is not resolved under Clause A13.1, the courts of Karachi have exclusive jurisdiction."
+            }
+          ]
+        },
+        {
+          "id": "sec-a14",
+          "code": "A14",
+          "title": "Mobile Application (Google Play)",
+          "clauses": [
+            {
+              "num": "A14.1",
+              "text": "The Speedy Meals mobile application may be downloaded from Google Play. These Terms are an agreement between you and Speedy Meals only. Google is not a party to them and has no obligation to provide support or maintenance for the application, or to respond to any claim about it."
+            },
+            {
+              "num": "A14.2",
+              "text": "You must also comply with the terms of the app store and device platform you use."
+            },
+            {
+              "num": "A14.3",
+              "text": "During the pre-launch phase the application acts as a gateway that opens the Speedy Meals website in your browser for registration. The application itself does not collect your personal data. Data you submit on the website is handled as described in the Privacy Policy."
+            }
+          ]
+        },
+        {
+          "id": "sec-a15",
+          "code": "A15",
+          "title": "Contact",
+          "clauses": [
+            {
+              "num": "",
+              "text": "Speedy Meals Delivery Services Emails : support@speedymealservices.com , info@speedymealservices.com  Website : www.speedymealservices.com"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "part-b",
+      "title": "PART B - PRE-LAUNCH REGISTRATION TERMS",
+      "scope": "Applies during pre-launch phase to all registering users.",
+      "sections": [
+        {
+          "id": "sec-b1",
+          "code": "B1",
+          "title": "Nature of Registration",
+          "clauses": [
+            {
+              "num": "B1.1",
+              "text": "Registration lets you tell Speedy Meals that you are interested in becoming a Customer, Rider or Restaurant Partner when services launch."
+            },
+            {
+              "num": "B1.2",
+              "text": "Registration is an expression of interest only. It does not create an account, a contract for services, or any right to use the services."
+            },
+            {
+              "num": "B1.3",
+              "text": "No ordering, delivery, payment or earning service is available until the Launch Date."
+            }
+          ]
+        },
+        {
+          "id": "sec-b2",
+          "code": "B2",
+          "title": "No Guarantee",
+          "clauses": [
+            {
+              "num": "B2.1",
+              "text": "Speedy Meals does not guarantee that your Registration will be approved, that services will launch in your area or by any date, or that you will earn any income or receive any orders."
+            },
+            {
+              "num": "B2.2",
+              "text": "Speedy Meals may accept, waitlist, defer or reject any Registration at its reasonable discretion."
+            },
+            {
+              "num": "B2.3",
+              "text": "Registration does not create any employment, agency, partnership, franchise or exclusivity relationship between you and Speedy Meals."
+            }
+          ]
+        },
+        {
+          "id": "sec-b3",
+          "code": "B3",
+          "title": "Accuracy of Information",
+          "clauses": [
+            {
+              "num": "B3.1",
+              "text": "You must provide accurate, complete and current information, and only your own information (or information you are authorised to provide for a business you represent)."
+            },
+            {
+              "num": "B3.2",
+              "text": "Speedy Meals may verify information by phone, message, email or other reasonable means. False, misleading or fraudulent information may lead to rejection, removal from the waitlist and blacklisting from future registration."
+            }
+          ]
+        },
+        {
+          "id": "sec-b4",
+          "code": "B4",
+          "title": "One Registration per Person or Business",
+          "clauses": [
+            {
+              "num": "",
+              "text": "Each person may register once for each role, using their own mobile number. Each business may register once. Speedy Meals may reject or merge duplicate, fake or automated Registrations, and may reject Registrations made on behalf of others without authority."
+            }
+          ]
+        },
+        {
+          "id": "sec-b5",
+          "code": "B5",
+          "title": "No Fees at Registration",
+          "clauses": [
+            {
+              "num": "B5.1",
+              "text": "Speedy Meals does not charge any fee for Registration. No employee, agent or third party is authorised to request payment, a deposit or a \"registration fee\" from you on our behalf."
+            },
+            {
+              "num": "B5.2",
+              "text": "Any Rider Wallet recharge, Kit Deposit or commission applies only after the Launch Date, after approval, and only as set out in Parts D and E. Speedy Meals will show these amounts to you before you are asked to pay."
+            },
+            {
+              "num": "B5.3",
+              "text": "If anyone asks you for money in connection with Registration, please report it to support@speedymealservices.com."
+            }
+          ]
+        },
+        {
+          "id": "sec-b6",
+          "code": "B6",
+          "title": "Information We Collect and How We Use It",
+          "clauses": [
+            {
+              "num": "B6.1",
+              "text": "We collect the information requested on the Registration form (such as your name, mobile number, city and role or business details) and technical data needed to operate and secure the website."
+            },
+            {
+              "num": "B6.2",
+              "text": "We use it to review and verify your Registration, contact you, plan the launch, prevent fraud and fake registrations, and comply with the law, as set out in the Privacy Policy."
+            },
+            {
+              "num": "B6.3",
+              "text": "We do not ask for identity or business documents (such as CNIC or licences) at Registration. These are requested only when you create an account and complete verification after the Launch Date."
+            },
+            {
+              "num": "B6.4",
+              "text": "We may contact you by phone, WhatsApp, SMS or email for onboarding and launch updates. We send marketing messages only with your opt-in, and you may opt out at any time."
+            }
+          ]
+        },
+        {
+          "id": "sec-b7",
+          "code": "B7",
+          "title": "Retention and Deletion",
+          "clauses": [
+            {
+              "num": "B7.1",
+              "text": "If your Registration is not approved, or services have not launched, we keep your Registration data for up to 12 months from the date of Registration, unless you ask us to delete it earlier."
+            },
+            {
+              "num": "B7.2",
+              "text": "You may withdraw your Registration and request deletion of your data at any time under Clause A5.6."
+            }
+          ]
+        },
+        {
+          "id": "sec-b8",
+          "code": "B8",
+          "title": "Moving to Launch",
+          "clauses": [
+            {
+              "num": "B8.1",
+              "text": "We will notify you when the Launch Date is confirmed, by the contact details you provided or on the Platform."
+            },
+            {
+              "num": "B8.2",
+              "text": "To use the services you must then create an account, log in, and complete any verification we require. You will be asked to accept the Terms and policies in force at that time, including the applicable Part C, D or E."
+            },
+            {
+              "num": "B8.3",
+              "text": "Parts C, D and E do not apply to you until you accept them at that stage."
+            }
+          ]
+        },
+        {
+          "id": "sec-b9",
+          "code": "B9",
+          "title": "Changes, Delay or Discontinuation",
+          "clauses": [
+            {
+              "num": "",
+              "text": "Speedy Meals may delay, change or discontinue the launch or any service. Subject to Clause A7.3, Speedy Meals is not liable for any cost or expectation you incurred in reliance on Registration."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "part-c",
+      "title": "PART C - CUSTOMER TERMS",
+      "scope": "Applies from launch date to customers ordering through Speedy Meals.",
+      "sections": [
+        {
+          "id": "sec-c1",
+          "code": "C1",
+          "title": "Placing an Order",
+          "clauses": [
+            {
+              "num": "C1.1",
+              "text": "Orders can be placed only within serviceable areas, which may change due to demand, weather, traffic or operational limits."
+            },
+            {
+              "num": "C1.2",
+              "text": "Before submitting, you must review the items, quantities, delivery address and payment method. An Order is placed when you receive in-app or SMS confirmation."
+            },
+            {
+              "num": "C1.3",
+              "text": "Multiple restaurants. You may hold separate carts for different Restaurant Partners. Each cart is checked out as a separate Order with its own Rider, Delivery Fee and delivery time."
+            },
+            {
+              "num": "C1.4",
+              "text": "Speedy Meals and Restaurant Partners will make reasonable efforts to follow special instructions but do not guarantee them. An unmet special instruction alone does not entitle you to a refund."
+            },
+            {
+              "num": "C1.5",
+              "text": "Images shown on the Platform are illustrative and may differ from the actual item."
+            }
+          ]
+        },
+        {
+          "id": "sec-c2",
+          "code": "C2",
+          "title": "Prices and Taxes",
+          "clauses": [
+            {
+              "num": "C2.1",
+              "text": "Prices are in Pakistani Rupees (PKR) and include applicable taxes where the Restaurant Partner is tax-registered. Prices on the Platform may differ from prices offered by the same Restaurant Partner elsewhere."
+            },
+            {
+              "num": "C2.2",
+              "text": "Before you confirm, the Platform shows a full breakdown: Food Subtotal, Delivery Fee and Total. By placing the Order you agree to the displayed Total."
+            }
+          ]
+        },
+        {
+          "id": "sec-c3",
+          "code": "C3",
+          "title": "Delivery Fee",
+          "clauses": [
+            {
+              "num": "C3.1",
+              "text": "The Delivery Fee is calculated as: Delivery Fee = Base Fee + (Road Distance in KM \u00d7 Per-KM Rate) The Base Fee is Rs. 100 and the Per-KM Rate is Rs. 20. Distance is the road distance between the Restaurant Partner and your delivery address, calculated using a third-party mapping service."
+            },
+            {
+              "num": "C3.2",
+              "text": "The Delivery Fee shown at checkout is final for that Order. Speedy Meals may revise the formula or rates with reasonable notice; revisions do not affect Orders already placed."
+            }
+          ]
+        },
+        {
+          "id": "sec-c4",
+          "code": "C4",
+          "title": "Payment",
+          "clauses": [
+            {
+              "num": "C4.1",
+              "text": "You may pay by Cash on Delivery or by an approved Digital Payment method. Speedy Meals may add or remove payment methods."
+            },
+            {
+              "num": "C4.2",
+              "text": "Digital Payment. Payment is received by Speedy Meals. Speedy Meals does not store full card details; these are handled by the payment provider under applicable security standards."
+            },
+            {
+              "num": "C4.3",
+              "text": "COD. You must pay the Rider the full Order Total in cash on delivery. You must not pay the Restaurant Partner directly."
+            },
+            {
+              "num": "C4.4",
+              "text": "Speedy Meals may disable COD for your account after two (2) or more failed or refused COD deliveries attributable to you, or where fraud is suspected. You may then pay by Digital Payment only."
+            }
+          ]
+        },
+        {
+          "id": "sec-c5",
+          "code": "C5",
+          "title": "Delivery",
+          "clauses": [
+            {
+              "num": "C5.1",
+              "text": "Delivery times shown are estimates only and depend on factors such as traffic, weather, distance and order volume."
+            },
+            {
+              "num": "C5.2",
+              "text": "You must be reachable and available at the delivery address. Riders hand over food without any payment exchange with the Restaurant Partner."
+            },
+            {
+              "num": "C5.3",
+              "text": "Failed delivery. Where delivery fails for a reason attributable to you (no one available, unreachable, incorrect or inaccessible address, or refusal to pay), the Rider will wait up to ten (10) minutes after arrival and attempt contact. After that the Order may be cancelled without refund. The allocation of amounts between the parties is set out in Schedule 2."
+            }
+          ]
+        },
+        {
+          "id": "sec-c6",
+          "code": "C6",
+          "title": "Cancellation",
+          "clauses": [
+            {
+              "num": "C6.1",
+              "text": "You may cancel an Order free of charge only before the Restaurant Partner accepts it."
+            },
+            {
+              "num": "C6.2",
+              "text": "After acceptance, you cannot cancel the Order, because preparation has begun. Exceptions apply where the cause is the Restaurant Partner or Rider (see Schedule 2) or where Speedy Meals approves a cancellation at its reasonable discretion."
+            },
+            {
+              "num": "C6.3",
+              "text": "Speedy Meals or a Restaurant Partner may cancel an Order (for example, items unavailable or the restaurant closed). You will be refunded in full under Clause C7."
+            }
+          ]
+        },
+        {
+          "id": "sec-c7",
+          "code": "C7",
+          "title": "Refunds",
+          "clauses": [
+            {
+              "num": "C7.1",
+              "text": "Refunds are available where: (a) the Order is cancelled before acceptance; (b) the Order is cancelled by Speedy Meals or the Restaurant Partner; or (c) Speedy Meals determines after investigation that the Order was wrong, incomplete, damaged or otherwise not fulfilled correctly (Clause C8)."
+            },
+            {
+              "num": "C7.2",
+              "text": "Digital Payment refunds are made to the original payment method within 5 - 7 working days, subject to the payment provider's processing times."
+            },
+            {
+              "num": "C7.3",
+              "text": "COD refunds are made by bank or mobile wallet transfer to an account you nominate, within the same period."
+            },
+            {
+              "num": "C7.4",
+              "text": "Where a voucher or discount was used, the refund may be adjusted for its value."
+            },
+            {
+              "num": "C7.5",
+              "text": "Speedy Meals may withhold refunds and cancel Orders where fraud or abuse is reasonably suspected."
+            }
+          ]
+        },
+        {
+          "id": "sec-c8",
+          "code": "C8",
+          "title": "Reporting Order Problems",
+          "clauses": [
+            {
+              "num": "C8.1",
+              "text": "Report a wrong item, missing item, spillage, damage or other issue through in-app support within two (2) hours of delivery, with a clear photo where possible. Food is perishable, so later reports may not be accepted."
+            },
+            {
+              "num": "C8.2",
+              "text": "Speedy Meals will investigate and may award a full or partial refund, or decline the claim, at its reasonable discretion."
+            }
+          ]
+        },
+        {
+          "id": "sec-c9",
+          "code": "C9",
+          "title": "Food Safety and Responsibility",
+          "clauses": [
+            {
+              "num": "C9.1",
+              "text": "Responsibility is allocated by stage of the Order: Stage Responsible party Preparation, ingredients, hygiene, allergen information, packaging and sealing Restaurant Partner Handling and transit by the Rider (tampering, spillage, unreasonable delay attributable to the Rider) Riders Incorrect or incomplete address or contact details, unavailability to receive Customer"
+            },
+            {
+              "num": "C9.2",
+              "text": "Subject to Clause C9.1 and to the extent permitted by law, Speedy Meals is not liable for food quality, hygiene, contamination, allergic reaction or illness arising from food prepared by a Restaurant Partner. Such complaints can be reported to Speedy Meals, which may assist in mediation without admission of liability."
+            },
+            {
+              "num": "C9.3",
+              "text": "Speedy Meals does not guarantee ingredient or allergen information shown on the Platform. If you have allergies or dietary restrictions, contact the Restaurant Partner directly before ordering."
+            }
+          ]
+        },
+        {
+          "id": "sec-c10",
+          "code": "C10",
+          "title": "Vouchers",
+          "clauses": [
+            {
+              "num": "",
+              "text": "Where Speedy Meals offers vouchers or promotions, they are subject to their stated validity, minimum-order and usage conditions, are non-transferable and have no cash value. Speedy Meals may withdraw or void a voucher, including where abuse is suspected."
+            }
+          ]
+        },
+        {
+          "id": "sec-c11",
+          "code": "C11",
+          "title": "Ratings and Reviews",
+          "clauses": [
+            {
+              "num": "",
+              "text": "You may rate an Order and leave a comment. You grant Speedy Meals a non-exclusive right to display your review on the Platform. Abusive, unlawful or false reviews may be removed."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "part-d",
+      "title": "PART D - RIDER TERMS",
+      "scope": "Applies from launch date to independent delivery couriers.",
+      "sections": [
+        {
+          "id": "sec-d1",
+          "code": "D1",
+          "title": "Independent Status",
+          "clauses": [
+            {
+              "num": "D1.1",
+              "text": "Riders are independent contractors. They are not employees, agents or partners of Speedy Meals. Riders choose when to go online and may accept or reject delivery requests."
+            },
+            {
+              "num": "D1.2",
+              "text": "Riders are responsible for their own vehicle, fuel, roadworthiness, licence, insurance, traffic-law compliance, taxes and personal conduct."
+            },
+            {
+              "num": "D1.3",
+              "text": "Rider must be follow the laws and regulation of Govt of  Pakistan for any illegal activity rider will be responsible. Rider must be verify the parcel when they pickup from the customer/Restaurant/shops etc."
+            }
+          ]
+        },
+        {
+          "id": "sec-d2",
+          "code": "D2",
+          "title": "Account and Verification",
+          "clauses": [
+            {
+              "num": "D2.1",
+              "text": "Account creation and verification require a valid phone number, CNIC, driving licence, vehicle registration and vehicle photo. You warrant that all documents are genuine and belong to you."
+            },
+            {
+              "num": "D2.2",
+              "text": "Speedy Meals manually reviews all applications and may approve or reject an application at its discretion. Forged or false documents result in immediate, permanent termination and possible legal action."
+            },
+            {
+              "num": "D2.3",
+              "text": "Before going online for the first time, a Rider must complete the Wallet recharge (Clause D3) and pay the Kit Deposit (Clause D5)."
+            }
+          ]
+        },
+        {
+          "id": "sec-d3",
+          "code": "D3",
+          "title": "Prepaid Wallet",
+          "clauses": [
+            {
+              "num": "D3.1",
+              "text": "First recharge. A Rider must make a minimum first recharge of Rs. 500."
+            },
+            {
+              "num": "D3.2",
+              "text": "Going online. A Rider may go online only while the Wallet balance is at least Rs. 100."
+            },
+            {
+              "num": "D3.3",
+              "text": "Per-delivery fee. Rs. 10 is automatically deducted from the Wallet when the Rider marks an Order \"Delivered\". This fee is non-refundable."
+            },
+            {
+              "num": "D3.4",
+              "text": "Low balance. If the balance falls below Rs. 100, the Rider is taken offline and prompted to recharge. A delivery already in progress must still be completed."
+            },
+            {
+              "num": "D3.5",
+              "text": "Recharge methods. Bank transfer, JazzCash, EasyPaisa or card."
+            },
+            {
+              "num": "D3.6",
+              "text": "Closure. On account closure, the remaining Wallet balance is refunded within seven (7) working days, after deduction of any amounts the Rider owes Speedy Meals."
+            },
+            {
+              "num": "D3.7",
+              "text": "The Wallet balance is a prepayment for services. It is not a bank deposit and does not earn interest."
+            }
+          ]
+        },
+        {
+          "id": "sec-d4",
+          "code": "D4",
+          "title": "Delivery Fee Earnings and Payout",
+          "clauses": [
+            {
+              "num": "D4.1",
+              "text": "A Rider receives 100% of the Delivery Fee for each completed delivery. Speedy Meals takes no share of it."
+            },
+            {
+              "num": "D4.2",
+              "text": "Earnings are paid weekly by bank or mobile wallet transfer, separately from any cash the Rider deposits."
+            },
+            {
+              "num": "D4.3",
+              "text": "Speedy Meals may set off amounts the Rider owes (including undeposited cash or unpaid dues) against earnings, to the extent permitted by law."
+            }
+          ]
+        },
+        {
+          "id": "sec-d5",
+          "code": "D5",
+          "title": "Equipment and Kit Deposit",
+          "clauses": [
+            {
+              "num": "D5.1",
+              "text": "Speedy Meals issues a branded uniform and delivery bag against a refundable with in 7 working days  Kit Deposit of Rs. 4,000. The Kit Deposit is separate from the Wallet."
+            },
+            {
+              "num": "D5.2",
+              "text": "The Kit Deposit is refunded within seven (7) working days after all of the following: (a) the Rider's account is closed, (b) the equipment is returned in acceptable condition, and (c) all amounts owed by the Rider are settled."
+            },
+            {
+              "num": "D5.3",
+              "text": "Speedy Meals may deduct from the Kit Deposit: the cost of damaged, lost or unreturned equipment; and, where the Rider fails to deposit collected COD cash, the unpaid amount, to the extent permitted by law. The Rider will be informed of any deduction and its reason."
+            },
+            {
+              "num": "D5.4",
+              "text": "Riders must use the equipment only for Speedy Meals deliveries and must not sell, transfer or misuse it."
+            }
+          ]
+        },
+        {
+          "id": "sec-d6",
+          "code": "D6",
+          "title": "Accepting and Completing Deliveries",
+          "clauses": [
+            {
+              "num": "D6.1",
+              "text": "Requests show pickup and drop-off locations, payment type, distance and the Delivery Fee earning. A Rider may accept or reject each request."
+            },
+            {
+              "num": "D6.2",
+              "text": "Once a request is accepted, the Rider is expected to pick up and deliver promptly and professionally, to handle food carefully, and not to open or tamper with any bag or seal. On the doubt bases rider may open the parcel."
+            },
+            {
+              "num": "D6.3",
+              "text": "The Rider must not exchange any payment with the Restaurant Partner at any time, whatever the Order's payment method."
+            },
+            {
+              "num": "D6.4",
+              "text": "The Rider must update Order status accurately in the app (arrived, picked up, on the way, delivered). Location is shared while the Rider is online."
+            },
+            {
+              "num": "D6.5",
+              "text": "Where the Customer is unreachable, the Rider must wait up to ten (10) minutes, attempt contact and record the attempt in the app before marking the Order failed."
+            }
+          ]
+        },
+        {
+          "id": "sec-d7",
+          "code": "D7",
+          "title": "Cash on Delivery Handling",
+          "clauses": [
+            {
+              "num": "D7.1",
+              "text": "The Rider collects the full Order Total (Food Subtotal plus Delivery Fee) in cash from the Customer. Collected cash is Speedy Meals' money held in trust, not the Rider's own money."
+            },
+            {
+              "num": "D7.2",
+              "text": "Daily deposit. The Rider must deposit all Pending Cash by the end of each day, through a Speedy Meals outlet or hub, bank transfer to the Speedy Meals company account, or an approved mobile wallet. The Rider must submit the amount and payment reference or proof in the app."
+            },
+            {
+              "num": "D7.3",
+              "text": "Verification. Outlet deposits are confirmed by Speedy Meals. For bank or wallet transfers, Speedy Meals may restore COD access on a provisional basis pending verification. Submitting false proof results in suspension."
+            },
+            {
+              "num": "D7.4",
+              "text": "Cash limit. When Pending Cash reaches Rs. 4,000, the app warns the Rider to deposit. When Pending Cash reaches Rs. 5,000, no new COD Orders are assigned until the Rider deposits. Digital Payment Orders continue to be assigned."
+            },
+            {
+              "num": "D7.5",
+              "text": "Next-day rule. A Rider with undeposited Pending Cash from a previous day cannot go online until it is deposited."
+            },
+            {
+              "num": "D7.6",
+              "text": "Reconciliation. Speedy Meals compares expected cash from completed COD Orders with deposits. Discrepancies are investigated. A Rider must explain and repay any shortfall."
+            },
+            {
+              "num": "D7.7",
+              "text": "Failure to deposit cash is a material breach. It may lead to immediate suspension, deduction under Clauses D4.3 and D5.3, blacklisting, and civil or criminal action (including a police report using the identity documents provided at verification)."
+            }
+          ]
+        },
+        {
+          "id": "sec-d8",
+          "code": "D8",
+          "title": "Conduct, Suspension and Termination",
+          "clauses": [
+            {
+              "num": "D8.1",
+              "text": "Speedy Meals may suspend or terminate a Rider for fraud, cash shortfalls, forged documents, tampering with food, harassment, unsafe or illegal conduct, or repeated breaches."
+            },
+            {
+              "num": "D8.2",
+              "text": "A Rider found engaging in illegal activity will be permanently terminated, blacklisted and reported to law enforcement. Speedy Meals is not liable for any unlawful act or traffic violation by a Rider (subject to Clause A7.3)."
+            },
+            {
+              "num": "D8.3",
+              "text": "A Rider may close the account at any time. Refunds under Clauses D3.6 and D5.2 apply after dues are settled."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "part-e",
+      "title": "PART E - RESTAURANT PARTNER TERMS",
+      "scope": "Applies from launch date to merchant restaurant partners.",
+      "sections": [
+        {
+          "id": "sec-e1",
+          "code": "E1",
+          "title": "Onboarding and Account",
+          "clauses": [
+            {
+              "num": "E1.1",
+              "text": "Restaurant Partners are onboarded by Speedy Meals after submitting business details, menu and required documents at verification. Each Restaurant Partner receives one account login (email and password, or registered phone number with OTP)."
+            },
+            {
+              "num": "E1.2",
+              "text": "The Restaurant Partner is responsible for the security of its login and for all activity under it, and must keep contact and bank details up to date."
+            },
+            {
+              "num": "E1.3",
+              "text": "The Restaurant Partner warrants that it holds all licences, registrations and approvals required to operate a food business in Pakistan, including under the applicable provincial food authority, and will provide them on request."
+            }
+          ]
+        },
+        {
+          "id": "sec-e2",
+          "code": "E2",
+          "title": "Responsibilities",
+          "clauses": [
+            {
+              "num": "E2.1",
+              "text": "The Restaurant Partner is solely responsible for food quality, hygiene, safe preparation, ingredient and allergen information, accurate descriptions and prices, and compliance with food safety laws."
+            },
+            {
+              "num": "E2.2",
+              "text": "It must keep menu items, prices and availability (\"Available\" / \"Sold Out\") accurate, and must accept or reject new Orders promptly."
+            },
+            {
+              "num": "E2.3",
+              "text": "It must mark an Order \"Ready for Pickup\" only when the food is actually ready, and must pack and seal the Order securely for delivery."
+            },
+            {
+              "num": "E2.4",
+              "text": "It must hand the Order to the Rider without any payment exchange, regardless of the Order's payment method."
+            },
+            {
+              "num": "E2.5",
+              "text": "It must not use Customer data for any purpose other than fulfilling the Order."
+            }
+          ]
+        },
+        {
+          "id": "sec-e3",
+          "code": "E3",
+          "title": "Commission",
+          "clauses": [
+            {
+              "num": "E3.1",
+              "text": "Speedy Meals charges a commission of 10% of the Food Subtotal of each completed Order (or the rate agreed in the individual partnership agreement). The Delivery Fee is not commissionable and belongs to the Rider."
+            },
+            {
+              "num": "E3.2",
+              "text": "The commission is calculated at the time the Order is placed and recorded as a snapshot for that Order. Later changes to rates do not affect existing Orders."
+            },
+            {
+              "num": "E3.3",
+              "text": "No upfront deposit or registration fee is charged."
+            }
+          ]
+        },
+        {
+          "id": "sec-e4",
+          "code": "E4",
+          "title": "Payment and Settlement",
+          "clauses": [
+            {
+              "num": "E4.1",
+              "text": "Speedy Meals pays the Restaurant Partner directly, weekly, by bank transfer. The Net Payable is 90% of the Food Subtotal of eligible Orders (after commission). This applies whether the Customer paid by COD or Digital Payment. A Rider never pays a Restaurant Partner."
+            },
+            {
+              "num": "E4.2",
+              "text": "Settlement is made each Monday for Orders completed in the previous Monday-to-Sunday week. If Monday is a public holiday, payment is made on the next working day."
+            },
+            {
+              "num": "E4.3",
+              "text": "The dashboard shows Total Sales, Commission Deducted and Net Payable for each week."
+            },
+            {
+              "num": "E4.4",
+              "text": "Disputes. The Restaurant Partner must raise any settlement dispute within seven (7) days of the settlement statement. After that the statement is treated as accepted."
+            },
+            {
+              "num": "E4.5",
+              "text": "Amounts for Orders refunded because of the Restaurant Partner's fault (Schedule 2), and any agreed adjustments, are deducted from settlement. No commission is charged on cancelled Orders."
+            },
+            {
+              "num": "E4.6",
+              "text": "The Restaurant Partner is responsible for its own taxes. Speedy Meals may deduct or withhold taxes where required by law."
+            }
+          ]
+        },
+        {
+          "id": "sec-e5",
+          "code": "E5",
+          "title": "Suspension and Termination",
+          "clauses": [
+            {
+              "num": "",
+              "text": "Speedy Meals may suspend or deactivate a Restaurant Partner for repeated late or rejected Orders, food safety violations or complaints, false information, circumvention of the commission system, or breach of these Terms. Amounts due for completed Orders remain payable, subject to lawful deductions."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "schedule1": {
+    "id": "sched-1",
+    "title": "SCHEDULE 1 - KEY RATES AND LIMITS",
+    "intro": "Applies from the Launch Date. These figures apply at the effective date. Speedy Meals may update them under Clause A10 with reasonable notice.",
+    "rows": [
+      {
+        "item": "Registration fee (pre-launch)",
+        "value": "None"
+      },
+      {
+        "item": "Registration data retention (if not approved or not launched)",
+        "value": "Up to 12 months"
+      },
+      {
+        "item": "Delivery Fee - Base Fee",
+        "value": "Rs. 100"
+      },
+      {
+        "item": "Delivery Fee - Per-KM Rate",
+        "value": "Rs. 20 per km"
+      },
+      {
+        "item": "Restaurant commission (default)",
+        "value": "10% of Food Subtotal"
+      },
+      {
+        "item": "Rider share of Delivery Fee",
+        "value": "100%"
+      },
+      {
+        "item": "Rider Wallet - minimum first recharge",
+        "value": "Rs. 500"
+      },
+      {
+        "item": "Rider Wallet - minimum balance to go online",
+        "value": "Rs. 100"
+      },
+      {
+        "item": "Rider Wallet - per-delivery fee (non-refundable)",
+        "value": "Rs. 10"
+      },
+      {
+        "item": "Rider Kit Deposit (refundable)",
+        "value": "Rs. 4,000"
+      },
+      {
+        "item": "COD cash warning / COD assignment stops",
+        "value": "Rs. 4,000 / Rs. 5,000"
+      },
+      {
+        "item": "Customer wait time before failed delivery",
+        "value": "10 minutes"
+      },
+      {
+        "item": "Customer issue reporting window",
+        "value": "2 hours after delivery"
+      },
+      {
+        "item": "Digital / COD refund time",
+        "value": "5 - 7 working days"
+      },
+      {
+        "item": "Rider Wallet and Kit Deposit refund time",
+        "value": "7 working days after conditions are met"
+      },
+      {
+        "item": "Restaurant settlement",
+        "value": "Weekly, every Monday"
+      },
+      {
+        "item": "Restaurant settlement dispute window",
+        "value": "7 days"
+      },
+      {
+        "item": "Complaint acknowledgement / response",
+        "value": "24 hours / 7 working days"
+      }
+    ]
+  },
+  "schedule2": {
+    "id": "sched-2",
+    "title": "SCHEDULE 2 - FAILED ORDER ALLOCATION",
+    "intro": "Applies from the Launch Date. Speedy Meals decides the cause of a failed or cancelled Order after a reasonable investigation, using app records such as call logs, GPS location, timestamps and photos.",
+    "rows": [
+      {
+        "cause": "Customer (unavailable, unreachable, wrong address, refuses COD)",
+        "customer": "No refund",
+        "restaurant": "Receives Net Payable (90% of Food Subtotal)",
+        "rider": "Receives full Delivery Fee"
+      },
+      {
+        "cause": "Restaurant Partner (rejects late, wrong or missing items, food not ready, quality issue)",
+        "customer": "Refunded",
+        "restaurant": "No payment for that Order",
+        "rider": "Receives Delivery Fee where the Rider attended and was dispatched"
+      },
+      {
+        "cause": "Rider (loss, tampering, non-delivery)",
+        "customer": "Refunded",
+        "restaurant": "Receives Net Payable if food was correctly prepared",
+        "rider": "No Delivery Fee, pending investigation"
+      },
+      {
+        "cause": "Cancelled before Restaurant acceptance",
+        "customer": "Full refund",
+        "restaurant": "No payment, no commission",
+        "rider": "No fee"
+      }
+    ]
+  },
+  "compliance": {
+    "id": "sec-compliance",
+    "title": "Compliance with Applicable Laws & Statutory Regulations",
+    "intro": "Mandatory compliance obligations under the laws of the Islamic Republic of Pakistan:",
+    "items": [
+      {
+        "title": "Following Pakistani Laws",
+        "text": "All riders, customers, restaurants, business partners, and other users connected with SpeedyMeals must follow all laws and regulations of Pakistan at all times while using or working with the platform."
+      },
+      {
+        "title": "Responsibility for Individual Actions",
+        "text": "Every rider, customer, restaurant, business partner, or other user is personally and solely responsible for their own actions, conduct, behaviour, and activities. SpeedyMeals will not be held responsible or legally liable for any unlawful, careless, dangerous, negligent, or fraudulent act committed by any user, rider, restaurant, or business partner."
+      },
+      {
+        "title": "Reporting Illegal Activities",
+        "text": "If SpeedyMeals becomes aware of any illegal or unlawful activity involving a rider, customer, restaurant, or other partner - including but not limited to fraud, theft, harassment, carrying prohibited or illegal items, or violating traffic laws - SpeedyMeals will fully cooperate with law enforcement authorities and will report the individual or business to the police or relevant authorities along with the verification and identity records provided during onboarding."
+      },
+      {
+        "title": "Fake or Fraudulent Documents",
+        "text": "Users and businesses must provide genuine and valid documents when requested (such as CNIC, driving license, vehicle registration, business NTN, or food authority licenses). Submitting fake, altered, forged, or fraudulent documents is strictly illegal under the Pakistan Penal Code. Any person or business found doing so will be permanently banned from SpeedyMeals and reported to the relevant authorities for criminal prosecution."
+      },
+      {
+        "title": "Accurate Information and Verification",
+        "text": "Riders, customers, restaurants, and business partners must provide true, complete, and accurate information at the time of registration and onboarding. SpeedyMeals reserves the right to verify any information through physical inspection, phone calls, background checks, document verification, or reference checks before granting approval or at any time during active operations."
+      }
+    ]
+  }
+}

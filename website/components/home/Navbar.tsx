@@ -159,10 +159,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
         {/* Desktop 1:1 Anchor Navigation with Tan Capsule Active Styling & Signature Glowing Tubelight */}
         <nav className="hidden md:flex items-center space-x-1 bg-white/40 backdrop-blur-md border border-white/60 p-1 nav-pill shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_2px_8px_rgba(0,0,0,0.03)]">
           {[
-            { id: 'overview', label: 'Overview' },
+            { id: 'overview', label: 'About' },
             { id: 'services', label: 'Services' },
             { id: 'partner', label: 'Partner' },
-            { id: 'about', label: 'About' },
+            { id: 'about', label: 'About Us' },
           ].map((item) => {
             const isActive = isAboutPage ? item.id === 'about' : activeSection === item.id;
             return (
@@ -407,7 +407,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                 : 'text-ink hover:bg-paper-off'
                 }`}
             >
-              <span>Overview</span>
+              <span>About</span>
               <span className={activeSection === 'overview' ? 'text-black' : 'text-ink-soft'}>→</span>
             </button>
             <button

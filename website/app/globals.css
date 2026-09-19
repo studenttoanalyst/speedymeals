@@ -66,13 +66,14 @@
   scroll-margin-top: 80px;
 }
 
-/* Mobile-only: Force immediate visibility for services & partner cards so they never vanish or lag */
-@media (max-width: 767px) {
-  #services [id^="service-panel-"],
-  #partner [id^="persona-col-"],
-  #registration-flow-panel {
+/* Mobile & Tablet: Force immediate visibility for key sections so they never get hidden */
+@media (max-width: 1024px) {
+  #overview,
+  #services,
+  #partner,
+  #main-footer {
     opacity: 1 !important;
-    transform: none !important;
+    visibility: visible !important;
   }
 }
 

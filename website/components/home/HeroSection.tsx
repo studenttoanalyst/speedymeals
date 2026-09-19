@@ -3,19 +3,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Lightning } from '@phosphor-icons/react';
+import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Coins } from '@phosphor-icons/react';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 const COVERED_COUNTRIES = [
   {
     name: 'Pakistan',
     code: 'PK',
-    cities: ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Peshawar', 'Faisalabad'],
+    isActive: true,
+    cities: ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Peshawar', 'Faisalabad', 'Gujranwala', 'Multan', 'Sialkot'],
   },
   {
     name: 'Saudi Arabia',
     code: 'KSA',
-    cities: ['Riyadh', 'Jeddah', 'Makkah', 'Madinah', 'Dammam', 'Taif'],
+    isActive: false,
+    cities: [],
   },
 ];
 
@@ -55,7 +57,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          videoEl.play().catch(() => {});
+          videoEl.play().catch(() => { });
         } else {
           videoEl.pause();
         }
@@ -309,7 +311,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">No gouging tiers</div>
               </motion.div>
 
-              {/* Metric 3: Infrastructure */}
+              {/* Metric 3: Customers */}
               <motion.div
                 whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
@@ -318,20 +320,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 <div className="text-[7.5px] xs:text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
                   <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
                     <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-xs bg-tan/20 flex items-center justify-center shrink-0">
-                      <Lightning size={12} weight="bold" className="text-tan group-hover:scale-110 transition-transform duration-200" />
+                      <Coins size={12} weight="bold" className="text-tan group-hover:scale-110 transition-transform duration-200" />
                     </span>
                     <span className="truncate font-semibold text-ink">
-                      <span className="xs:hidden">DISPATCH</span>
-                      <span className="hidden xs:inline">INFRASTRUCTURE</span>
+                      Customers
                     </span>
                   </span>
                   <span className="w-1.5 h-1.5 bg-tan opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                 </div>
                 <div className="text-[10px] xs:text-xs sm:text-base font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
-                  <span className="xs:hidden">Real-Time</span>
-                  <span className="hidden xs:inline">Real-Time Dispatch</span>
+                  Speedy Points
                 </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">Direct telemetry</div>
+                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">Loyalty points and more</div>
               </motion.div>
             </motion.div>
 
@@ -418,89 +418,77 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             <span className="group-hover:underline underline-offset-4 decoration-1">SCROLL TO DISCOVER SERVICES</span>
           </motion.button>
 
-          {/* WE ARE HERE: Interactive Country Marquee Popup */}
+          {/* WE ARE HERE: Interactive Country Links with Single Marquee Strip */}
           <div className="relative flex items-center space-x-2 font-mono text-[9px] sm:text-[11px]">
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
               <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
             </span>
             <span className="text-ink-soft uppercase tracking-wider font-bold shrink-0">WE ARE HERE:</span>
-            <div className="flex items-center space-x-1.5 sm:space-x-2">
-              {COVERED_COUNTRIES.map((item) => {
-                const isActive = activeCountry === item.code;
+            <div className="flex items-center space-x-2 sm:space-x-2.5">
+              {COVERED_COUNTRIES.map((item, idx) => {
+                const isActiveHover = activeCountry === item.code;
+                const hoverClass = item.isActive
+                  ? 'hover:text-[#10B981] hover:decoration-[#10B981]'
+                  : 'hover:text-[#F59E0B] hover:decoration-[#F59E0B]';
+                const activeColorClass = item.isActive
+                  ? 'text-[#10B981] decoration-[#10B981]'
+                  : 'text-[#F59E0B] decoration-[#F59E0B]';
+
                 return (
                   <div
                     key={item.code}
-                    className="relative"
+                    className="relative flex items-center"
                     onMouseEnter={() => setActiveCountry(item.code)}
                     onMouseLeave={() => setActiveCountry(null)}
                   >
+                    {idx > 0 && <span className="text-ink-soft/40 mr-2 sm:mr-2.5 select-none">·</span>}
                     <button
                       type="button"
-                      onClick={() => setActiveCountry(isActive ? null : item.code)}
+                      onClick={() => setActiveCountry(isActiveHover ? null : item.code)}
                       onTouchStart={() => handleTouchStart(item.code)}
                       onTouchEnd={handleTouchEnd}
-                      className={`px-2 py-0.5 border text-[10px] sm:text-[11px] font-bold tracking-wider uppercase transition-all duration-150 cursor-pointer flex items-center space-x-1 ${
-                        isActive
-                          ? 'bg-ink text-white border-ink shadow-sm'
-                          : 'bg-paper text-ink border-line hover:border-ink hover:text-red'
-                      }`}
-                      aria-label={`View operating cities in ${item.name}`}
+                      className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider transition-colors duration-150 cursor-pointer underline underline-offset-4 decoration-1 ${isActiveHover
+                          ? activeColorClass
+                          : `text-ink ${hoverClass}`
+                        }`}
+                      aria-label={`Coverage info for ${item.name}`}
                     >
-                      <span>{item.name}</span>
-                      <span className="text-[8px] sm:text-[9px] opacity-70">({item.code})</span>
+                      {item.name} ({item.code})
                     </button>
 
-                    {/* Popover displaying all active cities in marquee */}
-                    {isActive && (
+                    {/* Single Marquee Moving Strip or Coming Soon Message */}
+                    {isActiveHover && (
                       <div
-                        className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 w-[280px] sm:w-[350px] bg-[#16181D] text-white border border-[#2D3139] shadow-2xl p-2.5 z-50 pointer-events-auto"
-                        onClick={(e) => e.stopPropagation()}
+                        className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 z-50 pointer-events-none"
                       >
-                        {/* Little triangle arrow pointing down */}
-                        <div className="absolute -bottom-1.5 left-1/2 sm:left-auto sm:right-6 -translate-x-1/2 w-3 h-3 bg-[#16181D] border-b border-r border-[#2D3139] rotate-45" />
-
-                        {/* Popover Header */}
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#2D3139] text-[9px] sm:text-[10px] font-mono">
-                          <div className="flex items-center space-x-1.5">
-                            <span className="w-1.5 h-1.5 bg-[#10B981] inline-block" />
-                            <span className="font-bold text-white tracking-wider uppercase">
-                              {item.name} OPERATIONAL HUBS
-                            </span>
-                          </div>
-                          <span className="text-[#8C9099] text-[8px] sm:text-[9px]">
-                            {item.cities.length} ACTIVE CITIES
-                          </span>
-                        </div>
-
-                        {/* Marquee list of cities */}
-                        <div className="overflow-hidden relative bg-[#1F232B] py-1.5 px-1 border border-[#2D3139]/80">
-                          <motion.div
-                            className="flex items-center w-max space-x-2 whitespace-nowrap"
-                            animate={{ x: ['0%', '-50%'] }}
-                            transition={{
-                              repeat: Infinity,
-                              ease: 'linear',
-                              duration: item.cities.length * 2,
-                            }}
-                          >
-                            {/* Duplicate array twice for smooth infinite loop */}
-                            {[...item.cities, ...item.cities].map((city, idx) => (
-                              <span
-                                key={`${city}-${idx}`}
-                                className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#2A2F3A] text-white text-[9px] sm:text-[10px] font-mono uppercase tracking-wider border border-white/10"
+                        {item.isActive ? (
+                          /* Active Country: Single Strip of Continuous Marquee Moving Text */
+                          <div className="w-[280px] sm:w-[350px] bg-[#16181D] text-white border border-[#2D3139] px-2.5 py-1.5 shadow-xl overflow-hidden flex items-center space-x-2">
+                            <span className="w-1.5 h-1.5 bg-[#10B981] shrink-0 rounded-full inline-block" />
+                            <div className="overflow-hidden relative w-full flex">
+                              <div
+                                className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
+                                style={{
+                                  animationDuration: `${Math.max(12, item.cities.length * 1.8)}s`,
+                                }}
                               >
-                                <span className="w-1 h-1 bg-[#10B981] rounded-full inline-block" />
-                                <span>{city}</span>
-                              </span>
-                            ))}
-                          </motion.div>
-                        </div>
-
-                        <div className="pt-1.5 flex items-center justify-between text-[8px] text-[#8C9099] font-mono">
-                          <span>Real-time logistics & delivery</span>
-                          <span className="sm:hidden text-[#10B981]">Tap to dismiss</span>
-                        </div>
+                                {[...item.cities, ...item.cities].map((city, cIdx) => (
+                                  <span key={`${city}-${cIdx}`} className="inline-flex items-center space-x-2">
+                                    <span className="text-white font-semibold">{city}</span>
+                                    <span className="text-[#8C9099]">·</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Non-Active Country: Single Strip with Yellow Hover Text */
+                          <div className="bg-[#16181D] text-[#F59E0B] border border-[#2D3139] px-3 py-1.5 shadow-xl font-mono text-[9px] sm:text-[10px] whitespace-nowrap flex items-center space-x-1.5">
+                            <span className="w-1.5 h-1.5 bg-[#F59E0B] rounded-full inline-block animate-pulse" />
+                            <span className="font-semibold">Coming soon in your neighborhood...</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

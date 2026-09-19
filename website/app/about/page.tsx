@@ -412,7 +412,7 @@ export default function AboutPage() {
                 All proprietary software, routing telemetry algorithms, dispatch architectures, digital brand marks, and operational interfaces are protected under international copyright, trademark, and intellectual property conventions.
               </p>
               <p className="pt-2 text-ink font-semibold">
-                &copy; 2023&ndash;2026 SpeedyMeals Network. All rights reserved across South Asia, the GCC, and associated logistics territories.
+                &copy; 2023&ndash;2026 DiscoverTheTech. All rights reserved across South Asia, the GCC, and associated logistics territories.
               </p>
             </div>
           </div>

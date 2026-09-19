@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'motion/react';
-import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import {
   ForkKnife,
   Package,
@@ -14,30 +12,6 @@ import {
 } from '@phosphor-icons/react';
 
 export const ServicesSection: React.FC = () => {
-  const isMobile = useIsMobile();
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 14 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.55,
-        ease: [0.16, 1, 0.3, 1] as const,
-      },
-    },
-  };
-
   return (
     <section
       id="services"
@@ -45,13 +19,7 @@ export const ServicesSection: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          variants={isMobile ? undefined : containerVariants}
-          initial={isMobile ? false : "hidden"}
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.05 }}
-          className="mb-6 sm:mb-8"
-        >
+        <div className="mb-6 sm:mb-8">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
             <div className="flex items-center space-x-2 shrink-0">
               <span className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] whitespace-nowrap">
@@ -77,9 +45,9 @@ export const ServicesSection: React.FC = () => {
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-6">
             <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#15171A]">
-              One platform. <br className="hidden sm:inline" />
+              <span className="block">One platform.</span>
               <span
-                className="transition-colors duration-300"
+                className="block transition-colors duration-300"
                 style={{ color: 'var(--dynamic-accent, #1E5FA8)' }}
               >
                 A growing ecosystem.
@@ -91,18 +59,11 @@ export const ServicesSection: React.FC = () => {
               delivery, expanding systematically into regional commerce.
             </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Primary Row: Food Delivery (Compact hairline-bordered panel, Speedy Red accent) */}
-        <motion.div
-          variants={isMobile ? undefined : containerVariants}
-          initial={isMobile ? false : "hidden"}
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.05 }}
-          className="mb-3 sm:mb-4"
-        >
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+        <div className="mb-3 sm:mb-4">
+          <div
             id="service-panel-food-delivery"
             className="border-2 border-red bg-white p-4 sm:p-6 lg:p-7 relative overflow-hidden group shadow-xs hover:shadow-md transition-all duration-200"
           >
@@ -187,20 +148,13 @@ export const ServicesSection: React.FC = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Secondary Grid: 4 Hairline-Divided Panels Side-by-Side (2 cols on mobile, 4 on desktop) */}
-        <motion.div
-          variants={isMobile ? undefined : containerVariants}
-          initial={isMobile ? false : "hidden"}
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.05 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4"
-        >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           {/* Panel 02: Speedy Courier (Cobalt Transit Blue) */}
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+          <div
             id="service-panel-courier"
             className="border-l-2 border-l-blue border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-blue/[0.015] transition-all duration-200"
           >
@@ -227,11 +181,10 @@ export const ServicesSection: React.FC = () => {
               <span>PILOT Q3 2026</span>
               <ArrowUpRight size={12} weight="bold" />
             </div>
-          </motion.div>
+          </div>
 
           {/* Panel 03: Speedy Drive (Warm Desert Tan) */}
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+          <div
             id="service-panel-drive"
             className="border-l-2 border-l-tan border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-tan/[0.02] transition-all duration-200"
           >
@@ -258,11 +211,10 @@ export const ServicesSection: React.FC = () => {
               <span>PILOT Q4 2026</span>
               <ArrowUpRight size={12} weight="bold" />
             </div>
-          </motion.div>
+          </div>
 
           {/* Panel 04: Speedy Mall (Fresh Emerald) */}
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+          <div
             id="service-panel-mall"
             className="border-l-2 border-l-[#10B981] border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-[#10B981]/[0.015] transition-all duration-200"
           >
@@ -289,11 +241,10 @@ export const ServicesSection: React.FC = () => {
               <span>PHASE 2 ROADMAP</span>
               <span className="font-mono">...</span>
             </div>
-          </motion.div>
+          </div>
 
           {/* Panel 05: Technical Services (Cobalt Infrastructure) */}
-          <motion.div
-            variants={isMobile ? undefined : itemVariants}
+          <div
             id="service-panel-tech"
             className="border-l-2 border-l-blue border-y border-r border-line bg-white p-3 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-md hover:bg-blue/[0.015] transition-all duration-200"
           >
@@ -320,8 +271,8 @@ export const ServicesSection: React.FC = () => {
               <span>REST &amp; WEBHOOKS</span>
               <ArrowUpRight size={12} weight="bold" />
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );
