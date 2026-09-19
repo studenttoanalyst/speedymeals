@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -8,26 +8,32 @@ import {
   ShieldCheck,
   LockKey,
   MagnifyingGlass,
-  CheckCircle,
-  EnvelopeSimple,
   FileText,
   Printer,
   LinkSimple,
   Check,
-  Buildings,
   Scales,
   UserCheck,
   Database,
   MapPin,
+  EnvelopeSimple,
+  CaretUp,
+  CaretDown,
+  X,
 } from '@phosphor-icons/react';
 import { Footer } from '@/components/home/Footer';
+import { HighlightedText } from '@/components/legal/HighlightedText';
 import privacyData from '@/lib/legal/privacyData.json';
 
 export default function PrivacyPolicyPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeMatchIndex, setActiveMatchIndex] = useState(0);
+  const [totalMatches, setTotalMatches] = useState(0);
   const [activeSectionId, setActiveSectionId] = useState<string>('sec-1');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [copiedDocLink, setCopiedDocLink] = useState(false);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToSection = (id: string) => {
     setActiveSectionId(id);
@@ -57,17 +63,88 @@ export default function PrivacyPolicyPage() {
     window.print();
   };
 
-  const filteredSections = useMemo(() => {
-    if (!searchQuery.trim()) return privacyData.sections;
-    const q = searchQuery.toLowerCase();
-    return privacyData.sections.filter(sec => {
-      const matchTitle = sec.title.toLowerCase().includes(q) || sec.num.includes(q);
-      const matchPara = (sec.paragraphs || []).some(p => p.toLowerCase().includes(q));
-      const matchSub = (sec.subsections || []).some(
-        s => s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q)
-      );
-      return matchTitle || matchPara || matchSub;
+  const highlightAndScroll = (targetIndex: number, matchesNodeList?: NodeListOf<HTMLElement>) => {
+    const matches = matchesNodeList || document.querySelectorAll<HTMLElement>('.find-match');
+    if (matches.length === 0) return;
+
+    matches.forEach((el, idx) => {
+      if (idx === targetIndex) {
+        el.classList.add('bg-red', 'text-white', 'font-bold', 'ring-2', 'ring-red-400');
+        el.classList.remove('bg-[#FEF08A]', 'text-ink');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        el.classList.remove('bg-red', 'text-white', 'font-bold', 'ring-2', 'ring-red-400');
+        el.classList.add('bg-[#FEF08A]', 'text-ink');
+      }
     });
+  };
+
+  const goToNextMatch = () => {
+    const matches = document.querySelectorAll<HTMLElement>('.find-match');
+    if (matches.length === 0) return;
+    const next = (activeMatchIndex + 1) % matches.length;
+    setActiveMatchIndex(next);
+    highlightAndScroll(next, matches);
+  };
+
+  const goToPrevMatch = () => {
+    const matches = document.querySelectorAll<HTMLElement>('.find-match');
+    if (matches.length === 0) return;
+    const prev = (activeMatchIndex - 1 + matches.length) % matches.length;
+    setActiveMatchIndex(prev);
+    highlightAndScroll(prev, matches);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        goToPrevMatch();
+      } else {
+        goToNextMatch();
+      }
+    } else if (e.key === 'Escape') {
+      setSearchQuery('');
+    }
+  };
+
+  // Listen for Ctrl+F / Cmd+F to focus the in-page IDE find input
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
+  // Update match count & active match whenever search query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setTotalMatches(0);
+      setActiveMatchIndex(0);
+      document.querySelectorAll<HTMLElement>('.find-match-active').forEach(el => {
+        el.classList.remove('find-match-active', 'bg-red', 'text-white', 'ring-2', 'ring-red-400', 'font-bold');
+        el.classList.add('bg-[#FEF08A]', 'text-ink');
+      });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const matches = document.querySelectorAll<HTMLElement>('.find-match');
+      setTotalMatches(matches.length);
+      if (matches.length > 0) {
+        setActiveMatchIndex(0);
+        highlightAndScroll(0, matches);
+      } else {
+        setActiveMatchIndex(0);
+      }
+    }, 40);
+
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
   return (
@@ -119,7 +196,7 @@ export default function PrivacyPolicyPage() {
                 type="button"
                 onClick={handlePrint}
                 title="Print or Save as PDF"
-                className="p-1.5 border border-line bg-paper text-ink hover:bg-ink hover:text-white transition-colors hidden md:flex items-center justify-center"
+                className="p-1.5 border border-line bg-paper text-ink hover:bg-ink hover:text-white transition-colors hidden md:flex items-center justify-center cursor-pointer"
               >
                 <Printer size={15} />
               </button>
@@ -127,7 +204,7 @@ export default function PrivacyPolicyPage() {
                 type="button"
                 onClick={handleCopyDocLink}
                 title="Copy Document Link"
-                className="px-2.5 py-1.5 border border-line bg-paper text-ink hover:bg-ink hover:text-white transition-colors text-xs font-mono flex items-center space-x-1"
+                className="px-2.5 py-1.5 border border-line bg-paper text-ink hover:bg-ink hover:text-white transition-colors text-xs font-mono flex items-center space-x-1 cursor-pointer"
               >
                 {copiedDocLink ? (
                   <>
@@ -152,23 +229,74 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* Mobile Sticky Quick Jump Selector */}
-        <div className="lg:hidden border-t border-line/60 bg-[#F1F3F5] px-4 py-2 flex items-center justify-between gap-2">
-          <label htmlFor="mobile-sec-jump-privacy" className="font-mono text-[10px] text-[#5B5F66] uppercase font-bold shrink-0">
-            JUMP TO:
-          </label>
-          <select
-            id="mobile-sec-jump-privacy"
-            value={activeSectionId}
-            onChange={e => scrollToSection(e.target.value)}
-            className="w-full bg-white border border-line px-2.5 py-1 text-xs font-mono text-ink rounded-none focus:outline-none focus:border-red"
-          >
-            {privacyData.sections.map(s => (
-              <option key={s.id} value={s.id}>
-                § {s.num}. {s.title}
-              </option>
-            ))}
-          </select>
+        {/* Mobile Sticky Quick Jump & Find Toolbar */}
+        <div className="lg:hidden border-t border-line/60 bg-[#F1F3F5] px-4 py-2 flex flex-col gap-2">
+          {/* Mobile IDE Find Toolbar */}
+          <div className="flex items-center space-x-1.5 bg-white border border-line px-2.5 py-1.5 shadow-xs">
+            <MagnifyingGlass size={14} weight="bold" className="text-[#8C9099] shrink-0" />
+            <input
+              type="text"
+              placeholder="Find in policy (e.g. delete, cookies)..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full bg-transparent text-xs font-mono text-ink placeholder-[#8C9099] focus:outline-none"
+            />
+            {searchQuery.trim() && (
+              <div className="flex items-center space-x-1 shrink-0">
+                <span
+                  className={`font-mono text-[10px] px-1.5 py-0.5 border ${
+                    totalMatches > 0
+                      ? 'bg-paper-off border-line text-ink font-bold'
+                      : 'bg-red/10 border-red/30 text-red font-bold'
+                  }`}
+                >
+                  {totalMatches > 0 ? `${activeMatchIndex + 1}/${totalMatches}` : '0/0'}
+                </span>
+                <button
+                  type="button"
+                  onClick={goToNextMatch}
+                  disabled={totalMatches === 0}
+                  className="p-1 border border-line bg-paper text-ink disabled:opacity-30 cursor-pointer"
+                >
+                  <CaretUp size={11} weight="bold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={goToPrevMatch}
+                  disabled={totalMatches === 0}
+                  className="p-1 border border-line bg-paper text-ink disabled:opacity-30 cursor-pointer"
+                >
+                  <CaretDown size={11} weight="bold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-0.5 text-[#8C9099] cursor-pointer"
+                >
+                  <X size={12} weight="bold" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor="mobile-sec-jump-privacy" className="font-mono text-[10px] text-[#5B5F66] uppercase font-bold shrink-0">
+              JUMP:
+            </label>
+            <select
+              id="mobile-sec-jump-privacy"
+              value={activeSectionId}
+              onChange={e => scrollToSection(e.target.value)}
+              className="w-full bg-white border border-line px-2.5 py-1 text-xs font-mono text-ink rounded-none focus:outline-none focus:border-red"
+            >
+              {privacyData.sections.map(s => (
+                <option key={s.id} value={s.id}>
+                  § {s.num}. {s.title}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </header>
 
@@ -178,36 +306,75 @@ export default function PrivacyPolicyPage() {
           {/* Left Sticky Sidebar Navigation (Desktop) */}
           <aside className="hidden lg:block lg:col-span-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 border-r border-line/60 print:hidden">
             <div className="space-y-6">
-              {/* Search Bar */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search policy (e.g. delete, cookies, app)..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full bg-white border border-line px-3 py-2 pl-9 text-xs font-mono text-ink placeholder-[#8C9099] focus:outline-none focus:border-red transition-colors shadow-xs"
-                />
-                <MagnifyingGlass
-                  size={14}
-                  weight="bold"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C9099]"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[#8C9099] hover:text-ink bg-paper-off px-1"
-                  >
-                    CLEAR
-                  </button>
+              {/* IDE-Style Find Toolbar */}
+              <div className="bg-white border-2 border-line focus-within:border-red shadow-xs p-2 transition-all space-y-1.5">
+                <div className="flex items-center space-x-1.5">
+                  <MagnifyingGlass
+                    size={15}
+                    weight="bold"
+                    className="text-[#8C9099] shrink-0"
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Find in policy (e.g. delete, cookies)..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="w-full bg-transparent text-xs font-mono text-ink placeholder-[#8C9099] focus:outline-none"
+                  />
+                  {searchQuery.trim() && (
+                    <div className="flex items-center space-x-1 shrink-0">
+                      <span
+                        className={`font-mono text-[10px] px-1.5 py-0.5 border ${
+                          totalMatches > 0
+                            ? 'bg-paper-off border-line text-ink font-bold'
+                            : 'bg-red/10 border-red/30 text-red font-bold'
+                        }`}
+                      >
+                        {totalMatches > 0 ? `${activeMatchIndex + 1} of ${totalMatches}` : '0 of 0'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={goToNextMatch}
+                        disabled={totalMatches === 0}
+                        title="Next match (Enter)"
+                        className="p-1 border border-line bg-paper text-ink hover:bg-ink hover:text-white disabled:opacity-30 disabled:hover:bg-paper disabled:hover:text-ink transition-colors cursor-pointer"
+                      >
+                        <CaretUp size={12} weight="bold" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={goToPrevMatch}
+                        disabled={totalMatches === 0}
+                        title="Previous match (Shift+Enter)"
+                        className="p-1 border border-line bg-paper text-ink hover:bg-ink hover:text-white disabled:opacity-30 disabled:hover:bg-paper disabled:hover:text-ink transition-colors cursor-pointer"
+                      >
+                        <CaretDown size={12} weight="bold" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery('')}
+                        title="Clear find (Esc)"
+                        className="p-1 text-[#8C9099] hover:text-red transition-colors cursor-pointer"
+                      >
+                        <X size={12} weight="bold" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {searchQuery.trim() && (
+                  <div className="pt-1.5 border-t border-line/60 flex items-center justify-between text-[10px] font-mono text-[#8C9099]">
+                    <span>
+                      {totalMatches > 0
+                        ? 'Press Enter for next, Shift+Enter for prev'
+                        : 'No matches found in document'}
+                    </span>
+                    <span>Esc to clear</span>
+                  </div>
                 )}
               </div>
-
-              {searchQuery && (
-                <div className="font-mono text-[11px] text-[#5B5F66] px-1">
-                  Found <span className="font-bold text-red">{filteredSections.length}</span> section(s) matching &quot;{searchQuery}&quot;
-                </div>
-              )}
 
               {/* Table of Contents */}
               <div className="space-y-3">
@@ -224,7 +391,7 @@ export default function PrivacyPolicyPage() {
                         key={sec.id}
                         type="button"
                         onClick={() => scrollToSection(sec.id)}
-                        className={`w-full text-left py-1.5 px-2 transition-all flex items-center space-x-2 group ${
+                        className={`w-full text-left py-1.5 px-2 transition-all flex items-center space-x-2 group cursor-pointer ${
                           isActive
                             ? 'bg-ink text-white font-bold shadow-xs'
                             : 'text-[#5B5F66] hover:bg-white hover:text-ink'
@@ -281,8 +448,8 @@ export default function PrivacyPolicyPage() {
                 </div>
               </div>
 
-              <h1 className="font-display text-2xl sm:text-4xl uppercase tracking-tight text-ink mb-3">
-                Privacy and Data Protection Policy
+              <h1 className="font-display text-xl sm:text-2xl md:text-3xl uppercase tracking-tight text-ink mb-3">
+                <HighlightedText text="Privacy and Data Protection Policy" query={searchQuery} />
               </h1>
 
               {/* Pre-launch Status Notice */}
@@ -292,13 +459,18 @@ export default function PrivacyPolicyPage() {
                   <span>TRANSPARENT PRE-LAUNCH DATA PRACTICES</span>
                 </div>
                 <p>
-                  Speedy Meals is currently in its pre-launch registration phase. This policy explains what data we collect today on our website forms and how it will expand upon commercial launch to protect customers, riders, and restaurants.
+                  <HighlightedText
+                    text="Speedy Meals is currently in its pre-launch registration phase. This policy explains what data we collect today on our website forms and how it will expand upon commercial launch to protect customers, riders, and restaurants."
+                    query={searchQuery}
+                  />
                 </p>
               </div>
 
               <div className="space-y-3 font-sans text-sm text-[#4B515D] leading-relaxed">
                 {privacyData.meta.intro.map((p, idx) => (
-                  <p key={idx}>{p}</p>
+                  <p key={idx}>
+                    <HighlightedText text={p} query={searchQuery} />
+                  </p>
                 ))}
               </div>
 
@@ -310,7 +482,7 @@ export default function PrivacyPolicyPage() {
                     <span>NO DATA BROKERAGE</span>
                   </div>
                   <div className="text-[11px] text-[#5B5F66] leading-relaxed">
-                    We never sell, lease, or monetize personal information to external advertisers or brokers.
+                    <HighlightedText text="We never sell, lease, or monetize personal information to external advertisers or brokers." query={searchQuery} />
                   </div>
                 </div>
 
@@ -320,7 +492,7 @@ export default function PrivacyPolicyPage() {
                     <span>MINIMALIST ONBOARDING</span>
                   </div>
                   <div className="text-[11px] text-[#5B5F66] leading-relaxed">
-                    No CNIC or identity documentation is requested during pre-launch registration.
+                    <HighlightedText text="No CNIC or identity documentation is requested during pre-launch registration." query={searchQuery} />
                   </div>
                 </div>
 
@@ -330,15 +502,15 @@ export default function PrivacyPolicyPage() {
                     <span>RIGHT TO ERASURE</span>
                   </div>
                   <div className="text-[11px] text-[#5B5F66] leading-relaxed">
-                    You can request complete deletion of your registration data anytime by emailing support.
+                    <HighlightedText text="You can request complete deletion of your registration data anytime by emailing support." query={searchQuery} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Render Policy Sections */}
+            {/* Render Policy Sections (All intact without filtering) */}
             <div className="space-y-8">
-              {filteredSections.map(sec => {
+              {privacyData.sections.map(sec => {
                 const isCopied = copiedSection === sec.num;
 
                 return (
@@ -353,8 +525,8 @@ export default function PrivacyPolicyPage() {
                         <span className="font-mono text-xs font-bold text-white bg-[#15171A] px-2 py-0.5 shrink-0">
                           § {sec.num}
                         </span>
-                        <h2 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
-                          {sec.title}
+                        <h2 className="font-display text-base sm:text-lg uppercase tracking-tight text-ink">
+                          <HighlightedText text={sec.title} query={searchQuery} />
                         </h2>
                       </div>
 
@@ -382,7 +554,9 @@ export default function PrivacyPolicyPage() {
                     {sec.paragraphs && sec.paragraphs.length > 0 && (
                       <div className="space-y-3 font-sans text-xs sm:text-sm text-[#373C46] leading-relaxed mb-4">
                         {sec.paragraphs.map((p, pIdx) => (
-                          <p key={pIdx}>{p}</p>
+                          <p key={pIdx}>
+                            <HighlightedText text={p} query={searchQuery} />
+                          </p>
                         ))}
                       </div>
                     )}
@@ -399,10 +573,12 @@ export default function PrivacyPolicyPage() {
                             <div key={rIdx} className="grid grid-cols-1 md:grid-cols-12 p-3 sm:p-4 gap-2 hover:bg-paper-off/50 transition-colors">
                               <div className="md:col-span-5 font-bold text-ink flex items-center space-x-2">
                                 <span className="w-1.5 h-1.5 bg-red shrink-0" />
-                                <span>{row.q}</span>
+                                <span>
+                                  <HighlightedText text={row.q} query={searchQuery} />
+                                </span>
                               </div>
                               <div className="md:col-span-7 text-[#4B515D] font-sans text-xs sm:text-sm pl-3 md:pl-0">
-                                {row.a}
+                                <HighlightedText text={row.a} query={searchQuery} />
                               </div>
                             </div>
                           ))}
@@ -417,10 +593,12 @@ export default function PrivacyPolicyPage() {
                           <div key={sIdx} className="bg-paper-off p-4 border border-line">
                             <h3 className="font-mono text-xs font-bold uppercase text-ink mb-1.5 flex items-center space-x-2">
                               <span className="w-1.5 h-1.5 bg-[#10B981] inline-block" />
-                              <span>{sub.title}</span>
+                              <span>
+                                <HighlightedText text={sub.title} query={searchQuery} />
+                              </span>
                             </h3>
                             <p className="font-sans text-xs sm:text-sm text-[#4B515D] leading-relaxed">
-                              {sub.content}
+                              <HighlightedText text={sub.content} query={searchQuery} />
                             </p>
                           </div>
                         ))}

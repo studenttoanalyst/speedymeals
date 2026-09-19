@@ -29,14 +29,14 @@ export default function AboutPage() {
       {/* Sticky Snap Navbar */}
       <Navbar />
 
-      {/* Static Transparent SpeedyMeals Favicon Watermark (Anchored statically to the canvas, no viewport-tracking jitter) */}
-      <div className="absolute top-44 sm:top-56 md:top-64 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0 overflow-hidden">
+      {/* Fixed Ambient Transparent SpeedyMeals Favicon Watermark (Persistent viewport-centered background watermark) */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
         <Image
           src="/favicon.jpeg"
           alt="SpeedyMeals Favicon Watermark"
           width={900}
           height={900}
-          className="w-[82vw] max-w-[760px] md:max-w-[820px] h-auto object-contain opacity-10 select-none pointer-events-none"
+          className="w-[75vw] max-w-[700px] md:max-w-[780px] h-auto object-contain opacity-[0.08] select-none pointer-events-none"
           priority
         />
       </div>
@@ -65,7 +65,7 @@ export default function AboutPage() {
             </div>
 
             {/* Compact, responsive title: fits on one line per quote without wrapping overflow */}
-            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[44px] uppercase tracking-tight text-ink leading-tight mb-6 sm:whitespace-nowrap">
+            <h1 className="font-display text-xl sm:text-2xl md:text-3xl lg:text-[38px] uppercase tracking-tight text-ink leading-tight mb-6 sm:whitespace-nowrap">
               ENGINEERED FOR SPEED. <br />
               <span className="text-red">ARCHITECTED FOR FAIRNESS.</span>
             </h1>
@@ -109,13 +109,13 @@ export default function AboutPage() {
                 <span className="w-2 h-2 bg-red inline-block" />
                 <span>FOUNDATIONAL DIRECTIVES</span>
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl uppercase tracking-tight text-ink leading-tight">
+              <h2 className="font-display text-xl sm:text-2xl md:text-3xl uppercase tracking-tight text-ink leading-tight">
                 OUR VISION &amp; MISSION
               </h2>
             </div>
 
-            <div className="font-display italic text-blue text-2xl sm:text-3xl tracking-tight">
-              &ldquo;Fast &amp; Safe To You.&rdquo;
+            <div className="font-display italic text-blue text-lg sm:text-xl tracking-tight">
+              Fast &amp; Safe To You
             </div>
           </div>
 
@@ -134,7 +134,7 @@ export default function AboutPage() {
                   </span>
                 </div>
 
-                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-ink mb-4">
+                <h3 className="font-display text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-ink mb-4">
                   Pakistan&apos;s Unified Multi-Service Platform
                 </h3>
 
@@ -168,7 +168,7 @@ export default function AboutPage() {
                   </span>
                 </div>
 
-                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-ink mb-4">
+                <h3 className="font-display text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-ink mb-4">
                   Everyday Urban Life, Made Simpler &amp; Fairer
                 </h3>
 
@@ -198,7 +198,7 @@ export default function AboutPage() {
               <div className="font-mono text-xs uppercase tracking-widest text-red font-semibold mb-2">
                 ORIGIN &amp; MOTIVATION
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl uppercase tracking-tight text-ink leading-tight mb-4">
+              <h2 className="font-display text-xl sm:text-2xl md:text-3xl uppercase tracking-tight text-ink leading-tight mb-4">
                 WHY WE BUILT SPEEDYMEALS
               </h2>
               <p className="font-sans text-base text-ink-soft leading-relaxed mb-4">
@@ -215,7 +215,7 @@ export default function AboutPage() {
                   <div className="w-8 h-8 bg-red/10 text-red flex items-center justify-center font-bold">
                     01
                   </div>
-                  <h3 className="font-display text-xl uppercase tracking-tight text-ink">
+                  <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
                     The Fair-Split Promise
                   </h3>
                 </div>
@@ -229,7 +229,7 @@ export default function AboutPage() {
                   <div className="w-8 h-8 bg-blue/10 text-blue flex items-center justify-center font-bold">
                     02
                   </div>
-                  <h3 className="font-display text-xl uppercase tracking-tight text-ink">
+                  <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
                     100% Courier Dignity
                   </h3>
                 </div>
@@ -243,7 +243,7 @@ export default function AboutPage() {
                   <div className="w-8 h-8 bg-tan/20 text-tan flex items-center justify-center font-bold">
                     03
                   </div>
-                  <h3 className="font-display text-xl uppercase tracking-tight text-ink">
+                  <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
                     True Zero-Markup Consumer Menus
                   </h3>
                 </div>
@@ -272,7 +272,7 @@ export default function AboutPage() {
                 <div className="font-mono text-xs uppercase tracking-widest text-tan font-bold mb-1">
                   STRATEGIC ALLIANCE
                 </div>
-                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-white mb-2">
+                <h3 className="font-display text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
                   PARTNERED WITH PAKISTAN POST
                 </h3>
                 <p className="text-xs font-mono text-[#8C9099]">
@@ -312,7 +312,7 @@ export default function AboutPage() {
             <div className="font-mono text-xs uppercase tracking-widest text-blue font-semibold mb-2">
               VISION &amp; EXPANSION ROADMAP
             </div>
-            <h2 className="font-display text-3xl sm:text-5xl uppercase tracking-tight text-ink leading-tight mb-4">
+            <h2 className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tight text-ink leading-tight mb-4">
               OUR REGIONAL BLUEPRINT
             </h2>
             <p className="font-sans text-base text-ink-soft leading-relaxed">
@@ -400,13 +400,13 @@ export default function AboutPage() {
           <div className="p-8 sm:p-10 bg-[#FAF9F5] border border-line">
             <div className="flex items-center space-x-3 mb-4">
               <Scales size={24} weight="bold" className="text-ink" />
-              <h3 className="font-display text-2xl uppercase tracking-tight text-ink">
+              <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
                 GOVERNANCE, INTELLECTUAL PROPERTY &amp; RIGHTS
               </h3>
             </div>
             <div className="space-y-3 font-mono text-xs text-ink-soft leading-relaxed">
               <p>
-                <strong>SpeedyMeals Network</strong> operates under strict compliance with regional commercial registries, food safety standards, electronic transaction acts, and statutory transport regulations in all operating jurisdictions.
+                <strong>Speedy Meals</strong> operates under strict compliance with regional commercial registries, food safety standards, electronic transaction acts, and statutory transport regulations in all operating jurisdictions.
               </p>
               <p>
                 All proprietary software, routing telemetry algorithms, dispatch architectures, digital brand marks, and operational interfaces are protected under international copyright, trademark, and intellectual property conventions.
@@ -425,7 +425,7 @@ export default function AboutPage() {
               <div className="font-mono text-xs text-red uppercase tracking-widest font-bold mb-1">
                 JOIN THE REVOLUTION
               </div>
-              <h2 className="font-display text-2xl sm:text-3xl uppercase tracking-tight text-white">
+              <h2 className="font-display text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-white">
                 READY TO EXPERIENCE REAL LOGISTICS FREEDOM?
               </h2>
             </div>

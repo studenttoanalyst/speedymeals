@@ -44,7 +44,7 @@ export const ServicesSection: React.FC = () => {
           </div>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-6">
-            <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#15171A]">
+            <h2 className="font-display text-xl sm:text-3xl lg:text-4xl uppercase tracking-tight text-[#15171A]">
               <span className="block">One platform.</span>
               <span
                 className="block transition-colors duration-300"
