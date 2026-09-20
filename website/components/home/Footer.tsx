@@ -210,7 +210,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   className="text-white hover:text-[#25D366] transition-colors inline-flex items-center space-x-1.5"
                 >
                   <WhatsappIcon size={13} className="text-[#25D366] shrink-0" />
-                  <span>WhatsApp: 0316 1177202</span>
+                  <span>Help line: +92 316 11 77 202</span>
                 </a>
               </div>
               <div>
