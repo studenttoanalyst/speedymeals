@@ -267,7 +267,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               </a>
 
               <a
-                href="https://www.linkedin.com/in/discover-tech-181906438/"
+                href="https://www.linkedin.com/in/speedy-meals-181906438/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
