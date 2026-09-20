@@ -256,7 +256,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               </a>
 
               <a
-                href="https://www.instagram.com/discover_the_tech/?hl=en"
+                href="https://www.instagram.com/speedymealservices?stkn=MWJmczhnbm41eWgzcQ=="
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
