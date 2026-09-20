@@ -14,6 +14,12 @@ const WhatsappIcon: React.FC<{ size?: number; className?: string }> = ({ size = 
   </svg>
 );
 
+const FacebookIcon: React.FC<{ size?: number; className?: string }> = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
 const TiktokIcon: React.FC<{ size?: number; className?: string }> = ({ size = 16, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68 6.34 6.34 0 0 0 9.35 22a6.33 6.33 0 0 0 6.33-6.33V9.58a8.28 8.28 0 0 0 4.84 1.57v-3.5a4.85 4.85 0 0 1-.93-.96z" />
@@ -198,54 +204,86 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <div className="text-[#A0A4AB]">Serving South Asia &amp; the Middle East</div>
               <div>
                 <a
+                  href="https://wa.me/923161177202"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-[#25D366] transition-colors inline-flex items-center space-x-1.5"
+                >
+                  <WhatsappIcon size={13} className="text-[#25D366] shrink-0" />
+                  <span>WhatsApp: 0316 1177202</span>
+                </a>
+              </div>
+              <div>
+                <a
                   href="mailto:info@speedymealservices.com"
                   className="text-white hover:text-red transition-colors underline decoration-1 underline-offset-4"
                 >
                   info@speedymealservices.com
                 </a>
               </div>
-              <a
-                href="mailto:support@speedymealservices.com"
-                className="text-white hover:text-red transition-colors underline decoration-1 underline-offset-4"
-              >
-                support@speedymealservices.com
-              </a>
+              <div>
+                <a
+                  href="mailto:support@speedymealservices.com"
+                  className="text-white hover:text-red transition-colors underline decoration-1 underline-offset-4"
+                >
+                  support@speedymealservices.com
+                </a>
+              </div>
             </div>
 
             {/* Social icons row: Brand colors on hover */}
             <div className="pt-2 flex items-center space-x-2">
               <a
-                href="https://wa.me/"
+                href="https://wa.me/923161177202"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
+                title="Chat on WhatsApp"
                 className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] transition-colors duration-150"
               >
                 <WhatsappIcon size={16} />
               </a>
 
               <a
-                href="#tiktok"
-                aria-label="TikTok"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#000000] hover:border-[#EE1D52] hover:text-[#00F2FE] transition-colors duration-150"
+                href="https://www.facebook.com/profile.php?id=61594512695027"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                title="Follow us on Facebook"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] transition-colors duration-150"
               >
-                <TiktokIcon size={16} />
+                <FacebookIcon size={16} />
               </a>
 
               <a
-                href="#linkedin"
+                href="https://www.instagram.com/discover_the_tech/?hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                title="Follow us on Instagram"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#E4405F] hover:border-[#E4405F] transition-colors duration-150"
+              >
+                <InstagramLogo size={16} weight="bold" />
+              </a>
+
+              <a
+                href="https://www.linkedin.com/in/discover-tech-181906438/"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-blue hover:border-blue transition-colors duration-150"
+                title="Connect on LinkedIn"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#0A66C2] hover:border-[#0A66C2] transition-colors duration-150"
               >
                 <LinkedinLogo size={16} weight="bold" />
               </a>
 
               <a
-                href="#instagram"
-                aria-label="Instagram"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-red hover:border-red transition-colors duration-150"
+                href="#tiktok"
+                aria-label="TikTok"
+                title="Follow us on TikTok"
+                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#000000] hover:border-[#EE1D52] hover:text-[#00F2FE] transition-colors duration-150"
               >
-                <InstagramLogo size={16} weight="bold" />
+                <TiktokIcon size={16} />
               </a>
             </div>
           </div>
