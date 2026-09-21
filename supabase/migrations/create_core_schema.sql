@@ -215,3 +215,15 @@ create index if not exists idx_orders_restaurant on public.orders (restaurant_id
 create index if not exists idx_orders_rider on public.orders (rider_id);
 create index if not exists idx_orders_status on public.orders (status);
 create index if not exists idx_menu_items_restaurant on public.menu_items (restaurant_id);
+
+-- -------------------------------------------------------------------------------------------------
+-- PERMISSIONS & GRANTS FOR CORE SCHEMA
+-- -------------------------------------------------------------------------------------------------
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant all on all routines in schema public to anon, authenticated, service_role;
+
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public grant all on routines to anon, authenticated, service_role;
