@@ -104,6 +104,25 @@ class RiderStatusUpdateSchema(BaseModel):
     is_active: bool
 
 
+class RiderKitUpdateSchema(BaseModel):
+    """Body for PATCH /admin/riders/{id}/kit — staff records kit deposit and handover."""
+    kit_deposit_paid: bool
+    kit_shirts_issued: int = Field(ge=0, le=10)
+    kit_box_issued: bool
+
+
+class RiderKitResponseSchema(BaseModel):
+    id: uuid.UUID
+    name: str
+    kit_deposit_paid: bool
+    kit_deposit_date: datetime | None
+    kit_shirts_issued: int
+    kit_box_issued: bool
+    kit_verified_by: uuid.UUID | None
+    kit_completed: bool
+    created_at: datetime
+
+
 # --- Step 4: order management ---
 
 

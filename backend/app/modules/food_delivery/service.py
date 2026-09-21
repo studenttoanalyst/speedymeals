@@ -23,7 +23,8 @@ from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating,
 from app.platform.wallet_payment.models import Rider
 from app.platform.wallet_payment.service import (
     DELIVERED_STATUS,
-    DELIVERY_DEDUCTION_AMOUNT,
+    DELIVERY_WALLET_DEDUCTION,
+    WALLET_REMINDER_THRESHOLD,
     _rider_location_key,
     deduct_delivery_fee,
     rider_eligible_for_assignment,
@@ -1050,12 +1051,12 @@ def remove_cart_item(
 # --- Phase 5, Step 5: checkout price preview (distance + delivery fee) ---
 
 
-DELIVERY_FEE_BASE = Decimal("50")
-DELIVERY_FEE_PER_KM = Decimal("20")
+DELIVERY_FEE_BASE = Decimal("100")
+DELIVERY_FEE_PER_KM = Decimal("25")
 
 
 def calculate_delivery_fee(delivery_distance_km: Decimal | int | float) -> Decimal:
-    """Locked fee formula (spec Sec 3.3): fee = 50 + (km x 20). Decimal in,
+    """Locked fee formula: fee = 100 + (km x 25). Decimal in,
     Decimal out, quantized to paisa — never binary float."""
     distance = Decimal(str(delivery_distance_km))
     return (DELIVERY_FEE_BASE + distance * DELIVERY_FEE_PER_KM).quantize(Decimal("0.01"))

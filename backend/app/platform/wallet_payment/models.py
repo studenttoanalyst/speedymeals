@@ -14,7 +14,7 @@ are added here in Step 3d - both depend on tables that already exist
 """
 import uuid
 
-from sqlalchemy import String, Boolean, Numeric, Text, Date, DateTime, ForeignKey
+from sqlalchemy import String, Boolean, Integer, Numeric, Text, Date, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -38,6 +38,13 @@ class Rider(BaseModel, UpdatedAtMixin):
     current_longitude: Mapped[float | None] = mapped_column(Numeric, nullable=True)
     country_code: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # Kit deposit & handover tracking
+    kit_deposit_paid: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    kit_deposit_date: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    kit_shirts_issued: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    kit_box_issued: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    kit_verified_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    kit_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
 
 class WalletTransaction(BaseModel):

@@ -25,6 +25,8 @@ from app.modules.admin.schemas import (
     RestaurantStatusUpdateSchema,
     RiderAdminResponseSchema,
     RiderApprovalUpdateSchema,
+    RiderKitResponseSchema,
+    RiderKitUpdateSchema,
     RiderPayoutPeriodSchema,
     RiderPayoutResponseSchema,
     RiderStatusUpdateSchema,
@@ -158,6 +160,21 @@ def set_rider_status(
 ):
     """Step 3 — deactivate/reactivate a rider (e.g. fraud, violations)."""
     return service.set_rider_status(db, rider_id, payload.is_active)
+
+
+@router.patch("/riders/{rider_id}/kit", response_model=RiderKitResponseSchema)
+def update_rider_kit(
+    rider_id: uuid.UUID,
+    payload: RiderKitUpdateSchema,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Staff records kit deposit and handover for a rider."""
+    from app.platform.wallet_payment import service as wallet_service
+    return wallet_service.record_kit_completion(
+        db, rider_id, current_user.id,
+        payload.kit_deposit_paid, payload.kit_shirts_issued, payload.kit_box_issued,
+    )
 
 
 # --- Step 4: order management ---

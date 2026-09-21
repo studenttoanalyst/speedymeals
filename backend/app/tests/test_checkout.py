@@ -109,19 +109,19 @@ def _seed_cart(db, customer, restaurant, item, qty=2, track=None):
 # --- fee formula ---
 
 
-def test_fee_3km_is_exactly_110():
-    assert service.calculate_delivery_fee(3) == Decimal("110.00")
+def test_fee_3km_is_exactly_175():
+    assert service.calculate_delivery_fee(3) == Decimal("175.00")
 
 
 def test_fee_formula_matches_spec_examples():
-    assert service.calculate_delivery_fee(0.5) == Decimal("60.00")
-    assert service.calculate_delivery_fee(1) == Decimal("70.00")
-    assert service.calculate_delivery_fee(5) == Decimal("150.00")
-    assert service.calculate_delivery_fee(10) == Decimal("250.00")
+    assert service.calculate_delivery_fee(0.5) == Decimal("112.50")
+    assert service.calculate_delivery_fee(1) == Decimal("125.00")
+    assert service.calculate_delivery_fee(5) == Decimal("225.00")
+    assert service.calculate_delivery_fee(10) == Decimal("350.00")
 
 
 def test_fee_keeps_decimal_precision():
-    assert service.calculate_delivery_fee(Decimal("3.72")) == Decimal("124.40")
+    assert service.calculate_delivery_fee(Decimal("3.72")) == Decimal("193.00")
 
 
 # --- distance extraction (meters -> km at the client boundary) ---
@@ -181,8 +181,8 @@ def test_preview_happy_path_full_breakdown(db_session, customer, address, track_
 
     assert result["food_subtotal"] == Decimal("1920.00")  # 2x900 + 120
     assert result["delivery_distance_km"] == Decimal("3.00")
-    assert result["delivery_fee"] == Decimal("110.00")  # 50 + 3x20
-    assert result["total"] == Decimal("2030.00")
+    assert result["delivery_fee"] == Decimal("175.00")  # 100 + 3x25
+    assert result["total"] == Decimal("2095.00")
 
 
 def test_preview_rounds_maps_distance_to_2dp(db_session, customer, address, track_carts, monkeypatch):
@@ -194,7 +194,7 @@ def test_preview_rounds_maps_distance_to_2dp(db_session, customer, address, trac
     result = service.preview_checkout(db_session, customer.id, restaurant.id, address.id)
 
     assert result["delivery_distance_km"] == Decimal("3.72")
-    assert result["delivery_fee"] == Decimal("124.40")
+    assert result["delivery_fee"] == Decimal("193.00")
     assert result["total"] == result["food_subtotal"] + result["delivery_fee"]
 
 
@@ -356,8 +356,8 @@ def test_checkout_route_end_to_end(db_session, checkout_client, customer, addres
     body = response.json()
     assert body["food_subtotal"] == 1800.0
     assert body["delivery_distance_km"] == 3.0
-    assert body["delivery_fee"] == 110.0
-    assert body["total"] == 1910.0
+    assert body["delivery_fee"] == 175.0
+    assert body["total"] == 1975.0
 
 
 # --- Phase 5, Step 6: place order ---
@@ -377,11 +377,11 @@ def test_place_order_spec_example_exact_numbers(db_session, customer, address, t
 
     assert result["food_subtotal"] == Decimal("1000.00")
     assert result["delivery_distance_km"] == Decimal("3.00")
-    assert result["delivery_fee"] == Decimal("110.00")
+    assert result["delivery_fee"] == Decimal("175.00")
     assert result["commission_amount"] == Decimal("100.00")
     assert result["restaurant_payable"] == Decimal("900.00")
-    assert result["rider_earning"] == Decimal("110.00")
-    assert result["total_amount"] == Decimal("1110.00")
+    assert result["rider_earning"] == Decimal("175.00")
+    assert result["total_amount"] == Decimal("1175.00")
     assert result["status"] == "Accepted"
     assert result["payment_method"] == "COD"
 
@@ -420,12 +420,12 @@ def test_place_order_multiple_items_variants_quantities(db_session, customer, ad
 
     result = service.place_order(db_session, customer.id, restaurant.id, address.id, "Digital")
 
-    # 2x500 + 3x120 = 1360; fee 70; total 1430; 10% -> 136 / 1224; rider 70.
+    # 2x500 + 3x120 = 1360; fee 125; total 1485; 10% -> 136 / 1224; rider 125.
     assert result["food_subtotal"] == Decimal("1360.00")
-    assert result["total_amount"] == Decimal("1430.00")
+    assert result["total_amount"] == Decimal("1485.00")
     assert result["commission_amount"] == Decimal("136.00")
     assert result["restaurant_payable"] == Decimal("1224.00")
-    assert result["rider_earning"] == Decimal("70.00")
+    assert result["rider_earning"] == Decimal("125.00")
 
     rows = db_session.query(OrderItem).filter(OrderItem.order_id == result["id"]).all()
     by_name = {r.menu_item_id: r for r in rows}
@@ -549,6 +549,7 @@ def test_place_order_snapshot_frozen_against_commission_change(db_session, custo
     db_session.commit()
 
     order = db_session.query(Order).get(result["id"])
+    assert order.delivery_fee == Decimal("175.00")
     assert order.commission_amount == Decimal("100.00")
     assert order.restaurant_payable == Decimal("900.00")
 
@@ -616,11 +617,11 @@ def test_place_order_route_end_to_end(db_session, customer, address, track_carts
     assert response.status_code == 201
     body = response.json()
     assert body["food_subtotal"] == 1000.0
-    assert body["delivery_fee"] == 110.0
+    assert body["delivery_fee"] == 175.0
     assert body["commission_amount"] == 100.0
     assert body["restaurant_payable"] == 900.0
-    assert body["rider_earning"] == 110.0
-    assert body["total_amount"] == 1110.0
+    assert body["rider_earning"] == 175.0
+    assert body["total_amount"] == 1175.0
     assert body["items"][0]["name"] == "Biryani"
     # Cart cleared after the successful order.
     assert service.get_cart(db_session, customer.id, restaurant.id)["items"] == []
@@ -668,7 +669,7 @@ def test_place_order_digital_success_gets_payment_reference(
     assert result["payment_reference"] is not None
     assert result["payment_reference"].startswith("STUB-DIGITAL-")
     assert result["status"] == "Accepted"
-    assert result["total_amount"] == Decimal("1110.00")
+    assert result["total_amount"] == Decimal("1175.00")
 
 
 def test_place_order_digital_gateway_failure_leaves_no_order_and_cart_intact(

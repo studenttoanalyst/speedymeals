@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     FIRST_ADMIN_PASSWORD: str
 
     # Cash Collection Cap (Phase 3, Step 7 - spec Sec 3.4/6)
-    CASH_COLLECTION_CAP: float = 10000
+    CASH_COLLECTION_CAP: float = 5000
 
     model_config = SettingsConfigDict(
     env_file=ENV_FILE_PATH, env_file_encoding="utf-8", extra="ignore"

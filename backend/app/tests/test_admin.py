@@ -614,3 +614,96 @@ def test_reports_route_returns_200(admin_client, db_session, admin_token):
     )
     assert response.status_code == 200
     assert response.json()["total_orders"] == 1
+
+
+# --- Kit deposit & handover ---
+
+
+def test_record_kit_completion(db_session):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    admin_id = uuid.uuid4()
+
+    result = service.update_rider_kit(
+        db_session, rider.id, admin_id, True, 2, True
+    )
+
+    assert result.kit_deposit_paid is True
+    assert result.kit_deposit_date is not None
+    assert result.kit_shirts_issued == 2
+    assert result.kit_box_issued is True
+    assert result.kit_verified_by == admin_id
+    assert result.kit_completed is True
+
+
+def test_kit_not_completed_without_deposit(db_session):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    admin_id = uuid.uuid4()
+
+    result = service.update_rider_kit(
+        db_session, rider.id, admin_id, False, 2, True
+    )
+
+    assert result.kit_deposit_paid is False
+    assert result.kit_completed is False
+
+
+def test_kit_not_completed_without_enough_shirts(db_session):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    admin_id = uuid.uuid4()
+
+    result = service.update_rider_kit(
+        db_session, rider.id, admin_id, True, 1, True
+    )
+
+    assert result.kit_shirts_issued == 1
+    assert result.kit_completed is False
+
+
+def test_kit_not_completed_without_box(db_session):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    admin_id = uuid.uuid4()
+
+    result = service.update_rider_kit(
+        db_session, rider.id, admin_id, True, 2, False
+    )
+
+    assert result.kit_box_issued is False
+    assert result.kit_completed is False
+
+
+def test_go_online_blocked_before_kit(db_session):
+    from app.platform.wallet_payment import service as wallet_service
+    from fastapi import HTTPException
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    wallet_service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
+
+    with pytest.raises(HTTPException) as exc_info:
+        wallet_service.set_online_status(db_session, rider.id, True)
+    assert exc_info.value.status_code == 400
+    assert "Kit" in exc_info.value.detail
+
+
+def test_go_online_allowed_after_kit_and_recharge(db_session):
+    from app.platform.wallet_payment import service as wallet_service
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    admin_id = uuid.uuid4()
+    wallet_service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
+    service.update_rider_kit(db_session, rider.id, admin_id, True, 2, True)
+
+    updated = wallet_service.set_online_status(db_session, rider.id, True)
+    assert updated.is_online is True
+
+
+def test_kit_route_returns_200(admin_client, db_session, admin_token):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+
+    response = admin_client.patch(
+        f"/admin/riders/{rider.id}/kit",
+        json={"kit_deposit_paid": True, "kit_shirts_issued": 2, "kit_box_issued": True},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["kit_completed"] is True
+    assert response.json()["kit_deposit_paid"] is True
+    assert response.json()["kit_shirts_issued"] == 2
+    assert response.json()["kit_box_issued"] is True

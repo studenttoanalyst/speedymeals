@@ -182,12 +182,12 @@ def test_offline_rider_ignored(db_session):
 
 
 def test_insufficient_wallet_rider_ignored(db_session):
-    """Rider with wallet < 500 is not eligible → not assigned."""
+    """Rider with wallet < 100 (auto-offline threshold) is not eligible."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
     order = _make_order(db_session, restaurant, customer, address)
-    rider = _make_rider(db_session, wallet=100, lat=31.531, lng=74.361)
+    rider = _make_rider(db_session, wallet=50, lat=31.531, lng=74.361)
 
     try:
         result = service.update_order_status(

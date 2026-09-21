@@ -24,7 +24,7 @@ from app.core.security import hash_password
 from app.modules.food_delivery.models import Order, Restaurant
 from app.platform.users.models import User
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, Settlement
-from app.platform.wallet_payment.service import DELIVERED_STATUS, DELIVERY_DEDUCTION_AMOUNT
+from app.platform.wallet_payment.service import DELIVERED_STATUS, DELIVERY_WALLET_DEDUCTION
 
 ACTIVE_RESTAURANT_STATUS = "active"
 INACTIVE_RESTAURANT_STATUS = "inactive"
@@ -66,7 +66,7 @@ def get_dashboard_summary(db: Session) -> dict:
     delivered_today_count = sum(
         1 for o in todays_orders if o.status == DELIVERED_STATUS
     )
-    wallet_deductions_today = delivered_today_count * DELIVERY_DEDUCTION_AMOUNT
+    wallet_deductions_today = delivered_today_count * DELIVERY_WALLET_DEDUCTION
     net_revenue_today = commission_today + wallet_deductions_today
 
     pending_restaurant_settlements = (
@@ -251,6 +251,15 @@ def set_rider_status(db: Session, rider_id: uuid.UUID, is_active: bool) -> Rider
     db.commit()
     db.refresh(rider)
     return rider
+
+
+def update_rider_kit(
+    db: Session, rider_id: uuid.UUID, admin_id: uuid.UUID,
+    kit_deposit_paid: bool, kit_shirts_issued: int, kit_box_issued: bool,
+) -> Rider:
+    """Admin records kit deposit and handover for a rider."""
+    from app.platform.wallet_payment.service import record_kit_completion
+    return record_kit_completion(db, rider_id, admin_id, kit_deposit_paid, kit_shirts_issued, kit_box_issued)
 
 
 # --- Step 4: order management ---

@@ -34,12 +34,17 @@ from app.core.redis_client import redis_client
 from app.modules.food_delivery.models import Order
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, WalletTransaction
 
-MIN_WALLET_BALANCE = 500  # spec Sec 3.1 / Sec 8 Step 4 — required to go online
-DELIVERY_DEDUCTION_AMOUNT = 10  # spec Sec 3.1 — flat Rs. 10 per completed delivery
+# Wallet thresholds
+MIN_WALLET_BALANCE_TO_GO_ONLINE = 500
+WALLET_REMINDER_THRESHOLD = 100
+WALLET_AUTO_OFFLINE_THRESHOLD = 100
+DELIVERY_WALLET_DEDUCTION = 10
+INITIAL_WALLET_RECHARGE = 500
+KIT_DEPOSIT_AMOUNT = 5000
 
 VALID_RECHARGE_METHODS = {"bank_transfer", "jazzcash", "easypaisa", "card"}
 VALID_DEPOSIT_METHODS = {"bank_transfer", "mobile_wallet", "hub"}
-DELIVERED_STATUS = "Delivered"  # spec Sec 7 Step 10 status flow wording
+DELIVERED_STATUS = "Delivered"
 
 # Gap 2 fix — rider document upload (spec Sec 8 Step 1, Sec 6 Step 1).
 # Same 5MB/JPG/PNG-only validation as the menu photo upload in
@@ -74,23 +79,14 @@ def _get_rider_or_404(db: Session, rider_id: uuid.UUID) -> Rider:
 
 
 def _force_offline_if_below_min(rider: Rider) -> None:
-    """
-    Step 4 — shared helper, called after ANY balance decrease (currently
-    only Step 5's deduction; recharge only increases balance so never
-    needs this). Does not commit — caller controls the transaction so this
-    stays part of the same atomic write as the deduction/balance change.
-    """
-    if float(rider.wallet_balance) < MIN_WALLET_BALANCE:
+    """Force rider offline when wallet balance drops below the auto-offline
+    threshold. Does not commit — caller controls the transaction."""
+    if float(rider.wallet_balance) < WALLET_AUTO_OFFLINE_THRESHOLD:
         rider.is_online = False
 
 
 def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str) -> WalletTransaction:
-    """
-    Step 2 — manual-entry recharge (MVP: no real gateway call, just record
-    + credit). Real JazzCash/EasyPaisa/card gateway integration is a stub
-    for a later step — this trusts `amount` as already-received money,
-    matching how the spec describes MVP-stage manual reconciliation.
-    """
+    """Recharge the rider's wallet. First recharge must be exactly Rs. 500."""
     if method not in VALID_RECHARGE_METHODS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -99,12 +95,23 @@ def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str
 
     rider = _get_rider_or_404(db, rider_id)
 
+    existing_recharges = db.query(WalletTransaction).filter(
+        WalletTransaction.rider_id == rider_id,
+        WalletTransaction.type == "recharge",
+    ).count()
+
+    if existing_recharges == 0 and amount != INITIAL_WALLET_RECHARGE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"First wallet recharge must be exactly Rs. {INITIAL_WALLET_RECHARGE}.",
+        )
+
     rider.wallet_balance = float(rider.wallet_balance) + amount
     db.add(rider)
 
     txn = WalletTransaction(
         rider_id=rider.id,
-        order_id=None,  # recharge has no order — only a delivery deduction does
+        order_id=None,
         type="recharge",
         amount=amount,
         balance_after=rider.wallet_balance,
@@ -123,21 +130,24 @@ def get_wallet_summary(db: Session, rider_id: uuid.UUID) -> Rider:
 
 
 def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Rider:
-    """
-    Step 3 — go-online toggle. Going online requires wallet_balance >= 500
-    (spec Sec 8 Step 4-5); going offline always allowed, no balance check
-    needed (that direction never needs guarding).
-    """
+    """Go-online/offline toggle. Going online requires kit_completed and
+    wallet_balance >= MIN_WALLET_BALANCE_TO_GO_ONLINE. Going offline is always allowed."""
     rider = _get_rider_or_404(db, rider_id)
 
-    if is_online and float(rider.wallet_balance) < MIN_WALLET_BALANCE:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"Minimum wallet balance of Rs. {MIN_WALLET_BALANCE} required to go online. "
-                f"Current balance: Rs. {rider.wallet_balance}. Please recharge."
-            ),
-        )
+    if is_online:
+        if not rider.kit_completed:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Kit deposit and handover must be completed before going online.",
+            )
+        if float(rider.wallet_balance) < MIN_WALLET_BALANCE_TO_GO_ONLINE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Minimum wallet balance of Rs. {MIN_WALLET_BALANCE_TO_GO_ONLINE} required to go online. "
+                    f"Current balance: Rs. {rider.wallet_balance}. Please recharge."
+                ),
+            )
 
     rider.is_online = is_online
     db.add(rider)
@@ -146,31 +156,19 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
     return rider
 
 
-def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -> WalletTransaction:
-    """
-    Step 5 — the Rs. 10 auto-deduction on order "Delivered" (spec Sec 3.1 /
-    Sec 8 Step 10). Standalone function, not wired to any route here — this
-    file only builds + will be unit-tested (Step 9) against it; Phase 6's
-    "mark Delivered" endpoint is the actual caller once that phase exists.
-    Deduction fires regardless of resulting balance going below 0 or below
-    the Rs. 500 minimum — the minimum is only enforced at the go-online
-    gate (Step 3), never blocks a deduction from happening.
-    Step 4's force-offline check runs right after, same DB transaction.
+def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -> WalletTransaction | None:
+    """Deduct Rs. 10 from rider wallet on order Delivered. Returns the
+    WalletTransaction, or None if balance was insufficient (delivery still
+    completes, deduction skipped to prevent negative balance).
 
-    Does NOT commit — the caller commits (Phase 6 review fix, see
-    ADR/Backend_development.md Phase 6 note). This function used to call
-    db.commit() itself; when Phase 6's rider_advance_delivery_status()
-    started chaining a second write (COD pending_cash_owed) after this
-    call and then committing again, that was two separate DB transactions
-    instead of one, so a crash between them could leave the wallet
-    deducted but the COD cash-owed update lost. flush() is enough here —
-    it assigns the transaction's id and makes the row visible to the rest
-    of the same session (db.refresh() below works on a flush, it doesn't
-    require a commit) without closing the transaction early.
+    Does NOT commit — caller controls the transaction.
     """
     rider = _get_rider_or_404(db, rider_id)
 
-    rider.wallet_balance = float(rider.wallet_balance) - DELIVERY_DEDUCTION_AMOUNT
+    if float(rider.wallet_balance) < DELIVERY_WALLET_DEDUCTION:
+        return None
+
+    rider.wallet_balance = float(rider.wallet_balance) - DELIVERY_WALLET_DEDUCTION
     _force_offline_if_below_min(rider)
     db.add(rider)
 
@@ -178,7 +176,7 @@ def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -
         rider_id=rider.id,
         order_id=order_id,
         type="deduction",
-        amount=DELIVERY_DEDUCTION_AMOUNT,
+        amount=DELIVERY_WALLET_DEDUCTION,
         balance_after=rider.wallet_balance,
     )
     db.add(txn)
@@ -350,34 +348,48 @@ def update_rider_location(
 
 
 def rider_eligible_for_assignment(db: Session, rider_id: uuid.UUID) -> bool:
-    """
-    Phase 6 Step 2 — three-gate eligibility check for rider assignment.
-    All three conditions must hold simultaneously:
-
-      1. is_online = true   (reuses Phase 3 field)
-      2. wallet_balance >= MIN_WALLET_BALANCE  (reuses Phase 3 constant)
-      3. valid non-expired Redis location key  (from Phase 6 Step 1)
-
-    Reuses: _get_rider_or_404, MIN_WALLET_BALANCE, _rider_location_key,
-    redis_client — no duplicate business logic.
-
-    Phase 6's assignment logic will call this directly (no route needed);
-    same pattern as can_assign_cod() (Step 7).
-    """
+    """Three-gate eligibility: is_online, wallet above auto-offline threshold,
+    and valid Redis location."""
     rider = _get_rider_or_404(db, rider_id)
 
     if not rider.is_online:
         return False
 
-    if float(rider.wallet_balance) < MIN_WALLET_BALANCE:
+    if float(rider.wallet_balance) < WALLET_AUTO_OFFLINE_THRESHOLD:
         return False
 
-    # A non-existent key means either never set or TTL expired — both
-    # mean the rider's location is stale/absent.
     if not redis_client.exists(_rider_location_key(rider_id)):
         return False
 
     return True
+
+
+# --- Kit deposit & handover ---
+
+
+def record_kit_completion(
+    db: Session, rider_id: uuid.UUID, admin_id: uuid.UUID,
+    kit_deposit_paid: bool, kit_shirts_issued: int, kit_box_issued: bool,
+) -> Rider:
+    """Admin records kit deposit and handover. Kit is considered completed
+    when deposit is paid, at least 2 shirts issued, and delivery box issued."""
+    rider = _get_rider_or_404(db, rider_id)
+
+    rider.kit_deposit_paid = kit_deposit_paid
+    if kit_deposit_paid and rider.kit_deposit_date is None:
+        rider.kit_deposit_date = datetime.now(timezone.utc)
+    rider.kit_shirts_issued = kit_shirts_issued
+    rider.kit_box_issued = kit_box_issued
+    rider.kit_verified_by = admin_id
+    rider.kit_completed = (
+        rider.kit_deposit_paid
+        and rider.kit_shirts_issued >= 2
+        and rider.kit_box_issued
+    )
+    db.add(rider)
+    db.commit()
+    db.refresh(rider)
+    return rider
 
 
 # --- Gap 2 fix: rider document upload (spec Sec 8 Step 1, Sec 6 Step 1) ---

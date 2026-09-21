@@ -326,7 +326,11 @@ def test_route_missing_fields_rejected(location_client, db_session, rider):
 
 def _setup_eligible_rider(db, rider):
     """Make a rider fully eligible: online, sufficient wallet, valid location."""
-    service.recharge_wallet(db, rider.id, 1000, "bank_transfer")
+    rider.kit_completed = True
+    rider.approval_status = "approved"
+    db.commit()
+    service.recharge_wallet(db, rider.id, 500, "bank_transfer")
+    service.recharge_wallet(db, rider.id, 500, "bank_transfer")
     service.set_online_status(db, rider.id, True)
     service.update_rider_location(db, rider.id, 24.8607, 67.0011)
 
@@ -342,7 +346,8 @@ def test_eligible_online_sufficient_wallet_valid_location(db_session, rider):
 def test_not_eligible_offline(db_session, rider):
     try:
         # Recharge + push location, but stay offline
-        service.recharge_wallet(db_session, rider.id, 1000, "bank_transfer")
+        service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
+        service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
         service.update_rider_location(db_session, rider.id, 24.8607, 67.0011)
         # rider.is_online defaults to False from fixture
         assert service.rider_eligible_for_assignment(db_session, rider.id) is False
@@ -366,7 +371,11 @@ def test_not_eligible_insufficient_wallet(db_session, rider):
 def test_not_eligible_expired_location(db_session, rider):
     try:
         # Online + sufficient wallet, but no Redis location
-        service.recharge_wallet(db_session, rider.id, 1000, "bank_transfer")
+        rider.kit_completed = True
+        rider.approval_status = "approved"
+        db_session.commit()
+        service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
+        service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
         service.set_online_status(db_session, rider.id, True)
         # No location push — key doesn't exist
         assert service.rider_eligible_for_assignment(db_session, rider.id) is False
@@ -410,11 +419,11 @@ def test_eligible_unknown_rider_404(db_session):
     assert exc_info.value.status_code == 404
 
 
-def test_eligibility_uses_existing_min_wallet_balance_constant(db_session, rider):
-    """Verify the eligibility check reuses Phase 3's MIN_WALLET_BALANCE,
-    not a separate duplicate constant."""
-    assert service.MIN_WALLET_BALANCE == 500
-    # Rider at exactly 500 wallet balance should be eligible (not < 500)
+def test_eligibility_uses_auto_offline_threshold(db_session, rider):
+    """Rider above auto-offline threshold (100) is eligible."""
+    rider.kit_completed = True
+    rider.approval_status = "approved"
+    db_session.commit()
     try:
         service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
         service.set_online_status(db_session, rider.id, True)

@@ -139,7 +139,7 @@ def test_delivered_digital_creates_wallet_transaction(db_session):
         WalletTransaction.type == "deduction",
     ).first()
     assert txn is not None
-    assert float(txn.amount) == wallet_service.DELIVERY_DEDUCTION_AMOUNT
+    assert float(txn.amount) == wallet_service.DELIVERY_WALLET_DEDUCTION
     assert float(txn.balance_after) == 990
 
 
@@ -270,3 +270,54 @@ def test_phase3_deduct_delivery_fee_still_works(db_session):
     assert float(txn.balance_after) == 990
     db_session.refresh(rider)
     assert float(rider.wallet_balance) == 990
+
+
+# --- Cancelled order: no deduction ---
+
+
+def test_cancelled_order_no_wallet_deduction(db_session):
+    """A cancelled order should not trigger any wallet deduction."""
+    restaurant = _make_restaurant(db_session)
+    customer = _make_customer(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session, wallet=1000)
+    order = _make_order(db_session, restaurant, customer, address, "COD", rider)
+    order.status = "Cancelled"
+    db_session.commit()
+
+    # Attempting to advance a cancelled order should fail (invalid transition)
+    with pytest.raises(HTTPException) as exc_info:
+        service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
+    assert exc_info.value.status_code == 400
+
+    db_session.refresh(rider)
+    assert float(rider.wallet_balance) == 1000  # unchanged
+    assert float(rider.pending_cash_owed) == 0
+
+
+# --- Insufficient balance: deduction skipped ---
+
+
+def test_delivered_insufficient_balance_deduction_skipped(db_session):
+    """When wallet balance < Rs.10, deduction is skipped but delivery completes."""
+    restaurant = _make_restaurant(db_session)
+    customer = _make_customer(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session, wallet=5)
+    order = _make_order(db_session, restaurant, customer, address, "Digital", rider)
+
+    result = service.rider_advance_delivery_status(
+        db_session, rider.id, order.id, "Delivered"
+    )
+
+    assert result["status"] == "Delivered"
+    db_session.refresh(rider)
+    assert float(rider.wallet_balance) == 5  # unchanged, deduction skipped
+
+    # No deduction WalletTransaction created
+    txns = db_session.query(WalletTransaction).filter(
+        WalletTransaction.rider_id == rider.id,
+        WalletTransaction.order_id == order.id,
+        WalletTransaction.type == "deduction",
+    ).all()
+    assert len(txns) == 0
