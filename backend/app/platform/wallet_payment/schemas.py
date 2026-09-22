@@ -148,3 +148,39 @@ class RiderDocumentUploadResponseSchema(BaseModel):
     cnic_photo_url: str | None
     license_photo_url: str | None
     vehicle_photo_url: str | None
+
+
+# --- Rider wallet profile + assignment history (GET read views) ---
+
+
+class RiderWalletProfileResponseSchema(BaseModel):
+    """Response for GET /wallet/profile — one combined rider wallet view:
+    total earnings (all-time, Delivered orders), current wallet balance,
+    pending payouts (generated RiderPayout rows not yet Paid), and the
+    wallet-gated online status toggled by PATCH /wallet/status."""
+    total_earnings: float
+    current_balance: float
+    pending_payouts: float
+    is_online: bool
+
+
+class RiderAssignmentItemSchema(BaseModel):
+    """One assigned order in GET /wallet/assignments — payout fields are
+    the frozen per-order snapshots (rider_earning = 100% of delivery fee,
+    spec Sec 3.3), never recomputed at read time."""
+    id: uuid.UUID
+    status: str
+    payment_method: str
+    delivery_distance_km: float
+    delivery_fee: float
+    total_amount: float
+    rider_earning: float
+    placed_at: datetime | None
+    delivered_at: datetime | None
+
+
+class RiderAssignmentsResponseSchema(BaseModel):
+    """Response for GET /wallet/assignments — active (still in flight) and
+    past (Delivered) assignments, newest first within each list."""
+    active: list[RiderAssignmentItemSchema]
+    past: list[RiderAssignmentItemSchema]

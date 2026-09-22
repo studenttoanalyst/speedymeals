@@ -30,6 +30,7 @@ from app.modules.food_delivery.schemas import (
     MenuItemResponseSchema,
     MenuItemUpdateSchema,
     OrderHistoryResponseSchema,
+    OrderRiderLocationResponseSchema,
     OrderStatusUpdateSchema,
     OrderTrackingResponseSchema,
     RatingCreateSchema,
@@ -51,6 +52,10 @@ customer_orders_router = APIRouter(prefix="/orders", tags=["customer-orders"])
 
 require_restaurant = require_role(["restaurant"])
 require_customer = require_role(["customer"])
+# Rider-location read path: the customer who placed the order, or an admin
+# (ownership itself is enforced in the service's WHERE clause — this only
+# gates which roles may reach the handler at all).
+require_customer_or_admin = require_role(["customer", "admin"])
 
 
 @customer_router.get("", response_model=list[CustomerRestaurantResponseSchema])
@@ -309,6 +314,26 @@ def track_my_order(
     no-leak pattern as the restaurant-side order lookup).
     """
     return service.get_order_tracking(db, current_user.id, order_id)
+
+
+@customer_orders_router.get(
+    "/{order_id}/rider-location", response_model=OrderRiderLocationResponseSchema
+)
+def track_rider_location(
+    order_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_customer_or_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Live rider GPS for the customer's own order — poll-based like /track
+    (no push, spec Sec 14). Owner-only via the service's WHERE clause
+    (another customer's order_id returns 404, not 403 — same no-leak
+    pattern as /track); admins may query any order. Terminal orders 409;
+    active orders with no fresh Redis location return null coordinates.
+    """
+    return service.get_order_rider_location(
+        db, current_user.id, current_user.role, order_id
+    )
 
 
 @customer_orders_router.get("", response_model=list[OrderHistoryResponseSchema])

@@ -1,5 +1,6 @@
 """
-Phase 7, Step 1 — customer order tracking tests.
+Phase 7, Step 1 — customer order tracking tests. Also covers the
+rider-location read path (GET /orders/{id}/rider-location).
 
 Orders are built directly against the Order/OrderItem models (not through
 the Phase 5 cart/checkout flow) — tracking only reads an existing order,
@@ -13,11 +14,13 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.core.database import get_db
+from app.core.redis_client import redis_client
 from app.modules.food_delivery import service
 from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Restaurant
 from app.modules.food_delivery.routes import customer_orders_router
 from app.platform.auth.jwt_utils import create_access_token
 from app.platform.users.models import Address, User
+from app.platform.wallet_payment import service as wallet_service
 from app.platform.wallet_payment.models import Rider
 
 
@@ -146,6 +149,14 @@ def test_tracking_no_rider_fields_before_assignment(db_session, customer, addres
     assert result["rider_phone"] is None
 
 
+def test_tracking_includes_restaurant_name(db_session, customer, address, restaurant):
+    order = _make_order(db_session, customer, restaurant, address)
+
+    result = service.get_order_tracking(db_session, customer.id, order.id)
+
+    assert result["restaurant_name"] == restaurant.name
+
+
 def test_tracking_shows_rider_once_assigned(db_session, customer, address, restaurant):
     rider = _make_rider(db_session)
     order = _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Rider Assigned")
@@ -184,7 +195,9 @@ def test_tracking_route_returns_200_for_owner(tracking_client, db_session, custo
         f"/orders/{order.id}/track", headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 200
-    assert response.json()["status"] == "Accepted"
+    body = response.json()
+    assert body["status"] == "Accepted"
+    assert body["restaurant_name"] == restaurant.name  # in-payload, no extra fetch
 
 
 def test_tracking_route_missing_token_rejected(tracking_client):
@@ -200,3 +213,197 @@ def test_tracking_route_wrong_role_rejected(tracking_client, db_session, custome
         f"/orders/{order.id}/track", headers={"Authorization": f"Bearer {restaurant_token}"}
     )
     assert response.status_code == 403
+
+
+# --- rider-location read path (service-level) ---
+
+
+def test_rider_location_returns_live_coordinates(db_session, customer, address, restaurant):
+    rider = _make_rider(db_session)
+    order = _make_order(
+        db_session, customer, restaurant, address, rider=rider, order_status="Picked Up"
+    )
+    key = None
+    try:
+        # push through the REAL write path so we read the real stored shape
+        wallet_service.update_rider_location(db_session, rider.id, 24.8607, 67.0011)
+        key = wallet_service._rider_location_key(rider.id)
+
+        result = service.get_order_rider_location(
+            db_session, customer.id, "customer", order.id
+        )
+
+        assert result["order_id"] == order.id
+        assert result["latitude"] == 24.8607
+        assert result["longitude"] == 67.0011
+        assert result["updated_at"] is not None
+    finally:
+        if key:
+            redis_client.delete(key)
+
+
+def test_rider_location_null_when_never_pushed(db_session, customer, address, restaurant):
+    """Active order, rider assigned but never pushed GPS -> nulls, not an error."""
+    rider = _make_rider(db_session)
+    order = _make_order(
+        db_session, customer, restaurant, address, rider=rider, order_status="Accepted by Rider"
+    )
+
+    result = service.get_order_rider_location(db_session, customer.id, "customer", order.id)
+
+    assert result["order_id"] == order.id
+    assert result["latitude"] is None
+    assert result["longitude"] is None
+    assert result["updated_at"] is None
+
+
+def test_rider_location_null_without_assigned_rider(db_session, customer, address, restaurant):
+    order = _make_order(db_session, customer, restaurant, address, rider=None)
+
+    result = service.get_order_rider_location(db_session, customer.id, "customer", order.id)
+
+    assert result["latitude"] is None
+    assert result["longitude"] is None
+
+
+def test_rider_location_delivered_order_409(db_session, customer, address, restaurant):
+    from fastapi import HTTPException
+
+    rider = _make_rider(db_session)
+    order = _make_order(
+        db_session, customer, restaurant, address, rider=rider, order_status="Delivered"
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.get_order_rider_location(db_session, customer.id, "customer", order.id)
+    assert exc_info.value.status_code == 409
+
+
+def test_rider_location_cancelled_order_409(db_session, customer, address, restaurant):
+    from fastapi import HTTPException
+
+    order = _make_order(db_session, customer, restaurant, address, order_status="Cancelled")
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.get_order_rider_location(db_session, customer.id, "customer", order.id)
+    assert exc_info.value.status_code == 409
+
+
+def test_rider_location_other_customers_order_404(db_session, customer, address, restaurant):
+    from fastapi import HTTPException
+
+    order = _make_order(db_session, customer, restaurant, address)
+    other_customer = _make_customer(db_session)
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.get_order_rider_location(
+            db_session, other_customer.id, "customer", order.id
+        )
+    assert exc_info.value.status_code == 404
+
+
+def test_rider_location_nonexistent_order_404(db_session, customer):
+    from fastapi import HTTPException
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.get_order_rider_location(db_session, customer.id, "customer", uuid.uuid4())
+    assert exc_info.value.status_code == 404
+
+
+def test_rider_location_admin_may_query_any_order(db_session, customer, address, restaurant):
+    order = _make_order(db_session, customer, restaurant, address, order_status="On the Way")
+
+    # admin viewer needs no DB row of its own — role comes from the token
+    result = service.get_order_rider_location(db_session, uuid.uuid4(), "admin", order.id)
+
+    assert result["order_id"] == order.id
+
+
+# --- rider-location read path (route-level) ---
+
+
+def test_rider_location_route_returns_200_for_owner(
+    tracking_client, db_session, customer, address, restaurant
+):
+    rider = _make_rider(db_session)
+    order = _make_order(
+        db_session, customer, restaurant, address, rider=rider, order_status="Picked Up"
+    )
+    token = create_access_token(customer.id, "customer")
+    key = None
+    try:
+        wallet_service.update_rider_location(db_session, rider.id, 24.8607, 67.0011)
+        key = wallet_service._rider_location_key(rider.id)
+
+        response = tracking_client.get(
+            f"/orders/{order.id}/rider-location",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["order_id"] == str(order.id)
+        assert body["latitude"] == 24.8607
+        assert body["longitude"] == 67.0011
+        assert body["updated_at"] is not None
+    finally:
+        if key:
+            redis_client.delete(key)
+
+
+def test_rider_location_route_missing_token_rejected(tracking_client):
+    response = tracking_client.get(f"/orders/{uuid.uuid4()}/rider-location")
+    assert response.status_code == 403
+
+
+def test_rider_location_route_wrong_role_rejected(
+    tracking_client, db_session, customer, address, restaurant
+):
+    order = _make_order(db_session, customer, restaurant, address)
+    restaurant_token = create_access_token(restaurant.id, "restaurant")
+
+    response = tracking_client.get(
+        f"/orders/{order.id}/rider-location",
+        headers={"Authorization": f"Bearer {restaurant_token}"},
+    )
+    assert response.status_code == 403
+
+
+def test_rider_location_route_other_customer_404(
+    tracking_client, db_session, customer, address, restaurant
+):
+    order = _make_order(db_session, customer, restaurant, address)
+    other = _make_customer(db_session)
+    token = create_access_token(other.id, "customer")
+
+    response = tracking_client.get(
+        f"/orders/{order.id}/rider-location",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
+
+
+def test_rider_location_route_delivered_409(
+    tracking_client, db_session, customer, address, restaurant
+):
+    order = _make_order(db_session, customer, restaurant, address, order_status="Delivered")
+    token = create_access_token(customer.id, "customer")
+
+    response = tracking_client.get(
+        f"/orders/{order.id}/rider-location",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 409
+
+
+def test_rider_location_route_admin_allowed(
+    tracking_client, db_session, customer, address, restaurant
+):
+    order = _make_order(db_session, customer, restaurant, address, order_status="On the Way")
+    admin_token = create_access_token(uuid.uuid4(), "admin")
+
+    response = tracking_client.get(
+        f"/orders/{order.id}/rider-location",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["order_id"] == str(order.id)

@@ -473,3 +473,93 @@ def upload_rider_document(
     db.commit()
     db.refresh(rider)
     return rider
+
+
+# --- Rider wallet profile + assignment history (GET read views) ---
+
+# Mirrors admin/service.py's RIDER_PAYOUT_STATUS_PENDING — duplicated as a
+# local constant instead of imported because admin/service.py imports this
+# module at import time (a reverse import would be circular).
+RIDER_PAYOUT_STATUS_PENDING = "Pending"
+
+
+def get_rider_wallet_profile(db: Session, rider_id: uuid.UUID) -> dict:
+    """
+    GET /wallet/profile — combined rider wallet view, all numbers read
+    from real rows:
+
+    - total_earnings: all-time sum of `rider_earning` on Delivered orders
+      (same sum pattern as get_rider_earnings_summary(), minus its payout
+      time-window — this is lifetime earnings, not the unpaid balance).
+    - current_balance: rider.wallet_balance (same source as
+      get_wallet_summary()).
+    - pending_payouts: sum of generated RiderPayout rows still Pending
+      (admin marks them Paid, admin/service.py Step 6).
+    - is_online: the wallet-gated online status from PATCH /wallet/status.
+
+    Raises 404 if the rider row doesn't exist (same ownership helper as
+    every other wallet read).
+    """
+    rider = _get_rider_or_404(db, rider_id)
+
+    total_earnings = (
+        db.query(func.coalesce(func.sum(Order.rider_earning), 0))
+        .filter(Order.rider_id == rider_id, Order.status == DELIVERED_STATUS)
+        .scalar()
+    )
+
+    pending_payouts = (
+        db.query(func.coalesce(func.sum(RiderPayout.total_earning), 0))
+        .filter(
+            RiderPayout.rider_id == rider_id,
+            RiderPayout.status == RIDER_PAYOUT_STATUS_PENDING,
+        )
+        .scalar()
+    )
+
+    return {
+        "total_earnings": float(total_earnings),
+        "current_balance": float(rider.wallet_balance),
+        "pending_payouts": float(pending_payouts),
+        "is_online": rider.is_online,
+    }
+
+
+def get_rider_assignments(db: Session, rider_id: uuid.UUID) -> dict:
+    """
+    GET /wallet/assignments — this rider's assigned orders, newest first,
+    split into active (still in flight) and past (Delivered). Payout
+    details are the frozen per-order snapshot columns, never recomputed.
+
+    Own assignments only (WHERE rider_id == rider_id — same no-leak-by-
+    omission pattern as everywhere else; ownership comes from the
+    authenticated token, never from the request). A rejected order drops
+    rider_id to NULL on reject, so it disappears from this list
+    automatically. Raises 404 if the rider row doesn't exist.
+    """
+    _get_rider_or_404(db, rider_id)
+
+    orders = (
+        db.query(Order)
+        .filter(Order.rider_id == rider_id)
+        .order_by(Order.placed_at.desc())
+        .all()
+    )
+
+    active: list[dict] = []
+    past: list[dict] = []
+    for order in orders:
+        item = {
+            "id": order.id,
+            "status": order.status,
+            "payment_method": order.payment_method,
+            "delivery_distance_km": float(order.delivery_distance_km),
+            "delivery_fee": float(order.delivery_fee),
+            "total_amount": float(order.total_amount),
+            "rider_earning": float(order.rider_earning),
+            "placed_at": order.placed_at,
+            "delivered_at": order.delivered_at,
+        }
+        (past if order.status == DELIVERED_STATUS else active).append(item)
+
+    return {"active": active, "past": past}
