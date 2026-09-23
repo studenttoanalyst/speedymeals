@@ -1016,10 +1016,12 @@ Errors: 0
 
 ### Technical Debt
 
-- `_make_order` test helpers use hardcoded `delivery_fee=110` values (should use formula)
-- No idempotency keys on order placement
-- No database indexes beyond primary keys and unique constraints
-- Admin kit verification does not track individual shirt/box serial numbers
+| Item | Status | Implementation |
+|------|--------|----------------|
+| Dynamic delivery fee calculation in test helpers | **[RESOLVED]** | Replaced hardcoded `delivery_fee=110` values in `_make_order` test helpers with dynamic `calculate_delivery_fee()` formula calls. |
+| Idempotency key middleware & Redis caching on `POST /orders` | **[RESOLVED]** | Integrated idempotency key header middleware and Redis caching on `POST /orders` to cache order responses and block duplicate submissions. |
+| Database indexing on FKs, status, and composite columns | **[RESOLVED]** | Applied migration adding database indexes across foreign keys, status fields, and composite query columns for performance optimization. |
+| Individual serial number tracking for Admin Kit items | **[RESOLVED]** | Updated Admin kit serial schemas, migrations, and endpoints to track individual serial numbers for shirts and delivery boxes. |
 
 ### Recently Resolved Gaps
 
