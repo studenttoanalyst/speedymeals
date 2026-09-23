@@ -17,8 +17,9 @@ from sqlalchemy.exc import IntegrityError
 
 from app.core import maps_client
 from app.core.database import get_db
+from app.core.redis_client import redis_client
 from app.modules.food_delivery import service
-from app.modules.food_delivery.models import MenuItem
+from app.modules.food_delivery.models import MenuItem, Order
 from app.modules.food_delivery.schemas import CartAddItemSchema
 from app.platform.auth.jwt_utils import create_access_token
 from app.platform.users.models import Address
@@ -611,7 +612,7 @@ def test_place_order_route_end_to_end(db_session, customer, address, track_carts
     response = client.post(
         f"/restaurants/{restaurant.id}/cart/checkout",
         json={"address_id": str(address.id), "payment_method": "COD"},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": str(uuid.uuid4())},
     )
 
     assert response.status_code == 201
@@ -721,7 +722,7 @@ def test_place_order_digital_route_returns_reference_and_402_on_failure(
     ok = client.post(
         f"/restaurants/{restaurant.id}/cart/checkout",
         json={"address_id": str(address.id), "payment_method": "Digital"},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": str(uuid.uuid4())},
     )
     assert ok.status_code == 201
     assert ok.json()["payment_reference"].startswith("STUB-DIGITAL-")
@@ -737,7 +738,7 @@ def test_place_order_digital_route_returns_reference_and_402_on_failure(
     declined = client.post(
         f"/restaurants/{restaurant.id}/cart/checkout",
         json={"address_id": str(address.id), "payment_method": "Digital"},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": str(uuid.uuid4())},
     )
     assert declined.status_code == 402
 
@@ -750,3 +751,80 @@ def test_place_order_unauthorized_request_still_blocked_for_digital(checkout_cli
         json={"address_id": str(uuid.uuid4()), "payment_method": "Digital"},
     )
     assert response.status_code == 403
+
+
+# --- Idempotency-Key on checkout (duplicate-click protection) ---
+
+
+def test_checkout_replays_cached_response_for_same_idempotency_key(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """A retried POST with the same Idempotency-Key replays the original
+    response and places only ONE order — the second request never touches
+    place_order."""
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.core.database import get_db
+    from app.modules.food_delivery.routes import customer_router
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    app = FastAPI()
+    app.include_router(customer_router)
+    app.dependency_overrides[get_db] = lambda: db_session
+    client = TestClient(app)
+    token = create_access_token(customer.id, "customer")
+    key = uuid.uuid4()
+    headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": str(key)}
+
+    first = client.post(
+        f"/restaurants/{restaurant.id}/cart/checkout",
+        json={"address_id": str(address.id), "payment_method": "COD"},
+        headers=headers,
+    )
+    assert first.status_code == 201
+    order_id = first.json()["id"]
+
+    retry = client.post(
+        f"/restaurants/{restaurant.id}/cart/checkout",
+        json={"address_id": str(address.id), "payment_method": "COD"},
+        headers=headers,
+    )
+    assert retry.status_code == 201
+    assert retry.json()["id"] == order_id
+
+    assert db_session.query(Order).filter(Order.user_id == customer.id).count() == 1
+
+    redis_client.delete(f"idempotency:{customer.id}:{key}")
+
+
+def test_checkout_requires_uuid_idempotency_key(db_session, customer):
+    """The header is required and must be a UUID — missing or malformed
+    keys are a 422 before any cart/checkout logic runs."""
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.core.database import get_db
+    from app.modules.food_delivery.routes import customer_router
+
+    app = FastAPI()
+    app.include_router(customer_router)
+    app.dependency_overrides[get_db] = lambda: db_session
+    client = TestClient(app)
+    token = create_access_token(customer.id, "customer")
+
+    missing = client.post(
+        f"/restaurants/{uuid.uuid4()}/cart/checkout",
+        json={"address_id": str(uuid.uuid4()), "payment_method": "COD"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert missing.status_code == 422
+
+    malformed = client.post(
+        f"/restaurants/{uuid.uuid4()}/cart/checkout",
+        json={"address_id": str(uuid.uuid4()), "payment_method": "COD"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "not-a-uuid"},
+    )
+    assert malformed.status_code == 422

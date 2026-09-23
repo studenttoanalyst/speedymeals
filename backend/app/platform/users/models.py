@@ -28,8 +28,8 @@ class Address(BaseModel):
     # incorrectly treats "address" as already plural since it ends in "s"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )  # address book listing + ownership checks on every address read/update
     label: Mapped[str | None] = mapped_column(String, nullable=True)  # "Home"/"Work"/"Other"
     latitude: Mapped[float] = mapped_column(Numeric, nullable=False)
     longitude: Mapped[float] = mapped_column(Numeric, nullable=False)

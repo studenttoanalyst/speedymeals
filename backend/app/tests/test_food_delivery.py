@@ -55,6 +55,7 @@ def _make_order(db, restaurant, status="Accepted", user=None, address=None):
         db.add(address)
         db.flush()
 
+    delivery_fee = service.calculate_delivery_fee(3)
     order = Order(
         user_id=user.id,
         restaurant_id=restaurant.id,
@@ -63,11 +64,11 @@ def _make_order(db, restaurant, status="Accepted", user=None, address=None):
         payment_method="COD",
         food_subtotal=500,
         delivery_distance_km=3,
-        delivery_fee=110,
-        total_amount=610,
+        delivery_fee=delivery_fee,
+        total_amount=500 + delivery_fee,
         commission_amount=50,
         restaurant_payable=450,
-        rider_earning=110,
+        rider_earning=delivery_fee,
         country_code="+92",
         currency="PKR",
     )

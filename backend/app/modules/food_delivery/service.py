@@ -1305,12 +1305,10 @@ def place_order(
 
     Transaction behavior: orders + order_items are written inside ONE
     SQLAlchemy session/transaction (the project's existing get_db()
-    pattern — commit makes them atomic). The Redis cart is cleared ONLY
-    AFTER the DB commit succeeds, so a failed order creation never
-    destroys the customer's cart. No idempotency key exists in this
-    project; a duplicate click can at worst place two real orders (each
-    then sees an empty cart and fails with 400) — flagged as acceptable
-    MVP risk instead of building an idempotency system.
+    pattern — commit makes them atomic). The Redis cart    is cleared ONLY AFTER the DB commit succeeds, so a failed order creation never
+    destroys the customer's cart. Duplicate-click protection lives at the
+    route layer: POST .../cart/checkout requires a UUID Idempotency-Key and
+    replays the cached response for 24h (see routes.py place_my_order).
     """
     if payment_method not in VALID_PAYMENT_METHODS:
         raise HTTPException(

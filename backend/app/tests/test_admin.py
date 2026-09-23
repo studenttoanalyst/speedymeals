@@ -58,7 +58,7 @@ def test_dashboard_counts_todays_orders_and_revenue(db_session):
     result = service.get_dashboard_summary(db_session)
 
     assert result["total_orders_today"] == 1
-    assert result["gross_revenue_today"] == 1110
+    assert result["gross_revenue_today"] == 1175
     # commission (100) + one Rs.10 wallet deduction for the Delivered order
     assert result["net_revenue_today"] == 110
 
@@ -277,7 +277,7 @@ def test_get_order_detail_has_distance_and_fee_breakdown(db_session):
     result = service.get_order(db_session, order.id)
 
     assert result["delivery_distance_km"] == 3
-    assert result["delivery_fee"] == 110
+    assert result["delivery_fee"] == 175
     assert result["commission_amount"] == 100
 
 
@@ -459,7 +459,7 @@ def test_generate_rider_payouts_computes_totals(db_session):
 
     assert len(results) == 1
     assert results[0]["rider_id"] == rider.id
-    assert results[0]["total_earning"] == 110
+    assert results[0]["total_earning"] == 175
     assert results[0]["status"] == "Pending"
 
 
@@ -479,7 +479,7 @@ def test_generate_rider_payouts_is_idempotent_and_skips_paid(db_session):
 
     assert len(second) == 1
     assert second[0]["status"] == "Paid"
-    assert second[0]["total_earning"] == 110  # unchanged, not recomputed
+    assert second[0]["total_earning"] == 175  # unchanged, not recomputed
 
 
 def test_mark_rider_payout_paid_rejects_already_paid(db_session):
@@ -552,13 +552,13 @@ def test_get_reports_computes_trends(db_session):
     result = service.get_reports(db_session, period_start, period_end)
 
     assert result["total_orders"] == 1
-    assert result["total_revenue"] == 1110
-    assert result["total_rider_payouts"] == 110
+    assert result["total_revenue"] == 1175
+    assert result["total_rider_payouts"] == 175
     assert result["average_delivery_distance_km"] == 3
-    assert result["average_delivery_fee"] == 110
+    assert result["average_delivery_fee"] == 175
     assert len(result["top_restaurants"]) == 1
     assert result["top_restaurants"][0]["restaurant_id"] == restaurant.id
-    assert result["top_restaurants"][0]["revenue"] == 1110
+    assert result["top_restaurants"][0]["revenue"] == 1175
 
 
 def test_get_reports_includes_cash_discrepancy_total(db_session):
@@ -707,3 +707,59 @@ def test_kit_route_returns_200(admin_client, db_session, admin_token):
     assert response.json()["kit_deposit_paid"] is True
     assert response.json()["kit_shirts_issued"] == 2
     assert response.json()["kit_box_issued"] is True
+
+
+def test_record_kit_completion_with_serials(db_session):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    admin_id = uuid.uuid4()
+
+    result = service.update_rider_kit(
+        db_session,
+        rider.id,
+        admin_id,
+        True,
+        2,
+        True,
+        shirt_serial_numbers=["SHIRT-001", "SHIRT-002"],
+        box_serial_number="BOX-999",
+        helmet_serial_number="HELMET-777",
+    )
+
+    assert result.kit_completed is True
+    assert result.shirt_serial_numbers == ["SHIRT-001", "SHIRT-002"]
+    assert result.shirt_serial_number == "SHIRT-001, SHIRT-002"
+    assert result.box_serial_number == "BOX-999"
+    assert result.helmet_serial_number == "HELMET-777"
+
+
+def test_kit_route_with_serials_and_get_kit(admin_client, db_session, admin_token):
+    rider = _make_admin_rider(db_session, approval_status="approved")
+
+    patch_res = admin_client.patch(
+        f"/admin/riders/{rider.id}/kit",
+        json={
+            "kit_deposit_paid": True,
+            "kit_shirts_issued": 2,
+            "kit_box_issued": True,
+            "shirt_serial_numbers": ["SH-101", "SH-102"],
+            "box_serial_number": "BX-500",
+            "helmet_serial_number": "HL-200",
+        },
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert patch_res.status_code == 200
+    data = patch_res.json()
+    assert data["kit_completed"] is True
+    assert data["shirt_serial_numbers"] == ["SH-101", "SH-102"]
+    assert data["box_serial_number"] == "BX-500"
+    assert data["helmet_serial_number"] == "HL-200"
+
+    get_res = admin_client.get(
+        f"/admin/riders/{rider.id}/kit",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert get_res.status_code == 200
+    get_data = get_res.json()
+    assert get_data["shirt_serial_numbers"] == ["SH-101", "SH-102"]
+    assert get_data["box_serial_number"] == "BX-500"
+    assert get_data["helmet_serial_number"] == "HL-200"

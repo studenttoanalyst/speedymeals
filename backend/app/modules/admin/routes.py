@@ -162,6 +162,16 @@ def set_rider_status(
     return service.set_rider_status(db, rider_id, payload.is_active)
 
 
+@router.get("/riders/{rider_id}/kit", response_model=RiderKitResponseSchema)
+def get_rider_kit(
+    rider_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Staff retrieves kit verification details and assigned item serial numbers for a rider."""
+    return service.get_rider_kit(db, rider_id)
+
+
 @router.patch("/riders/{rider_id}/kit", response_model=RiderKitResponseSchema)
 def update_rider_kit(
     rider_id: uuid.UUID,
@@ -174,6 +184,10 @@ def update_rider_kit(
     return wallet_service.record_kit_completion(
         db, rider_id, current_user.id,
         payload.kit_deposit_paid, payload.kit_shirts_issued, payload.kit_box_issued,
+        shirt_serial_number=payload.shirt_serial_number,
+        shirt_serial_numbers=payload.shirt_serial_numbers,
+        box_serial_number=payload.box_serial_number,
+        helmet_serial_number=payload.helmet_serial_number,
     )
 
 

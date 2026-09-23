@@ -370,6 +370,10 @@ def rider_eligible_for_assignment(db: Session, rider_id: uuid.UUID) -> bool:
 def record_kit_completion(
     db: Session, rider_id: uuid.UUID, admin_id: uuid.UUID,
     kit_deposit_paid: bool, kit_shirts_issued: int, kit_box_issued: bool,
+    shirt_serial_number: str | None = None,
+    shirt_serial_numbers: list[str] | None = None,
+    box_serial_number: str | None = None,
+    helmet_serial_number: str | None = None,
 ) -> Rider:
     """Admin records kit deposit and handover. Kit is considered completed
     when deposit is paid, at least 2 shirts issued, and delivery box issued."""
@@ -381,6 +385,21 @@ def record_kit_completion(
     rider.kit_shirts_issued = kit_shirts_issued
     rider.kit_box_issued = kit_box_issued
     rider.kit_verified_by = admin_id
+
+    if shirt_serial_number is not None:
+        rider.shirt_serial_number = shirt_serial_number
+    if shirt_serial_numbers is not None:
+        rider.shirt_serial_numbers = shirt_serial_numbers
+        if not rider.shirt_serial_number and shirt_serial_numbers:
+            rider.shirt_serial_number = ", ".join(shirt_serial_numbers)
+    elif shirt_serial_number and not rider.shirt_serial_numbers:
+        rider.shirt_serial_numbers = [s.strip() for s in shirt_serial_number.split(",") if s.strip()]
+
+    if box_serial_number is not None:
+        rider.box_serial_number = box_serial_number
+    if helmet_serial_number is not None:
+        rider.helmet_serial_number = helmet_serial_number
+
     rider.kit_completed = (
         rider.kit_deposit_paid
         and rider.kit_shirts_issued >= 2

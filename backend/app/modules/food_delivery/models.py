@@ -11,7 +11,7 @@ respectively, so they're placed with the module that owns their FK target.
 """
 import uuid
 
-from sqlalchemy import String, Boolean, Numeric, Text, Time, Integer, DateTime, ForeignKey
+from sqlalchemy import String, Boolean, Numeric, Text, Time, Integer, DateTime, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -38,8 +38,8 @@ class Restaurant(BaseModel, UpdatedAtMixin):
 
 class MenuItem(BaseModel):
     restaurant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("restaurants.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("restaurants.id"), nullable=False, index=True
+    )  # menu listing, cart line validation, customer menu joins
     name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price: Mapped[float] = mapped_column(Numeric, nullable=False)
@@ -50,19 +50,26 @@ class MenuItem(BaseModel):
 
 
 class Order(BaseModel):
+    __table_args__ = (
+        # (rider_id, status) drives the hot rider queries: earnings summary,
+        # weekly payout generation, cash-collection math all filter
+        # rider_id == X AND status == 'Delivered'.
+        Index("ix_orders_rider_id_status", "rider_id", "status"),
+    )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )  # customer order history / tracking lookups
     restaurant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("restaurants.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("restaurants.id"), nullable=False, index=True
+    )  # restaurant dashboard + admin per-restaurant filters
     rider_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("riders.id"), nullable=True
-    )  # nullable: no rider assigned yet when order is first placed
+    )  # nullable: no rider assigned yet when order is first placed;
+    # indexed via the (rider_id, status) composite above (leading column)
     delivery_address_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=False
     )
-    status: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False, index=True)
     payment_method: Mapped[str] = mapped_column(String, nullable=False)  # "COD" or "Digital"
     food_subtotal: Mapped[float] = mapped_column(Numeric, nullable=False)
     delivery_distance_km: Mapped[float] = mapped_column(Numeric, nullable=False)
@@ -76,16 +83,18 @@ class Order(BaseModel):
     currency: Mapped[str] = mapped_column(String, nullable=False)
     cancellation_reason: Mapped[str | None] = mapped_column(String, nullable=True)
     cancelled_by: Mapped[str | None] = mapped_column(String, nullable=True)
-    placed_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    placed_at: Mapped[object | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )  # admin dashboard/report date ranges + newest-first ordering
     delivered_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class OrderItem(BaseModel):
     order_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False, index=True
+    )  # per-order item loading on every order detail/history view
     menu_item_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("menu_items.id"), nullable=False
+        UUID(as_uuid=True), ForeignKey("menu_items.id"), nullable=False, index=True
     )
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     selected_variant: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -94,10 +103,10 @@ class OrderItem(BaseModel):
 
 class Rating(BaseModel):
     order_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False, index=True
+    )  # one-rating-per-order existence check
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
     restaurant_rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
     rider_rating: Mapped[int | None] = mapped_column(Integer, nullable=True)

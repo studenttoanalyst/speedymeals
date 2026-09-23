@@ -31,7 +31,9 @@ class RefreshToken(BaseModel):
     hash of the raw token, never the raw token itself, matching how we
     never store raw passwords either.
     """
-    subject_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    subject_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )  # token lookup on logout/refresh (previously only in the migration)
     role: Mapped[str] = mapped_column(String, nullable=False)  # "customer"|"rider"|"restaurant"|"admin"
     token_hash: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     status: Mapped[str] = mapped_column(String, default="valid", nullable=False)  # "valid"|"revoked"

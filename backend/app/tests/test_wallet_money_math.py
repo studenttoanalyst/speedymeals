@@ -13,6 +13,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.modules.food_delivery.models import Order, Restaurant
+from app.modules.food_delivery.service import calculate_delivery_fee
 from app.platform.users.models import Address, User
 from app.platform.wallet_payment import service
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout
@@ -57,7 +58,7 @@ def _make_address(db, user):
 
 def _make_order(
     db, restaurant, customer, address, rider,
-    payment_method="COD", total_amount=610, rider_earning=110, delivered_at=None,
+    payment_method="COD", total_amount=675, rider_earning=175, delivered_at=None,
 ):
     order = Order(
         user_id=customer.id,
@@ -68,7 +69,7 @@ def _make_order(
         payment_method=payment_method,
         food_subtotal=500,
         delivery_distance_km=3,
-        delivery_fee=110,
+        delivery_fee=calculate_delivery_fee(3),
         total_amount=total_amount,
         commission_amount=50,
         restaurant_payable=450,
@@ -99,12 +100,12 @@ def scenario(db_session, rider):
 
 def test_expected_cash_sums_cod_delivered_orders_only(db_session, rider, scenario):
     _make_order(db_session, scenario["restaurant"], scenario["customer"], scenario["address"],
-                rider, payment_method="COD", total_amount=610)
+                rider, payment_method="COD", total_amount=675)
     _make_order(db_session, scenario["restaurant"], scenario["customer"], scenario["address"],
                 rider, payment_method="Digital", total_amount=999)  # must NOT count
 
-    deposit = service.create_cash_deposit(db_session, rider.id, 610, "bank_transfer")
-    assert deposit.expected_amount == 610  # Digital order excluded
+    deposit = service.create_cash_deposit(db_session, rider.id, 675, "bank_transfer")
+    assert deposit.expected_amount == 675  # Digital order excluded
 
 
 def test_expected_cash_only_counts_orders_after_last_deposit(db_session, rider, scenario):

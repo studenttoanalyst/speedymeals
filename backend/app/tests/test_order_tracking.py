@@ -79,11 +79,13 @@ def _make_rider(db):
 
 
 def _make_order(db, customer, restaurant, address, rider=None, order_status="Accepted"):
+    delivery_fee = service.calculate_delivery_fee(3)
     order = Order(
         user_id=customer.id, restaurant_id=restaurant.id, rider_id=rider.id if rider else None,
         delivery_address_id=address.id, status=order_status, payment_method="COD",
-        food_subtotal=1000, delivery_distance_km=3, delivery_fee=110, total_amount=1110,
-        commission_amount=100, restaurant_payable=900, rider_earning=110,
+        food_subtotal=1000, delivery_distance_km=3, delivery_fee=delivery_fee,
+        total_amount=1000 + delivery_fee,
+        commission_amount=100, restaurant_payable=900, rider_earning=delivery_fee,
         country_code="+92", currency="PKR", placed_at=datetime.now(timezone.utc),
     )
     db.add(order)
@@ -134,7 +136,7 @@ def test_tracking_returns_status_and_totals(db_session, customer, address, resta
     result = service.get_order_tracking(db_session, customer.id, order.id)
 
     assert result["status"] == "Accepted"
-    assert result["total_amount"] == 1110
+    assert result["total_amount"] == 1175
     assert len(result["items"]) == 1
     assert result["items"][0]["name"] == "Biryani"
     assert result["items"][0]["quantity"] == 2

@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 
 from app.core.database import get_db
 from app.modules.food_delivery.models import Order, Restaurant
+from app.modules.food_delivery.service import calculate_delivery_fee
 from app.platform.auth.jwt_utils import create_access_token
 from app.platform.users.models import Address, User
 from app.platform.wallet_payment import service
@@ -203,7 +204,7 @@ def test_can_assign_cod_false_at_or_above_cap(db_session, rider):
 # --- Rider wallet profile + assignment history (GET endpoints) ---
 
 
-def _make_delivery_order(db, rider, status="Delivered", earning=110):
+def _make_delivery_order(db, rider, status="Delivered", earning=175):
     """Helper: minimal Order + required FK rows assigned to `rider`
     (same shape as test_rider_accept_reject.py's _make_order)."""
     unique = uuid.uuid4().hex[:8]
@@ -234,8 +235,8 @@ def _make_delivery_order(db, rider, status="Delivered", earning=110):
         payment_method="COD",
         food_subtotal=500,
         delivery_distance_km=3,
-        delivery_fee=110,
-        total_amount=610,
+        delivery_fee=calculate_delivery_fee(3),
+        total_amount=675,
         commission_amount=50,
         restaurant_payable=450,
         rider_earning=earning,
@@ -310,7 +311,7 @@ def test_rider_assignments_split_active_and_past(db_session, rider):
     assert [a["id"] for a in result["active"]] == [active.id]
     assert [p["id"] for p in result["past"]] == [past.id]
     # payout details come from the frozen per-order snapshot columns
-    assert result["past"][0]["rider_earning"] == 110
+    assert result["past"][0]["rider_earning"] == 175
     assert result["past"][0]["delivered_at"] is not None
     assert result["active"][0]["delivered_at"] is None
 
@@ -385,7 +386,7 @@ def test_assignments_route_returns_riders_orders(wallet_read_client, db_session,
     body = response.json()
     assert [a["id"] for a in body["active"]] == [str(active.id)]
     assert [p["id"] for p in body["past"]] == [str(past.id)]
-    assert body["past"][0]["rider_earning"] == 110.0
+    assert body["past"][0]["rider_earning"] == 175.0
 
 
 def test_assignments_route_missing_token_rejected(wallet_read_client):

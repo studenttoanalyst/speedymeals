@@ -7,13 +7,15 @@ token; the customer browse route requires "customer" — rider/restaurant/
 admin tokens get 403 either way, same RBAC pattern as
 platform/users/routes.py.
 """
+import json
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.redis_client import redis_client
 from app.platform.auth.dependencies import CurrentUser, require_role
 from app.modules.food_delivery import service
 from app.modules.food_delivery.schemas import (
@@ -173,20 +175,40 @@ def preview_my_checkout(
     return service.preview_checkout(db, current_user.id, restaurant_id, address_id)
 
 
+# Cached checkout responses replay for 24h — a retried POST with the same
+# Idempotency-Key returns the original order instead of placing a second one.
+IDEMPOTENCY_TTL_SECONDS = 86400
+
+
 @customer_router.post("/{restaurant_id}/cart/checkout", response_model=PlaceOrderResponseSchema, status_code=status.HTTP_201_CREATED)
 def place_my_order(
     restaurant_id: uuid.UUID,
     payload: PlaceOrderSchema,
+    idempotency_key: uuid.UUID = Header(...),  # required, UUID format -> 422 otherwise
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
     """Step 6 — convert this restaurant's cart into a real order. All prices
     are re-read from the DB and frozen on the order row (commission via the
     Phase 4 helper, rider earning = 100% of delivery fee). The Redis cart
-    is cleared only after the DB commit succeeds."""
-    return service.place_order(
+    is cleared only after the DB commit succeeds.
+
+    Requires a UUID `Idempotency-Key` header: the placed order's response is
+    cached in Redis under `idempotency:{user_id}:{key}` for 24h and a retry
+    with the same key replays it (no duplicate order). Failed placements are
+    never cached, so a rejected order can be retried with the same key."""
+    cache_key = f"idempotency:{current_user.id}:{idempotency_key}"
+    cached = redis_client.get(cache_key)
+    if cached:
+        return json.loads(cached)
+
+    result = service.place_order(
         db, current_user.id, restaurant_id, payload.address_id, payload.payment_method
     )
+    redis_client.setex(
+        cache_key, IDEMPOTENCY_TTL_SECONDS, json.dumps(result, default=str)
+    )
+    return result
 
 
 @router.get("", response_model=list[MenuItemResponseSchema])

@@ -14,7 +14,7 @@ are added here in Step 3d - both depend on tables that already exist
 """
 import uuid
 
-from sqlalchemy import String, Boolean, Integer, Numeric, Text, Date, DateTime, ForeignKey
+from sqlalchemy import String, Boolean, Integer, Numeric, Text, Date, DateTime, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -45,12 +45,16 @@ class Rider(BaseModel, UpdatedAtMixin):
     kit_box_issued: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     kit_verified_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     kit_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    shirt_serial_number: Mapped[str | None] = mapped_column(String, nullable=True)
+    shirt_serial_numbers: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    box_serial_number: Mapped[str | None] = mapped_column(String, nullable=True)
+    helmet_serial_number: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class WalletTransaction(BaseModel):
     rider_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("riders.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("riders.id"), nullable=False, index=True
+    )  # recharge-count gate + wallet transaction history
     order_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("orders.id"), nullable=True
     )  # nullable: a wallet recharge has no order, only a per-delivery deduction does
@@ -61,8 +65,8 @@ class WalletTransaction(BaseModel):
 
 class CashDeposit(BaseModel):
     rider_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("riders.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("riders.id"), nullable=False, index=True
+    )  # last-deposit lookup before every deposit + expected-cash math
     amount_submitted: Mapped[float] = mapped_column(Numeric, nullable=False)
     expected_amount: Mapped[float] = mapped_column(Numeric, nullable=False)
     discrepancy: Mapped[float] = mapped_column(Numeric, default=0, nullable=False)
@@ -85,8 +89,8 @@ class Settlement(BaseModel):
 
 class RiderPayout(BaseModel):
     rider_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("riders.id"), nullable=False
-    )
+        UUID(as_uuid=True), ForeignKey("riders.id"), nullable=False, index=True
+    )  # payout history + last-payout lookup in earnings summary
     period_start: Mapped[object] = mapped_column(Date, nullable=False)
     period_end: Mapped[object] = mapped_column(Date, nullable=False)
     total_earning: Mapped[float] = mapped_column(Numeric, nullable=False)

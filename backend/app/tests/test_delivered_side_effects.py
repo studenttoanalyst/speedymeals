@@ -59,6 +59,7 @@ def _make_address(db, user):
 
 
 def _make_order(db, restaurant, customer, address, payment_method="COD", rider=None):
+    delivery_fee = service.calculate_delivery_fee(3)
     order = Order(
         user_id=customer.id,
         restaurant_id=restaurant.id,
@@ -67,11 +68,11 @@ def _make_order(db, restaurant, customer, address, payment_method="COD", rider=N
         payment_method=payment_method,
         food_subtotal=500,
         delivery_distance_km=3,
-        delivery_fee=110,
-        total_amount=610,
+        delivery_fee=delivery_fee,
+        total_amount=500 + delivery_fee,
         commission_amount=50,
         restaurant_payable=450,
-        rider_earning=110,
+        rider_earning=delivery_fee,
         rider_id=rider.id if rider else None,
         country_code="+92",
         currency="PKR",
@@ -161,7 +162,7 @@ def test_delivered_cod_deducts_wallet_and_increases_cash_owed(db_session):
     assert result["status"] == "Delivered"
     db_session.refresh(rider)
     assert float(rider.wallet_balance) == 990  # 1000 - 10
-    assert float(rider.pending_cash_owed) == 610  # 0 + order.total_amount
+    assert float(rider.pending_cash_owed) == 675  # 0 + order.total_amount
 
 
 def test_delivered_cod_cash_owed_uses_frozen_total(db_session):
@@ -192,7 +193,7 @@ def test_delivered_cod_accumulates_cash_owed(db_session):
     service.rider_advance_delivery_status(db_session, rider.id, order2.id, "Delivered")
 
     db_session.refresh(rider)
-    assert float(rider.pending_cash_owed) == 1220  # 610 + 610
+    assert float(rider.pending_cash_owed) == 1350  # 675 + 675
     assert float(rider.wallet_balance) == 980  # 1000 - 10 - 10
 
 

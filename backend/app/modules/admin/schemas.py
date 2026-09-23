@@ -109,6 +109,10 @@ class RiderKitUpdateSchema(BaseModel):
     kit_deposit_paid: bool
     kit_shirts_issued: int = Field(ge=0, le=10)
     kit_box_issued: bool
+    shirt_serial_number: str | None = None
+    shirt_serial_numbers: list[str] | None = None
+    box_serial_number: str | None = None
+    helmet_serial_number: str | None = None
 
 
 class RiderKitResponseSchema(BaseModel):
@@ -120,6 +124,10 @@ class RiderKitResponseSchema(BaseModel):
     kit_box_issued: bool
     kit_verified_by: uuid.UUID | None
     kit_completed: bool
+    shirt_serial_number: str | None = None
+    shirt_serial_numbers: list[str] | None = None
+    box_serial_number: str | None = None
+    helmet_serial_number: str | None = None
     created_at: datetime
 
 
