@@ -776,6 +776,7 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | GET | `/restaurants/{id}/cart/checkout-preview` | Preview checkout |
 | POST | `/restaurants/{id}/cart/checkout` | Place order |
 | GET | `/orders/{id}/track` | Track order |
+| GET | `/orders/{id}/rider-location` | Live rider GPS (read from Redis) |
 | GET | `/orders` | Order history |
 | POST | `/orders/{id}/reorder` | Reorder |
 | POST | `/orders/{id}/rating` | Rate order |
@@ -804,6 +805,8 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | POST | `/wallet/cash-deposit` | Submit COD cash |
 | GET | `/wallet/cod-eligibility` | Check COD cap |
 | GET | `/wallet/earnings` | Earnings summary |
+| GET | `/wallet/profile` | Combined rider wallet profile view |
+| GET | `/wallet/assignments` | List this rider's assigned orders |
 | PATCH | `/wallet/location` | Push GPS location |
 | POST | `/wallet/assignments/{id}/respond` | Accept/reject order |
 | PATCH | `/wallet/deliveries/{id}/status/arrived` | Mark arrived |
@@ -1017,6 +1020,14 @@ Errors: 0
 - No idempotency keys on order placement
 - No database indexes beyond primary keys and unique constraints
 - Admin kit verification does not track individual shirt/box serial numbers
+
+### Recently Resolved Gaps
+
+| Gap | Status | Implementation |
+|-----|--------|----------------|
+| Rider wallet read endpoints (`GET /wallet/profile`, `GET /wallet/assignments`) | **[COMPLETED]** | Available on the `wallet_payment` router (`/wallet` prefix) in `platform/wallet_payment/routes.py`; responses via `RiderWalletProfileResponseSchema` and `RiderAssignmentsResponseSchema` |
+| Order tracking payload (`restaurant_name`) | **[COMPLETED]** | `restaurant_name` is included in `get_order_tracking()` (joined from `restaurants` in the same read) and `OrderTrackingResponseSchema` |
+| Rider live location read path (`GET /orders/{id}/rider-location`) | **[COMPLETED]** | Customer-facing endpoint on the `food_delivery` router reads rider GPS coordinates from Redis (`rider_location:{rider_id}`, 45s TTL); nulls when no fresh location exists, 409 on terminal orders |
 
 ---
 
