@@ -67,6 +67,7 @@ def _make_address(db, user, lat=31.52, lng=74.35):
 
 def _make_order(db, restaurant, customer, address, status="Preparing"):
     from datetime import datetime, timezone
+    delivery_fee = service.calculate_delivery_fee(3)
     order = Order(
         user_id=customer.id,
         restaurant_id=restaurant.id,
@@ -75,11 +76,11 @@ def _make_order(db, restaurant, customer, address, status="Preparing"):
         payment_method="COD",
         food_subtotal=500,
         delivery_distance_km=3,
-        delivery_fee=110,
-        total_amount=610,
+        delivery_fee=delivery_fee,
+        total_amount=500 + delivery_fee,
         commission_amount=50,
         restaurant_payable=450,
-        rider_earning=110,
+        rider_earning=delivery_fee,
         country_code="+92",
         currency="PKR",
         placed_at=datetime.now(timezone.utc),
@@ -182,12 +183,12 @@ def test_offline_rider_ignored(db_session):
 
 
 def test_insufficient_wallet_rider_ignored(db_session):
-    """Rider with wallet < 500 is not eligible → not assigned."""
+    """Rider with wallet < 100 (auto-offline threshold) is not eligible."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
     order = _make_order(db_session, restaurant, customer, address)
-    rider = _make_rider(db_session, wallet=100, lat=31.531, lng=74.361)
+    rider = _make_rider(db_session, wallet=50, lat=31.531, lng=74.361)
 
     try:
         result = service.update_order_status(

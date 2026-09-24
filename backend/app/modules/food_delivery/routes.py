@@ -7,13 +7,15 @@ token; the customer browse route requires "customer" — rider/restaurant/
 admin tokens get 403 either way, same RBAC pattern as
 platform/users/routes.py.
 """
+import json
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.redis_client import redis_client
 from app.platform.auth.dependencies import CurrentUser, require_role
 from app.modules.food_delivery import service
 from app.modules.food_delivery.schemas import (
@@ -30,6 +32,7 @@ from app.modules.food_delivery.schemas import (
     MenuItemResponseSchema,
     MenuItemUpdateSchema,
     OrderHistoryResponseSchema,
+    OrderRiderLocationResponseSchema,
     OrderStatusUpdateSchema,
     OrderTrackingResponseSchema,
     RatingCreateSchema,
@@ -51,6 +54,10 @@ customer_orders_router = APIRouter(prefix="/orders", tags=["customer-orders"])
 
 require_restaurant = require_role(["restaurant"])
 require_customer = require_role(["customer"])
+# Rider-location read path: the customer who placed the order, or an admin
+# (ownership itself is enforced in the service's WHERE clause — this only
+# gates which roles may reach the handler at all).
+require_customer_or_admin = require_role(["customer", "admin"])
 
 
 @customer_router.get("", response_model=list[CustomerRestaurantResponseSchema])
@@ -168,20 +175,40 @@ def preview_my_checkout(
     return service.preview_checkout(db, current_user.id, restaurant_id, address_id)
 
 
+# Cached checkout responses replay for 24h — a retried POST with the same
+# Idempotency-Key returns the original order instead of placing a second one.
+IDEMPOTENCY_TTL_SECONDS = 86400
+
+
 @customer_router.post("/{restaurant_id}/cart/checkout", response_model=PlaceOrderResponseSchema, status_code=status.HTTP_201_CREATED)
 def place_my_order(
     restaurant_id: uuid.UUID,
     payload: PlaceOrderSchema,
+    idempotency_key: uuid.UUID = Header(...),  # required, UUID format -> 422 otherwise
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
     """Step 6 — convert this restaurant's cart into a real order. All prices
     are re-read from the DB and frozen on the order row (commission via the
     Phase 4 helper, rider earning = 100% of delivery fee). The Redis cart
-    is cleared only after the DB commit succeeds."""
-    return service.place_order(
+    is cleared only after the DB commit succeeds.
+
+    Requires a UUID `Idempotency-Key` header: the placed order's response is
+    cached in Redis under `idempotency:{user_id}:{key}` for 24h and a retry
+    with the same key replays it (no duplicate order). Failed placements are
+    never cached, so a rejected order can be retried with the same key."""
+    cache_key = f"idempotency:{current_user.id}:{idempotency_key}"
+    cached = redis_client.get(cache_key)
+    if cached:
+        return json.loads(cached)
+
+    result = service.place_order(
         db, current_user.id, restaurant_id, payload.address_id, payload.payment_method
     )
+    redis_client.setex(
+        cache_key, IDEMPOTENCY_TTL_SECONDS, json.dumps(result, default=str)
+    )
+    return result
 
 
 @router.get("", response_model=list[MenuItemResponseSchema])
@@ -309,6 +336,26 @@ def track_my_order(
     no-leak pattern as the restaurant-side order lookup).
     """
     return service.get_order_tracking(db, current_user.id, order_id)
+
+
+@customer_orders_router.get(
+    "/{order_id}/rider-location", response_model=OrderRiderLocationResponseSchema
+)
+def track_rider_location(
+    order_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_customer_or_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Live rider GPS for the customer's own order — poll-based like /track
+    (no push, spec Sec 14). Owner-only via the service's WHERE clause
+    (another customer's order_id returns 404, not 403 — same no-leak
+    pattern as /track); admins may query any order. Terminal orders 409;
+    active orders with no fresh Redis location return null coordinates.
+    """
+    return service.get_order_rider_location(
+        db, current_user.id, current_user.role, order_id
+    )
 
 
 @customer_orders_router.get("", response_model=list[OrderHistoryResponseSchema])

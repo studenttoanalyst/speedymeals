@@ -128,11 +128,11 @@ def _run_full_lifecycle(db_session, monkeypatch, payment_method: str):
 
         # Sec 11 exact numbers hold at placement time regardless of payment method.
         assert placed["food_subtotal"] == 1000
-        assert placed["delivery_fee"] == 110
+        assert placed["delivery_fee"] == 175
         assert placed["commission_amount"] == 100
         assert placed["restaurant_payable"] == 900
-        assert placed["rider_earning"] == 110
-        assert placed["total_amount"] == 1110
+        assert placed["rider_earning"] == 175
+        assert placed["total_amount"] == 1175
 
         food_service.update_order_status(db_session, restaurant.id, order_id, "Preparing")
 
@@ -173,7 +173,7 @@ def test_full_lifecycle_cod(db_session, monkeypatch):
     assert float(rider.wallet_balance) == 990  # started at 1000
 
     # COD: full order total added to pending_cash_owed (spec Sec 3.4).
-    assert float(rider.pending_cash_owed) == 1110
+    assert float(rider.pending_cash_owed) == 1175
 
 
 # --- Digital path ---

@@ -19,10 +19,12 @@ from app.platform.wallet_payment.schemas import (
     OnlineStatusToggleSchema,
     RiderAssignmentActionSchema,
     RiderAssignmentResponseSchema,
+    RiderAssignmentsResponseSchema,
     RiderDocumentUploadResponseSchema,
     RiderEarningsResponseSchema,
     RiderLocationResponseSchema,
     RiderLocationUpdateSchema,
+    RiderWalletProfileResponseSchema,
     WalletBalanceResponseSchema,
     WalletRechargeRequestSchema,
     WalletTransactionResponseSchema,
@@ -222,3 +224,27 @@ async def upload_my_document(
     return service.upload_rider_document(
         db, current_user.id, doc_type, data, file.content_type, file.filename
     )
+
+
+# --- Rider wallet profile + assignment history (GET read views) ---
+
+
+@router.get("/profile", response_model=RiderWalletProfileResponseSchema)
+def get_wallet_profile(
+    current_user: CurrentUser = Depends(require_rider),
+    db: Session = Depends(get_db),
+):
+    """Combined rider wallet view — total earnings, current balance,
+    pending payouts, and wallet (online) status in one read. Rider-only;
+    rider_id comes from the token, never from the request."""
+    return service.get_rider_wallet_profile(db, current_user.id)
+
+
+@router.get("/assignments", response_model=RiderAssignmentsResponseSchema)
+def list_my_assignments(
+    current_user: CurrentUser = Depends(require_rider),
+    db: Session = Depends(get_db),
+):
+    """Active and past assigned deliveries with payout details — own
+    assignments only (rider_id from the authenticated token)."""
+    return service.get_rider_assignments(db, current_user.id)

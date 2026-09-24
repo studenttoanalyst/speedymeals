@@ -64,6 +64,7 @@ def _make_address(db, user):
 
 
 def _make_order(db, restaurant, customer, address, status="Accepted by Rider", rider=None):
+    delivery_fee = service.calculate_delivery_fee(3)
     order = Order(
         user_id=customer.id,
         restaurant_id=restaurant.id,
@@ -72,11 +73,11 @@ def _make_order(db, restaurant, customer, address, status="Accepted by Rider", r
         payment_method="COD",
         food_subtotal=500,
         delivery_distance_km=3,
-        delivery_fee=110,
-        total_amount=610,
+        delivery_fee=delivery_fee,
+        total_amount=500 + delivery_fee,
         commission_amount=50,
         restaurant_payable=450,
-        rider_earning=110,
+        rider_earning=delivery_fee,
         rider_id=rider.id if rider else None,
         country_code="+92",
         currency="PKR",
@@ -220,7 +221,7 @@ def test_delivered(db_session):
             db_session, rider.id, order.id, "Delivered"
         )
         assert result["status"] == "Delivered"
-        assert result["rider_earning"] == 110
+        assert result["rider_earning"] == 175
     finally:
         _cleanup(rider.id)
 
@@ -447,7 +448,7 @@ def test_route_delivered(db_session):
         assert response.status_code == 200
         body = response.json()
         assert body["status"] == "Delivered"
-        assert body["rider_earning"] == 110
+        assert body["rider_earning"] == 175
     finally:
         _cleanup(rider.id)
 

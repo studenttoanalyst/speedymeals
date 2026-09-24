@@ -23,7 +23,8 @@ from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating,
 from app.platform.wallet_payment.models import Rider
 from app.platform.wallet_payment.service import (
     DELIVERED_STATUS,
-    DELIVERY_DEDUCTION_AMOUNT,
+    DELIVERY_WALLET_DEDUCTION,
+    WALLET_REMINDER_THRESHOLD,
     _rider_location_key,
     deduct_delivery_fee,
     rider_eligible_for_assignment,
@@ -235,14 +236,20 @@ def get_order_tracking(db: Session, customer_id: uuid.UUID, order_id: uuid.UUID)
     Rider name/phone are included ONLY once a rider is actually assigned
     (order.rider_id set) — Step 2 of this phase. Before assignment those
     two fields are simply absent (None), never a placeholder/fake value.
+
+    restaurant_name is fetched in the SAME read via a join on restaurants
+    (no duplicate query — same pattern as list_customer_orders()); the
+    ownership WHERE clause is unchanged, as is all status logic.
     """
-    order = (
-        db.query(Order)
+    order_row = (
+        db.query(Order, Restaurant.name)
+        .join(Restaurant, Order.restaurant_id == Restaurant.id)
         .filter(Order.id == order_id, Order.user_id == customer_id)
         .first()
     )
-    if order is None:
+    if order_row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+    order, restaurant_name = order_row
 
     rider_name = None
     rider_phone = None
@@ -267,6 +274,7 @@ def get_order_tracking(db: Session, customer_id: uuid.UUID, order_id: uuid.UUID)
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
         "total_amount": order.total_amount,
+        "restaurant_name": restaurant_name,
         "rider_name": rider_name,
         "rider_phone": rider_phone,
         "placed_at": order.placed_at,
@@ -281,6 +289,72 @@ def get_order_tracking(db: Session, customer_id: uuid.UUID, order_id: uuid.UUID)
             }
             for item, name in item_rows
         ],
+    }
+
+
+# --- Customer rider-location read path (GET /orders/{id}/rider-location) ---
+
+# Statuses where the delivery is over, so there is no live rider location
+# left to serve — rejected with 409 instead of a misleading null. Mirrors
+# admin/service.py's _ORDER_LOCKED_STATUSES (Delivered/Cancelled) plus the
+# rider-side Rejected (rejected order has no assigned rider either).
+INACTIVE_DELIVERY_STATUSES = {DELIVERED_STATUS, "Cancelled", "Rejected"}
+
+
+def get_order_rider_location(
+    db: Session, viewer_id: uuid.UUID, viewer_role: str, order_id: uuid.UUID
+) -> dict:
+    """
+    Customer-facing live rider GPS for one order (poll-based, same
+    no-push reasoning as get_order_tracking()).
+
+    Authorization (strict): the customer who PLACED the order, or an admin.
+    For customers the ownership check lives in the WHERE clause itself
+    (order_id AND user_id) — another customer's order is indistinguishable
+    from a missing one (404, no leak, same pattern as get_order_tracking());
+    admins pass without the user_id filter (role comes from the verified
+    token, never from the request).
+
+    State check: terminal orders (Delivered/Cancelled/Rejected) raise 409 —
+    the delivery is over, nothing to track. Active orders return whatever
+    the rider's Redis location currently holds, with null
+    latitude/longitude/updated_at when no rider is assigned yet or the
+    short TTL (45s) expired — stale coordinates are never served.
+
+    Redis: reads the SAME key the existing write path uses, via the reused
+    _rider_location_key() helper — the write path is untouched (rule: use
+    the existing key format, don't fork it).
+    """
+    query = db.query(Order).filter(Order.id == order_id)
+    if viewer_role != "admin":
+        query = query.filter(Order.user_id == viewer_id)
+    order = query.first()
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+
+    if order.status in INACTIVE_DELIVERY_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Order in status '{order.status}' has no active rider location.",
+        )
+
+    latitude = longitude = updated_at = None
+    if order.rider_id is not None:
+        raw = redis_client.get(_rider_location_key(order.rider_id))
+        if raw is not None:
+            try:
+                location = json.loads(raw)
+                latitude = location["lat"]
+                longitude = location["lng"]
+                updated_at = location["updated_at"]
+            except (json.JSONDecodeError, KeyError, TypeError):
+                pass  # missing/corrupt payload -> nulls, never a 500 on a read path
+
+    return {
+        "order_id": order.id,
+        "latitude": latitude,
+        "longitude": longitude,
+        "updated_at": updated_at,
     }
 
 
@@ -1050,12 +1124,12 @@ def remove_cart_item(
 # --- Phase 5, Step 5: checkout price preview (distance + delivery fee) ---
 
 
-DELIVERY_FEE_BASE = Decimal("50")
-DELIVERY_FEE_PER_KM = Decimal("20")
+DELIVERY_FEE_BASE = Decimal("100")
+DELIVERY_FEE_PER_KM = Decimal("25")
 
 
 def calculate_delivery_fee(delivery_distance_km: Decimal | int | float) -> Decimal:
-    """Locked fee formula (spec Sec 3.3): fee = 50 + (km x 20). Decimal in,
+    """Locked fee formula: fee = 100 + (km x 25). Decimal in,
     Decimal out, quantized to paisa — never binary float."""
     distance = Decimal(str(delivery_distance_km))
     return (DELIVERY_FEE_BASE + distance * DELIVERY_FEE_PER_KM).quantize(Decimal("0.01"))
@@ -1231,12 +1305,10 @@ def place_order(
 
     Transaction behavior: orders + order_items are written inside ONE
     SQLAlchemy session/transaction (the project's existing get_db()
-    pattern — commit makes them atomic). The Redis cart is cleared ONLY
-    AFTER the DB commit succeeds, so a failed order creation never
-    destroys the customer's cart. No idempotency key exists in this
-    project; a duplicate click can at worst place two real orders (each
-    then sees an empty cart and fails with 400) — flagged as acceptable
-    MVP risk instead of building an idempotency system.
+    pattern — commit makes them atomic). The Redis cart    is cleared ONLY AFTER the DB commit succeeds, so a failed order creation never
+    destroys the customer's cart. Duplicate-click protection lives at the
+    route layer: POST .../cart/checkout requires a UUID Idempotency-Key and
+    replays the cached response for 24h (see routes.py place_my_order).
     """
     if payment_method not in VALID_PAYMENT_METHODS:
         raise HTTPException(

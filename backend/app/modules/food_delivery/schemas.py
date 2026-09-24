@@ -197,9 +197,10 @@ class CheckoutPreviewResponseSchema(BaseModel):
 
 
 class OrderTrackingResponseSchema(BaseModel):
-    """Phase 7, Step 1 — poll-based customer tracking. rider_name/rider_phone
-    are only populated once a rider is assigned (Step 2); None before that,
-    never a placeholder."""
+    """Phase 7, Step 1 — poll-based customer tracking. restaurant_name is
+    always present (joined from restaurants in the same read, no duplicate
+    query); rider_name/rider_phone are only populated once a rider is
+    assigned (Step 2); None before that, never a placeholder."""
     id: uuid.UUID
     status: str
     payment_method: str
@@ -207,11 +208,26 @@ class OrderTrackingResponseSchema(BaseModel):
     delivery_distance_km: float
     delivery_fee: float
     total_amount: float
+    restaurant_name: str
     rider_name: str | None
     rider_phone: str | None
     placed_at: datetime
     delivered_at: datetime | None
     items: list[RestaurantOrderItemResponseSchema]
+
+
+class OrderRiderLocationResponseSchema(BaseModel):
+    """Response for GET /orders/{order_id}/rider-location — live rider GPS
+    for an active delivery (same 4-field shape the client contract asks
+    for). Nulls while the order is active but no fresh Redis location
+    exists (no rider assigned yet, or the 45-second TTL expired) — stale
+    coordinates are never served. Terminal orders never reach this
+    payload; the service rejects them with 409 first. updated_at echoes
+    the ISO timestamp the existing write path stored."""
+    order_id: uuid.UUID
+    latitude: float | None
+    longitude: float | None
+    updated_at: str | None
 
 
 class OrderHistoryResponseSchema(BaseModel):
