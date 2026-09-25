@@ -1,6 +1,7 @@
 /**
  * SpeedyMeals Admin API Client
  * 1:1 mapping with backend `app/modules/admin/routes.py`
+ * Enhanced with Promotions, Customer Management, and KYC operations.
  */
 
 import { apiClient } from './client';
@@ -10,8 +11,11 @@ import {
   AdminOrderSummary,
   AdminReportsResponse,
   CashDiscrepancy,
+  CustomerAdmin,
   OrderCancelPayload,
   OrderReassignPayload,
+  PromotionAdmin,
+  PromotionCreatePayload,
   RestaurantAdmin,
   RestaurantCommissionUpdatePayload,
   RestaurantCreatePayload,
@@ -30,6 +34,8 @@ import {
   mockAdminDashboard,
   mockAdminOrders,
   mockCashDiscrepancies,
+  mockCustomers,
+  mockPromotions,
   mockRestaurants,
   mockRiderPayouts,
   mockRiders,
@@ -48,7 +54,7 @@ export async function getAdminDashboard(): Promise<AdminDashboardSummary> {
 /**
  * Step 2 — Restaurants Management
  */
-export async function listAdminRestaurants(status?: 'active' | 'inactive'): Promise<RestaurantAdmin[]> {
+export async function listAdminRestaurants(status?: 'active' | 'inactive' | 'pending'): Promise<RestaurantAdmin[]> {
   const query = status ? `?status=${status}` : '';
   const fallback = status
     ? mockRestaurants.filter((r) => r.status === status)
@@ -74,6 +80,8 @@ export async function createAdminRestaurant(payload: RestaurantCreatePayload): P
     phone_number: payload.phone_number,
     status: 'active',
     commission_rate: payload.commission_rate ?? 10.0,
+    logo_url: payload.logo_url ?? null,
+    banner_url: payload.banner_url ?? null,
     created_at: new Date().toISOString(),
   };
 
@@ -121,25 +129,35 @@ export async function updateAdminRestaurantCommission(
 export async function resetAdminRestaurantCredentials(
   restaurantId: string,
   payload: RestaurantCredentialsResetPayload
-): Promise<RestaurantAdmin> {
-  const base = mockRestaurants.find((r) => r.id === restaurantId) ?? mockRestaurants[0];
-  return apiClient<RestaurantAdmin>(`/admin/restaurants/${restaurantId}/reset-credentials`, {
+): Promise<void> {
+  return apiClient<void>(`/admin/restaurants/${restaurantId}/credentials`, {
     method: 'POST',
     body: JSON.stringify(payload),
-    fallbackData: base,
+    fallbackData: undefined,
   });
 }
 
 /**
  * Step 3 — Riders Management
  */
-export async function listAdminRiders(approvalStatus?: string): Promise<RiderAdmin[]> {
-  const query = approvalStatus ? `?approval_status=${approvalStatus}` : '';
-  const fallback = approvalStatus
-    ? mockRiders.filter((r) => r.approval_status === approvalStatus)
-    : mockRiders;
+export async function listAdminRiders(params?: {
+  approval_status?: string;
+  is_online?: boolean;
+}): Promise<RiderAdmin[]> {
+  const query = new URLSearchParams();
+  if (params?.approval_status) query.append('approval_status', params.approval_status);
+  if (params?.is_online !== undefined) query.append('is_online', String(params.is_online));
 
-  return apiClient<RiderAdmin[]>(`/admin/riders${query}`, {
+  const qs = query.toString() ? `?${query.toString()}` : '';
+  let fallback = [...mockRiders];
+  if (params?.approval_status) {
+    fallback = fallback.filter((r) => r.approval_status === params.approval_status);
+  }
+  if (params?.is_online !== undefined) {
+    fallback = fallback.filter((r) => r.is_online === params.is_online);
+  }
+
+  return apiClient<RiderAdmin[]>(`/admin/riders${qs}`, {
     fallbackData: fallback,
   });
 }
@@ -176,7 +194,6 @@ export async function updateAdminRiderStatus(
   const fallback: RiderAdmin = {
     ...base,
     is_active: payload.is_active,
-    is_online: payload.is_active ? base.is_online : false,
   };
 
   return apiClient<RiderAdmin>(`/admin/riders/${riderId}/status`, {
@@ -202,29 +219,40 @@ export async function listAdminOrders(params?: {
   if (params?.date_to) query.append('date_to', params.date_to);
 
   const qs = query.toString() ? `?${query.toString()}` : '';
+  let fallback = [...mockAdminOrders];
+  if (params?.status) {
+    fallback = fallback.filter((o) => o.status === params.status);
+  }
+  if (params?.restaurant_id) {
+    fallback = fallback.filter((o) => o.restaurant_id === params.restaurant_id);
+  }
+
   return apiClient<AdminOrderSummary[]>(`/admin/orders${qs}`, {
-    fallbackData: mockAdminOrders,
+    fallbackData: fallback,
   });
 }
 
 export async function getAdminOrder(orderId: string): Promise<AdminOrderDetail> {
+  const summary = mockAdminOrders.find((o) => o.id === orderId) ?? mockAdminOrders[0];
   const fallback: AdminOrderDetail = {
     id: orderId,
-    restaurant_id: mockRestaurants[0].id,
-    restaurant_name: mockRestaurants[0].name,
-    customer_name: 'Ahmed Khan',
-    rider_id: mockRiders[0].id,
-    rider_name: mockRiders[0].name,
-    status: 'On the Way',
-    payment_method: 'COD',
+    restaurant_id: summary.restaurant_id,
+    restaurant_name: summary.restaurant_name,
+    customer_name: 'Ahmed Faraz',
+    customer_phone: '+923001239876',
+    rider_id: summary.rider_id ?? null,
+    rider_name: summary.rider_name ?? 'Unassigned',
+    rider_phone: '+923011234567',
+    status: summary.status,
+    payment_method: summary.payment_method,
     food_subtotal: 1350.0,
     delivery_distance_km: 3.2,
-    delivery_fee: 114.0,
-    total_amount: 1464.0,
-    commission_amount: 135.0,
+    delivery_fee: 100.0,
+    total_amount: summary.total_amount,
+    commission_amount: 135.0, // 10%
     restaurant_payable: 1215.0,
-    rider_earning: 114.0,
-    placed_at: '2026-09-13T01:30:00Z',
+    rider_earning: 100.0, // 100% of delivery fee
+    placed_at: summary.placed_at,
     delivered_at: null,
   };
 
@@ -239,7 +267,7 @@ export async function cancelAdminOrder(orderId: string, payload: OrderCancelPayl
     ...base,
     status: 'Cancelled',
     cancellation_reason: payload.reason,
-    cancelled_by: 'admin',
+    cancelled_by: 'Admin',
   };
 
   return apiClient<AdminOrderDetail>(`/admin/orders/${orderId}/cancel`, {
@@ -260,14 +288,14 @@ export async function reassignAdminOrder(orderId: string, payload: OrderReassign
   };
 
   return apiClient<AdminOrderDetail>(`/admin/orders/${orderId}/reassign`, {
-    method: 'PATCH',
+    method: 'POST',
     body: JSON.stringify(payload),
     fallbackData: fallback,
   });
 }
 
 /**
- * Step 5 — Settlements
+ * Step 5 — Settlements Management
  */
 export async function generateAdminSettlements(payload: SettlementPeriodPayload): Promise<Settlement[]> {
   return apiClient<Settlement[]>('/admin/settlements/generate', {
@@ -292,6 +320,7 @@ export async function markAdminSettlementPaid(settlementId: string): Promise<Set
     ...base,
     status: 'Settled',
     paid_at: new Date().toISOString(),
+    reference_code: `TXN-${Date.now().toString().slice(-6)}`,
   };
 
   return apiClient<Settlement>(`/admin/settlements/${settlementId}/mark-paid`, {
@@ -326,6 +355,7 @@ export async function markAdminRiderPayoutPaid(payoutId: string): Promise<RiderP
     ...base,
     status: 'Paid',
     paid_at: new Date().toISOString(),
+    reference_code: `RDR-${Date.now().toString().slice(-6)}`,
   };
 
   return apiClient<RiderPayout>(`/admin/rider-payouts/${payoutId}/mark-paid`, {
@@ -341,7 +371,77 @@ export async function listAdminCashDiscrepancies(unresolvedOnly = true): Promise
 }
 
 /**
- * Step 7 — Reports
+ * Step 7 — Promotions Management
+ */
+export async function listAdminPromotions(): Promise<PromotionAdmin[]> {
+  return apiClient<PromotionAdmin[]>('/admin/promotions', {
+    fallbackData: mockPromotions,
+  });
+}
+
+export async function createAdminPromotion(payload: PromotionCreatePayload): Promise<PromotionAdmin> {
+  const fallback: PromotionAdmin = {
+    id: `promo-${Date.now()}`,
+    code: payload.code.toUpperCase(),
+    title: payload.title,
+    description: payload.description,
+    banner_url: payload.banner_url,
+    discount_type: payload.discount_type,
+    discount_value: payload.discount_value,
+    min_order_value: payload.min_order_value,
+    max_discount_amount: payload.max_discount_amount,
+    valid_from: payload.valid_from,
+    valid_until: payload.valid_until,
+    is_active: payload.is_active,
+    usage_count: 0,
+  };
+
+  return apiClient<PromotionAdmin>('/admin/promotions', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    fallbackData: fallback,
+  });
+}
+
+export async function toggleAdminPromotionStatus(promotionId: string, isActive: boolean): Promise<PromotionAdmin> {
+  const base = mockPromotions.find((p) => p.id === promotionId) ?? mockPromotions[0];
+  const fallback: PromotionAdmin = {
+    ...base,
+    is_active: isActive,
+  };
+
+  return apiClient<PromotionAdmin>(`/admin/promotions/${promotionId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_active: isActive }),
+    fallbackData: fallback,
+  });
+}
+
+/**
+ * Step 8 — Customers Management
+ */
+export async function listAdminCustomers(): Promise<CustomerAdmin[]> {
+  return apiClient<CustomerAdmin[]>('/admin/customers', {
+    fallbackData: mockCustomers,
+  });
+}
+
+export async function toggleAdminCustomerStatus(customerId: string, isActive: boolean): Promise<CustomerAdmin> {
+  const base = mockCustomers.find((c) => c.id === customerId) ?? mockCustomers[0];
+  const fallback: CustomerAdmin = {
+    ...base,
+    is_active: isActive,
+  };
+
+  return apiClient<CustomerAdmin>(`/admin/customers/${customerId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_active: isActive }),
+    fallbackData: fallback,
+  });
+}
+
+/**
+ * Step 9 — Reports
  */
 export async function getAdminReports(periodStart: string, periodEnd: string): Promise<AdminReportsResponse> {
   const fallback: AdminReportsResponse = {

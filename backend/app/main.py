@@ -4,6 +4,7 @@ App entry point. Run with:
 (run this command from inside backend/ folder, not backend/app/)
 """
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import SessionLocal
 from app.platform.auth import service as auth_service
@@ -19,6 +20,19 @@ from app.modules.food_delivery.routes import (
 )
 
 app = FastAPI(title="SpeedyMeals API", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(users_router)

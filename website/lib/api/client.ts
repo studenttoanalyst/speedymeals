@@ -57,10 +57,50 @@ export async function apiClient<T>(
   const url = `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 
   try {
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       ...restOptions,
       headers: requestHeaders,
     });
+
+    // 1. If 401 Unauthorized, automatically attempt refresh with refresh_token
+    if (res.status === 401 && !skipAuth && typeof window !== 'undefined') {
+      const refreshToken = localStorage.getItem('sm_refresh_token');
+      if (refreshToken) {
+        try {
+          const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+          });
+
+          if (refreshRes.ok) {
+            const data = await refreshRes.json();
+            if (data?.access_token) {
+              localStorage.setItem('sm_access_token', data.access_token);
+              if (data.refresh_token) {
+                localStorage.setItem('sm_refresh_token', data.refresh_token);
+              }
+              document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax`;
+
+              // Retry original request with freshly minted access token
+              requestHeaders['Authorization'] = `Bearer ${data.access_token}`;
+              res = await fetch(url, {
+                ...restOptions,
+                headers: requestHeaders,
+              });
+            }
+          }
+        } catch (refreshErr) {
+          console.warn('[SpeedyMeals API] Automatic token refresh attempt failed:', refreshErr);
+        }
+      }
+    }
+
+    // 2. Handle 404 specifically when fallback data is available
+    if (res.status === 404 && fallbackData !== undefined) {
+      console.warn(`[SpeedyMeals API] Endpoint ${path} returned 404. Serving configured fallback fixture.`);
+      return fallbackData as T;
+    }
 
     if (!res.ok) {
       let errorBody: any = null;
@@ -75,6 +115,12 @@ export async function apiClient<T>(
         (typeof errorBody === 'object' && errorBody?.message) ||
         `API error ${res.status}: ${res.statusText}`;
 
+      // If fallback data is available on any error, use it gracefully
+      if (fallbackData !== undefined) {
+        console.warn(`[SpeedyMeals API] Request to ${url} failed with ${res.status}. Falling back to local data.`);
+        return fallbackData as T;
+      }
+
       throw new ApiError(res.status, errorMessage, errorBody);
     }
 
@@ -84,11 +130,8 @@ export async function apiClient<T>(
 
     return (await res.json()) as T;
   } catch (err: any) {
-    // If backend is offline / network refused and fallback data is provided, use it gracefully in development
-    if (
-      fallbackData !== undefined &&
-      (err.name === 'TypeError' || err.message?.includes('fetch failed') || err.message?.includes('NetworkError'))
-    ) {
+    // If backend is offline / network refused and fallback data is provided, use it gracefully
+    if (fallbackData !== undefined) {
       console.warn(`[SpeedyMeals API] Backend unreachable at ${url}. Using local fallback data.`, err);
       return fallbackData as T;
     }

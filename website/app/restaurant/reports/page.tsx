@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChartLineUp, Receipt, Coins, Calendar } from '@phosphor-icons/react';
+import { ChartLineUp, Receipt, Coins, Calendar, DownloadSimple, TrendUp } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { StatCard } from '@/components/dashboard/StatCard';
-import { DataTable } from '@/components/dashboard/DataTable';
+import { DataTable, Column } from '@/components/dashboard/DataTable';
 
 interface DailyReportRow {
   date: string;
@@ -33,98 +33,144 @@ export default function RestaurantReportsPage() {
   const totalGross = mockDailyRows.reduce((acc, r) => acc + r.gross_sales, 0);
   const totalNet = mockDailyRows.reduce((acc, r) => acc + r.net_earnings, 0);
 
+  const columns: Column<DailyReportRow>[] = [
+    {
+      key: 'date',
+      title: 'Date',
+      sortable: true,
+      render: (r) => (
+        <span className="font-mono text-xs font-semibold text-slate-800">
+          {r.date}
+        </span>
+      ),
+    },
+    {
+      key: 'order_count',
+      title: 'Orders Delivered',
+      align: 'center',
+      sortable: true,
+      render: (r) => (
+        <span className="font-mono text-xs font-semibold text-slate-800 px-2 py-0.5 rounded-md bg-slate-100">
+          {r.order_count}
+        </span>
+      ),
+    },
+    {
+      key: 'gross_sales',
+      title: 'Gross Food Sales',
+      align: 'right',
+      sortable: true,
+      render: (r) => (
+        <span className="font-mono text-xs font-medium text-slate-800">
+          {formatPKR(r.gross_sales)}
+        </span>
+      ),
+    },
+    {
+      key: 'commission',
+      title: 'Platform Fee (10%)',
+      align: 'right',
+      sortable: true,
+      render: (r) => (
+        <span className="font-mono text-xs font-medium text-rose-600">
+          −{formatPKR(r.commission)}
+        </span>
+      ),
+    },
+    {
+      key: 'net_earnings',
+      title: 'Net Restaurant Payable',
+      align: 'right',
+      sortable: true,
+      render: (r) => (
+        <span className="font-mono text-xs font-bold text-emerald-700">
+          {formatPKR(r.net_earnings)}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Kitchen Sales Analytics"
-        description="Daily sales volume, commission deductions, and periodic revenue performance."
+        title="Sales Analytics & Trends"
+        description="Daily sales volume, platform commission, and kitchen revenue performance."
+        actions={
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs flex items-center gap-1.5"
+          >
+            <DownloadSimple size={14} weight="bold" />
+            <span>Export Analytics</span>
+          </button>
+        }
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 max-w-7xl mx-auto w-full space-y-6 print:p-0 print:max-w-none print:space-y-4">
+        {/* Document Header (Clean Print Version) */}
+        <div className="hidden print:block pb-4 border-b-2 border-slate-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-bold font-mono tracking-widest text-rose-600 uppercase">
+                SpeedyMeals Restaurant Partner Portal
+              </div>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+                Sales Analytics & Revenue Performance
+              </h1>
+              <p className="text-xs text-slate-500 font-mono mt-1">
+                Kitchen Turnover, Platform Commission & Settlement Breakdown
+              </p>
+            </div>
+            <div className="text-right text-[11px] font-mono text-slate-400">
+              Export Date: {new Date().toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             label="7-Day Completed Orders"
             value={totalOrders}
-            subValue="Fulfilled customer tickets"
+            change={{ value: '+18.4%', isPositive: true, period: 'vs prior 7 days' }}
             accent="blue"
-            icon={<Receipt size={18} />}
+            icon={<Receipt size={18} weight="bold" />}
+            targetBenchmark="Fulfilled"
           />
+
           <StatCard
             label="7-Day Gross Sales"
             value={formatPKR(totalGross)}
             subValue="Food merchandise total"
-            accent="tan"
-            icon={<Coins size={18} />}
+            accent="amber"
+            icon={<Coins size={18} weight="bold" />}
+            targetBenchmark="Target Met"
           />
+
           <StatCard
             label="7-Day Net Payout"
             value={formatPKR(totalNet)}
-            subValue="90% net after commission"
-            accent="red"
-            icon={<ChartLineUp size={18} />}
+            change={{ value: '+16.2%', isPositive: true, period: 'net growth' }}
+            accent="emerald"
+            icon={<ChartLineUp size={18} weight="bold" />}
+            targetBenchmark="90% Net Share"
           />
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-ink-soft" />
-            <h2 className="font-heading font-bold text-sm text-ink uppercase tracking-wide">
+            <Calendar size={16} className="text-slate-400" />
+            <h2 className="font-bold text-sm text-slate-900">
               Daily Breakdown History
             </h2>
           </div>
 
           <DataTable<DailyReportRow>
             data={mockDailyRows}
+            columns={columns}
             keyExtractor={(r) => r.date}
-            columns={[
-              {
-                key: 'date',
-                title: 'Date',
-                render: (r) => (
-                  <span className="font-mono text-xs font-semibold text-ink">
-                    {r.date}
-                  </span>
-                ),
-              },
-              {
-                key: 'order_count',
-                title: 'Orders Delivered',
-                align: 'center',
-                render: (r) => (
-                  <span className="font-mono text-xs text-ink">{r.order_count}</span>
-                ),
-              },
-              {
-                key: 'gross_sales',
-                title: 'Gross Food Sales',
-                align: 'right',
-                render: (r) => (
-                  <span className="font-mono text-xs font-semibold text-ink">
-                    {formatPKR(r.gross_sales)}
-                  </span>
-                ),
-              },
-              {
-                key: 'commission',
-                title: 'Platform Fee (10%)',
-                align: 'right',
-                render: (r) => (
-                  <span className="font-mono text-xs text-red font-semibold">
-                    -{formatPKR(r.commission)}
-                  </span>
-                ),
-              },
-              {
-                key: 'net_earnings',
-                title: 'Net Kitchen Earnings (90%)',
-                align: 'right',
-                render: (r) => (
-                  <span className="font-mono text-xs font-bold text-[#1E7E34]">
-                    {formatPKR(r.net_earnings)}
-                  </span>
-                ),
-              },
-            ]}
+            searchPlaceholder="Filter by date..."
+            searchFilter={(r, q) => r.date.includes(q)}
           />
         </div>
       </div>

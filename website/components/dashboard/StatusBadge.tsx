@@ -11,8 +11,8 @@ export interface StatusBadgeProps {
 export function StatusBadge({ status, className = '', size = 'md' }: StatusBadgeProps) {
   const normalized = status.toLowerCase().replace(/_/g, ' ').trim();
 
-  let colors = 'bg-paper-off text-ink-soft border-line';
-  let dotColor = 'bg-ink-soft';
+  let colors = 'bg-slate-50 text-slate-700 ring-slate-200';
+  let dotColor = 'bg-slate-400';
 
   switch (normalized) {
     case 'delivered':
@@ -20,8 +20,9 @@ export function StatusBadge({ status, className = '', size = 'md' }: StatusBadge
     case 'paid':
     case 'approved':
     case 'active':
-      colors = 'bg-[#EBF7EE] text-[#1E7E34] border-[#BCE4C7]';
-      dotColor = 'bg-[#1E7E34]';
+    case 'online':
+      colors = 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+      dotColor = 'bg-emerald-500';
       break;
 
     case 'ready for pickup':
@@ -30,44 +31,45 @@ export function StatusBadge({ status, className = '', size = 'md' }: StatusBadge
     case 'picked up':
     case 'rider assigned':
     case 'accepted':
-      colors = 'bg-[#EAF3FA] text-[#1E5FA8] border-[#BAD6F0]';
-      dotColor = 'bg-[#1E5FA8]';
+    case 'delivering':
+      colors = 'bg-blue-50 text-blue-700 ring-blue-600/20';
+      dotColor = 'bg-blue-500';
       break;
 
     case 'preparing':
     case 'pending':
     case 'pending approval':
-      colors = 'bg-[#FDF6E2] text-[#8C6D1F] border-[#F1DC9B]';
-      dotColor = 'bg-[#8C6D1F]';
+      colors = 'bg-amber-50 text-amber-800 ring-amber-600/20';
+      dotColor = 'bg-amber-500';
       break;
 
     case 'cancelled':
     case 'rejected':
     case 'inactive':
     case 'suspended':
-      colors = 'bg-[#FDF0EE] text-[#C92A2A] border-[#F5C2BC]';
-      dotColor = 'bg-[#C92A2A]';
+    case 'offline':
+      colors = 'bg-rose-50 text-rose-700 ring-rose-600/20';
+      dotColor = 'bg-rose-500';
       break;
 
     case 'placed':
     default:
-      colors = 'bg-paper-off text-ink-soft border-line';
-      dotColor = 'bg-ink-soft';
+      colors = 'bg-indigo-50 text-indigo-700 ring-indigo-600/20';
+      dotColor = 'bg-indigo-500';
       break;
   }
 
   const sizeClasses =
     size === 'sm'
-      ? 'px-1.5 py-0.5 text-[10px]'
+      ? 'px-2 py-0.5 text-[11px]'
       : 'px-2.5 py-1 text-xs';
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-mono uppercase tracking-wider font-medium border ${colors} ${sizeClasses} ${className}`}
-      style={{ borderRadius: '0px' }}
+      className={`inline-flex items-center gap-1.5 font-medium rounded-full ring-1 ring-inset ${colors} ${sizeClasses} ${className}`}
     >
-      <span className={`w-1.5 h-1.5 ${dotColor}`} style={{ borderRadius: '0px' }} />
-      {status}
+      <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+      <span className="capitalize">{status.replace(/_/g, ' ')}</span>
     </span>
   );
 }

@@ -93,11 +93,14 @@ export function parseJwtRole(token: string): UserRole | null {
  * Admin Login via email & password
  */
 export async function loginAdmin(payload: AdminLoginPayload): Promise<TokenResponse> {
-  const fallbackTokens: TokenResponse = {
-    access_token: 'mock-admin-access-token-jwt',
-    refresh_token: 'mock-admin-refresh-token',
-    token_type: 'bearer',
-  };
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const fallbackTokens: TokenResponse | undefined = isMockMode
+    ? {
+        access_token: 'mock-admin-access-token-jwt',
+        refresh_token: 'mock-admin-refresh-token',
+        token_type: 'bearer',
+      }
+    : undefined;
 
   const tokens = await apiClient<TokenResponse>('/auth/admin/login', {
     method: 'POST',

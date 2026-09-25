@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { MagnifyingGlass, Funnel, CaretLeft, CaretRight, CaretUpDown } from '@phosphor-icons/react';
+import {
+  MagnifyingGlass,
+  Funnel,
+  CaretLeft,
+  CaretRight,
+  CaretUpDown,
+  CaretUp,
+  CaretDown,
+  X,
+} from '@phosphor-icons/react';
 
 export interface Column<T> {
   key: string;
@@ -9,6 +18,7 @@ export interface Column<T> {
   render?: (item: T) => React.ReactNode;
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
+  width?: string;
 }
 
 export interface DataTableProps<T> {
@@ -24,6 +34,7 @@ export interface DataTableProps<T> {
   }[];
   isLoading?: boolean;
   emptyMessage?: string;
+  emptySubtext?: string;
   pageSize?: number;
   onRowClick?: (item: T) => void;
   actions?: React.ReactNode;
@@ -37,7 +48,8 @@ export function DataTable<T>({
   searchFilter,
   filterOptions,
   isLoading = false,
-  emptyMessage = 'No records found.',
+  emptyMessage = 'No records found',
+  emptySubtext = 'Try adjusting your search or filters.',
   pageSize = 10,
   onRowClick,
   actions,
@@ -67,6 +79,9 @@ export function DataTable<T>({
       result.sort((a: any, b: any) => {
         const valA = a[sortColumn];
         const valB = b[sortColumn];
+        if (valA === valB) return 0;
+        if (valA == null) return 1;
+        if (valB == null) return -1;
         if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
         if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
@@ -98,49 +113,58 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="flex flex-col bg-paper border border-line" style={{ borderRadius: '0px' }}>
-      {/* Table Toolbar */}
-      <div className="p-4 border-b border-line flex flex-wrap items-center justify-between gap-3 bg-paper-off/50">
-        <div className="flex items-center gap-3 flex-1 min-w-[240px]">
-          {searchFilter && (
-            <div className="relative flex-1 max-w-sm">
-              <MagnifyingGlass
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft"
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                placeholder={searchPlaceholder}
-                className="w-full pl-9 pr-3 py-1.5 text-sm bg-paper border border-line text-ink placeholder:text-ink-soft focus:outline-none focus:border-ink font-sans transition-colors"
-                style={{ borderRadius: '0px' }}
-              />
-            </div>
-          )}
+    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+      {/* Controls Header: Search, Filters, and Bulk Actions */}
+      <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+        <div className="flex flex-1 items-center gap-2 max-w-md">
+          <div className="relative w-full">
+            <MagnifyingGlass
+              size={16}
+              weight="bold"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder={searchPlaceholder}
+              className="w-full pl-9 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X size={14} weight="bold" />
+              </button>
+            )}
+          </div>
 
           {filterOptions && filterOptions.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Funnel size={14} className="text-ink-soft" />
+            <div className="relative">
               <select
                 value={selectedFilter}
                 onChange={(e) => {
                   setSelectedFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="py-1.5 px-2.5 text-xs bg-paper border border-line text-ink focus:outline-none focus:border-ink font-mono font-medium transition-colors"
-                style={{ borderRadius: '0px' }}
+                className="appearance-none pl-8 pr-7 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 cursor-pointer"
               >
-                <option value="all">All statuses</option>
+                <option value="all">All Records</option>
                 {filterOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
                 ))}
               </select>
+              <Funnel
+                size={14}
+                weight="bold"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
             </div>
           )}
         </div>
@@ -152,61 +176,94 @@ export function DataTable<T>({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-line bg-paper-off/80">
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  onClick={() => handleSort(col.key, col.sortable)}
-                  className={`py-3 px-4 font-mono text-[11px] font-semibold tracking-wider uppercase text-ink-soft ${
-                    col.align === 'right'
-                      ? 'text-right'
-                      : col.align === 'center'
-                      ? 'text-center'
-                      : 'text-left'
-                  } ${col.sortable ? 'cursor-pointer select-none hover:text-ink' : ''}`}
-                >
-                  <span className="inline-flex items-center gap-1">
-                    {col.title}
-                    {col.sortable && <CaretUpDown size={12} className="opacity-60" />}
-                  </span>
-                </th>
-              ))}
+            <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              {columns.map((col) => {
+                const isSorted = sortColumn === col.key;
+                return (
+                  <th
+                    key={col.key}
+                    onClick={() => handleSort(col.key, col.sortable)}
+                    style={{ width: col.width }}
+                    className={`px-4 py-3 select-none ${
+                      col.align === 'right'
+                        ? 'text-right'
+                        : col.align === 'center'
+                        ? 'text-center'
+                        : 'text-left'
+                    } ${
+                      col.sortable
+                        ? 'cursor-pointer hover:bg-slate-100/75 transition-colors'
+                        : ''
+                    }`}
+                  >
+                    <div
+                      className={`inline-flex items-center gap-1.5 ${
+                        col.align === 'right'
+                          ? 'justify-end'
+                          : col.align === 'center'
+                          ? 'justify-center'
+                          : 'justify-start'
+                      }`}
+                    >
+                      <span>{col.title}</span>
+                      {col.sortable && (
+                        <span className="text-slate-400">
+                          {isSorted ? (
+                            sortDirection === 'asc' ? (
+                              <CaretUp size={12} weight="bold" className="text-rose-600" />
+                            ) : (
+                              <CaretDown size={12} weight="bold" className="text-rose-600" />
+                            )
+                          ) : (
+                            <CaretUpDown size={12} />
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line text-sm">
+
+          <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
             {isLoading ? (
-              // Skeleton rows
-              Array.from({ length: 5 }).map((_, i) => (
+              // Skeleton loading rows
+              Array.from({ length: pageSize > 6 ? 6 : pageSize }).map((_, i) => (
                 <tr key={`skeleton-${i}`} className="animate-pulse">
-                  {columns.map((col) => (
-                    <td key={col.key} className="py-3.5 px-4">
-                      <div className="h-4 bg-line/60 w-3/4" style={{ borderRadius: '0px' }} />
+                  {columns.map((col, cIdx) => (
+                    <td key={`skeleton-col-${cIdx}`} className="px-4 py-3.5">
+                      <div className="h-4 bg-slate-100 rounded-md w-3/4" />
                     </td>
                   ))}
                 </tr>
               ))
             ) : paginatedData.length === 0 ? (
+              // Empty State
               <tr>
-                <td
-                  colSpan={columns.length}
-                  className="py-12 text-center text-sm font-sans text-ink-soft"
-                >
-                  {emptyMessage}
+                <td colSpan={columns.length} className="px-6 py-12 text-center">
+                  <div className="max-w-xs mx-auto space-y-1">
+                    <p className="text-sm font-semibold text-slate-800">{emptyMessage}</p>
+                    <p className="text-xs text-slate-400">{emptySubtext}</p>
+                  </div>
                 </td>
               </tr>
             ) : (
+              // Data Rows
               paginatedData.map((item) => (
                 <tr
                   key={keyExtractor(item)}
                   onClick={() => onRowClick && onRowClick(item)}
                   className={`transition-colors ${
-                    onRowClick ? 'cursor-pointer hover:bg-paper-off/60' : 'hover:bg-paper-off/30'
+                    onRowClick
+                      ? 'cursor-pointer hover:bg-slate-50/80 active:bg-slate-100/60'
+                      : 'hover:bg-slate-50/50'
                   }`}
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      className={`py-3 px-4 text-ink font-sans ${
+                      className={`px-4 py-3.5 align-middle ${
                         col.align === 'right'
                           ? 'text-right'
                           : col.align === 'center'
@@ -214,7 +271,7 @@ export function DataTable<T>({
                           : 'text-left'
                       }`}
                     >
-                      {col.render ? col.render(item) : (item as any)[col.key]}
+                      {col.render ? col.render(item) : (item as any)[col.key] ?? '—'}
                     </td>
                   ))}
                 </tr>
@@ -226,33 +283,37 @@ export function DataTable<T>({
 
       {/* Pagination Footer */}
       {!isLoading && filteredData.length > 0 && (
-        <div className="p-3 border-t border-line flex items-center justify-between bg-paper-off/30 text-xs font-mono text-ink-soft">
+        <div className="p-3.5 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
           <div>
-            Showing {(currentPage - 1) * pageSize + 1}–
-            {Math.min(currentPage * pageSize, filteredData.length)} of {filteredData.length} entries
+            Showing{' '}
+            <span className="font-semibold text-slate-700">
+              {(currentPage - 1) * pageSize + 1}
+            </span>{' '}
+            to{' '}
+            <span className="font-semibold text-slate-700">
+              {Math.min(currentPage * pageSize, filteredData.length)}
+            </span>{' '}
+            of{' '}
+            <span className="font-semibold text-slate-700">{filteredData.length}</span> entries
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-1.5 border border-line bg-paper text-ink disabled:opacity-30 disabled:cursor-not-allowed hover:bg-paper-off transition-colors"
-              style={{ borderRadius: '0px' }}
-              title="Previous Page"
+              className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              <CaretLeft size={14} />
+              <CaretLeft size={14} weight="bold" />
             </button>
-            <span className="px-3 py-1 font-semibold text-ink">
-              {currentPage} / {totalPages}
+            <span className="px-2.5 text-xs font-medium text-slate-700">
+              Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-1.5 border border-line bg-paper text-ink disabled:opacity-30 disabled:cursor-not-allowed hover:bg-paper-off transition-colors"
-              style={{ borderRadius: '0px' }}
-              title="Next Page"
+              className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              <CaretRight size={14} />
+              <CaretRight size={14} weight="bold" />
             </button>
           </div>
         </div>

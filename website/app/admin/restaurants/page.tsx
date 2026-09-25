@@ -7,12 +7,18 @@ import {
   X,
   CheckCircle,
   Percent,
-  LockKeyOpen,
+  ToggleLeft,
+  ToggleRight,
+  PencilSimple,
+  Sliders,
+  MapPin,
+  Buildings,
 } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
-import { DataTable } from '@/components/dashboard/DataTable';
+import { DataTable, Column } from '@/components/dashboard/DataTable';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import { ConfirmDialog } from '@/components/dashboard/ConfirmDialog';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import {
   listAdminRestaurants,
   createAdminRestaurant,
@@ -36,6 +42,8 @@ export default function AdminRestaurantsPage() {
     phone_number: '',
     commission_rate: 10.0,
     country_code: '+92',
+    logo_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200',
+    banner_url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200',
   });
 
   // Commission Modal State
@@ -74,6 +82,8 @@ export default function AdminRestaurantsPage() {
         phone_number: '',
         commission_rate: 10.0,
         country_code: '+92',
+        logo_url: '',
+        banner_url: '',
       });
       await fetchRestaurants();
     } catch (err) {
@@ -99,7 +109,9 @@ export default function AdminRestaurantsPage() {
     e.preventDefault();
     if (!commissionTarget) return;
     try {
-      await updateAdminRestaurantCommission(commissionTarget.id, { commission_rate: newCommission });
+      await updateAdminRestaurantCommission(commissionTarget.id, {
+        commission_rate: newCommission,
+      });
       setCommissionTarget(null);
       await fetchRestaurants();
     } catch (err) {
@@ -107,11 +119,95 @@ export default function AdminRestaurantsPage() {
     }
   };
 
+  const columns: Column<RestaurantAdmin>[] = [
+    {
+      key: 'restaurant',
+      title: 'Restaurant Storefront',
+      sortable: true,
+      render: (r) => (
+        <div className="flex items-center gap-3">
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={r.logo_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200'}
+              alt={r.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <div className="font-bold text-slate-900 text-xs">{r.name}</div>
+            <div className="text-[11px] text-slate-400 font-mono">#{r.id.slice(0, 8)}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'contact',
+      title: 'Contact Credentials',
+      render: (r) => (
+        <div className="space-y-0.5 text-xs">
+          <div className="text-slate-800">{r.email}</div>
+          <div className="text-slate-400 font-mono text-[11px]">{r.phone_number}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'commission_rate',
+      title: 'Platform Commission',
+      align: 'center',
+      sortable: true,
+      render: (r) => (
+        <button
+          onClick={() => {
+            setCommissionTarget(r);
+            setNewCommission(r.commission_rate);
+          }}
+          className="inline-flex items-center gap-1 font-mono font-bold text-xs px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors border border-rose-200"
+          title="Click to adjust commission override"
+        >
+          <span>{r.commission_rate}%</span>
+          <PencilSimple size={11} weight="bold" />
+        </button>
+      ),
+    },
+    {
+      key: 'status',
+      title: 'Status',
+      render: (r) => <StatusBadge status={r.status} size="sm" />,
+    },
+    {
+      key: 'created_at',
+      title: 'Onboarded',
+      render: (r) => (
+        <span className="text-xs text-slate-500 font-mono">
+          {new Date(r.created_at).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      title: 'Store Control',
+      align: 'right',
+      render: (r) => (
+        <button
+          onClick={() => setStatusTarget(r)}
+          className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors ${
+            r.status === 'active'
+              ? 'border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+          }`}
+        >
+          {r.status === 'active' ? 'Suspend' : 'Activate'}
+        </button>
+      ),
+    },
+  ];
+
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Restaurant Management"
-        description="Onboard dining partners, override commission rates, and manage merchant access."
+        title="Restaurant Partners Directory"
+        description="Partner onboarding, brand asset verification, contracted 10% commission tiers, and operational status."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchRestaurants();
@@ -120,237 +216,151 @@ export default function AdminRestaurantsPage() {
         actions={
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-3 py-1.5 font-mono text-xs font-semibold bg-red text-paper hover:bg-[#C92A2E] transition-colors flex items-center gap-1.5"
-            style={{ borderRadius: '0px' }}
+            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
           >
-            <Plus size={14} weight="bold" />
-            <span>Onboard New Partner</span>
+            <Plus size={15} weight="bold" />
+            <span>Onboard Restaurant</span>
           </button>
         }
       />
 
-      <div className="p-6">
+      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
         <DataTable<RestaurantAdmin>
           data={restaurants}
+          columns={columns}
           keyExtractor={(r) => r.id}
           isLoading={isLoading}
-          searchPlaceholder="Search by name, email, or phone..."
-          searchFilter={(r, query) =>
-            r.name.toLowerCase().includes(query.toLowerCase()) ||
-            r.email.toLowerCase().includes(query.toLowerCase()) ||
-            r.phone_number.includes(query)
+          searchPlaceholder="Search restaurant name, email, or ID..."
+          searchFilter={(r, q) =>
+            r.name.toLowerCase().includes(q.toLowerCase()) ||
+            r.email.toLowerCase().includes(q.toLowerCase()) ||
+            r.id.toLowerCase().includes(q.toLowerCase())
           }
           filterOptions={[
-            { label: 'Active', value: 'active', filterFn: (r) => r.status === 'active' },
-            { label: 'Inactive', value: 'inactive', filterFn: (r) => r.status === 'inactive' },
-          ]}
-          columns={[
-            {
-              key: 'name',
-              title: 'Restaurant Name',
-              sortable: true,
-              render: (r) => (
-                <div>
-                  <div className="font-heading font-bold text-sm text-ink flex items-center gap-2">
-                    <Storefront size={16} className="text-red" />
-                    <span>{r.name}</span>
-                  </div>
-                  <div className="font-mono text-[11px] text-ink-soft">{r.email}</div>
-                </div>
-              ),
-            },
-            {
-              key: 'phone_number',
-              title: 'Phone / OTP',
-              render: (r) => <span className="font-mono text-xs text-ink">{r.phone_number}</span>,
-            },
-            {
-              key: 'commission_rate',
-              title: 'Commission',
-              align: 'center',
-              sortable: true,
-              render: (r) => (
-                <button
-                  onClick={() => {
-                    setCommissionTarget(r);
-                    setNewCommission(r.commission_rate);
-                  }}
-                  className="font-mono text-xs font-semibold px-2 py-0.5 border border-line bg-paper-off hover:border-ink transition-colors flex items-center gap-1 mx-auto"
-                  style={{ borderRadius: '0px' }}
-                  title="Click to override commission"
-                >
-                  <span>{r.commission_rate}%</span>
-                  <Percent size={12} className="text-ink-soft" />
-                </button>
-              ),
-            },
-            {
-              key: 'status',
-              title: 'Status',
-              render: (r) => <StatusBadge status={r.status} size="sm" />,
-            },
-            {
-              key: 'created_at',
-              title: 'Onboarded',
-              sortable: true,
-              render: (r) => (
-                <span className="font-mono text-xs text-ink-soft">
-                  {new Date(r.created_at).toLocaleDateString()}
-                </span>
-              ),
-            },
-            {
-              key: 'actions',
-              title: 'Controls',
-              align: 'right',
-              render: (r) => (
-                <div className="flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => setStatusTarget(r)}
-                    className={`px-2.5 py-1 text-[11px] font-mono font-semibold border transition-colors ${
-                      r.status === 'active'
-                        ? 'border-[#F5C2BC] text-[#C92A2A] hover:bg-[#FDF0EE]'
-                        : 'border-[#BCE4C7] text-[#1E7E34] hover:bg-[#EBF7EE]'
-                    }`}
-                    style={{ borderRadius: '0px' }}
-                  >
-                    {r.status === 'active' ? 'Deactivate' : 'Activate'}
-                  </button>
-                </div>
-              ),
-            },
+            { label: 'Active Partners', value: 'active', filterFn: (r) => r.status === 'active' },
+            { label: 'Pending KYC Review', value: 'pending', filterFn: (r) => r.status === 'pending' },
+            { label: 'Suspended', value: 'inactive', filterFn: (r) => r.status === 'inactive' },
           ]}
         />
       </div>
 
-      {/* Onboard Partner Modal */}
+      {/* ONBOARD RESTAURANT MODAL WITH LOGO & BANNER UPLOAD */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-[2px]">
-          <div
-            className="w-full max-w-lg bg-paper border border-line shadow-2xl p-6"
-            style={{ borderRadius: '0px' }}
-          >
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-line">
-              <div className="flex items-center gap-2">
-                <Storefront size={18} className="text-red" />
-                <h3 className="font-heading font-bold text-base text-ink">
-                  Onboard Restaurant Partner
-                </h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Onboard New Restaurant Partner</h3>
+                <p className="text-xs text-slate-400">
+                  Provide credentials, storefront branding media, and default commission.
+                </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 border border-line hover:bg-paper-off text-ink-soft"
-                style={{ borderRadius: '0px' }}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
               >
-                <X size={16} />
+                <X size={18} weight="bold" />
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div>
-                <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1 font-semibold">
-                  Restaurant Brand Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Student Biryani Saddar"
-                  className="w-full px-3 py-2 text-sm bg-paper border border-line text-ink focus:outline-none focus:border-ink font-sans"
-                  style={{ borderRadius: '0px' }}
+            <form onSubmit={handleCreate} className="space-y-4 text-xs">
+              {/* Media Uploads */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <ImageUpload
+                  label="Restaurant Logo"
+                  aspectRatio="1:1"
+                  value={formData.logo_url}
+                  onChange={(url) => setFormData({ ...formData, logo_url: url })}
+                  hint="Square 512×512px"
+                />
+                <ImageUpload
+                  label="Storefront Cover"
+                  aspectRatio="16:9"
+                  value={formData.banner_url}
+                  onChange={(url) => setFormData({ ...formData, banner_url: url })}
+                  hint="Widescreen cover"
                 />
               </div>
 
+              {/* Basic Fields */}
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1 font-semibold">
-                    Login Email *
-                  </label>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700">Restaurant Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Ginsoy Chinese"
+                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700">Commission Rate (%)</label>
+                  <input
+                    type="number"
+                    required
+                    step="0.5"
+                    value={formData.commission_rate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, commission_rate: parseFloat(e.target.value) || 10.0 })
+                    }
+                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700">Login Email</label>
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="partner@restaurant.pk"
-                    className="w-full px-3 py-2 text-sm bg-paper border border-line text-ink focus:outline-none focus:border-ink font-sans"
-                    style={{ borderRadius: '0px' }}
+                    placeholder="partner@store.pk"
+                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
                   />
                 </div>
-                <div>
-                  <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1 font-semibold">
-                    Initial Password *
-                  </label>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700">Initial Password</label>
                   <input
                     type="password"
                     required
-                    minLength={8}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="Min 8 characters"
-                    className="w-full px-3 py-2 text-sm bg-paper border border-line text-ink focus:outline-none focus:border-ink font-sans"
-                    style={{ borderRadius: '0px' }}
+                    placeholder="••••••••"
+                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1 font-semibold">
-                    Phone (for OTP Login) *
-                  </label>
-                  <div className="flex">
-                    <span className="px-2.5 py-2 font-mono text-xs border border-r-0 border-line bg-paper-off text-ink font-semibold">
-                      +92
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone_number}
-                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                      placeholder="3001234567"
-                      className="w-full px-3 py-2 text-sm bg-paper border border-line text-ink focus:outline-none focus:border-ink font-mono"
-                      style={{ borderRadius: '0px' }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1 font-semibold">
-                    Commission Rate (%) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="1"
-                    max="100"
-                    required
-                    value={formData.commission_rate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, commission_rate: parseFloat(e.target.value) || 10.0 })
-                    }
-                    className="w-full px-3 py-2 text-sm bg-paper border border-line text-ink focus:outline-none focus:border-ink font-mono"
-                    style={{ borderRadius: '0px' }}
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700">Phone Number (OTP Verification)</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.phone_number}
+                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                  placeholder="+923001234567"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono"
+                />
               </div>
 
-              <div className="pt-4 border-t border-line flex justify-end gap-2">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 font-mono text-xs border border-line bg-paper text-ink hover:bg-paper-off"
-                  style={{ borderRadius: '0px' }}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 font-mono text-xs font-semibold bg-red text-paper hover:bg-[#C92A2E] disabled:opacity-50"
-                  style={{ borderRadius: '0px' }}
+                  className="px-5 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Onboarding...' : 'Confirm Partner Onboard'}
+                  {isSubmitting ? 'Creating Partner...' : 'Complete Onboarding'}
                 </button>
               </div>
             </form>
@@ -358,53 +368,43 @@ export default function AdminRestaurantsPage() {
         </div>
       )}
 
-      {/* Override Commission Modal */}
+      {/* COMMISSION OVERRIDE MODAL */}
       {commissionTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-[2px]">
-          <div
-            className="w-full max-w-sm bg-paper border border-line shadow-2xl p-6"
-            style={{ borderRadius: '0px' }}
-          >
-            <h3 className="font-heading font-bold text-sm text-ink mb-1">
-              Override Commission Rate
-            </h3>
-            <p className="font-sans text-xs text-ink-soft mb-4">
-              Update platform fee percentage for <span className="font-semibold text-ink">{commissionTarget.name}</span>.
-            </p>
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Adjust Platform Commission</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {commissionTarget.name} (Default: 10.0%)
+              </p>
+            </div>
 
-            <form onSubmit={handleUpdateCommission} className="space-y-4">
-              <div>
-                <label className="block font-mono text-[11px] uppercase tracking-wider text-ink-soft mb-1">
-                  Commission Percentage (%)
-                </label>
+            <form onSubmit={handleUpdateCommission} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700">New Commission Percentage (%)</label>
                 <input
                   type="number"
                   step="0.1"
-                  min="0.5"
-                  max="100"
                   required
                   value={newCommission}
                   onChange={(e) => setNewCommission(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 text-base font-mono font-bold bg-paper border border-line text-ink focus:outline-none focus:border-ink"
-                  style={{ borderRadius: '0px' }}
+                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold text-base"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setCommissionTarget(null)}
-                  className="px-3 py-1.5 font-mono text-xs border border-line bg-paper text-ink hover:bg-paper-off"
-                  style={{ borderRadius: '0px' }}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1.5 font-mono text-xs font-semibold bg-red text-paper hover:bg-[#C92A2E]"
-                  style={{ borderRadius: '0px' }}
+                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
                 >
-                  Save Override
+                  Update Commission
                 </button>
               </div>
             </form>
@@ -412,16 +412,19 @@ export default function AdminRestaurantsPage() {
         </div>
       )}
 
-      {/* Confirm Deactivate / Activate Dialog */}
+      {/* STATUS CHANGE CONFIRM */}
       <ConfirmDialog
-        isOpen={statusTarget !== null}
-        title={statusTarget?.status === 'active' ? 'Deactivate Restaurant Partner' : 'Activate Restaurant Partner'}
-        message={
+        isOpen={Boolean(statusTarget)}
+        title={statusTarget?.status === 'active' ? 'Suspend Restaurant' : 'Activate Restaurant'}
+        description={`Are you sure you want to ${
+          statusTarget?.status === 'active' ? 'suspend' : 'activate'
+        } "${statusTarget?.name}"? ${
           statusTarget?.status === 'active'
-            ? `Deactivating ${statusTarget?.name} will hide all their menu items from customer search and reject new orders.`
-            : `Activating ${statusTarget?.name} will restore their store visibility to customers immediately.`
-        }
-        confirmLabel={statusTarget?.status === 'active' ? 'Confirm Deactivate' : 'Confirm Activate'}
+            ? 'The restaurant will immediately be hidden from customer app search and orders will be paused.'
+            : 'The restaurant will become visible and ready to receive customer orders.'
+        }`}
+        confirmText={statusTarget?.status === 'active' ? 'Suspend Store' : 'Activate Store'}
+        cancelText="Cancel"
         variant={statusTarget?.status === 'active' ? 'danger' : 'primary'}
         onConfirm={handleToggleStatus}
         onCancel={() => setStatusTarget(null)}

@@ -1,22 +1,23 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Receipt,
-  WarningCircle,
   Bicycle,
   X,
   Storefront,
   User,
-  MapPin,
   Clock,
-  CurrencyDollar,
   ArrowsClockwise,
+  Warning,
+  Eye,
+  ShieldWarning,
+  Check,
 } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
-import { DataTable } from '@/components/dashboard/DataTable';
+import { DataTable, Column } from '@/components/dashboard/DataTable';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
-import { ConfirmDialog } from '@/components/dashboard/ConfirmDialog';
 import {
   listAdminOrders,
   getAdminOrder,
@@ -44,7 +45,7 @@ export default function AdminOrdersPage() {
     try {
       const [orderData, riderData] = await Promise.all([
         listAdminOrders(),
-        listAdminRiders('approved'),
+        listAdminRiders({ approval_status: 'approved' }),
       ]);
       setOrders(orderData);
       setAvailableRiders(riderData);
@@ -104,11 +105,87 @@ export default function AdminOrdersPage() {
     return `PKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  const columns: Column<AdminOrderSummary>[] = [
+    {
+      key: 'id',
+      title: 'Order ID',
+      sortable: true,
+      render: (o) => (
+        <span className="font-mono text-xs font-semibold text-slate-900">
+          #{o.id.slice(0, 8)}
+        </span>
+      ),
+    },
+    {
+      key: 'restaurant_name',
+      title: 'Restaurant Partner',
+      sortable: true,
+      render: (o) => <div className="font-semibold text-slate-800 text-xs">{o.restaurant_name}</div>,
+    },
+    {
+      key: 'rider_name',
+      title: 'Courier',
+      render: (o) => (
+        <div className="flex items-center gap-1.5 text-xs text-slate-600">
+          <Bicycle size={13} className="text-slate-400" />
+          <span>{o.rider_name || <span className="text-amber-600 italic">Unassigned</span>}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      title: 'Status',
+      render: (o) => <StatusBadge status={o.status} size="sm" />,
+    },
+    {
+      key: 'payment_method',
+      title: 'Method',
+      render: (o) => (
+        <span
+          className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+            o.payment_method === 'COD'
+              ? 'bg-amber-50 text-amber-800 border border-amber-200'
+              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+          }`}
+        >
+          {o.payment_method}
+        </span>
+      ),
+    },
+    {
+      key: 'total_amount',
+      title: 'Gross Amount',
+      align: 'right',
+      sortable: true,
+      render: (o) => (
+        <span className="font-mono font-bold text-slate-900 text-xs">
+          {formatPKR(o.total_amount)}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      title: 'Intervention',
+      align: 'right',
+      render: (o) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowClick(o);
+          }}
+          className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs"
+        >
+          Inspect
+        </button>
+      ),
+    },
+  ];
+
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Global Order Monitor"
-        description="Inspect system-wide orders, track live statuses, and intervene on stuck dispatches."
+        title="Global Order Operations Console"
+        description="Monitor system-wide food delivery tickets, manage emergency courier reassignments, and authorize customer refunds."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchOrders();
@@ -116,203 +193,139 @@ export default function AdminOrdersPage() {
         isRefreshing={isRefreshing}
       />
 
-      <div className="p-6">
+      <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
         <DataTable<AdminOrderSummary>
           data={orders}
+          columns={columns}
           keyExtractor={(o) => o.id}
           isLoading={isLoading}
           onRowClick={handleRowClick}
-          searchPlaceholder="Search by Order ID, restaurant, or status..."
-          searchFilter={(o, query) =>
-            o.id.toLowerCase().includes(query.toLowerCase()) ||
-            o.restaurant_name.toLowerCase().includes(query.toLowerCase()) ||
-            o.status.toLowerCase().includes(query.toLowerCase())
+          searchPlaceholder="Search order ID, restaurant, or courier..."
+          searchFilter={(o, q) =>
+            o.id.toLowerCase().includes(q.toLowerCase()) ||
+            o.restaurant_name.toLowerCase().includes(q.toLowerCase()) ||
+            Boolean(o.rider_name && o.rider_name.toLowerCase().includes(q.toLowerCase()))
           }
           filterOptions={[
-            { label: 'Active Dispatches', value: 'active', filterFn: (o) => !['Delivered', 'Cancelled'].includes(o.status) },
-            { label: 'Delivered', value: 'delivered', filterFn: (o) => o.status === 'Delivered' },
-            { label: 'Cancelled', value: 'cancelled', filterFn: (o) => o.status === 'Cancelled' },
-          ]}
-          columns={[
-            {
-              key: 'id',
-              title: 'Order ID',
-              render: (o) => (
-                <span className="font-mono text-xs font-semibold text-ink">
-                  #{o.id.slice(0, 8)}
-                </span>
-              ),
-            },
-            {
-              key: 'restaurant_name',
-              title: 'Restaurant',
-              render: (o) => (
-                <div className="font-sans text-xs font-semibold text-ink flex items-center gap-1.5">
-                  <Storefront size={14} className="text-ink-soft shrink-0" />
-                  <span>{o.restaurant_name}</span>
-                </div>
-              ),
-            },
-            {
-              key: 'status',
-              title: 'Status',
-              render: (o) => <StatusBadge status={o.status} size="sm" />,
-            },
-            {
-              key: 'payment_method',
-              title: 'Payment',
-              render: (o) => (
-                <span className="font-mono text-[11px] px-1.5 py-0.5 border border-line bg-paper-off text-ink-soft">
-                  {o.payment_method}
-                </span>
-              ),
-            },
-            {
-              key: 'total_amount',
-              title: 'Total Amount',
-              align: 'right',
-              sortable: true,
-              render: (o) => (
-                <span className="font-mono text-xs font-semibold text-ink">
-                  {formatPKR(o.total_amount)}
-                </span>
-              ),
-            },
-            {
-              key: 'placed_at',
-              title: 'Placed At',
-              render: (o) => (
-                <span className="font-mono text-xs text-ink-soft">
-                  {new Date(o.placed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              ),
-            },
+            { label: 'All Orders', value: 'all', filterFn: () => true },
+            { label: 'Active In-Transit', value: 'transit', filterFn: (o) => ['On the Way', 'Picked Up'].includes(o.status) },
+            { label: 'In Kitchen Prep', value: 'prep', filterFn: (o) => ['Accepted', 'Preparing'].includes(o.status) },
+            { label: 'Delivered (Done)', value: 'delivered', filterFn: (o) => o.status === 'Delivered' },
           ]}
         />
       </div>
 
-      {/* Order Detail Drawer with Intervention Options */}
+      {/* INSPECTION SLIDEOVER DRAWER */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-ink/60 backdrop-blur-[2px]">
-          <div
-            className="w-full max-w-lg bg-paper border-l border-line h-full flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-150"
-            style={{ borderRadius: '0px' }}
-          >
-            <div>
-              <div className="h-16 border-b border-line px-6 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Receipt size={18} className="text-red" />
-                  <h3 className="font-heading font-bold text-sm text-ink">
-                    Order Breakdown #{selectedOrder.id.slice(0, 8)}
-                  </h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex justify-end animate-in fade-in">
+          <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto">
+            <div className="p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <span className="font-mono text-xs font-bold text-rose-600">
+                    #{selectedOrder.id.slice(0, 8)}
+                  </span>
+                  <h2 className="text-base font-bold text-slate-900">Order Telemetry</h2>
                 </div>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="p-1 border border-line hover:bg-paper-off text-ink-soft"
-                  style={{ borderRadius: '0px' }}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
                 >
-                  <X size={16} />
+                  <X size={18} weight="bold" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-5 overflow-y-auto max-h-[calc(100vh-140px)]">
-                {/* Status & Placement Bar */}
-                <div className="flex items-center justify-between p-3 border border-line bg-paper-off/50">
-                  <StatusBadge status={selectedOrder.status} />
-                  <span className="font-mono text-xs text-ink-soft">
-                    Placed: {new Date(selectedOrder.placed_at).toLocaleString()}
-                  </span>
-                </div>
-
-                {/* Counterparties */}
-                <div className="grid grid-cols-2 gap-3 text-xs font-sans">
-                  <div className="p-3 border border-line bg-paper space-y-1">
-                    <div className="font-mono text-[10px] text-ink-soft uppercase font-semibold">
-                      Restaurant
-                    </div>
-                    <div className="font-bold text-ink">{selectedOrder.restaurant_name}</div>
-                  </div>
-                  <div className="p-3 border border-line bg-paper space-y-1">
-                    <div className="font-mono text-[10px] text-ink-soft uppercase font-semibold">
-                      Assigned Rider
-                    </div>
-                    <div className="font-bold text-ink">
-                      {selectedOrder.rider_name || (
-                        <span className="text-ink-soft font-normal italic">Unassigned</span>
-                      )}
-                    </div>
+              {/* Status Pill */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] text-slate-400">Order Lifecycle State</div>
+                  <div className="mt-1">
+                    <StatusBadge status={selectedOrder.status} />
                   </div>
                 </div>
-
-                {/* Frozen Financial Snapshot (Single Source of Truth) */}
-                <div className="border border-line bg-paper p-4 space-y-2.5">
-                  <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-ink border-b border-line pb-1.5 flex items-center justify-between">
-                    <span>Audit Financial Breakdown</span>
-                    <span className="text-[10px] text-ink-soft font-normal">Spec Sec 11 Frozen Snapshot</span>
-                  </div>
-
-                  <div className="space-y-1.5 font-mono text-xs">
-                    <div className="flex justify-between text-ink-soft">
-                      <span>Food Subtotal</span>
-                      <span className="text-ink">{formatPKR(selectedOrder.food_subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between text-ink-soft">
-                      <span>Road Distance</span>
-                      <span className="text-ink">{selectedOrder.delivery_distance_km} km</span>
-                    </div>
-                    <div className="flex justify-between text-ink-soft">
-                      <span>Delivery Fee [50 + (km × 20)]</span>
-                      <span className="text-ink">{formatPKR(selectedOrder.delivery_fee)}</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-ink pt-1.5 border-t border-line text-sm">
-                      <span>Total Paid by Customer</span>
-                      <span>{formatPKR(selectedOrder.total_amount)}</span>
-                    </div>
-
-                    <div className="pt-3 border-t border-dashed border-line space-y-1 text-[11px]">
-                      <div className="flex justify-between text-ink-soft">
-                        <span>SpeedyMeals Commission (10%)</span>
-                        <span className="text-red font-semibold">{formatPKR(selectedOrder.commission_amount)}</span>
-                      </div>
-                      <div className="flex justify-between text-ink-soft">
-                        <span>Restaurant Net Payable (90%)</span>
-                        <span className="text-ink font-semibold">{formatPKR(selectedOrder.restaurant_payable)}</span>
-                      </div>
-                      <div className="flex justify-between text-ink-soft">
-                        <span>Rider Earnings (100% Delivery Fee)</span>
-                        <span className="text-[#1E7E34] font-semibold">{formatPKR(selectedOrder.rider_earning)}</span>
-                      </div>
-                    </div>
+                <div className="text-right">
+                  <div className="text-[11px] text-slate-400">Payment</div>
+                  <div className="text-xs font-bold text-slate-800 mt-1">
+                    {selectedOrder.payment_method}
                   </div>
                 </div>
-
-                {selectedOrder.cancellation_reason && (
-                  <div className="p-3 border border-[#F5C2BC] bg-[#FDF0EE] text-xs font-mono text-[#C92A2A]">
-                    <span className="font-bold">Cancellation Reason: </span>
-                    {selectedOrder.cancellation_reason} (By: {selectedOrder.cancelled_by})
-                  </div>
-                )}
               </div>
+
+              {/* Stakeholders */}
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-slate-900">
+                    <Storefront size={14} className="text-slate-400" />
+                    <span>Restaurant: {selectedOrder.restaurant_name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600 pt-1">
+                    <User size={14} className="text-slate-400" />
+                    <span>Customer: {selectedOrder.customer_name}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <Bicycle size={14} className="text-slate-400" />
+                    <span>Courier: {selectedOrder.rider_name || 'Unassigned'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Split (Strict SpeedyMeals Rules) */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                <div className="font-bold text-slate-700 pb-1 border-b border-slate-200">
+                  Financial Settlement Split
+                </div>
+                <div className="flex items-center justify-between text-slate-600">
+                  <span>Gross Food Volume</span>
+                  <span className="font-mono">{formatPKR(selectedOrder.food_subtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between text-rose-600 font-semibold">
+                  <span>Platform Commission (10%)</span>
+                  <span className="font-mono">+{formatPKR(selectedOrder.commission_amount)}</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-600">
+                  <span>Restaurant Net Payable (90%)</span>
+                  <span className="font-mono">{formatPKR(selectedOrder.restaurant_payable)}</span>
+                </div>
+                <div className="flex items-center justify-between text-blue-700 font-semibold">
+                  <span>Courier Retained Fee (100%)</span>
+                  <span className="font-mono">+{formatPKR(selectedOrder.rider_earning)}</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
+                  <span>Gross Customer Total</span>
+                  <span className="font-mono">{formatPKR(selectedOrder.total_amount)}</span>
+                </div>
+              </div>
+
+              {/* Cancellation Banner */}
+              {selectedOrder.status === 'Cancelled' && (
+                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-1">
+                  <div className="font-bold flex items-center gap-1.5">
+                    <Warning size={15} weight="bold" />
+                    <span>Order Was Cancelled</span>
+                  </div>
+                  <p className="text-[11px] text-rose-700">
+                    Reason: {selectedOrder.cancellation_reason || 'Administrative intervention'}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Admin Intervention Controls */}
-            {!['Delivered', 'Cancelled'].includes(selectedOrder.status) && (
-              <div className="p-4 border-t border-line bg-paper flex items-center gap-2">
+            {/* Action Bar */}
+            {selectedOrder.status !== 'Delivered' && selectedOrder.status !== 'Cancelled' && (
+              <div className="p-5 border-t border-slate-200 bg-white flex items-center gap-3">
                 <button
+                  type="button"
                   onClick={() => setReassignModalOpen(true)}
-                  className="flex-1 py-2 font-mono text-xs font-semibold border border-line bg-paper-off hover:bg-paper text-ink transition-colors flex items-center justify-center gap-1.5"
-                  style={{ borderRadius: '0px' }}
+                  className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs"
                 >
-                  <ArrowsClockwise size={14} />
-                  <span>Reassign Rider</span>
+                  Reassign Courier
                 </button>
                 <button
+                  type="button"
                   onClick={() => setCancelModalOpen(true)}
-                  className="flex-1 py-2 font-mono text-xs font-semibold border border-[#F5C2BC] bg-[#FDF0EE] text-[#C92A2A] hover:bg-[#FADBD8] transition-colors flex items-center justify-center gap-1.5"
-                  style={{ borderRadius: '0px' }}
+                  className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow-xs"
                 >
-                  <WarningCircle size={14} />
-                  <span>Force Cancel</span>
+                  Emergency Cancel
                 </button>
               </div>
             )}
@@ -320,43 +333,42 @@ export default function AdminOrdersPage() {
         </div>
       )}
 
-      {/* Cancel Order Modal */}
-      {cancelModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-[2px]">
-          <div className="w-full max-w-sm bg-paper border border-line shadow-2xl p-6" style={{ borderRadius: '0px' }}>
-            <h3 className="font-heading font-bold text-sm text-ink mb-1">
-              Confirm Force Cancellation
-            </h3>
-            <p className="font-sans text-xs text-ink-soft mb-4">
-              Enter the official administrative reason for aborting Order #{selectedOrder?.id.slice(0, 8)}.
-            </p>
+      {/* REASSIGN MODAL */}
+      {reassignModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
+            <h3 className="text-base font-bold text-slate-900">Reassign Order Courier</h3>
+            <form onSubmit={handleReassignRider} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700">Select Available Courier</label>
+                <select
+                  required
+                  value={selectedRiderId}
+                  onChange={(e) => setSelectedRiderId(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800"
+                >
+                  <option value="">Select courier...</option>
+                  {availableRiders.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} ({r.vehicle_type || 'Motorcycle'}) — {r.phone_number}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <form onSubmit={handleCancelOrder} className="space-y-4">
-              <textarea
-                required
-                rows={3}
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="e.g. Rider vehicle breakdown, customer unreachable..."
-                className="w-full p-2.5 text-xs bg-paper border border-line text-ink focus:outline-none focus:border-ink font-sans"
-                style={{ borderRadius: '0px' }}
-              />
-
-              <div className="flex justify-end gap-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setCancelModalOpen(false)}
-                  className="px-3 py-1.5 font-mono text-xs border border-line bg-paper text-ink hover:bg-paper-off"
-                  style={{ borderRadius: '0px' }}
+                  onClick={() => setReassignModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  Back
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1.5 font-mono text-xs font-semibold bg-[#C92A2A] text-paper hover:bg-[#A82222]"
-                  style={{ borderRadius: '0px' }}
+                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
                 >
-                  Confirm Cancel
+                  Confirm Reassign
                 </button>
               </div>
             </form>
@@ -364,49 +376,37 @@ export default function AdminOrdersPage() {
         </div>
       )}
 
-      {/* Reassign Rider Modal */}
-      {reassignModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-[2px]">
-          <div className="w-full max-w-sm bg-paper border border-line shadow-2xl p-6" style={{ borderRadius: '0px' }}>
-            <h3 className="font-heading font-bold text-sm text-ink mb-1">
-              Manually Reassign Rider
-            </h3>
-            <p className="font-sans text-xs text-ink-soft mb-4">
-              Select an approved rider to dispatch for this delivery.
-            </p>
+      {/* CANCEL MODAL */}
+      {cancelModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
+            <h3 className="text-base font-bold text-slate-900">Emergency Cancel Order</h3>
+            <form onSubmit={handleCancelOrder} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700">Cancellation Rationale</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Specify reason for manual administrative cancellation..."
+                  className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                />
+              </div>
 
-            <form onSubmit={handleReassignRider} className="space-y-4">
-              <select
-                required
-                value={selectedRiderId}
-                onChange={(e) => setSelectedRiderId(e.target.value)}
-                className="w-full p-2 text-xs font-sans bg-paper border border-line text-ink focus:outline-none focus:border-ink"
-                style={{ borderRadius: '0px' }}
-              >
-                <option value="">Choose an approved rider...</option>
-                {availableRiders.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name} ({r.phone_number})
-                  </option>
-                ))}
-              </select>
-
-              <div className="flex justify-end gap-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setReassignModalOpen(false)}
-                  className="px-3 py-1.5 font-mono text-xs border border-line bg-paper text-ink hover:bg-paper-off"
-                  style={{ borderRadius: '0px' }}
+                  onClick={() => setCancelModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  Cancel
+                  Go Back
                 </button>
                 <button
                   type="submit"
-                  disabled={!selectedRiderId}
-                  className="px-3 py-1.5 font-mono text-xs font-semibold bg-red text-paper hover:bg-[#C92A2E] disabled:opacity-40"
-                  style={{ borderRadius: '0px' }}
+                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
                 >
-                  Confirm Reassign
+                  Cancel & Refund
                 </button>
               </div>
             </form>

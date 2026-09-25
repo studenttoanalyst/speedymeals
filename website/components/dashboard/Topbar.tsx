@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ArrowClockwise } from '@phosphor-icons/react';
+import { ArrowClockwise, WifiHigh, WifiSlash } from '@phosphor-icons/react';
 
 export interface TopbarProps {
   title: string;
@@ -40,41 +40,37 @@ export function Topbar({
   }, []);
 
   return (
-    <header className="h-16 border-b border-line bg-paper px-6 flex items-center justify-between sticky top-0 z-20">
+    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between sticky top-0 z-20 shadow-2xs print:hidden">
       <div>
-        <h1 className="font-heading text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+        <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
           {title}
         </h1>
         {description && (
-          <p className="font-sans text-xs text-ink-soft hidden sm:block">
+          <p className="text-xs text-slate-500 hidden sm:block print:block print:mt-1">
             {description}
           </p>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Backend Connectivity Indicator */}
-        <div
-          className="hidden md:flex items-center gap-1.5 px-2 py-1 border border-line bg-paper-off font-mono text-[10px] text-ink-soft"
-          style={{ borderRadius: '0px' }}
-        >
-          <span
-            className={`w-1.5 h-1.5 inline-block ${
-              backendStatus === 'connected'
-                ? 'bg-[#1E7E34] animate-pulse'
-                : backendStatus === 'checking'
-                ? 'bg-[#8C6D1F]'
-                : 'bg-[#C92A2A]'
-            }`}
-            style={{ borderRadius: '0px' }}
-          />
-          <span>
-            {backendStatus === 'connected'
-              ? 'FastAPI Connected'
-              : backendStatus === 'checking'
-              ? 'Checking API...'
-              : 'Offline Fixture Mode'}
-          </span>
+      <div className="flex items-center gap-3 print:hidden">
+        {/* Backend API Live Indicator */}
+        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-[11px] font-medium text-slate-600">
+          {backendStatus === 'connected' ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>FastAPI Backend Active</span>
+            </>
+          ) : backendStatus === 'checking' ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span>Checking Backend...</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-slate-400" />
+              <span>Offline / Local Data Mode</span>
+            </>
+          )}
         </div>
 
         {onRefresh && (
@@ -82,10 +78,9 @@ export function Topbar({
             onClick={onRefresh}
             disabled={isRefreshing}
             title="Refresh Data"
-            className="p-1.5 border border-line bg-paper text-ink-soft hover:text-ink hover:bg-paper-off transition-colors disabled:opacity-40"
-            style={{ borderRadius: '0px' }}
+            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-40"
           >
-            <ArrowClockwise size={15} className={isRefreshing ? 'animate-spin' : ''} />
+            <ArrowClockwise size={15} weight="bold" className={isRefreshing ? 'animate-spin text-rose-600' : ''} />
           </button>
         )}
 

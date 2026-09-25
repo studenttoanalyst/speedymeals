@@ -1,6 +1,7 @@
 /**
  * SpeedyMeals Admin Domain Types
  * 1:1 match with backend `app/modules/admin/schemas.py`
+ * Enhanced with promotions, media management, and SLA tracking.
  */
 
 import { OrderStatus, PaymentMethod } from './order';
@@ -10,10 +11,14 @@ export interface AdminDashboardSummary {
   date: string;
   total_orders_today: number;
   gross_revenue_today: number;
-  net_revenue_today: number;
+  net_revenue_today: number; // 10% platform commission
   pending_restaurant_settlements: number;
   total_rider_wallet_balance: number;
-  total_pending_cod_cash: number;
+  total_pending_cod_cash: number; // Float risk metric
+  active_deliveries_count: number;
+  riders_exceeding_float_count: number;
+  pending_restaurant_kyc_count: number;
+  pending_rider_kyc_count: number;
 }
 
 export interface RestaurantAdmin {
@@ -21,8 +26,12 @@ export interface RestaurantAdmin {
   name: string;
   email: string;
   phone_number: string;
-  status: 'active' | 'inactive' | string;
+  status: 'active' | 'inactive' | 'pending' | string;
   commission_rate: number;
+  logo_url?: string | null;
+  banner_url?: string | null;
+  active_menu_items_count?: number;
+  total_orders_count?: number;
   created_at: string;
 }
 
@@ -37,6 +46,8 @@ export interface RestaurantCreatePayload {
   longitude?: number | null;
   commission_rate?: number;
   currency?: string;
+  logo_url?: string | null;
+  banner_url?: string | null;
 }
 
 export interface RestaurantStatusUpdatePayload {
@@ -58,10 +69,12 @@ export interface AdminOrderSummary {
   restaurant_id: string;
   restaurant_name: string;
   rider_id?: string | null;
+  rider_name?: string | null;
   status: OrderStatus | string;
   payment_method: PaymentMethod | string;
   total_amount: number;
   placed_at: string;
+  elapsed_time_mins?: number;
 }
 
 export interface AdminOrderDetail {
@@ -69,8 +82,10 @@ export interface AdminOrderDetail {
   restaurant_id: string;
   restaurant_name: string;
   customer_name: string;
+  customer_phone?: string;
   rider_id?: string | null;
   rider_name?: string | null;
+  rider_phone?: string | null;
   status: OrderStatus | string;
   payment_method: PaymentMethod | string;
   food_subtotal: number;
@@ -110,6 +125,7 @@ export interface Settlement {
   net_payable: number;
   status: 'Pending' | 'Settled' | string;
   paid_at?: string | null;
+  reference_code?: string | null;
 }
 
 export interface CashDiscrepancy {
@@ -130,6 +146,36 @@ export interface TopRestaurant {
   revenue: number;
 }
 
+export interface PromotionAdmin {
+  id: string;
+  code: string;
+  title: string;
+  description?: string;
+  banner_url?: string | null;
+  discount_type: 'percentage' | 'flat';
+  discount_value: number;
+  min_order_value: number;
+  max_discount_amount?: number;
+  valid_from: string;
+  valid_until: string;
+  is_active: boolean;
+  usage_count: number;
+}
+
+export interface PromotionCreatePayload {
+  code: string;
+  title: string;
+  description?: string;
+  banner_url?: string | null;
+  discount_type: 'percentage' | 'flat';
+  discount_value: number;
+  min_order_value: number;
+  max_discount_amount?: number;
+  valid_from: string;
+  valid_until: string;
+  is_active: boolean;
+}
+
 export interface AdminReportsResponse {
   period_start: string;
   period_end: string;
@@ -148,6 +194,7 @@ export interface CustomerAdmin {
   phone_number: string;
   email?: string | null;
   wallet_balance: number;
+  total_orders_count?: number;
   is_active: boolean;
   created_at: string;
 }

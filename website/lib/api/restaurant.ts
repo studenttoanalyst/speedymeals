@@ -238,7 +238,10 @@ export async function getRestaurantMetrics(): Promise<RestaurantDashboardMetrics
     active_orders_count: 3,
     today_orders_count: 24,
     today_sales_gross: 31200.0,
-    pending_settlement_estimate: 28080.0, // 90%
+    net_payable_estimate: 28080.0, // 90% net after 10% commission
+    pending_settlement_estimate: 28080.0,
+    avg_prep_time_mins: 16.4,
+    cancellation_rate_pct: 1.8,
   };
 
   return apiClient<RestaurantDashboardMetrics>('/restaurants/me/metrics', {
