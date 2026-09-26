@@ -986,8 +986,8 @@ Every protected resource query includes the authenticated user's ID in the WHERE
 ## 29. Current Test Status
 
 ```
-Total tests: 309
-Passed: 309
+Total tests: 351
+Passed: 351
 Failed: 0
 Skipped: 0
 Errors: 0
@@ -1002,7 +1002,7 @@ Errors: 0
 - **SMS provider:** OTP sent to console log only (not real SMS)
 - **Push notifications:** No notification infrastructure (reminder threshold defined but not wired)
 - **Payment gateway:** Digital payment is a stub returning fake reference
-- **Real-time tracking:** Poll-based only (no WebSocket/push)
+- **Real-time tracking:** Implemented via WebSocket Pub/Sub with fallback polling
 - **Automated settlements:** Admin manually triggers generation and marks paid
 
 ### Partially Implemented
@@ -1114,6 +1114,35 @@ All secrets configured through environment variables. No hardcoded values in sou
 | Admin-only operations | Protected | All admin routes require admin role |
 | Rate limiting | Implemented | Redis-based, 5/min per endpoint |
 | File upload validation | Implemented | Size limit, type check, magic bytes |
+
+---
+
+## 33. Google Maps Platform Cost Optimization Matrix (Phase B0-B5)
+
+### Phase B0 – Key Hygiene & Circuit Breaker
+- Isolation of Google Maps API calls in `backend/app/core/maps_client.py`.
+- Daily call budget enforced via Redis key `maps:daily_usage:{YYYY-MM-DD}` with `MAPS_DAILY_CALL_BUDGET=300`.
+- Haversine fallback formula with driving multiplier 1.3 used when budget exceeded.
+
+### Phase B1 – Checkout Single-Call Optimization
+- `_build_checkout_context()` caches distance in Redis key `checkout_dist:{restaurant_id}:{address_id}` with 600‑second TTL, preventing duplicate Distance Matrix calls between `preview_checkout` and `place_order`.
+
+### Phase B2 – Geocoding Proxy & Rate Limiting
+- Reverse geocoding endpoint `GET /api/v1/location/reverse-geocode` caches results for 24 h under `geocode:{lat}:{lng}`.
+- Addresses persisted in PostgreSQL `addresses` table; subsequent order placements reuse stored coordinates.
+- Rate limiting applied via `core/rate_limiter.py` – 20 requests/min per IP, returns 429 on excess.
+
+### Phase B3 – WebSocket Real-Time Rider Tracking
+- WebSocket `WS /api/v1/orders/{order_id}/track` authenticates via JWT query token, validates order ownership, streams JSON location frames from Redis Pub/Sub channel `order:location:{order_id}`.
+- Auto‑disconnect on terminal status (`Delivered` / `Cancelled`) with close code 1000.
+- REST fallback `GET /orders/{order_id}/rider-location` still supported.
+
+### Phase B4 – Admin Governance & Financial Surfacing
+- Admin role bypasses ownership check, allowing live tracking of any order.
+- `AdminOrderDetailResponseSchema` includes `delivery_distance_km`, `delivery_fee`, `commission_amount`, `restaurant_payable`, `rider_earning`.
+
+### Phase B5 – Automated Test Suite & Regression Safeguards
+- Comprehensive tests covering all above features; total 351 tests passing.
 
 ---
 
