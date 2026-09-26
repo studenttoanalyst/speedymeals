@@ -1,190 +1,146 @@
-# SpeedyMeals — Google Maps Platform Integration Plan
-### Phase-by-Phase Work Breakdown
+# SpeedyMeals — Google Maps Platform Integration Plan (Revised)
+### Phase-by-Phase Work Breakdown — updated against `report.md` (backend code inspection)
 
-**Repo structure referenced:** `mobile_app/` (Flutter — customer + rider apps), `backend/` (order/fee/tracking logic), `admin_web/` (Next.js), `docs/`
+**Key change from previous plan:** the backend already implements two of the phases assumed to be future work. This revision separates **Done**, **In Progress / Partial**, and **Not Started** so effort isn't duplicated.
 
-**APIs in scope:** Maps SDK (Android/iOS), Geocoding, Places Autocomplete, Distance Matrix (Legacy), rider live-location (custom WebSocket, not a Google product)
+**Scope correction:** `report.md` documents the FastAPI `backend/` only. It contains no evidence of Geocoding, Places Autocomplete, or Maps SDK integration — those live in `mobile_app/` / `admin_web/` (outside this report's scope) and their status is unconfirmed, not "not started." Flagged accordingly below.
 
-**Cost baseline (from prior analysis, ~500 orders/day):** ~$25/month, driven almost entirely by Distance Matrix once past the 10,000/month free cap. Maps SDK, cached Geocoding, and session-based Autocomplete stay near $0.
+**Delivery fee formula correction:** actual implemented formula is `Rs. 100 base + Rs. 25/km` (`DELIVERY_FEE_BASE`, `DELIVERY_FEE_PER_KM` in `modules/food_delivery/service.py`) — not the Rs. 50 + Rs. 20/km used in the earlier draft.
 
 ---
 
-## Phase 0 — Google Cloud Setup (Pre-work, ~1 day)
+## Status Summary
 
-**Where:** Google Cloud Console (outside repo) → record output in `docs/maps-setup.md`
+| Phase | Component | Status | Evidence in report.md |
+|---|---|---|---|
+| 0 | Cloud setup | Partial | Single `GOOGLE_MAPS_API_KEY` in `.env` — one server key only, no separate mobile/web keys confirmed |
+| 1 | Map rendering (mobile) | Unconfirmed | Not covered by this backend report |
+| 2 | Address resolution (Geocoding) | Unconfirmed | `addresses` table stores lat/lng directly (Section 6); no geocoding endpoint in backend |
+| 3 | Address autocomplete (Places) | Unconfirmed | No mention in backend |
+| 4 | Delivery fee (Distance Matrix) | **Done** | Section 13, `core/maps_client.py`, `calculate_delivery_fee()` |
+| 5 | Rider live location | **Partial — poll-based only** | Section 22/23/30: Redis `rider_location:{rider_id}` (45s TTL), `PATCH /wallet/location` push, `GET /orders/{id}/rider-location` poll read. Explicitly listed as a known limitation: "no WebSocket/push" |
+| 6 | Rider navigation hand-off | Unconfirmed | Not covered by this backend report |
+| 7 | Admin visibility | Partial | Admin dashboard/order endpoints exist (Section 24); no map-specific admin UI confirmed |
+| 8 | Testing & cost validation | Not started | 309/309 tests pass, but none scoped to Maps cost/quota behavior |
 
-| Task | Detail |
-|---|---|
-| Create project | `speedymeals-prod` (+ separate `speedymeals-dev` for testing, keeps dev usage off prod billing/quota) |
-| Enable billing | Required even for free-tier usage |
-| Enable APIs | Maps SDK for Android, Maps SDK for iOS, Geocoding API, Places API (New), Distance Matrix API |
-| Generate keys | 3 separate keys minimum: Android key, iOS key, Backend/server key |
-| Restrict keys | Android → package name + SHA-1 cert fingerprint. iOS → bundle ID. Backend → server IP whitelist |
-| Set budget alert | e.g. Rs. 20,000/month threshold, email notification |
-| Store secrets | Backend key → `.env` / secrets manager, never committed. Mobile keys → platform-native config files, not hardcoded in Dart source |
+---
 
-**Exit criteria:** all 3 keys generated, restricted, budget alert active, keys stored (not committed to git).
+## Phase 0 — Cloud Setup: Close the Gap
+
+**Current state:** one `GOOGLE_MAPS_API_KEY` env var, used server-side only (`core/maps_client.py`).
+
+**Remaining work:**
+1. Confirm whether mobile/admin apps need their own restricted keys (Maps SDK, Autocomplete) or whether all map-facing work stays server-mediated. If mobile renders its own map (Phase 1), it needs its own Android/iOS keys — separate from the backend's Distance Matrix key.
+2. Restrict the existing backend key to server IP only (verify this is set in Cloud Console — not visible from code).
+3. Confirm budget alert exists; report gives no evidence either way.
+
+**Where:** Cloud Console + `backend/app/.env` (already wired) + new keys in `mobile_app/` config if Phase 1 proceeds.
 
 ---
 
 ## Phase 1 — Map Rendering Foundation (mobile_app)
 
-**Goal:** map displays on screen with static markers. No live tracking yet, no backend calls yet.
+**Status: unconfirmed — not in backend scope.**
 
-**Where:** `mobile_app/lib/` — new module e.g. `lib/features/maps/`
+No change to prior guidance, but before starting: confirm with whoever owns `mobile_app/` whether `google_maps_flutter` is already integrated. Don't duplicate.
 
-**Steps:**
-1. Add `google_maps_flutter` package to `pubspec.yaml`.
-2. Android: insert Android key into `android/app/src/main/AndroidManifest.xml` meta-data tag.
-3. iOS: insert iOS key into `ios/Runner/AppDelegate.swift` via `GMSServices.provideAPIKey()`.
-4. Build a reusable `MapView` widget wrapping `GoogleMap()` — accepts a list of markers as input, used by both customer and rider apps.
-5. Wire into customer app: **Step 4 (Set Delivery Address)** screen — show map with draggable pin for address confirmation.
-6. Wire into rider app: not yet — this phase is customer-side pin-drop only.
+**Where:** `mobile_app/lib/features/maps/` (assumed path, verify against actual repo).
 
-**Exit criteria:** customer can open the app, see a map, drag a pin, and the app reads back a lat/lng.
-
-**Cost:** $0 (Maps SDK always free).
+**Exit criteria:** unchanged from previous plan — map renders, draggable pin returns lat/lng.
 
 ---
 
 ## Phase 2 — Address Resolution (Geocoding)
 
-**Goal:** convert pin-drop coordinates into a readable address string, and vice versa.
+**Status: unconfirmed, likely not started on backend side.**
 
-**Where:** `backend/` — new endpoint, e.g. `POST /api/geocode/reverse` and `POST /api/geocode/forward`
+Report's `addresses` table (Section 6) has `latitude`, `longitude` fields but no evidence of a geocoding round-trip — coordinates may currently be captured directly from device GPS or a mobile-side Google SDK call, bypassing backend entirely.
 
-**Steps:**
-1. Backend service wraps Google Geocoding REST endpoint (`maps.googleapis.com/maps/api/geocode/json`), using the backend key.
-2. Reverse geocode: mobile app sends `{lat, lng}` after pin-drop → backend calls Google → returns formatted address string → shown to customer for confirmation before saving.
-3. Cache: store resolved address string against the saved address record in `addresses` table, so the same address is never re-geocoded.
-4. Mobile app calls this backend endpoint (never Google directly) — keeps the backend key server-side only.
-5. Wire into customer app **Step 4** flow: after pin confirm → call reverse geocode → show address label → customer taps "Save as Home/Work/Other."
+**Action before building anything:** check whether `mobile_app/` already calls Google Geocoding client-side. If yes, Phase 2 as previously scoped (backend proxy endpoint) is unnecessary — only add it if there's a reason to keep the key server-side (recommended, but confirm current behavior first rather than building a redundant path).
 
-**Exit criteria:** saved addresses have both coordinates and a human-readable label, geocoded exactly once per address.
-
-**Cost:** ~$0 at MVP volume (new addresses only, well under 10k free/month; repeat orders don't re-trigger this).
+**Where (if built):** `backend/app/modules/food_delivery/` or a new small `platform/location/` service — notably, `platform/location/` already exists in the codebase as a **placeholder (README only)**. This is the natural home for Geocoding logic if/when it's added — don't create a new module when one is already scaffolded for this purpose.
 
 ---
 
 ## Phase 3 — Address Autocomplete (Places)
 
-**Goal:** faster address entry via search-as-you-type, as an alternative to manual pin-drop.
+**Status: unconfirmed — no backend involvement expected.**
 
-**Where:** `mobile_app/lib/features/maps/` — new widget, e.g. `AddressSearchField`
-
-**Steps:**
-1. Add `google_places_flutter` (or `flutter_google_places_sdk`) package.
-2. **Session token handling is mandatory** — generate one session token when the user starts typing, reuse it for every keystroke request and the final Place Details call, discard it once a place is picked or the search is abandoned. This is what keeps Autocomplete free (session billing) instead of per-character billing.
-3. On place selection: fetch lat/lng via Place Details, feed into the same reverse-geocode/save flow from Phase 2.
-4. Wire into customer app **Step 4**: offer both entry paths — "Search address" (this phase) and "Drop pin on map" (Phase 1) — customer picks either.
-
-**Exit criteria:** customer can type a partial address, select from suggestions, and have it resolve to saved coordinates — zero incremental cost if session tokens are correctly scoped.
-
-**Cost:** $0 at MVP volume (session billing, free at all volumes when implemented correctly).
+Unchanged from prior plan: this stays entirely mobile-side with session tokens, backend never touches it. No action needed here unless `mobile_app/` inspection shows it's missing.
 
 ---
 
-## Phase 4 — Distance-Based Delivery Fee (Distance Matrix)
+## Phase 4 — Delivery Fee Calculation (Distance Matrix) — DONE
 
-**Goal:** calculate road distance between restaurant and customer at checkout, per the locked formula (Base Rs. 50 + Rs. 20/km).
+**No remaining work.** Confirmed implemented:
+- `core/maps_client.py` — Google Maps Distance Matrix client, driving mode, 10-second timeout
+- `calculate_delivery_fee()` in `modules/food_delivery/service.py` — `Decimal("100")` base + `Decimal("25")`/km, quantized to 2 decimals
+- Used in `_build_checkout_context()` → both `place_order()` and `preview_checkout()` — meaning distance is calculated at preview time too, not just final placement (worth confirming this doesn't mean **two** Distance Matrix calls per order — one at preview, one at checkout, if the customer previews before placing)
+- `MapsError` on failure → 503 to client — correct failure handling, no silent fallback
 
-**Where:** `backend/` — checkout/order-creation service, e.g. `backend/services/pricing/deliveryFee.ts` (or equivalent)
+**One open question to verify against actual code (not stated in report):** does `preview_checkout()` cache/reuse the same distance value if the customer proceeds to `place_order()` immediately after, or does it call Distance Matrix twice? If it's two calls per completed order instead of one, the Phase 4 cost estimate (~$25/month at 500 orders/day) roughly doubles to ~$50/month. Worth a 10-minute code check before finalizing budget.
 
-**Steps:**
-1. Backend endpoint (called during **Step 8: Checkout**) takes restaurant coordinates (from restaurant profile) + confirmed customer delivery coordinates.
-2. Calls Distance Matrix API (Legacy) server-side, using the backend key.
-3. Computes `delivery_fee = 50 + (distance_km * 20)`, computes commission/rider-earning splits per Section 3 of the product spec.
-4. Persists `delivery_distance_km` on the order record at creation — **never re-calls Distance Matrix for an existing order**, even if the app screen reloads. This single-call-per-order rule is what keeps this API's cost bounded and predictable.
-5. Returns the price breakdown (food subtotal + delivery fee + total) to the mobile app for display before order confirmation.
-
-**Exit criteria:** every order has a stored `delivery_distance_km` and fee snapshot; distance is never recalculated after order placement.
-
-**Cost:** ~$25/month at 500 orders/day (15,000 calls/month, 5,000 over the 10k free cap × $5/1000).
+**Remaining action:** none functionally required; recommend the cache check above as a small follow-up task.
 
 ---
 
-## Phase 5 — Rider Live Location (Custom, not a Google API)
+## Phase 5 — Rider Live Location — PARTIALLY DONE (poll-based, no push)
 
-**Goal:** rider's live position streams to the customer's tracking screen and updates the map marker in real time.
+**What's implemented (Section 21, 22, 30):**
+- Rider app pushes location: `PATCH /wallet/location` → written to Redis key `rider_location:{rider_id}`, 45-second TTL
+- Customer reads location: `GET /orders/{id}/rider-location` — reads from Redis, returns null if location stale/expired, returns 409 if order is in a terminal status (Delivered/Cancelled)
+- This endpoint was recently completed per Section 30's "Recently Resolved Gaps" table
 
-**Where:** `backend/` (WebSocket/streaming layer) + `mobile_app/` (rider app sends, customer app receives)
+**What's explicitly missing (Section 30, "Known Limitations"):**
+> Real-time tracking: Poll-based only (no WebSocket/push)
 
-**Steps:**
-1. **Rider app** (background service while "Online" or on an active delivery): sends `{order_id, lat, lng, timestamp}` every 3–5 seconds via WebSocket (or lightweight POST if WebSocket infra isn't ready yet) to backend.
-2. **Backend**: maintains rider's latest position — use Redis (or equivalent in-memory store) keyed by `rider_id`/`order_id`, not the main relational DB, to avoid write amplification from high-frequency pings.
-3. **Backend**: exposes a subscription channel per active order (WebSocket room, or a service like Supabase Realtime / Firebase Realtime DB if you want to avoid rolling your own).
-4. **Customer app**: on reaching **Step 10 (Track Order Live)** with status "Rider Assigned" or later, subscribes to that order's channel, receives position updates, moves the marker on the `MapView` widget built in Phase 1.
-5. Subscription closes automatically on "Delivered" status or order cancellation — stop rider pings too, to avoid unnecessary battery drain and backend load.
+This means the *backend data layer* for rider tracking is done, but the *delivery mechanism* to the customer app is polling, not a live stream. The earlier plan's Phase 5 assumed a WebSocket push architecture — that layer does not exist yet.
 
-**Exit criteria:** customer sees rider's marker move on the map roughly every 3–5 seconds during an active delivery; stream stops cleanly on delivery completion.
+**Remaining work, if push-based tracking is still wanted:**
+1. Add a WebSocket endpoint (e.g. `WS /orders/{id}/track`) in `backend/app/modules/food_delivery/` that subscribes to the same Redis key and pushes updates to connected clients instead of requiring the client to poll `GET /orders/{id}/rider-location` every few seconds.
+2. Decide whether polling is actually good enough for MVP — polling `GET /orders/{id}/rider-location` every 3–5 seconds from the customer app achieves the same visible result as a WebSocket, at the cost of slightly more HTTP overhead and no Google Maps billing impact either way (this is entirely internal infrastructure, zero-cost on the Maps Platform side regardless of which approach is used).
+3. If staying poll-based: no backend change needed, just confirm `mobile_app/` is actually polling this endpoint on the tracking screen (Customer Journey, "Order Tracking (poll-based)" — matches what the backend already supports).
 
-**Cost:** $0 in Google Maps billing terms — this is entirely your own infrastructure. Only cost impact on Google's side is indirect: more frequent map marker redraws on the customer's open map screen do not themselves trigger new billable Maps SDK events (SDK is unlimited/free), so this phase adds no Maps Platform cost.
+**Recommendation:** treat WebSocket upgrade as a nice-to-have, not a blocker — the existing poll endpoint is functionally complete and already has correct edge-case handling (staleness null, terminal-order 409).
 
 ---
 
 ## Phase 6 — Rider Navigation Hand-off
 
-**Goal:** rider taps "Navigate" and gets turn-by-turn guidance to restaurant, then to customer.
-
-**Where:** `mobile_app/lib/features/rider/` — navigation trigger on **Rider Journey Step 7 and Step 9**
-
-**Steps (recommended, zero-cost approach):**
-1. Add `url_launcher` package.
-2. On "Navigate" tap, construct a Google Maps deep-link intent: `google.navigation:q=<lat>,<lng>` (Android) or the equivalent Apple Maps/Google Maps URL scheme on iOS.
-3. This hands off to the user's installed Google Maps app for actual turn-by-turn — no Directions API call, no billing, and riders get Google's full live-traffic navigation experience (better than anything built in-house at MVP stage).
-
-**Alternative (only if in-app route rendering is a hard product requirement):**
-- Use Directions API (Legacy) server-side, draw the returned polyline on the in-app `MapView`. Adds ~$5/1000 calls cost and engineering overhead — not recommended for MVP.
-
-**Exit criteria:** rider taps Navigate, external Maps app opens with correct destination pre-filled.
-
-**Cost:** $0 (deep-link approach).
+**Status: unconfirmed — not in backend scope.** Unchanged from prior plan: deep-link approach (`google.navigation:q=lat,lng`) recommended over building in-app Directions rendering, since it's zero backend involvement and zero Maps Platform cost.
 
 ---
 
 ## Phase 7 — Admin Visibility (admin_web)
 
-**Goal:** Admin can see rider locations and delivery distance/fee breakdowns per the Admin Journey (Section 10, Steps 5 and 9).
+**Status: partial.** Backend already exposes everything needed:
+- `GET /admin/orders/{id}` — order detail, would include `delivery_distance_km` and fee breakdown if that's returned in the response schema (verify — report doesn't confirm this field is in the admin order-detail response specifically)
+- No dedicated admin endpoint for rider location exists — admin would need to either reuse `GET /orders/{id}/rider-location` (currently scoped as a customer-facing endpoint per Section 24's endpoint table — check if admin role is permitted to call it, or if a role check would reject it) or a new admin-specific read path
 
-**Where:** `admin_web/` — Next.js dashboard, order detail view
-
-**Steps:**
-1. Reuse the Phase 5 backend subscription channel (or a simple polling endpoint) to show live rider positions on an admin map view — use `@react-google-maps/api` (React wrapper) with a web-restricted Maps JavaScript API key, or Maps Embed API if only a static/simple view is needed (also free).
-2. Order detail page: display stored `delivery_distance_km` and fee breakdown from Phase 4 — read-only, no new API calls, since it's already persisted on the order.
-
-**Exit criteria:** Admin can open an active order and see rider position + distance/fee breakdown without triggering any new billable Maps events.
-
-**Cost:** Maps JavaScript API web map loads — free up to 10,000 loads/month (Essentials tier), trivial at admin-panel usage volume.
+**Remaining work:**
+1. Confirm `GET /orders/{id}/rider-location` accepts the admin role, or add an equivalent admin-scoped endpoint.
+2. Confirm order-detail response schema includes distance/fee breakdown fields for admin display.
+3. Frontend: `admin_web/` map view, using Maps JavaScript API (free up to 10,000 loads/month) — no backend blocker once the above two are confirmed.
 
 ---
 
 ## Phase 8 — Testing & Cost Validation
 
-**Where:** `docs/maps-testing.md` + Cloud Console billing dashboard
+**Status: not started, but foundation is strong.** 309/309 tests pass, Maps API already mocked via monkeypatch in test suite (Section 28) — meaning the Distance Matrix integration is under test, just not for cost/quota behavior specifically.
 
-**Steps:**
-1. Load-test checkout flow, confirm exactly one Distance Matrix call per order (check Cloud Console API metrics, not just app logs).
-2. Confirm Autocomplete session tokens are actually reducing billing to session-rate, not per-character — verify in Cloud Console under Places API usage.
-3. Confirm reverse-geocode is not re-triggered on repeat visits to a saved address.
-4. Run one full day of test traffic on `speedymeals-dev` project, check the Cloud Console cost breakdown against the Phase-by-phase cost estimates above before going live on `speedymeals-prod`.
-5. Confirm budget alert actually fires (test by temporarily lowering threshold).
-
-**Exit criteria:** actual per-API costs during test traffic match projections within reasonable margin; budget alert confirmed functional.
+**Remaining work (unchanged in substance from prior plan):**
+1. Verify preview-vs-checkout call count (see Phase 4's open question) using real Cloud Console metrics on `speedymeals-dev`, not just mocked tests.
+2. Load-test the poll-based rider-location endpoint under concurrent active orders — confirm Redis TTL/staleness behavior holds up, since this is now confirmed as the actual production mechanism, not a placeholder.
+3. Confirm budget alert (Phase 0) fires correctly.
 
 ---
 
-## Summary Table
+## Revised Cost Estimate
 
-| Phase | Component | API(s) | Repo location | Cost impact |
-|---|---|---|---|---|
-| 0 | Cloud setup | — | Console + `docs/` | $0 |
-| 1 | Map rendering | Maps SDK | `mobile_app/` | $0 |
-| 2 | Address resolution | Geocoding | `backend/` | ~$0 |
-| 3 | Address search | Places Autocomplete | `mobile_app/` | $0 (session billing) |
-| 4 | Delivery fee calc | Distance Matrix | `backend/` | ~$25/mo @ 500 orders/day |
-| 5 | Rider live tracking | Custom WebSocket | `backend/` + `mobile_app/` | $0 (not a Google API) |
-| 6 | Rider navigation | Deep-link (no API) | `mobile_app/` | $0 |
-| 7 | Admin visibility | Maps JS API / Embed | `admin_web/` | ~$0 |
-| 8 | Testing | — | `docs/` | validation only |
+| Item | Status | Monthly cost @ ~500 orders/day |
+|---|---|---|
+| Distance Matrix | Done, in production | ~$25 (or ~$50 if preview+checkout double-calls — verify) |
+| Rider location (Redis + poll) | Done, in production | $0 — not a Google API |
+| Maps SDK, Geocoding, Autocomplete, Directions | Unconfirmed (mobile-side) | Assume $0–low per prior estimates, pending confirmation these exist and use session tokens/caching correctly |
 
-**Total projected Maps Platform cost at MVP scale (~500 orders/day): ~$25/month**, concentrated entirely in Phase 4.
+**Immediate next action:** two verification tasks — (1) confirm single vs. double Distance Matrix call per order, (2) confirm current state of `mobile_app/` Maps integration — before doing any further planning, since both materially change scope and cost.
