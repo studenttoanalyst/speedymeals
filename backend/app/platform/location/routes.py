@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, Query, status
 
 from app.core.maps_client import MapsError
 from app.platform.location import service
-from app.platform.location.schemas import ReverseGeocodeResponseSchema
+from app.platform.location.schemas import (
+    PlaceDetailsResponseSchema,
+    PlacePredictionSchema,
+    ReverseGeocodeResponseSchema,
+)
 
 router = APIRouter(prefix="/api/v1/location", tags=["location"])
 
@@ -28,3 +32,44 @@ async def reverse_geocode(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Location resolution service is currently unavailable.",
         ) from exc
+
+
+@router.get("/places/autocomplete", response_model=list[PlacePredictionSchema])
+async def places_autocomplete(
+    q: str = Query(..., min_length=1, max_length=200, description="Address search query text"),
+    session_token: str | None = Query(default=None, description="Google Places Session Token for billing grouping"),
+):
+    """
+    Search place autocomplete suggestions using Google Places API proxy.
+    """
+    try:
+        return await service.autocomplete_places(q, session_token)
+    except MapsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Places autocomplete service is currently unavailable.",
+        ) from exc
+
+
+@router.get("/places/details", response_model=PlaceDetailsResponseSchema)
+async def place_details(
+    place_id: str = Query(..., min_length=1, description="Google Place ID"),
+    session_token: str | None = Query(default=None, description="Google Places Session Token"),
+):
+    """
+    Fetch lat/lng and structured address components for a Google Place ID.
+    """
+    try:
+        return await service.get_place_details(place_id, session_token)
+    except MapsError as exc:
+        err_msg = str(exc)
+        if err_msg == "ZERO_RESULTS":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Place ID not found.",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Place details service is currently unavailable.",
+        ) from exc
+

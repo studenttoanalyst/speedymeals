@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     # Google Maps
     GOOGLE_MAPS_API_KEY: str
+    GOOGLE_PLACES_API_KEY: str = ""
 
     # First Admin Auto-Seed (Phase 2, Step 10 - see ADR-002)
     FIRST_ADMIN_EMAIL: str

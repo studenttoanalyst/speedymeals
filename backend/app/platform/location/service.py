@@ -29,3 +29,20 @@ async def get_reverse_geocode(lat: float, lng: float) -> dict:
         pass  # Redis set failure should not break request flow
 
     return data
+
+
+async def autocomplete_places(query: str, session_token: str | None = None) -> list[dict]:
+    """
+    Proxy address autocomplete query to Google Places API.
+    """
+    from app.core.maps_client import autocomplete_places as maps_autocomplete
+    return await maps_autocomplete(query, session_token)
+
+
+async def get_place_details(place_id: str, session_token: str | None = None) -> dict:
+    """
+    Fetch place details for place_id from Google Places API.
+    """
+    from app.core.maps_client import get_place_details as maps_get_place_details
+    return await maps_get_place_details(place_id, session_token)
+

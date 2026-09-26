@@ -100,3 +100,107 @@ async def reverse_geocode(lat: float, lng: float) -> dict:
         "components": formatted_components,
     }
 
+
+PLACES_AUTOCOMPLETE_URL = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
+
+
+def _get_places_api_key() -> str:
+    return settings.GOOGLE_PLACES_API_KEY or settings.GOOGLE_MAPS_API_KEY
+
+
+async def autocomplete_places(input_text: str, session_token: str | None = None) -> list[dict]:
+    """
+    Search for address autocomplete predictions using Google Places API.
+    Supports session tokens for cost protection.
+    """
+    params = {
+        "input": input_text,
+        "key": _get_places_api_key(),
+    }
+    if session_token:
+        params["sessiontoken"] = session_token
+
+    try:
+        async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS) as client:
+            response = await client.get(PLACES_AUTOCOMPLETE_URL, params=params)
+            response.raise_for_status()
+            data = response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise MapsError("Places autocomplete lookup failed.") from exc
+
+    status = data.get("status")
+    if status == "ZERO_RESULTS":
+        return []
+
+    if status != "OK":
+        raise MapsError(f"Places autocomplete lookup failed: {status}")
+
+    predictions = []
+    for pred in data.get("predictions", []):
+        predictions.append({
+            "place_id": pred.get("place_id", ""),
+            "description": pred.get("description", ""),
+        })
+
+    return predictions
+
+
+async def get_place_details(place_id: str, session_token: str | None = None) -> dict:
+    """
+    Fetch place details (lat/lng and address components) for a given place_id using Google Places API.
+    Supports session tokens to close out autocomplete billing sessions.
+    """
+    params = {
+        "place_id": place_id,
+        "key": _get_places_api_key(),
+        "fields": "place_id,formatted_address,geometry,address_components",
+    }
+    if session_token:
+        params["sessiontoken"] = session_token
+
+    try:
+        async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS) as client:
+            response = await client.get(PLACE_DETAILS_URL, params=params)
+            response.raise_for_status()
+            data = response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise MapsError("Place details lookup failed.") from exc
+
+    status = data.get("status")
+    if status == "ZERO_RESULTS" or status == "INVALID_REQUEST":
+        raise MapsError("ZERO_RESULTS")
+
+    if status != "OK" or not data.get("result"):
+        raise MapsError(f"Place details lookup failed: {status}")
+
+    result = data["result"]
+    location = result.get("geometry", {}).get("location", {})
+    lat = location.get("lat", 0.0)
+    lng = location.get("lng", 0.0)
+
+    components = {}
+    for comp in result.get("address_components", []):
+        types = comp.get("types", [])
+        if "route" in types or "street_number" in types:
+            components.setdefault("street", []).append(comp.get("long_name", ""))
+        if "neighborhood" in types or "sublocality" in types or "sublocality_level_1" in types:
+            components.setdefault("neighborhood", comp.get("long_name", ""))
+        if "locality" in types or "administrative_area_level_2" in types:
+            components.setdefault("city", comp.get("long_name", ""))
+
+    formatted_components = {
+        "street": " ".join(components.get("street", [])) if isinstance(components.get("street"), list) else components.get("street", ""),
+        "neighborhood": components.get("neighborhood", ""),
+        "city": components.get("city", ""),
+    }
+
+    return {
+        "place_id": result.get("place_id", place_id),
+        "formatted_address": result.get("formatted_address", ""),
+        "lat": lat,
+        "lng": lng,
+        "components": formatted_components,
+    }
+
+
