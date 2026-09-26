@@ -199,6 +199,31 @@ def test_preview_rounds_maps_distance_to_2dp(db_session, customer, address, trac
     assert result["total"] == result["food_subtotal"] + result["delivery_fee"]
 
 
+def test_checkout_caching_eliminates_duplicate_maps_calls(db_session, customer, address, track_carts, monkeypatch):
+    restaurant = _make_restaurant(db_session, "Cache Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Karahi", 900)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+
+    call_count = {"count": 0}
+
+    def tracking_maps(*args):
+        call_count["count"] += 1
+        return 3.0
+
+    monkeypatch.setattr(maps_client, "get_road_distance_km", tracking_maps)
+
+    # First call: preview_checkout -> triggers 1 Maps API call
+    preview = service.preview_checkout(db_session, customer.id, restaurant.id, address.id)
+    assert preview["delivery_distance_km"] == Decimal("3.00")
+    assert call_count["count"] == 1
+
+    # Second call: place_order -> hits Redis cache, 0 additional Maps API calls
+    order = service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+    assert order["delivery_distance_km"] == Decimal("3.00")
+    assert call_count["count"] == 1  # Still 1 call!
+
+
+
 def test_preview_other_customers_address_rejected_404(db_session, customer, address, track_carts, monkeypatch):
     from app.platform.users.models import User
 

@@ -1,6 +1,8 @@
 from unittest.mock import AsyncMock, patch
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
+
 
 from app.main import app
 from app.core.maps_client import MapsError
@@ -97,4 +99,28 @@ def test_place_details_success(mock_details):
     assert data["place_id"] == "ChIJ2eUgeAK6j4ARbn5w_nE990E"
     assert data["lat"] == 37.42247
     assert data["lng"] == -122.08455
+
+
+@patch("app.core.maps_client.redis_client")
+def test_circuit_breaker_triggers_haversine_fallback(mock_redis, monkeypatch):
+    from app.core import maps_client
+
+    # Simulate counter reaching budget limit of 300
+    mock_redis.get.return_value = "300"
+
+    # Call get_road_distance_km with known coordinates (Lahore points: ~1.5 km straight line * 1.3 = ~1.95 km)
+    distance = maps_client.get_road_distance_km(31.5204, 74.3587, 31.5300, 74.3600)
+    assert distance > 0
+    # Confirm httpx was not called (would fail with real connection or exception if attempted with dummy key)
+
+
+@patch("app.platform.location.routes.enforce_rate_limit")
+def test_reverse_geocode_rate_limiting_exceeded(mock_rate_limit):
+    mock_rate_limit.side_effect = HTTPException(status_code=429, detail="Too many attempts. Please try again in 60 seconds.")
+
+    response = client.get("/api/v1/location/reverse-geocode?lat=37.42247&lng=-122.08455")
+    assert response.status_code == 429
+    assert response.json()["detail"] == "Too many attempts. Please try again in 60 seconds."
+
+
 

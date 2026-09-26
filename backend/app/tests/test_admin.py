@@ -279,6 +279,9 @@ def test_get_order_detail_has_distance_and_fee_breakdown(db_session):
     assert result["delivery_distance_km"] == 3
     assert result["delivery_fee"] == 175
     assert result["commission_amount"] == 100
+    assert result["restaurant_payable"] == 900
+    assert result["rider_earning"] == 175
+
 
 
 def test_cancel_order_sets_status_and_reason(db_session):

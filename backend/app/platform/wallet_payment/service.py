@@ -330,6 +330,24 @@ def update_rider_location(
 
     try:
         redis_client.set(_rider_location_key(rider_id), payload, ex=LOCATION_TTL_SECONDS)
+        
+        # Publish to active order Pub/Sub channel if rider has an active delivery
+        active_order = (
+            db.query(Order)
+            .filter(
+                Order.rider_id == rider_id,
+                Order.status.notin_(["Delivered", "Cancelled", "Rejected"]),
+            )
+            .first()
+        )
+        if active_order is not None:
+            pub_payload = json.dumps({
+                "order_id": str(active_order.id),
+                "latitude": latitude,
+                "longitude": longitude,
+                "updated_at": now,
+            })
+            redis_client.publish(f"order:location:{active_order.id}", pub_payload)
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -342,6 +360,7 @@ def update_rider_location(
         "lng": longitude,
         "updated_at": now,
     }
+
 
 
 # --- Phase 6, Step 2: rider assignment eligibility ---

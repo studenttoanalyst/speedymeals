@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Request, Query, status
 
 from app.core.maps_client import MapsError
+from app.core.rate_limiter import enforce_rate_limit
 from app.platform.location import service
 from app.platform.location.schemas import (
     PlaceDetailsResponseSchema,
@@ -13,12 +14,17 @@ router = APIRouter(prefix="/api/v1/location", tags=["location"])
 
 @router.get("/reverse-geocode", response_model=ReverseGeocodeResponseSchema)
 async def reverse_geocode(
+    request: Request,
     lat: float = Query(..., ge=-90.0, le=90.0, description="Latitude"),
     lng: float = Query(..., ge=-180.0, le=180.0, description="Longitude"),
 ):
     """
     Reverse geocode latitude and longitude to a human-readable address.
+    Rate limited to 20 requests per minute per IP.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    enforce_rate_limit(client_ip, "reverse_geocode", max_attempts=20, window_seconds=60)
+
     try:
         return await service.get_reverse_geocode(lat, lng)
     except MapsError as exc:
@@ -32,6 +38,7 @@ async def reverse_geocode(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Location resolution service is currently unavailable.",
         ) from exc
+
 
 
 @router.get("/places/autocomplete", response_model=list[PlacePredictionSchema])

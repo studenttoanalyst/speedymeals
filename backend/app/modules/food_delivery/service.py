@@ -1203,22 +1203,37 @@ def _build_checkout_context(
         food_subtotal += by_id[item_id].price * sum(line.qty for line in item_lines)
     food_subtotal = food_subtotal.quantize(Decimal("0.01"))
 
+    cache_key = f"checkout_dist:{restaurant_id}:{address_id}"
+    distance_km = None
     try:
-        distance_km = maps_client.get_road_distance_km(
-            float(restaurant.latitude),
-            float(restaurant.longitude),
-            float(address.latitude),
-            float(address.longitude),
-        )
-    except maps_client.MapsError:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Could not calculate delivery distance. Please try again shortly.",
-        )
+        cached_dist = redis_client.get(cache_key)
+        if cached_dist is not None:
+            distance_km = float(cached_dist)
+    except Exception:
+        pass
+
+    if distance_km is None:
+        try:
+            distance_km = maps_client.get_road_distance_km(
+                float(restaurant.latitude),
+                float(restaurant.longitude),
+                float(address.latitude),
+                float(address.longitude),
+            )
+            try:
+                redis_client.setex(cache_key, 600, str(distance_km))
+            except Exception:
+                pass
+        except maps_client.MapsError:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Could not calculate delivery distance. Please try again shortly.",
+            )
 
     delivery_distance_km = Decimal(str(round(distance_km, 2)))
     delivery_fee = calculate_delivery_fee(delivery_distance_km)
     total = (food_subtotal + delivery_fee).quantize(Decimal("0.01"))
+
 
     return {
         "restaurant": restaurant,

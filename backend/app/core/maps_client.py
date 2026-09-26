@@ -9,17 +9,62 @@ Failure policy: any network/HTTP/payload problem raises MapsError — the
 service layer decides the HTTP response (503), so an outage degrades one
 request, never the app.
 """
+import logging
+import math
+from datetime import date
 import httpx
 
 from app.core.config import settings
+from app.core.redis_client import redis_client
+
+logger = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT_SECONDS = 10
 DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json"
+DRIVING_ROAD_FACTOR = 1.3
 
 
 class MapsError(Exception):
     """Google Maps could not provide a distance (network, HTTP error, or
     non-OK element status like ZERO_RESULTS / REQUEST_DENIED)."""
+
+
+def _calculate_haversine_distance(
+    origin_lat: float, origin_lon: float, dest_lat: float, dest_lon: float
+) -> float:
+    """
+    Great-circle Haversine distance in km multiplied by a 1.3 road factor.
+    """
+    phi1, phi2 = math.radians(origin_lat), math.radians(dest_lat)
+    dphi = math.radians(dest_lat - origin_lat)
+    dlambda = math.radians(dest_lon - origin_lon)
+    a = (
+        math.sin(dphi / 2) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    )
+    straight_km = 2 * 6371.0 * math.asin(math.sqrt(a))
+    return straight_km * DRIVING_ROAD_FACTOR
+
+
+def _check_and_increment_daily_budget() -> bool:
+    """
+    Checks if today's Google Maps API call budget is exceeded.
+    Returns True if allowed (and increments counter), False if budget exceeded.
+    """
+    key = f"maps:daily_usage:{date.today().isoformat()}"
+    try:
+        current_count = redis_client.get(key)
+        if current_count is not None and int(current_count) >= settings.MAPS_DAILY_CALL_BUDGET:
+            return False
+
+        pipe = redis_client.pipeline()
+        pipe.incr(key)
+        pipe.expire(key, 86400)
+        pipe.execute()
+        return True
+    except Exception as exc:
+        logger.warning(f"Redis daily budget check failed: {exc}")
+        return True  # Fallback to allowing API call if Redis fails
 
 
 def get_road_distance_km(
@@ -30,6 +75,12 @@ def get_road_distance_km(
     restaurant -> delivery address. Returns raw km (unrounded — the caller
     decides storage/display precision).
     """
+    if not _check_and_increment_daily_budget():
+        logger.warning(
+            "[MAPS_CIRCUIT_BREAKER] Daily budget reached. Falling back to local Haversine formula."
+        )
+        return _calculate_haversine_distance(origin_lat, origin_lon, dest_lat, dest_lon)
+
     params = {
         "origins": f"{origin_lat},{origin_lon}",
         "destinations": f"{dest_lat},{dest_lon}",
@@ -47,6 +98,7 @@ def get_road_distance_km(
         raise MapsError(f"Distance lookup failed: {element.get('status')}")
 
     return element["distance"]["value"] / 1000.0  # meters -> km
+
 
 
 GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"

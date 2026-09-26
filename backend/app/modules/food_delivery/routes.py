@@ -402,3 +402,92 @@ def rate_my_order(
         payload.rider_rating,
         payload.comment,
     )
+
+
+# --- Phase B3: WebSocket Live Tracking Stream ---
+
+import asyncio
+from fastapi import WebSocket, WebSocketDisconnect
+from jose import JWTError
+from app.platform.auth.jwt_utils import decode_token
+
+
+@customer_orders_router.websocket("/{order_id}/track")
+async def websocket_track_rider(
+    websocket: WebSocket,
+    order_id: uuid.UUID,
+    token: str = Query(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Phase B3 — WebSocket real-time live rider tracking.
+    Authenticates user via token query param (`?token=...`), verifies order ownership,
+    subscribes to Redis Pub/Sub channel `order:location:{order_id}`, and streams
+    live JSON location frames. Auto-disconnects on terminal status or client disconnect.
+    """
+    try:
+        payload = decode_token(token)
+        user_id = uuid.UUID(payload.get("sub"))
+        role = payload.get("role")
+        if payload.get("type") != "access" or role not in ("customer", "admin"):
+            await websocket.close(code=4003)
+            return
+    except (JWTError, ValueError, TypeError):
+        await websocket.close(code=4003)
+        return
+
+    try:
+        # Initial tracking read & order ownership validation
+        order_tracking = service.get_order_rider_location(db, user_id, role, order_id)
+    except HTTPException:
+        await websocket.close(code=4003)
+        return
+
+    await websocket.accept()
+
+    # Initial frame
+    await websocket.send_json({
+        "event": "location_update",
+        "data": order_tracking,
+    })
+
+    # Pub/Sub streaming loop using redis_client async channel listener
+    pubsub = redis_client.pubsub()
+    channel_name = f"order:location:{order_id}"
+    pubsub.subscribe(channel_name)
+
+    try:
+        while True:
+            # Non-blocking check for pubsub messages
+            message = pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
+            if message and message["type"] == "message":
+                data = json.loads(message["data"])
+                await websocket.send_json({
+                    "event": "location_update",
+                    "data": data,
+                })
+
+            # Check if order transitioned to a terminal status
+            db.expire_all()
+            try:
+                current_status = service.get_order_rider_location(db, user_id, role, order_id)
+            except HTTPException as exc:
+                if exc.status_code == 409:
+                    await websocket.send_json({
+                        "event": "order_completed",
+                        "detail": "Order reached terminal status. Live tracking ended.",
+                    })
+                    await websocket.close(code=1000)
+                    break
+
+            await asyncio.sleep(0.5)
+
+    except WebSocketDisconnect:
+        pass
+    finally:
+        try:
+            pubsub.unsubscribe(channel_name)
+            pubsub.close()
+        except Exception:
+            pass
+

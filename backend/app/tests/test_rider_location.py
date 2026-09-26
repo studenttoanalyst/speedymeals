@@ -311,6 +311,30 @@ def test_route_rider_isolation(location_client, db_session, rider, rider2):
         _cleanup_location(rider2.id)
 
 
+def test_admin_can_track_any_order_rider_location(db_session, rider):
+    """Phase B4: Admin token can query rider location for any customer order."""
+    from app.modules.food_delivery.service import get_order_rider_location
+    from app.tests.test_order_tracking import _make_customer, _make_restaurant, _make_address, _make_order
+
+    # Push location for rider
+    service.update_rider_location(db_session, rider.id, 31.5204, 74.3587)
+
+    customer = _make_customer(db_session)
+    restaurant = _make_restaurant(db_session)
+    address = _make_address(db_session, customer)
+    order = _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Accepted by Rider")
+
+    try:
+        # Admin querying third-party order returns rider location
+        result = get_order_rider_location(db_session, uuid.uuid4(), "admin", order.id)
+        assert result["latitude"] == 31.5204
+        assert result["longitude"] == 74.3587
+    finally:
+        _cleanup_location(rider.id)
+
+
+
+
 def test_route_missing_fields_rejected(location_client, db_session, rider):
     token = create_access_token(rider.id, "rider")
     response = location_client.patch(
