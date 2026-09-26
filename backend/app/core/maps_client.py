@@ -47,3 +47,56 @@ def get_road_distance_km(
         raise MapsError(f"Distance lookup failed: {element.get('status')}")
 
     return element["distance"]["value"] / 1000.0  # meters -> km
+
+
+GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+
+
+async def reverse_geocode(lat: float, lng: float) -> dict:
+    """
+    Reverse geocode latitude and longitude to human-readable address components
+    and place ID using Google Geocoding API.
+    """
+    params = {
+        "latlng": f"{lat},{lng}",
+        "key": settings.GOOGLE_MAPS_API_KEY,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS) as client:
+            response = await client.get(GEOCODING_URL, params=params)
+            response.raise_for_status()
+            data = response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise MapsError("Geocoding lookup failed.") from exc
+
+    status = data.get("status")
+    if status == "ZERO_RESULTS":
+        raise MapsError("ZERO_RESULTS")
+
+    if status != "OK" or not data.get("results"):
+        raise MapsError(f"Geocoding lookup failed: {status}")
+
+    first_result = data["results"][0]
+
+    components = {}
+    for comp in first_result.get("address_components", []):
+        types = comp.get("types", [])
+        if "route" in types or "street_number" in types:
+            components.setdefault("street", []).append(comp.get("long_name", ""))
+        if "neighborhood" in types or "sublocality" in types or "sublocality_level_1" in types:
+            components.setdefault("neighborhood", comp.get("long_name", ""))
+        if "locality" in types or "administrative_area_level_2" in types:
+            components.setdefault("city", comp.get("long_name", ""))
+
+    formatted_components = {
+        "street": " ".join(components.get("street", [])) if isinstance(components.get("street"), list) else components.get("street", ""),
+        "neighborhood": components.get("neighborhood", ""),
+        "city": components.get("city", ""),
+    }
+
+    return {
+        "formatted_address": first_result.get("formatted_address", ""),
+        "place_id": first_result.get("place_id", ""),
+        "components": formatted_components,
+    }
+

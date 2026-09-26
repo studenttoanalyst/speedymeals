@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from app.core.database import SessionLocal
 from app.platform.auth import service as auth_service
 from app.platform.auth.routes import router as auth_router
+from app.platform.location.routes import router as location_router
 from app.platform.users.routes import router as users_router
 from app.platform.wallet_payment.routes import router as wallet_router
 from app.modules.admin.routes import router as admin_router
@@ -21,8 +22,10 @@ from app.modules.food_delivery.routes import (
 app = FastAPI(title="SpeedyMeals API", version="0.1.0")
 
 app.include_router(auth_router)
+app.include_router(location_router)
 app.include_router(users_router)
 app.include_router(wallet_router)
+
 app.include_router(menu_router)
 app.include_router(orders_router)
 app.include_router(customer_router)
