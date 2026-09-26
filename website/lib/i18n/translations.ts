@@ -8,8 +8,14 @@ export interface TranslationPhrases {
   fullLegalName: string;
   primaryModeOfTransport: string;
   emailAddress: string;
+  emailAddressOptional: string;
   phoneNumber: string;
   primaryDispatchZone: string;
+  areaNeighborhood: string;
+  streetAddressOptional: string;
+  selectCityFirst: string;
+  typeToSearchCity: string;
+  typeToSearchArea: string;
   deliveryExperience: string;
   restaurantPartnerOnboarding: string;
   authorizedRepresentative: string;
@@ -43,8 +49,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     fullLegalName: 'Full Legal Name',
     primaryModeOfTransport: 'Primary Mode of Transport',
     emailAddress: 'Email Address',
+    emailAddressOptional: 'Email Address (Optional)',
     phoneNumber: 'Phone Number',
     primaryDispatchZone: 'Primary Dispatch Zone',
+    areaNeighborhood: 'Area / Locality',
+    streetAddressOptional: 'Street Address / Building (Optional)',
+    selectCityFirst: 'Select a city first...',
+    typeToSearchCity: 'Type to search city (e.g. Karachi, Lahore, Riyadh)...',
+    typeToSearchArea: 'Type to search area (e.g. Clifton, Gulberg)...',
     deliveryExperience: 'Delivery Experience',
     restaurantPartnerOnboarding: 'Restaurant Partner Onboarding',
     authorizedRepresentative: 'Authorized Representative',
@@ -76,8 +88,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     fullLegalName: 'مکمل قانونی نام',
     primaryModeOfTransport: 'بنیادی وسیلہ نقل',
     emailAddress: 'ای میل کا پتہ',
+    emailAddressOptional: 'ای میل کا پتہ (اختیاری)',
     phoneNumber: 'فون نمبر',
     primaryDispatchZone: 'بنیادی ڈسپیچ زون',
+    areaNeighborhood: 'علاقہ / لوکیشن',
+    streetAddressOptional: 'گلی کا پتہ / عمارت (اختیاری)',
+    selectCityFirst: 'پہلے شہر منتخب کریں...',
+    typeToSearchCity: 'شہر تلاش کریں (مثلاً کراچی، لاہور، ریاض)...',
+    typeToSearchArea: 'علاقہ تلاش کریں (مثلاً کلفٹن، گلبرگ)...',
     deliveryExperience: 'ڈیلیوری کا تجربہ',
     restaurantPartnerOnboarding: 'ریسٹورنٹ پارٹنر آن بورڈنگ',
     authorizedRepresentative: 'مجاز نمائندہ',
@@ -109,8 +127,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     fullLegalName: 'اسم القانوني كامل',
     primaryModeOfTransport: 'وسيلة النقل الاساسية',
     emailAddress: 'عنوان بريد الالكتروني',
+    emailAddressOptional: 'عنوان بريد الالكتروني (اختياري)',
     phoneNumber: 'رقم الهاتف',
     primaryDispatchZone: 'منطقة التوزيع الأساسية',
+    areaNeighborhood: 'المنطقة / الحي',
+    streetAddressOptional: 'عنوان الشارع / المبنى (اختياري)',
+    selectCityFirst: 'اختر المدينة أولاً...',
+    typeToSearchCity: 'ابحث عن المدينة (مثل الرياض، جدة، كراتشي)...',
+    typeToSearchArea: 'ابحث عن الحي أو المنطقة...',
     deliveryExperience: 'الخبرة في مجال التوصيل',
     restaurantPartnerOnboarding: 'تسجيل شريك المطعم',
     authorizedRepresentative: 'الممثل المفوّض',

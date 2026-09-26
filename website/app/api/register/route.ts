@@ -85,8 +85,10 @@ export async function POST(request: Request) {
       phone,
       phoneNumber,
       countryCode = '+92',
-      city = 'Karachi',
+      city,
       customCity,
+      area,
+      address,
       vehicleType,
       businessName,
       cuisineType,
@@ -127,7 +129,8 @@ export async function POST(request: Request) {
     // 4. Input sanitization & Unicode normalization (NFKC)
     const personName = sanitizeTextInput(fullName || name, { maxLength: 80 });
     const contactPhone = (phone || phoneNumber || '').trim();
-    const contactEmail = sanitizeTextInput(email, { maxLength: 254 }).toLowerCase();
+    const rawEmail = typeof email === 'string' ? email.trim() : '';
+    const contactEmail = rawEmail ? sanitizeTextInput(rawEmail, { maxLength: 254 }).toLowerCase() : null;
 
     // Resolve city: Strictly save the actual user-typed city name and NEVER "Other" or "Others"
     const rawCityStr = typeof city === 'string' ? city.trim() : '';
@@ -138,14 +141,14 @@ export async function POST(request: Request) {
       rawCityStr.toLowerCase() === 'others' ||
       rawCityStr.toLowerCase().startsWith('other');
 
-    let resolvedCity = rawCityStr || 'Karachi';
+    let resolvedCity = rawCityStr;
 
     if (isOtherChoice) {
       if (!rawCustomCityStr || rawCustomCityStr.toLowerCase() === 'other' || rawCustomCityStr.toLowerCase() === 'others') {
         return NextResponse.json(
           {
             error: 'Please specify your actual city or district name.',
-            field: 'customCity',
+            field: 'city',
           },
           { status: 400 }
         );
@@ -160,13 +163,18 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: 'Please specify your actual city or district name.',
-          field: 'customCity',
+          field: 'city',
         },
         { status: 400 }
       );
     }
 
-    const sanitizedCity = sanitizeTextInput(resolvedCity, { maxLength: 50 }) || 'Karachi';
+    const sanitizedCity = sanitizeTextInput(resolvedCity, { maxLength: 50 });
+    const rawAreaStr = typeof area === 'string' ? area.trim() : '';
+    const rawAddressStr = typeof address === 'string' ? address.trim() : '';
+    const sanitizedArea = rawAreaStr ? sanitizeTextInput(rawAreaStr, { maxLength: 100 }) : '';
+    const sanitizedAddress = rawAddressStr ? sanitizeTextInput(rawAddressStr, { maxLength: 200 }) : null;
+
     const sanitizedBusinessName = businessName ? sanitizeTextInput(businessName, { maxLength: 100 }) : null;
     const sanitizedCuisineType = cuisineType ? sanitizeTextInput(cuisineType, { maxLength: 50 }) : null;
     const sanitizedVehicleType = vehicleType ? sanitizeTextInput(vehicleType, { maxLength: 50 }) : null;
@@ -174,18 +182,47 @@ export async function POST(request: Request) {
     const sanitizedServiceInterest = serviceInterest ? sanitizeTextInput(serviceInterest, { maxLength: 100 }) : null;
 
     // 5. Basic field presence & minimum length validation
-    if (!personName || personName.length < 2 || !contactEmail || !contactPhone || !persona) {
+    if (!personName || personName.length < 2 || !contactPhone || !persona) {
       return NextResponse.json(
-        { error: 'Missing or invalid required fields: name, email, phone, and persona are required.' },
+        { error: 'Missing or invalid required fields: name, phone, and persona are required.' },
         { status: 400 }
       );
+    }
+
+    // City and Area validation:
+    // Restaurants: compulsory City and Area with specific blocks/localities
+    // Riders and Customers: choose preferred city ONLY (no area, no address)
+    if (persona === 'restaurant') {
+      if (!sanitizedCity || sanitizedCity.length < 2) {
+        return NextResponse.json(
+          { error: 'City is compulsory for restaurant onboarding. Please enter or select your operating city.', field: 'city' },
+          { status: 400 }
+        );
+      }
+
+      if (!sanitizedArea || sanitizedArea.length < 2) {
+        return NextResponse.json(
+          { error: 'Area is compulsory for restaurant onboarding. Please select or enter your specific operating area/locality.', field: 'area' },
+          { status: 400 }
+        );
+      }
+    } else {
+      if (!sanitizedCity || sanitizedCity.length < 2) {
+        return NextResponse.json(
+          { error: 'Please select or enter your city.', field: 'city' },
+          { status: 400 }
+        );
+      }
     }
 
     // 6. Security: Prohibit Prompt Injection and SQL drop patterns
     if (
       containsPromptInjection(personName) ||
       containsPromptInjection(sanitizedBusinessName || '') ||
-      containsPromptInjection(sanitizedCuisineType || '')
+      containsPromptInjection(sanitizedCuisineType || '') ||
+      containsPromptInjection(sanitizedCity || '') ||
+      containsPromptInjection(sanitizedArea || '') ||
+      containsPromptInjection(sanitizedAddress || '')
     ) {
       console.warn(`[Security Alert] Prompt injection / SQL attack pattern detected from IP ${clientIp}`);
       return NextResponse.json(
@@ -205,23 +242,25 @@ export async function POST(request: Request) {
       );
     }
 
-    if (isReservedEmail(contactEmail)) {
-      return NextResponse.json(
-        {
-          error: 'Administrative email aliases cannot be used for registration.',
-          field: 'email',
-        },
-        { status: 400 }
-      );
-    }
+    // 8. Email format check (RFC 5322 compliant standard check) - Only if email is provided
+    if (contactEmail) {
+      if (isReservedEmail(contactEmail)) {
+        return NextResponse.json(
+          {
+            error: 'Administrative email aliases cannot be used for registration.',
+            field: 'email',
+          },
+          { status: 400 }
+        );
+      }
 
-    // 8. Email format check (RFC 5322 compliant standard check)
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-    if (!emailRegex.test(contactEmail)) {
-      return NextResponse.json(
-        { error: 'Please provide a valid email address.', field: 'email' },
-        { status: 400 }
-      );
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+      if (!emailRegex.test(contactEmail)) {
+        return NextResponse.json(
+          { error: 'Please provide a valid email address.', field: 'email' },
+          { status: 400 }
+        );
+      }
     }
 
     // 9. Regional phone format verification
@@ -267,26 +306,28 @@ export async function POST(request: Request) {
 
     const db = getDbClient();
 
-    // 10. Uniqueness Enforcement: Check if Email already exists
-    const { data: existingEmail, error: emailCheckError } = await db
-      .from('partner_registrations')
-      .select('id, email')
-      .ilike('email', contactEmail)
-      .limit(1)
-      .maybeSingle();
+    // 10. Uniqueness Enforcement: Check if Email already exists (only if email was provided)
+    if (contactEmail) {
+      const { data: existingEmail, error: emailCheckError } = await db
+        .from('partner_registrations')
+        .select('id, email')
+        .ilike('email', contactEmail)
+        .limit(1)
+        .maybeSingle();
 
-    if (emailCheckError && emailCheckError.code !== 'PGRST116') {
-      console.warn('[Supabase Email Check Warning]:', emailCheckError.message);
-    }
+      if (emailCheckError && emailCheckError.code !== 'PGRST116') {
+        console.warn('[Supabase Email Check Warning]:', emailCheckError.message);
+      }
 
-    if (existingEmail) {
-      return NextResponse.json(
-        {
-          error: 'This email address is already registered. Please use another email or sign in.',
-          field: 'email',
-        },
-        { status: 409 }
-      );
+      if (existingEmail) {
+        return NextResponse.json(
+          {
+            error: 'This email address is already registered. Please use another email or sign in.',
+            field: 'email',
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // 11. Uniqueness Enforcement: Check if Phone already exists for this country code
@@ -321,10 +362,12 @@ export async function POST(request: Request) {
       reference_code: referenceCode,
       persona_type: persona,
       full_name: personName,
-      email: contactEmail,
+      email: contactEmail || null,
       phone: phoneValidation.formatted,
       country_code: countryCode,
       city: sanitizedCity,
+      area: persona === 'restaurant' ? sanitizedArea : null,
+      address: persona === 'restaurant' ? (sanitizedAddress || null) : null,
       vehicle_type: persona === 'rider' ? sanitizedVehicleType : null,
       business_name: persona === 'restaurant' ? sanitizedBusinessName : null,
       cuisine_type: persona === 'restaurant' ? sanitizedCuisineType : null,
