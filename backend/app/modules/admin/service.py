@@ -748,3 +748,123 @@ def get_reports(db: Session, period_start: date, period_end: date) -> dict:
         "average_delivery_distance_km": average_delivery_distance_km,
         "average_delivery_fee": average_delivery_fee,
     }
+
+
+# --- Step 8: Customers & Promotions ---
+
+
+def list_customers(db: Session) -> list[dict]:
+    """Step 8 — list all registered customers from `users` table."""
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    results = []
+    for u in users:
+        order_count = db.query(Order).filter(Order.user_id == u.id).count()
+        results.append({
+            "id": u.id,
+            "name": u.name,
+            "phone_number": u.phone_number,
+            "email": u.email,
+            "wallet_balance": float(u.wallet_balance or 0.0),
+            "total_orders_count": order_count,
+            "is_active": u.is_active,
+            "created_at": u.created_at,
+        })
+    return results
+
+
+def toggle_customer_status(db: Session, customer_id: uuid.UUID, is_active: bool) -> dict:
+    """Step 8 — block or unblock customer account."""
+    user = db.query(User).filter(User.id == customer_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer not found",
+        )
+    user.is_active = is_active
+    db.commit()
+    db.refresh(user)
+    order_count = db.query(Order).filter(Order.user_id == user.id).count()
+    return {
+        "id": user.id,
+        "name": user.name,
+        "phone_number": user.phone_number,
+        "email": user.email,
+        "wallet_balance": float(user.wallet_balance or 0.0),
+        "total_orders_count": order_count,
+        "is_active": user.is_active,
+        "created_at": user.created_at,
+    }
+
+
+# In-memory promotional campaign storage for MVP stage
+_PROMOTIONS_STORE: list[dict] = [
+    {
+        "id": "promo-1",
+        "code": "SPEEDY50",
+        "title": "Flat 50% Off First Feast",
+        "description": "Welcome bonus for new platform users on orders over PKR 1,000",
+        "banner_url": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200",
+        "discount_type": "percentage",
+        "discount_value": 50.0,
+        "min_order_value": 1000.0,
+        "max_discount_amount": 500.0,
+        "valid_from": datetime.now(timezone.utc),
+        "valid_until": datetime.now(timezone.utc).replace(year=datetime.now(timezone.utc).year + 1),
+        "is_active": True,
+        "usage_count": 142,
+    },
+    {
+        "id": "promo-2",
+        "code": "FREEDELIVERY",
+        "title": "100% Free Delivery Rush",
+        "description": "Zero delivery fees on all orders above PKR 1,500",
+        "banner_url": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1200",
+        "discount_type": "flat",
+        "discount_value": 150.0,
+        "min_order_value": 1500.0,
+        "max_discount_amount": 150.0,
+        "valid_from": datetime.now(timezone.utc),
+        "valid_until": datetime.now(timezone.utc).replace(year=datetime.now(timezone.utc).year + 1),
+        "is_active": True,
+        "usage_count": 89,
+    },
+]
+
+
+def list_promotions() -> list[dict]:
+    """Step 8 — list all promotional codes and active banners."""
+    return _PROMOTIONS_STORE
+
+
+def create_promotion(payload) -> dict:
+    """Step 8 — create a new promotion."""
+    new_promo = {
+        "id": f"promo-{len(_PROMOTIONS_STORE) + 1}",
+        "code": payload.code.upper().strip(),
+        "title": payload.title.strip(),
+        "description": payload.description,
+        "banner_url": payload.banner_url,
+        "discount_type": payload.discount_type,
+        "discount_value": payload.discount_value,
+        "min_order_value": payload.min_order_value,
+        "max_discount_amount": payload.max_discount_amount,
+        "valid_from": payload.valid_from,
+        "valid_until": payload.valid_until,
+        "is_active": payload.is_active,
+        "usage_count": 0,
+    }
+    _PROMOTIONS_STORE.insert(0, new_promo)
+    return new_promo
+
+
+def toggle_promotion_status(promo_id: str, is_active: bool) -> dict:
+    """Step 8 — toggle promotion active/inactive status."""
+    for promo in _PROMOTIONS_STORE:
+        if promo["id"] == promo_id:
+            promo["is_active"] = is_active
+            return promo
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Promotion {promo_id} not found",
+    )
+

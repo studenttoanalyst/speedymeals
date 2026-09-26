@@ -290,3 +290,56 @@ class ReportsResponseSchema(BaseModel):
     cash_discrepancy_total: float
     average_delivery_distance_km: float
     average_delivery_fee: float
+
+
+# --- Step 8: Customers & Promotions ---
+
+
+class CustomerAdminResponseSchema(BaseModel):
+    id: uuid.UUID
+    name: str | None = None
+    phone_number: str
+    email: str | None = None
+    wallet_balance: float = 0.0
+    total_orders_count: int = 0
+    is_active: bool = True
+    created_at: datetime
+
+
+class CustomerStatusUpdateSchema(BaseModel):
+    is_active: bool
+
+
+class PromotionResponseSchema(BaseModel):
+    id: str
+    code: str
+    title: str
+    description: str | None = None
+    banner_url: str | None = None
+    discount_type: str = "percentage"
+    discount_value: float = 0.0
+    min_order_value: float = 0.0
+    max_discount_amount: float | None = None
+    valid_from: datetime
+    valid_until: datetime
+    is_active: bool = True
+    usage_count: int = 0
+
+
+class PromotionCreateSchema(BaseModel):
+    code: str
+    title: str
+    description: str | None = None
+    banner_url: str | None = None
+    discount_type: str = "percentage"
+    discount_value: float = 0.0
+    min_order_value: float = 0.0
+    max_discount_amount: float | None = None
+    valid_from: datetime
+    valid_until: datetime
+    is_active: bool = True
+
+
+class PromotionStatusUpdateSchema(BaseModel):
+    is_active: bool
+

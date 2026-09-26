@@ -15,9 +15,14 @@ from app.modules.admin.schemas import (
     AdminOrderDetailResponseSchema,
     AdminOrderSummaryResponseSchema,
     CashDiscrepancyResponseSchema,
+    CustomerAdminResponseSchema,
+    CustomerStatusUpdateSchema,
     DashboardSummaryResponseSchema,
     OrderCancelSchema,
     OrderReassignSchema,
+    PromotionCreateSchema,
+    PromotionResponseSchema,
+    PromotionStatusUpdateSchema,
     RestaurantAdminResponseSchema,
     RestaurantCommissionUpdateSchema,
     RestaurantCreateSchema,
@@ -336,3 +341,63 @@ def get_reports(
     restaurants, rider payout totals, cash discrepancy total, average
     delivery distance/fee, for the given period."""
     return service.get_reports(db, period_start, period_end)
+
+
+# --- Step 8: Customers & Promotions ---
+
+
+@router.get("", include_in_schema=False)
+def admin_root_redirect(
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Fallback root endpoint so hitting /admin directly returns dashboard data."""
+    return service.get_dashboard_summary(db)
+
+
+@router.get("/customers", response_model=list[CustomerAdminResponseSchema])
+def list_customers(
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 8 — view all registered platform customers."""
+    return service.list_customers(db)
+
+
+@router.patch("/customers/{customer_id}/status", response_model=CustomerAdminResponseSchema)
+def set_customer_status(
+    customer_id: uuid.UUID,
+    payload: CustomerStatusUpdateSchema,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 8 — block or unblock customer account."""
+    return service.toggle_customer_status(db, customer_id, payload.is_active)
+
+
+@router.get("/promotions", response_model=list[PromotionResponseSchema])
+def list_promotions(
+    current_user: CurrentUser = Depends(require_admin),
+):
+    """Step 8 — list all promotional codes and active banners."""
+    return service.list_promotions()
+
+
+@router.post("/promotions", response_model=PromotionResponseSchema, status_code=status.HTTP_201_CREATED)
+def create_promotion(
+    payload: PromotionCreateSchema,
+    current_user: CurrentUser = Depends(require_admin),
+):
+    """Step 8 — create a new promotion."""
+    return service.create_promotion(payload)
+
+
+@router.patch("/promotions/{promo_id}/status", response_model=PromotionResponseSchema)
+def toggle_promotion_status(
+    promo_id: str,
+    payload: PromotionStatusUpdateSchema,
+    current_user: CurrentUser = Depends(require_admin),
+):
+    """Step 8 — toggle promotion active/inactive status."""
+    return service.toggle_promotion_status(promo_id, payload.is_active)
+
