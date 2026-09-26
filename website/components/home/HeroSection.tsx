@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Coins } from '@phosphor-icons/react';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
@@ -369,35 +368,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
                 <span>PARTNER YOUR RESTAURANT</span>
                 <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
               </motion.button>
-            </motion.div>
-
-            {/* Strategic Partner Authority Badge: Partnered with Pakistan Post (Logo-Only) */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-2.5 sm:mt-3 [@media(max-height:760px)]:mt-1.5 [@media(max-height:640px)]:mt-1 flex items-center justify-center"
-            >
-              <div
-                id="hero-partner-badge"
-                className="inline-flex items-center space-x-2.5 sm:space-x-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-paper/95 border border-line shadow-xs hover:border-red/40 hover:shadow-sm transition-all duration-200 cursor-default group"
-              >
-                <div className="flex items-center space-x-1.5">
-                  <span className="w-1.5 h-1.5 bg-red animate-pulse shrink-0" />
-                  <span className="font-mono text-[9px] sm:text-[10.5px] uppercase tracking-wider text-ink-soft font-bold">
-                    PARTNERED WITH
-                  </span>
-                </div>
-                <div className="h-5 sm:h-6 w-px bg-line" />
-                <div className="flex items-center">
-                  <Image
-                    src="/assets/pakistan-post.png"
-                    alt="Pakistan Post Official Partner"
-                    width={96}
-                    height={36}
-                    className="h-6 sm:h-7 md:h-8 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform duration-200"
-                    priority
-                  />
-                </div>
-              </div>
             </motion.div>
           </motion.div>
         </div>

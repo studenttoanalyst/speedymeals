@@ -1,0 +1,6440 @@
+[
+  {
+    "name": "Karachi",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "karachi"
+    ],
+    "areas": [
+      "Abbas Town",
+      "Abbasi Shaheed",
+      "Abdullah Shah Ghazi",
+      "Abu Zar Ghaffari",
+      "Administrative divisions of Karachi",
+      "Agra Taj Colony",
+      "Ahmadiyya",
+      "Ahmed Salim Siddiqui",
+      "Aisha Manzil",
+      "Akhtar Colony",
+      "Al-Falah Society",
+      "Allahwala Town",
+      "Allama Iqbal Colony",
+      "Allama Muhammad Iqbal",
+      "Ancholi",
+      "Arabian Sea",
+      "Aram Bagh",
+      "Asif Ali Zardari",
+      "Askari 1",
+      "Askari 2",
+      "Askari 3",
+      "Askari 4",
+      "Askari 5",
+      "Awami Colony",
+      "Azam Basti",
+      "Aziz Bhatti Park",
+      "Azizabad",
+      "Baba Bhit",
+      "Bagh Ibne Qasim",
+      "Bagh-e-Ibne Qasim",
+      "Baghdadi",
+      "Bahadurabad",
+      "Bahria Icon Tower",
+      "Bahria Town - Precinct 1",
+      "Bahria Town - Precinct 10",
+      "Bahria Town - Precinct 11",
+      "Bahria Town - Precinct 12",
+      "Bahria Town - Precinct 13",
+      "Bahria Town - Precinct 14",
+      "Bahria Town - Precinct 15",
+      "Bahria Town - Precinct 16",
+      "Bahria Town - Precinct 17",
+      "Bahria Town - Precinct 18",
+      "Bahria Town - Precinct 19",
+      "Bahria Town - Precinct 2",
+      "Bahria Town - Precinct 20",
+      "Bahria Town - Precinct 21",
+      "Bahria Town - Precinct 22",
+      "Bahria Town - Precinct 23",
+      "Bahria Town - Precinct 24",
+      "Bahria Town - Precinct 25",
+      "Bahria Town - Precinct 26",
+      "Bahria Town - Precinct 27",
+      "Bahria Town - Precinct 28",
+      "Bahria Town - Precinct 29",
+      "Bahria Town - Precinct 3",
+      "Bahria Town - Precinct 30",
+      "Bahria Town - Precinct 31",
+      "Bahria Town - Precinct 32",
+      "Bahria Town - Precinct 33",
+      "Bahria Town - Precinct 4",
+      "Bahria Town - Precinct 5",
+      "Bahria Town - Precinct 6",
+      "Bahria Town - Precinct 7",
+      "Bahria Town - Precinct 8",
+      "Bahria Town - Precinct 9",
+      "Bahria Town Karachi",
+      "Baldia Town",
+      "Baldiya Town",
+      "Baloch Colony",
+      "Baloch Goth",
+      "Baloch people",
+      "Balochi language",
+      "Banaras Colony",
+      "Bandhani Colony",
+      "Banglore Town",
+      "Barbecue",
+      "Bath Island",
+      "Bhawani Chali",
+      "Bhimpura",
+      "Bhittai Colony",
+      "Bhutto Nagar",
+      "Bihar Colony",
+      "Bilal Colony",
+      "Bilawal Bhutto Zardari",
+      "Bilawal House",
+      "Bin Qasim Town",
+      "Boat Basin Park",
+      "Bohri Bazaar",
+      "Buffer Zone II",
+      "Buffer Zone, Karachi",
+      "BufferZone - Sector 15 A 1",
+      "BufferZone - Sector 15 A 2",
+      "BufferZone - Sector 15 A 3",
+      "BufferZone - Sector 15 A 4",
+      "BufferZone - Sector 15 A 5",
+      "BufferZone - Sector 15 B",
+      "BufferZone - Sector 16 A",
+      "BufferZone - Sector 16 B",
+      "Burmee Colony",
+      "Burns Road",
+      "Cantonment",
+      "Cattle Colony",
+      "Chakiwara",
+      "Chakra Goth",
+      "Chanesar Goth",
+      "Chanesar Town",
+      "Chisti Nagar",
+      "Christians",
+      "Civic Center, Karachi",
+      "Civic Centre",
+      "Civil Line",
+      "Civil Lines",
+      "Civil Lines, Karachi",
+      "Clifton",
+      "Clifton - Bath Island",
+      "Clifton - Block 1",
+      "Clifton - Block 2",
+      "Clifton - Block 3",
+      "Clifton - Block 4",
+      "Clifton - Block 5",
+      "Clifton - Block 6",
+      "Clifton - Block 7",
+      "Clifton - Block 8",
+      "Clifton - Block 9",
+      "Clifton - Delhi Colony",
+      "Clifton - Kehkashan",
+      "Clifton - Punjab Colony",
+      "Clifton - Shah Rasool Colony",
+      "Clifton - Zamzama",
+      "Clifton Beach, Karachi",
+      "Clifton Cantonment",
+      "Clifton Urban Forest",
+      "Commercial Area",
+      "Convent of Jesus and Mary, Karachi",
+      "Countries of the world",
+      "DHA - Phase 1",
+      "DHA - Phase 2",
+      "DHA - Phase 3",
+      "DHA - Phase 4",
+      "DHA - Phase 5",
+      "DHA - Phase 6",
+      "DHA - Phase 7",
+      "DHA - Phase 8",
+      "DHA - Phase 9",
+      "DHA Phase 2 Extension",
+      "DHA Phase 7 Extension",
+      "DST",
+      "Dak Khana",
+      "Dalmia",
+      "Darsano Chana",
+      "Darwaish Colony",
+      "Darya Lal Mandir",
+      "Daryaabad",
+      "Data Nagar",
+      "Dawood Chowrangi",
+      "Defence View - Phase 1",
+      "Defence View - Phase 2",
+      "Delhi Colony",
+      "Delhi Mercantile Society",
+      "Dhoraji - Adamjee Nagar",
+      "Dhoraji - CP & Berar Society",
+      "Dolmen City",
+      "Dolmen Malls",
+      "Drigh Colony",
+      "Essa Nagri",
+      "F.B Area - Azizabad",
+      "F.B Area - B Area",
+      "F.B Area - B1 Area",
+      "F.B Area - Block 1",
+      "F.B Area - Block 10",
+      "F.B Area - Block 11",
+      "F.B Area - Block 12",
+      "F.B Area - Block 13",
+      "F.B Area - Block 14",
+      "F.B Area - Block 15",
+      "F.B Area - Block 16",
+      "F.B Area - Block 17",
+      "F.B Area - Block 18",
+      "F.B Area - Block 19",
+      "F.B Area - Block 2",
+      "F.B Area - Block 20",
+      "F.B Area - Block 21",
+      "F.B Area - Block 22",
+      "F.B Area - Block 3",
+      "F.B Area - Block 4",
+      "F.B Area - Block 5",
+      "F.B Area - Block 6",
+      "F.B Area - Block 7",
+      "F.B Area - Block 8",
+      "F.B Area - Block 9",
+      "F.C Area - C Area",
+      "F.C Area - C1 Area",
+      "FC Area",
+      "Faisal Cantonment",
+      "Faisal Cantt.",
+      "Faisal Colony",
+      "Farooq-e-Azam",
+      "Fatima Jinnah",
+      "Fatima Jinnah Colony",
+      "Federal B Area - Block 1",
+      "Federal B Area - Block 10",
+      "Federal B Area - Block 11",
+      "Federal B Area - Block 12",
+      "Federal B Area - Block 13",
+      "Federal B Area - Block 14",
+      "Federal B Area - Block 15",
+      "Federal B Area - Block 16",
+      "Federal B Area - Block 17",
+      "Federal B Area - Block 18",
+      "Federal B Area - Block 19",
+      "Federal B Area - Block 2",
+      "Federal B Area - Block 20",
+      "Federal B Area - Block 21",
+      "Federal B Area - Block 22",
+      "Federal B Area - Block 3",
+      "Federal B Area - Block 4",
+      "Federal B Area - Block 5",
+      "Federal B Area - Block 6",
+      "Federal B Area - Block 7",
+      "Federal B Area - Block 8",
+      "Federal B Area - Block 9",
+      "Firdous Colony",
+      "Fowler Lines",
+      "Frontier Colony",
+      "Gabo Pat",
+      "Gabol Colony",
+      "Gadap",
+      "Gadap Town",
+      "Gaghar",
+      "Garden",
+      "Garden - Garden East",
+      "Garden - Garden West",
+      "Garden - Soldier Bazaar",
+      "Garden East",
+      "Garden West",
+      "Gazdarabad",
+      "Ghanchi Para",
+      "Gharibabad",
+      "Ghazi Brohi Goth",
+      "Ghaziabad",
+      "Godhra",
+      "Gujro",
+      "Gulbahar",
+      "Gulberg",
+      "Gulberg Town, Karachi",
+      "Gulistan-e-Johar",
+      "Gulistan-e-Johar - Block 1",
+      "Gulistan-e-Johar - Block 10",
+      "Gulistan-e-Johar - Block 11",
+      "Gulistan-e-Johar - Block 12",
+      "Gulistan-e-Johar - Block 13",
+      "Gulistan-e-Johar - Block 14",
+      "Gulistan-e-Johar - Block 15",
+      "Gulistan-e-Johar - Block 16",
+      "Gulistan-e-Johar - Block 17",
+      "Gulistan-e-Johar - Block 18",
+      "Gulistan-e-Johar - Block 19",
+      "Gulistan-e-Johar - Block 2",
+      "Gulistan-e-Johar - Block 20",
+      "Gulistan-e-Johar - Block 3",
+      "Gulistan-e-Johar - Block 4",
+      "Gulistan-e-Johar - Block 5",
+      "Gulistan-e-Johar - Block 6",
+      "Gulistan-e-Johar - Block 7",
+      "Gulistan-e-Johar - Block 8",
+      "Gulistan-e-Johar - Block 9",
+      "Gulshan e Maymar",
+      "Gulshan-e-Ghazi",
+      "Gulshan-e-Hadeed",
+      "Gulshan-e-Hadeed - Data Nagar",
+      "Gulshan-e-Hadeed - EIDU Goth",
+      "Gulshan-e-Hadeed - Gulshan-e-Mauzzam",
+      "Gulshan-e-Hadeed - Gulshan-e-Rehman",
+      "Gulshan-e-Hadeed - Mehran Road",
+      "Gulshan-e-Hadeed - PTCL Satellite Station",
+      "Gulshan-e-Hadeed - Phase 1",
+      "Gulshan-e-Hadeed - Phase 2",
+      "Gulshan-e-Hadeed - Phase 3",
+      "Gulshan-e-Hadeed - Shah Latif Town",
+      "Gulshan-e-Hadeed - Shah Town",
+      "Gulshan-e-Hadeed - Shahnawaz Goth",
+      "Gulshan-e-Hadeed - Steel Town",
+      "Gulshan-e-Hadeed - TCP Godowns",
+      "Gulshan-e-Iqbal",
+      "Gulshan-e-Iqbal - Adamjee Nagar",
+      "Gulshan-e-Iqbal - Block 1",
+      "Gulshan-e-Iqbal - Block 10",
+      "Gulshan-e-Iqbal - Block 11",
+      "Gulshan-e-Iqbal - Block 12",
+      "Gulshan-e-Iqbal - Block 13",
+      "Gulshan-e-Iqbal - Block 14",
+      "Gulshan-e-Iqbal - Block 15",
+      "Gulshan-e-Iqbal - Block 16",
+      "Gulshan-e-Iqbal - Block 17",
+      "Gulshan-e-Iqbal - Block 18",
+      "Gulshan-e-Iqbal - Block 19",
+      "Gulshan-e-Iqbal - Block 2",
+      "Gulshan-e-Iqbal - Block 3",
+      "Gulshan-e-Iqbal - Block 4",
+      "Gulshan-e-Iqbal - Block 5",
+      "Gulshan-e-Iqbal - Block 6",
+      "Gulshan-e-Iqbal - Block 7",
+      "Gulshan-e-Iqbal - Block 8",
+      "Gulshan-e-Iqbal - Block 9",
+      "Gulshan-e-Iqbal - Civic Center",
+      "Gulshan-e-Iqbal - Dhoraji",
+      "Gulshan-e-Iqbal I",
+      "Gulshan-e-Iqbal II",
+      "Gulshan-e-Iqbal Town",
+      "Gulshan-e-Jamal",
+      "Gulshan-e-Maymar",
+      "Gulshan-e-Mehran",
+      "Gulshan-e-Saeed",
+      "Gulshan-e-Shamim",
+      "Gulzar Colony",
+      "Gulzar-e-Hijri",
+      "Hakim Ahsan",
+      "Halal",
+      "Hanifabad",
+      "Haryana Colony",
+      "Hasrat Mohani Colony",
+      "Hawksbay",
+      "Hindko",
+      "Hindkowans",
+      "Hindus",
+      "Hundred Quarters",
+      "Hussainabad",
+      "Hyderabad Colony",
+      "Hyderi",
+      "I.I Chundrigar",
+      "ISO 3166-2:PK",
+      "Ibrahim Hyderi",
+      "Indus Valley School of Art and Architecture",
+      "Iqbal Baloch Colony",
+      "Islam Pura",
+      "Islamnagar, Karachi",
+      "Ittehad Town",
+      "Jacob Lines",
+      "Jafar-e-Tayyar",
+      "Jahanabad",
+      "Jail Road - Hyderabad Colony",
+      "Jamali Colony",
+      "Jamshed Quarters",
+      "Jamshed Road",
+      "Jamshed Town",
+      "Jehangir Kothari Parade",
+      "Jinnah Town, Karachi",
+      "Jut Line",
+      "K.A.E.C.H.S",
+      "K.D.A Officers",
+      "K.D.A Scheme 1",
+      "KDA Officers Housing Society",
+      "KDA Scheme 1",
+      "KDA Scheme 33",
+      "KESC Society",
+      "Kala Board",
+      "Kalakot",
+      "Karachi",
+      "Karachi Central",
+      "Karachi Development Authority",
+      "Karachi Division",
+      "Karachi East",
+      "Karachi Expo Center",
+      "Karachi Grammar School",
+      "Karachi Memon Society",
+      "Karachi Metropolitan Corporation",
+      "Karachi Safari Park",
+      "Karachi School of Art",
+      "Karachi United FC",
+      "Karachiite",
+      "Karimabad",
+      "Karimabad, Karachi",
+      "Kashmiri people",
+      "Keamari",
+      "Keamari Town",
+      "Kehkashan",
+      "Kemari",
+      "Kemari Town",
+      "Khamiso Goth",
+      "Khamosh Colony",
+      "Khandu Goth",
+      "Kharadar",
+      "Khawaja Ajmeer Colony",
+      "Khawaja Ajmeer Nagri",
+      "Khokhra Par",
+      "Khokrapar",
+      "Kiamari",
+      "Kokan Cooperative Housing Society",
+      "Korangi",
+      "Korangi - Abdullah Shah Noorani Pahari Colony",
+      "Korangi - Korangi Industrial Area",
+      "Korangi - Mehran Town",
+      "Korangi - Nasir Colony",
+      "Korangi - PAF Base Korangi Creek",
+      "Korangi - Sector 31 B",
+      "Korangi - Sector 31 D",
+      "Korangi - Sector 32 B",
+      "Korangi - Sector 41 B",
+      "Korangi - Zaman Town",
+      "Korangi - Zia Colony",
+      "Korangi Creek Cantonment",
+      "Korangi Industrial Area",
+      "Korangi J Area",
+      "Korangi Sector 33",
+      "Korangi Town",
+      "Lahore",
+      "Landhi",
+      "Landhi - Alflah Housing Society",
+      "Landhi - Awami Colony",
+      "Landhi - Bagh-e-Korangi",
+      "Landhi - Bakhtawar Goth",
+      "Landhi - Barmi Colony",
+      "Landhi - Bhutto Nagar",
+      "Landhi - Future Colony",
+      "Landhi - Gulshan-e-Rafi",
+      "Landhi - Ilyas Goth",
+      "Landhi - Labour Colony",
+      "Landhi - Landhi Industrial Area",
+      "Landhi - Muslimabad Colony",
+      "Landhi - Muzaffarabad Colony",
+      "Landhi - Punjab Town",
+      "Landhi - Qasim Town",
+      "Landhi - Sadat Colony",
+      "Landhi - Shah Khalid Colony",
+      "Landhi - Sharafi Goth",
+      "Landhi - Zamanabad",
+      "Landhi Colony",
+      "Landhi Town",
+      "Landhi Town - 36 B",
+      "Liaquatabad",
+      "Liaquatabad - Block 1",
+      "Liaquatabad - Block 10",
+      "Liaquatabad - Block 2",
+      "Liaquatabad - Block 3",
+      "Liaquatabad - Block 4",
+      "Liaquatabad - Block 5",
+      "Liaquatabad - Block 6",
+      "Liaquatabad - Block 7",
+      "Liaquatabad - Block 8",
+      "Liaquatabad - Block 9",
+      "Liaquatabad Town",
+      "Liyari",
+      "Lyari",
+      "Lyari Town",
+      "M.A Jinnah Rd",
+      "Machar Colony",
+      "Madina Colony",
+      "Madras Cooperative Housing Society",
+      "Mahmudabad, Karachi",
+      "Malir - Malir",
+      "Malir - Malir Cantt",
+      "Malir Cantonment",
+      "Malir Cantt",
+      "Malir City",
+      "Malir Town",
+      "Manghopir",
+      "Manora",
+      "Manzoor Colony",
+      "Maripur",
+      "Mehmoodabad",
+      "Mehran Town KIA",
+      "Metrovil",
+      "Metroville Colony",
+      "Millat Nagar",
+      "Model Colony",
+      "Model Colony Town, Karachi",
+      "Mohammad Ali Society",
+      "Mohammad Nagar",
+      "Moinabad",
+      "Mominabad",
+      "Moosa Lane",
+      "Moria Khan Goth",
+      "Muhajir",
+      "Muhajir Camp",
+      "Mujahid Colony",
+      "Mujahidabad",
+      "Muller & Phipps",
+      "Murad Memon Goth",
+      "Muslim Mujahid Colony",
+      "Muslimabad",
+      "Muslims",
+      "Mustafa Taj Colony",
+      "Muzafarabad",
+      "NA-234 Karachi Korangi-III",
+      "NA-236 Karachi East-II",
+      "NA-241 Karachi South-III",
+      "NA-249 Karachi Central-III",
+      "NA-250 Karachi Central-IV",
+      "Nai Abadi",
+      "Nanak Wara",
+      "Napier Quarter",
+      "Narayan Pura",
+      "Naseerabad, Karachi",
+      "Nasir Colony",
+      "Natha Khan Goth",
+      "Nawabad",
+      "Nazimabad",
+      "Nazimabad - Block 1",
+      "Nazimabad - Block 2",
+      "Nazimabad - Block 3",
+      "Nazimabad - Block 4",
+      "Nazimabad - Block 5",
+      "Nazimabad Town",
+      "New Karachi",
+      "New Karachi Town",
+      "New Surjani",
+      "North Karachi",
+      "North Karachi - Sector 10",
+      "North Karachi - Sector 11 - A",
+      "North Karachi - Sector 11 - B",
+      "North Karachi - Sector 11 - C 1",
+      "North Karachi - Sector 11 - C 2",
+      "North Karachi - Sector 11 - C 3",
+      "North Karachi - Sector 11 - E",
+      "North Karachi - Sector 11 - H",
+      "North Karachi - Sector 11 - I",
+      "North Karachi - Sector 11 - K",
+      "North Karachi - Sector 11 - L",
+      "North Karachi - Sector 12 A",
+      "North Karachi - Sector 12 C",
+      "North Karachi - Sector 2",
+      "North Karachi - Sector 3",
+      "North Karachi - Sector 4",
+      "North Karachi - Sector 5 - A 1",
+      "North Karachi - Sector 5 - A 2",
+      "North Karachi - Sector 5 - A 3",
+      "North Karachi - Sector 5 - A 4",
+      "North Karachi - Sector 5 - B 1",
+      "North Karachi - Sector 5 - B 2",
+      "North Karachi - Sector 5 - B 3",
+      "North Karachi - Sector 5 - B 4",
+      "North Karachi - Sector 5 - C 1",
+      "North Karachi - Sector 5 - C 2",
+      "North Karachi - Sector 5 - C 3",
+      "North Karachi - Sector 5 - C 4",
+      "North Karachi - Sector 5 - I",
+      "North Karachi - Sector 5 - J",
+      "North Karachi - Sector 5 - K",
+      "North Karachi - Sector 5 - L",
+      "North Karachi - Sector 5 - M",
+      "North Karachi - Sector 6",
+      "North Karachi - Sector 7 - D 1",
+      "North Karachi - Sector 7 - D 2",
+      "North Karachi - Sector 7 - D 3",
+      "North Karachi - Sector 7 - D 4",
+      "North Karachi - Sector 8",
+      "North Karachi - Sector 9",
+      "North Nazimabad",
+      "North Nazimabad - Block A",
+      "North Nazimabad - Block B",
+      "North Nazimabad - Block C",
+      "North Nazimabad - Block D",
+      "North Nazimabad - Block E",
+      "North Nazimabad - Block F",
+      "North Nazimabad - Block G",
+      "North Nazimabad - Block H",
+      "North Nazimabad - Block I",
+      "North Nazimabad - Block J",
+      "North Nazimabad - Block K",
+      "North Nazimabad - Block L",
+      "North Nazimabad - Block M",
+      "North Nazimabad - Block N",
+      "North Nazimabad - Block O",
+      "North Nazimabad - Block P",
+      "North Nazimabad - Block Q",
+      "North Nazimabad - Block R",
+      "North Nazimabad - Block S",
+      "North Nazimabad - Block T",
+      "North Nazimabad - Block W",
+      "North Nazimabad Town",
+      "Nusrat Bhutto Colony",
+      "Ocean Mall",
+      "Ocean Towers",
+      "Old Golimar",
+      "Old Haji Camp",
+      "Old Town - Bhimpora",
+      "Old Town - Bohra Pir",
+      "Old Town - Bombay Bazar",
+      "Old Town - Jodia Bazar",
+      "Old Town - Kagzi Bazar",
+      "Old Town - Kakri Ground",
+      "Old Town - Kamil Gali",
+      "Old Town - Khada Market",
+      "Old Town - Kharadar",
+      "Old Town - Lee Market",
+      "Old Town - Mithadar",
+      "Old Town - Nanwara",
+      "Old Town - Nishter Road",
+      "Old Town - Pan Mandi",
+      "Old Town - Ramswami",
+      "Old Town - Ranchorline",
+      "Orangi Town",
+      "Orangi Town - Banaras Town",
+      "Orangi Town - Bangla Bazaar",
+      "Orangi Town - Bilal Colony",
+      "Orangi Town - Katti Pahari",
+      "Orangi Town - Moria Goth Orangi",
+      "Orangi Town - Orangi",
+      "Orangi Town - Sector 14 - A",
+      "Orangi Town - Sector 14 - C",
+      "Orangi Town - Thorani Goth",
+      "P.E.C.H.S - Block 1",
+      "P.E.C.H.S - Block 2",
+      "P.E.C.H.S - Block 3",
+      "P.E.C.H.S - Block 4",
+      "P.E.C.H.S - Block 5",
+      "P.E.C.H.S - Block 6",
+      "P.E.C.H.S - Block 7",
+      "P.E.C.H.S - Khalid Bin Walid",
+      "P.E.C.H.S - Tariq Road",
+      "PECHS",
+      "PECHS - Block 1",
+      "PECHS - Block 2",
+      "PECHS - Block 3",
+      "PECHS - Block 4",
+      "PECHS - Block 5",
+      "PECHS - Block 6",
+      "PECHS - Khalid Bin Waleed Road",
+      "PECHS - Tariq Road",
+      "PECHS-II",
+      "PIB Colony",
+      "Pahar Ganj",
+      "Pahar Ganj, Karachi",
+      "Pak Colony",
+      "Paposh Nagar",
+      "Parsi",
+      "Parsi Colony",
+      "Parsis",
+      "Pashto",
+      "Pashto language",
+      "Pashtuns",
+      "Pehlwan Goth",
+      "Pervez Musharraf",
+      "Pipri Goth",
+      "Pir Ilahi Buksh Colony",
+      "Province",
+      "Qaidabad",
+      "Qasimabad",
+      "Qasimabad, Karachi",
+      "Qasr-e-Fatima",
+      "Qayyumabad",
+      "Qazzafi Town",
+      "Rafa-e-Aam Society",
+      "Ragiwara",
+      "Raita Plot",
+      "Ranchore Line",
+      "Rasheedabad",
+      "Rehri",
+      "Restaurant",
+      "Rizvia Society",
+      "S.I.T.E - Golimar",
+      "S.I.T.E - S.I.T.E",
+      "S.I.T.E. Town",
+      "SITE Industrial Area",
+      "SITE Town",
+      "Sachal Goth",
+      "Sadat Colony",
+      "Saddar",
+      "Saddar Town",
+      "Saeedabad, Karachi",
+      "Safoora Goth",
+      "Safooran Goth",
+      "Sakhi Hassan",
+      "Saraiki language",
+      "Saraiki people",
+      "Saudabad",
+      "Scheme 33",
+      "Seaview, Clifton beach",
+      "Seth Jehangir Hormusji Kothari",
+      "Shabbirabad",
+      "Shadman, Karachi",
+      "Shafiq Mill Colony",
+      "Shah Baig Line",
+      "Shah Faisal Colony - 3",
+      "Shah Faisal Colony - 4",
+      "Shah Faisal Colony - Aswan Town",
+      "Shah Faisal Colony - Green Town",
+      "Shah Faisal Colony - Gulshan-e-Asghar",
+      "Shah Faisal Colony - Muslimabad Malir City",
+      "Shah Faisal Colony - Shah Faisal Colony 1",
+      "Shah Faisal Colony - Shah Faisal Colony 5",
+      "Shah Faisal Colony - Shamsi Society",
+      "Shah Faisal Town",
+      "Shah Nawaz Bhutto Colony",
+      "Shah Rasool Colony",
+      "Shahra-e-Faisal - Jinnah Housing Society",
+      "Shahra-e-Faisal - Umar Colony",
+      "Shahrah-e-Faisal",
+      "Shanti Nagar",
+      "Sharafi Goth",
+      "Sharfabad Society",
+      "Sharifabad",
+      "SherShah",
+      "Shireen Jinnah",
+      "Shireen Jinnah Colony",
+      "Shree Ratneshwar Mahadev Temple, Karachi",
+      "Shrine",
+      "Sikanderabad",
+      "Sikhs",
+      "Sindhi Muslim Cooperative Housing Society",
+      "Singo Line",
+      "Sohrab Goth Town",
+      "Soldier Bazaar",
+      "Soldier Bazar",
+      "Songal",
+      "Steel Town",
+      "Super Market",
+      "Surjani Town",
+      "Syed Darbar Ali Shah",
+      "Teen Hatti",
+      "Teen Talwar",
+      "Tehsil",
+      "The Lyceum School",
+      "Town council",
+      "Towns in Karachi",
+      "Tughlaqabad",
+      "UTC",
+      "University Road",
+      "Usmania Colony",
+      "Water Pump",
+      "Yaseenabad",
+      "Yousuf Goth",
+      "Zaman Town",
+      "Zulfikar Ali Bhutto",
+      "Zulfiqar Ali Bhutto",
+      "civil servant",
+      "consulate",
+      "councilors",
+      "shopping"
+    ]
+  },
+  {
+    "name": "Lahore",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "lahore"
+    ],
+    "areas": [
+      "Abdalian Cooperative Housing Society",
+      "Abu Al-Asar Hafeez Jullundhri",
+      "Agrics - Block A",
+      "Agrics - Block B",
+      "Agrics - Block C",
+      "Ahmad Nagar",
+      "Airport Road",
+      "Aisam-ul-Haq Qureshi",
+      "Aitchison Society",
+      "Ajmeer Town - Block A",
+      "Ajmeer Town - Block B",
+      "Ajmeer Town - Block C",
+      "Ajmeer Town - Block D",
+      "Ajmeer Town - Block E",
+      "Ajmeer Town - Block F",
+      "Ajmeer Town - Block G",
+      "Ajmeer Town - Block H",
+      "Ajmeer Town - Block I",
+      "Ajmeer Town - Block J",
+      "Al-Rehman Garden",
+      "Ali Park Bedian Road",
+      "Allama Iqbal Town",
+      "Ameen Park",
+      "Anarkali",
+      "Anarkali Urdu Bazar",
+      "Ashfaq Ahmed",
+      "Askari 1",
+      "Askari 10",
+      "Askari 11",
+      "Askari 2",
+      "Askari 3",
+      "Askari 5",
+      "Askari 8",
+      "Askari 9",
+      "Awaisia Colony",
+      "Awan Town",
+      "Aziz Bhatti Town",
+      "BOR Society - Block A",
+      "BOR Society - Block B",
+      "BOR Society - Block C",
+      "Baba Shah Jamal",
+      "Badami Bagh",
+      "Baghbanpura",
+      "Baghriyan",
+      "Bahria Town - Awais Qarni Block",
+      "Bahria Town - Baba Block",
+      "Bahria Town - Ghori Block",
+      "Bahria Town - Gulbahar Block",
+      "Bahria Town - Haris Block",
+      "Bahria Town - Iqbal Block",
+      "Bahria Town - Jasmine Block",
+      "Bahria Town - Jeneper Block",
+      "Bahria Town - Maidos Block",
+      "Bahria Town - Nargis Block",
+      "Bahria Town - Nashter Block",
+      "Bahria Town - Overseas A",
+      "Bahria Town - Overseas AA",
+      "Bahria Town - Overseas BB",
+      "Bahria Town - Overseas Extension",
+      "Bahria Town - Quaid-e-Azam Block",
+      "Bahria Town - Safari Block",
+      "Bahria Town - Shaheen Block",
+      "Bahria Town - Spring Block",
+      "Bahria Town - Takbeer Block",
+      "Bahria Town - Tulip Block",
+      "Bahria Town - Umer Block",
+      "Bata Pur",
+      "Batapur",
+      "Beaconhouse School System",
+      "Begampura",
+      "Benazir Bhutto",
+      "Bhatta Chowk",
+      "Bhubtian Chowk",
+      "Bilal Gunj",
+      "Bund Road",
+      "Canal City - Block A",
+      "Canal City - Block B",
+      "Canal City - Block C",
+      "Canal City - Block D",
+      "Canal Garden - Block A",
+      "Canal Garden - Block AA",
+      "Canal Garden - Block B",
+      "Canal Garden - Block C",
+      "Canal Garden - Block D",
+      "Canal Garden - Block E",
+      "Canal Garden - Block F",
+      "Canal Garden - Block G",
+      "Canal Garden - Block H",
+      "Canal Road",
+      "Cantonment",
+      "Cantt",
+      "Cantt View",
+      "Cavalry Ground",
+      "Chanar Bagh",
+      "Chauburji",
+      "Chowk Yateem Khana",
+      "Chung",
+      "Chung Adda",
+      "Chung Police Training Center",
+      "Chungi Amar Sidhu",
+      "College Road",
+      "Countries of the world",
+      "DHA",
+      "DHA - Phase 1",
+      "DHA - Phase 2",
+      "DHA - Phase 3",
+      "DHA - Phase 4",
+      "DHA - Phase 5",
+      "DHA - Phase 6",
+      "DHA - Phase 7",
+      "DHA - Phase 8",
+      "Daroghawala",
+      "Data Gunj Bakhsh",
+      "Data Gunj Buksh Town",
+      "Defence, Lahore",
+      "Defense Road",
+      "Dehli Gate",
+      "Dewan Khem Chand",
+      "Dharampura",
+      "Divisional Public School",
+      "EME - Block A",
+      "EME - Block B",
+      "EME - Block C",
+      "EME - Block D",
+      "EME - Block E",
+      "EME - Block F",
+      "EME - Block G",
+      "EME - Block H",
+      "EME - Block J",
+      "Eden - Canal Villas",
+      "Eden - Lane Villas 1",
+      "Eden - Lane Villas 2",
+      "Eden - Palace Villas",
+      "Eden Value Home - Block A",
+      "Eden Value Home - Block B",
+      "Eden Value Home - Block C",
+      "Eden Value Home - Block D",
+      "Education Town",
+      "Elite Town",
+      "Engineers Town - Phase 3 Block A",
+      "Engineers Town - Phase 3 Block A 1",
+      "Engineers Town - Phase 3 Block A 2",
+      "Engineers Town - Phase 3 Block A 3",
+      "Engineers Town - Phase 3 Block B",
+      "Engineers Town - Phase 3 Block B 1",
+      "Engineers Town - Phase 3 Block B 2",
+      "Engineers Town - Phase 3 Block B 3",
+      "Engineers Town - Phase 3 Block C",
+      "Engineers Town - Phase 3 Block C 1",
+      "Engineers Town - Phase 3 Block C 2",
+      "Engineers Town - Phase 3 Block C 3",
+      "Engineers Town - Phase 3 Block D",
+      "Engineers Town - Phase 3 Block D 1",
+      "Engineers Town - Phase 3 Block D 2",
+      "Engineers Town - Phase 3 Block E",
+      "Engineers Town - Phase 3 Block E 1",
+      "Engineers Town - Phase 3 Block E 2",
+      "Engineers Town - Phase 3 Block E 3",
+      "Engineers Town - Phase 3 Block E 4",
+      "Engineers Town - Phase 3 Block E 5",
+      "Evacuee Trust Property Board",
+      "Faisal Town",
+      "Faisal Town - Block A",
+      "Faisal Town - Block B",
+      "Faisal Town - Block C",
+      "Faisal Town - Block C 1",
+      "Faisal Town - Block D",
+      "Faisal Town - H.B.F.C Society",
+      "Faiz Ahmad Faiz",
+      "Fateh Garh",
+      "Ferozepur Road",
+      "Ferozpur Road - Anum Road",
+      "Ferozpur Road - Asif Town",
+      "Ferozpur Road - Attari Industial Area",
+      "Ferozpur Road - Dhulu Khurd",
+      "Ferozpur Road - Gajumata",
+      "Ferozpur Road - General Hospital",
+      "Ferozpur Road - Green Caps",
+      "Ferozpur Road - Nishtar Colony",
+      "Ferozpur Road - Qainchi",
+      "Ferozpur Road - Rohi Nala Industrial",
+      "Ferozpur Road - Saroba Gardens",
+      "Ferozpur Road - Sattelite Town",
+      "Ferozpur Road - Shadab Colony",
+      "Gaddafi Stadium",
+      "Ganga Ram",
+      "Garden Town",
+      "Garden city movement",
+      "Garhi Shahu",
+      "Gated community",
+      "Gawal Mandi",
+      "Gawalmandi",
+      "Grand Charter School",
+      "Green Town",
+      "Green Town - Sector D 1 Block 1",
+      "Green Town - Sector D 1 Block 2",
+      "Green Town - Sector D 1 Block 3",
+      "Green Town - Sector D 1 Block 4",
+      "Green Town - Sector D 1 Block 5",
+      "Green Town - Sector D 2 Block 1",
+      "Green Town - Sector D 2 Block 2",
+      "Green Town - Sector D 2 Block 3",
+      "Green Town - Sector D 2 Block 3 Nill",
+      "Green Town - Sector D 2 Block 4",
+      "Green Town - Sector D 2 Block 5",
+      "Green Town - Sector D 2 Block 5 Nill",
+      "Gul-e-Daman - Block A",
+      "Gul-e-Daman - Block B",
+      "Gulberg",
+      "Gulberg 2 Block A",
+      "Gulberg 2 Block B",
+      "Gulberg 2 Block C",
+      "Gulberg 2 Block D",
+      "Gulberg 2 Block E",
+      "Gulberg 2 Block F",
+      "Gulberg 2 Block G",
+      "Gulberg 2 Block H",
+      "Gulberg 2 Block J",
+      "Gulberg 2 Block K",
+      "Gulberg 2 Block L",
+      "Gulberg 2 Block M",
+      "Gulberg 2 Block N",
+      "Gulberg 2 Block P",
+      "Gulberg 2 Block Q",
+      "Gulberg 2 Block R",
+      "Gulberg 2 Block S",
+      "Gulberg 2 Block T",
+      "Gulberg 3 Block A 1",
+      "Gulberg 3 Block A 2",
+      "Gulberg 3 Block A 3",
+      "Gulberg 3 Block B 1",
+      "Gulberg 3 Block B 2",
+      "Gulberg 3 Block B 3",
+      "Gulberg 3 Block C 1",
+      "Gulberg 3 Block C 2",
+      "Gulberg 3 Block C 3",
+      "Gulberg 3 Block D 1",
+      "Gulberg 3 Block D 2",
+      "Gulberg 3 Block D 3",
+      "Gulberg 3 Block E 1",
+      "Gulberg 3 Block E 2",
+      "Gulberg 3 Block E 3",
+      "Gulberg 3 Block G",
+      "Gulberg 3 Block H",
+      "Gulberg 3 Block J",
+      "Gulberg 3 Block K",
+      "Gulberg 3 Block L",
+      "Gulberg 3 Block M",
+      "Gulberg 3 Block N",
+      "Gulberg 3 Block P",
+      "Gulberg 3 Falcon Complex",
+      "Gulberg 3 Firdous Market",
+      "Gulberg 4 FCC",
+      "Gulberg 4 FCC Kachi Basti",
+      "Gulberg 4 Old FCC",
+      "Gulberg 5 Aziz Avenue",
+      "Gulberg 5 Bridge Colony",
+      "Gulberg 5 Bridge Line",
+      "Gulberg 5 Ghos-e-Azam Colony",
+      "Gulberg 5 Zafar Ali Road",
+      "Gulberg Guru Mangat Road",
+      "Gulberg, Lahore",
+      "Guldasht Town",
+      "Gulshan Ravi",
+      "Gulshan-e-Ravi",
+      "Gulshan-e-Ravi - Gulberg",
+      "Gulshan-e-Ravi - Shalamar Town Rustam Park",
+      "Hall Road",
+      "Haloki",
+      "Hamza Shahbaz Sharif",
+      "Handu Gujjar",
+      "Harbanspura",
+      "Hassan Nisar",
+      "Hassan Town",
+      "Hijab Imtiaz Ali",
+      "Ichhra",
+      "Ijaz Ahmed",
+      "Iqbal Avenue - Phase 1",
+      "Iqbal Avenue - Phase 2",
+      "Iqbal Avenue - Phase 2 Block B",
+      "Iqbal Avenue - Phase 3",
+      "Iqbal Avenue - Phase 3 Block A",
+      "Iqbal Avenue - Phase 3 Block B",
+      "Iqbal Avenue - Phase 3 Block C",
+      "Iqbal Avenue - Phase 3 Block D",
+      "Iqbal Park",
+      "Iqbal Town - Asif Block",
+      "Iqbal Town - Badar Block",
+      "Iqbal Town - College Block",
+      "Iqbal Town - Gulshan Block",
+      "Iqbal Town - Huma Block",
+      "Iqbal Town - Hunza Block",
+      "Iqbal Town - Jahanzaib Block",
+      "Iqbal Town - Kamran Block",
+      "Iqbal Town - Kareem Block",
+      "Iqbal Town - Kashmir Block",
+      "Iqbal Town - Mehran Block",
+      "Iqbal Town - Nargis Block",
+      "Iqbal Town - Neelam Block",
+      "Iqbal Town - Neezam Block",
+      "Iqbal Town - Nishter Block",
+      "Iqbal Town - Pak Block",
+      "Iqbal Town - Rachna Block",
+      "Iqbal Town - Ravi Block",
+      "Iqbal Town - Raza Block",
+      "Iqbal Town - Satluj Iqbal",
+      "Iqbal Town - Sikandar Block",
+      "Iqbal Town - Umer Block",
+      "Iqbal Town, Lahore",
+      "Islamia Park",
+      "Islamnagar, Lahore",
+      "Islampura",
+      "Jail Road",
+      "Jallo",
+      "Jati Umra",
+      "Johar Town",
+      "Johar Town - Block A",
+      "Johar Town - Block A 1",
+      "Johar Town - Block A 2",
+      "Johar Town - Block A 3",
+      "Johar Town - Block B",
+      "Johar Town - Block B 1",
+      "Johar Town - Block B 2",
+      "Johar Town - Block B 3",
+      "Johar Town - Block C",
+      "Johar Town - Block C 1",
+      "Johar Town - Block C 2",
+      "Johar Town - Block D",
+      "Johar Town - Block D 1",
+      "Johar Town - Block D 2",
+      "Johar Town - Block E",
+      "Johar Town - Block E 1",
+      "Johar Town - Block E 2",
+      "Johar Town - Block F",
+      "Johar Town - Block F 1",
+      "Johar Town - Block F 2",
+      "Johar Town - Block G",
+      "Johar Town - Block G 1",
+      "Johar Town - Block G 3",
+      "Johar Town - Block G 4",
+      "Johar Town - Block H",
+      "Johar Town - Block M",
+      "Judicial Colony - Phase 1",
+      "Judicial Colony - Phase 2",
+      "KB Colony",
+      "Kahna",
+      "Kahna Nau",
+      "Kamahan",
+      "Karim Park Ravi Road",
+      "Kasoor Road - Center Park",
+      "Kasoor Road - Kahna Nau",
+      "Kasoor Road - Kahna Old",
+      "Khan Colony",
+      "Khayaban-e-Jinnah Road - AWT Phase 2",
+      "Khayaban-e-Jinnah Road - Audit Accounts Society",
+      "Khayaban-e-Jinnah Road - Bahria Orchard",
+      "Khayaban-e-Jinnah Road - Gulshan e Lahore",
+      "Khayaban-e-Jinnah Road - Khayban-e-Amin",
+      "Khayaban-e-Jinnah Road - Lake City",
+      "Khayaban-e-Jinnah Road - Shareef Medical Jati Umra",
+      "Khayaban-e-Jinnah Road - Tariq Gardens",
+      "Khayaban-e-Jinnah Road - UET Society",
+      "Khayaban-e-Jinnah Road - Valencia Town",
+      "Khuda Buksh Colony KB Society",
+      "Kosar Colony",
+      "Kot Abdul Malik",
+      "Kot Lakh Pat - Dilkhushan",
+      "Kot Lakh Pat - Kot Lakh Pat Indutrial Area",
+      "Kot Lakh Pat - Kot Lakh Pat Staion Area",
+      "Kot Lakh Pat - Liaqatabad",
+      "Kot Lakh Pat - Modern Colony",
+      "Kot Lakhpat",
+      "Krishan Nagar",
+      "Ladheke",
+      "Lahore",
+      "Lahore Cantonment",
+      "Lahore Grammar School",
+      "Lakshmi Chowk",
+      "List of towns in Lahore",
+      "List of zones in Lahore",
+      "Loadshedding",
+      "Loharan Wala Kho",
+      "Lower Mall Road",
+      "M M Alam Road",
+      "M. M. Alam Road",
+      "Main Boulevard Gulberg",
+      "Main Gullberg",
+      "Malika Pukhraj",
+      "Mall Road",
+      "Manawan",
+      "Manhala",
+      "Mansoorah",
+      "Mansoorah, Lahore",
+      "Mateen Avenue",
+      "Mayo Gardens",
+      "Mayo Hospital",
+      "Mehmood Buti Interchange",
+      "Mian Amer Mahmood",
+      "Mian Amir Mehmood",
+      "Military Accounts - Block A",
+      "Military Accounts - Block B",
+      "Military Accounts - Block C",
+      "Military Accounts - Block D",
+      "Military Accounts - Block E",
+      "Mini Market",
+      "Mochi Pura",
+      "Model Town",
+      "Model Town - Block A",
+      "Model Town - Block B",
+      "Model Town - Block C",
+      "Model Town - Block D",
+      "Model Town - Block E",
+      "Model Town - Block F",
+      "Model Town - Block G",
+      "Model Town - Block H",
+      "Model Town - Block J",
+      "Model Town - Block K",
+      "Model Town - Block L",
+      "Model Town - Block M",
+      "Model Town - Block N",
+      "Model Town - Block P",
+      "Model Town - Block Q",
+      "Model Town - Block R",
+      "Model Town - Block S",
+      "Model Town - Square Market",
+      "Model Town Library",
+      "Model Town, Lahore",
+      "Mohlanwal",
+      "Mohni Road",
+      "Mozang",
+      "Mozang Chungi",
+      "Mughalpura",
+      "Muhafiz Town - Block A",
+      "Muhafiz Town - Block B",
+      "Muhafiz Town - Block C",
+      "Muhafiz Town - Block D",
+      "Muhafiz Town - Block E",
+      "Muhammad Zia-ul-Haq",
+      "Mushtaq Ahmad Yusufi",
+      "Muslim Town",
+      "Muslim Town, Lahore",
+      "Mustafa Town",
+      "NFC Employees Cooperative Housing Society",
+      "Naeem Tahir",
+      "Nawaz Sharif",
+      "Naz Town",
+      "Nespak - Phase 1 Block D 1",
+      "Nespak - Phase 1 Block D 2",
+      "Nespak - Phase 1 Block E",
+      "Nespak - Phase 2 Block A",
+      "Nespak - Phase 2 Block B",
+      "Nespak - Phase 2 Block C",
+      "Nespak - Phase 2 Block D",
+      "Nespak - Phase 3 Block A",
+      "Nespak - Phase 3 Block B",
+      "New Iqbal Park",
+      "New Super Town",
+      "Nishat Colony",
+      "Nishtar Town",
+      "Nusrat Fateh Ali Khan",
+      "Oqaf Colony",
+      "PGSHS",
+      "PIA Society - Block A",
+      "PIA Society - Block A 1",
+      "PIA Society - Block B",
+      "PIA Society - Block B 1",
+      "PIA Society - Block C",
+      "PIA Society - Block D",
+      "PIA Society - Block E",
+      "PIA Society - Block F",
+      "Pak Arab Society - Block A",
+      "Pak Arab Society - Block B",
+      "Pak Arab Society - Block BB",
+      "Pak Arab Society - Block C",
+      "Pak Arab Society - Block D",
+      "Pak Arab Society - Block E",
+      "Pak Arab Society - Block F",
+      "Pak Arab Society - Pak Arab Society Vittal Homes",
+      "Pandoke, Lahore",
+      "Patiala Ground",
+      "Punjab Society - Block A",
+      "Punjab Society - Block B",
+      "Punjab Society - Block C",
+      "Punjab Society - Block D",
+      "Punjab Society - Phase 1 Block A 1",
+      "Punjab Society - Phase 1 Block A 2",
+      "Punjab Society - Phase 1 Block A 3",
+      "Punjab Society - Phase 1 Block A 4",
+      "Punjab Society - Phase 1 Block A 5",
+      "Punjab Society - Phase 1 Block B 1",
+      "Punjab Society - Phase 1 Block B 2",
+      "Punjab Society - Phase 1 Block B 3",
+      "Punjab Society - Phase 1 Block C 2",
+      "Punjab Society - Phase 1 Block R",
+      "Punjab Society - Phase 2 Block A",
+      "Punjab Society - Phase 2 Block B",
+      "Punjab Society - Phase 2 Block C",
+      "Punjab Society - Phase 2 Block D",
+      "Punjab Society - Phase 2 Block E",
+      "Qasori Road",
+      "Qila Gujar Singh",
+      "R.A Bazar",
+      "Railway Station",
+      "Raiwand Road - Airline Society",
+      "Raiwand Road - Ali Raza Abad Rawind Road",
+      "Raiwand Road - Ali Town",
+      "Raiwand Road - Architect Society",
+      "Raiwand Road - Doctors Society",
+      "Raiwand Road - Dream Garden",
+      "Raiwand Road - Dubai Town",
+      "Raiwand Road - OPF Society",
+      "Raiwand Road - Shair Shah Colony",
+      "Raiwind",
+      "Raiwind Road",
+      "Rajpoot Town - Block A",
+      "Rajpoot Town - Block B",
+      "Rajpoot Town - Block C",
+      "Rajpoot Town - Block D",
+      "Rameez Raja",
+      "Ravi Town",
+      "Rehman Garden Phase 1",
+      "Rehman Garden Phase 2",
+      "Revenue Society",
+      "Rewaz Garden",
+      "River View Society - Block A",
+      "River View Society - Block B",
+      "Sabzazar",
+      "Sabzazar - Mansoorah",
+      "Sadar Cantt",
+      "Saggiyan Bypass",
+      "Salima Hashmi",
+      "Samanabad",
+      "Samanabad Town",
+      "Sanat Nagar",
+      "Sanda",
+      "Sanda Islampura - Chaburji",
+      "Sanda Islampura - Dev Samajh Road",
+      "Sanda Islampura - Govt.College University",
+      "Sanda Islampura - Islampura",
+      "Sanda Islampura - Outfall Road",
+      "Sanda Islampura - Rajghar",
+      "Sanda Islampura - Rewarz Garden",
+      "Sanda Islampura - Rizwan Gardens",
+      "Sanda Islampura - Sanat Nagar",
+      "Sanda Islampura - Sanda",
+      "Sanda Islampura - Shamnagar",
+      "Sanda, Lahore",
+      "Sarfraz Rafiqui Road",
+      "Sarwar Colony Lahore Cantt",
+      "Sarwar Road Lahore Cantt",
+      "Shad Bagh",
+      "Shadmaan",
+      "Shah Alam",
+      "Shah Pur Kanjra",
+      "Shahbagh China Scheme - Sadiqia Colony",
+      "Shahbagh China Scheme - Salamat Pura",
+      "Shahbagh China Scheme - Walled City Lahore",
+      "Shahbaz Sharif",
+      "Shahdara Bagh",
+      "Shahdra - Begamkot Sharkpur Road",
+      "Shahdra - Imamia Colony Rachna Town",
+      "Shahdra - Shahdra Town",
+      "Shahpur Kanjra",
+      "Shalamar Town",
+      "Shalimar Town",
+      "Shalimar, Lahore",
+      "Shami Road Lahore Cantt",
+      "Sher Shah Colony",
+      "Sheraz Town",
+      "Shimla Pahari",
+      "Shoaib Hashmi",
+      "Sitara Colony - Colony 1",
+      "Sitara Colony - Colony 2",
+      "St. Francis Colony",
+      "Staff Colony - Block A",
+      "Staff Colony - Block B",
+      "Staff Colony - Block C",
+      "Staff Colony - Block D",
+      "Staff Colony - Block E",
+      "Staff Colony - Phase 1",
+      "Staff Colony - Phase 2 Block A",
+      "Staff Colony - Phase 2 Block B",
+      "Staff Colony - Phase 2 Block C",
+      "Staff Colony - Phase 2 Block D",
+      "Staff Colony - Phase 3 Block A",
+      "Staff Colony - Phase 3 Block B",
+      "Staff Colony - Phase 3 Block C",
+      "State Life Society",
+      "Sui Gas Society",
+      "Sukh Chain Garden - Block A",
+      "Sukh Chain Garden - Block B",
+      "Sukh Chain Garden - Block C",
+      "Sukh Chain Garden - Block D",
+      "Sukh Chain Garden - Block E",
+      "Sukh Chain Garden - Block F",
+      "Sukh Chain Garden - Block G",
+      "Sultan Pura",
+      "Tajpura",
+      "Tehsil",
+      "The City School",
+      "Thokar Canal Road - DHA Rehber Phase 11",
+      "Thokar Canal Road - New Shaheen Block Bahria",
+      "Thokar Canal Road - P&D Apara Housing Society",
+      "Thokar Canal Road - Sultan Town",
+      "Thokar Canal Road - Westwood Colony",
+      "Thokar Niaz Baig",
+      "Town Ship",
+      "Town Ship - Sector A 1",
+      "Town Ship - Sector A 2",
+      "Town Ship - Sector B 1",
+      "Town Ship - Sector B 2",
+      "Town Ship - Sector C 1",
+      "Town Ship - Sector C 2",
+      "Township, Lahore",
+      "Triocon Village - Block A",
+      "Triocon Village - Block B",
+      "Triocon Village - Block C",
+      "Triocon Village - Block D",
+      "Upper Mall",
+      "Valencia, Lahore",
+      "Venus Housing Scheme",
+      "WAPDA Town",
+      "Wagha",
+      "Wahga",
+      "Walton Road",
+      "Wapda Town",
+      "Wapda Town - Phase 1",
+      "Wapda Town - Phase 2",
+      "Wasim Akram",
+      "Yasmeen Tahir",
+      "Zarar Shaheed Road - Gulistan Colony",
+      "Zarar Shaheed Road - P.A.F New Officer Coloney",
+      "Zarar Shaheed Road - P.A.F Old Officer Coloney",
+      "economic liberalization",
+      "panchayats",
+      "transfer deed"
+    ]
+  },
+  {
+    "name": "Islamabad",
+    "province": "ICT",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "islamabad"
+    ],
+    "areas": [
+      "Aabpara",
+      "Ali Pur",
+      "B-17, Islamabad",
+      "Bahria Town - Phase 1",
+      "Bahria Town - Phase 2",
+      "Bahria Town - Phase 3",
+      "Bahria Town - Phase 4",
+      "Bahria Town - Phase 5",
+      "Bahria Town - Phase 6",
+      "Bahria Town - Phase 7",
+      "Bahria Town - Phase 8",
+      "Bani Gala",
+      "Banni Gaala",
+      "Bhara Kahu",
+      "Blue Area",
+      "Burma Town",
+      "Capital Development Authority",
+      "Chak Shahzad",
+      "Chatta Bakhtawar",
+      "DHA - Phase 1",
+      "DHA - Phase 2",
+      "DHA - Phase 3",
+      "Diplomatic Enclave, Islamabad",
+      "E - 10",
+      "E - 11",
+      "E - 7",
+      "E - 8",
+      "E - 9",
+      "F - 10",
+      "F - 11",
+      "F - 15",
+      "F - 5",
+      "F - 6",
+      "F - 7",
+      "F - 8",
+      "F - 9",
+      "F-6, Islamabad",
+      "F-8, Islamabad",
+      "F-9, Islamabad",
+      "Faisal Mosque",
+      "Fatima Jinnah Park",
+      "G - 10",
+      "G - 11",
+      "G - 12",
+      "G - 13",
+      "G - 14",
+      "G - 5",
+      "G - 6",
+      "G - 7",
+      "G - 8",
+      "G - 9",
+      "Ghauri Town",
+      "Gulberg Greens",
+      "H - 10",
+      "H - 11",
+      "H - 12",
+      "H - 13",
+      "H - 8",
+      "H - 9",
+      "H-11, Islamabad",
+      "H-8, Islamabad",
+      "H-9, Islamabad",
+      "I - 10",
+      "I - 11",
+      "I - 8",
+      "I - 9",
+      "I-10, Islamabad",
+      "I-11, Islamabad",
+      "Islamabad",
+      "Islamabad Capital Territory",
+      "Kurri Road",
+      "Latin script",
+      "Madina Town - Islamabad",
+      "Naval Anchorage",
+      "PWD",
+      "PWD Housing Society",
+      "Pakistan Town",
+      "Park View City",
+      "Rawal Town",
+      "Red Zone",
+      "Roman numerals",
+      "Shahzad Town",
+      "Shakar Parian",
+      "Sihala",
+      "Soan Gardens",
+      "Talai Kalan",
+      "Tarnol",
+      "Tramrri",
+      "Union councils of Islamabad",
+      "Wapda Colony"
+    ]
+  },
+  {
+    "name": "Rawalpindi",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "rawalpindi"
+    ],
+    "areas": [
+      "Adiyala Road",
+      "Adyala",
+      "Afshan Colony",
+      "Afzal Town",
+      "Aria Mohalla",
+      "Asghar Mall",
+      "Askari 1",
+      "Askari 10",
+      "Askari 11",
+      "Askari 12",
+      "Askari 13",
+      "Askari 14",
+      "Askari 2",
+      "Askari 3",
+      "Askari 4",
+      "Askari 5",
+      "Askari 6",
+      "Askari 7",
+      "Askari 8",
+      "Askari 9",
+      "Askari Town",
+      "Bahria Town",
+      "Bahria Town - Phase 1",
+      "Bahria Town - Phase 2",
+      "Bahria Town - Phase 3",
+      "Bahria Town - Phase 4",
+      "Bahria Town - Phase 5",
+      "Bahria Town - Phase 6",
+      "Bahria Town - Phase 7",
+      "Bahria Town - Phase 8",
+      "British Homes",
+      "Building control body",
+      "Chaklala - Scheme 1",
+      "Chaklala - Scheme 2",
+      "Chaklala - Scheme 3",
+      "China Market",
+      "College Road",
+      "Committee Chowk",
+      "Country",
+      "DHA - Phase 1",
+      "DHA - Phase 2",
+      "Dawn",
+      "Dhoke Chaudrian",
+      "Dhoke Dalal",
+      "Dhoke Mangtal",
+      "Dhoke Ratta - Allahbad",
+      "Dhoke Ratta - Dhoke Hassu",
+      "Dhoke Ratta - Dhoke Ratta",
+      "Dhoke Ratta - Kalyamabad",
+      "Dhoke Ratta - Railway Colony",
+      "Dhoke Syedan",
+      "Dhowk Sayedan",
+      "Eid Gah",
+      "Fort Road",
+      "Gated community",
+      "Gawalmandi",
+      "Ghauri Town - Phase 1",
+      "Ghauri Town - Phase 2",
+      "Ghauri Town - Phase 3",
+      "Ghauri Town - Phase 4",
+      "Ghauri Town - Phase 5",
+      "Ghauri Town - Phase 6",
+      "Ghauri Town - Phase 7",
+      "Gulraiz - Phase 1",
+      "Gulraiz - Phase 2",
+      "Gulraiz - Phase 3",
+      "Gulraiz - Phase 4",
+      "Gulshan Abad",
+      "Highway - Khanna",
+      "Highway - Korang Town",
+      "Highway - Lohi Bhair",
+      "Highway - Pakistan Town",
+      "Highway - Sohan",
+      "Highway - Zaraj Housing Society",
+      "Islamabad",
+      "Islamabad Capital Territory",
+      "Islamabad-Rawalpindi",
+      "Karachi",
+      "Kartar Pura",
+      "Khayaban e Sir Syed",
+      "Kuri Road",
+      "Lahore",
+      "Lalazar - New Lalazar",
+      "Lalazar - Old Lalazar",
+      "Lalkurti",
+      "List of towns in Lahore",
+      "Malik Riaz",
+      "Marir",
+      "Mayor of Rawalpindi",
+      "Metropolitan Corporation",
+      "Misriyal - Allama Iqbal Colony",
+      "Misriyal - Chakra",
+      "Misriyal - Chrisitan Colony",
+      "Misriyal - Dhamial Road",
+      "Misriyal - Dhoke Gujran",
+      "Misriyal - Friends Colony",
+      "Misriyal - Girja Road",
+      "Misriyal - Madina Colony",
+      "Misriyal - Misrial Road",
+      "Misriyal - Nai Abadi",
+      "Misriyal - PIA Colony",
+      "Misriyal - Railway Scheme 7",
+      "Misriyal - Siham",
+      "Morgah - Morgah",
+      "Muhammad Javed Ikhlas",
+      "Munawar Colony",
+      "Murree Road",
+      "Peshawar Road",
+      "Pindora",
+      "Raja Bazar",
+      "Rawal Road - Awan Town",
+      "Rawal Road - Chah Sultan",
+      "Rawal Road - Iqbal Town",
+      "Rawal Road - Madina Town",
+      "Rawalpindi",
+      "Saddar",
+      "Sadiqabad - Affandi Colony",
+      "Sadiqabad - Bilal Colony",
+      "Sadiqabad - Dhoke Kala Khan",
+      "Sadiqabad - Dhoke Paracha",
+      "Sadiqabad - Muslim Town",
+      "Safari Villas",
+      "Satellite Town",
+      "Shadman Town",
+      "Shaheen Town",
+      "Shakrial",
+      "Shamsabad",
+      "Stadium Road",
+      "The Express Tribune",
+      "Tulsa Road",
+      "Urban planning",
+      "Westridge 1",
+      "Westridge 2",
+      "Westridge 3",
+      "gated community"
+    ]
+  },
+  {
+    "name": "Faisalabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "faisalabad"
+    ],
+    "areas": [
+      "103 JB",
+      "103 RB",
+      "113 GB",
+      "117 JB",
+      "128 GB",
+      "16 JB",
+      "189 RB",
+      "199 RB",
+      "203 RB",
+      "206 GB",
+      "207 GB",
+      "229 RB",
+      "248 RB",
+      "253 RB",
+      "257 RB",
+      "267 RB",
+      "271 RB",
+      "275 J.B",
+      "353 GB",
+      "433 GB",
+      "447 GB",
+      "45 GB",
+      "482 GB",
+      "583 GB",
+      "59jb",
+      "66 GB",
+      "98/GB",
+      "Abid Sher Ali",
+      "Ad-Dharmi",
+      "Aminpur Bangla",
+      "Anglo-Indian people",
+      "Arjan Singh",
+      "Ayub Agricultural Research Institute",
+      "Bhagat Singh",
+      "Board Of Education",
+      "British Christianity",
+      "Buchiana",
+      "Buddhism",
+      "Burj Mandi",
+      "California",
+      "Canal Colony",
+      "Chak Jhumra",
+      "Chak Jhumra Tehsil",
+      "Christianity",
+      "Clock Tower - Faisalabad",
+      "Dasuha",
+      "Deputy Commissioner",
+      "Dich Kot",
+      "Faisalabad",
+      "Faisalabad Arts Council",
+      "Faisalabad City Tehsil",
+      "Faisalabad Division",
+      "Faisalabad Electric Supply Company",
+      "Faisalabad Sadar Tehsil",
+      "Gangapur",
+      "Garh",
+      "Gatwala Wildlife Park",
+      "Ghulam Muhammad Abad",
+      "Harkishan Singh",
+      "Haryana",
+      "Hinduism",
+      "Human chorionic gonadotropin",
+      "Hurmoy",
+      "Indian Air Force",
+      "Iqbal Stadium",
+      "Islam",
+      "Jainism",
+      "Jaranwala",
+      "Jaranwala Tehsil",
+      "Jhumra",
+      "Judaism",
+      "Kanjwani",
+      "Karachi",
+      "Khanewal-Wazirabad Branch Line",
+      "Khurrian Wala",
+      "Lahore",
+      "Lal Chand Yamla Jatt",
+      "Los Angeles County, California",
+      "Madina Town",
+      "Mamu Kanjan",
+      "Marshal of the Indian Air Force",
+      "Mian Abdul Bari",
+      "Millat Colony",
+      "Millat Town",
+      "Murid Wala",
+      "Muslim",
+      "Nishat Abad",
+      "Noorpur",
+      "Nusrat Fateh Ali Khan",
+      "Om P. Bahl",
+      "P.A.F. Risalay Wala",
+      "Pashto",
+      "Peoples Colony No.1",
+      "Peoples Colony No.2",
+      "Pindi Shiekh Musa",
+      "Punajbi language",
+      "Rana Sanaullah",
+      "Rex City",
+      "Rorala Road",
+      "Sadiq Market",
+      "Sahuwala",
+      "Samanabad - Faislabad",
+      "Samundri",
+      "Samundri Tehsil",
+      "Sargodha Road",
+      "Satiyana Road",
+      "Sikhism",
+      "Sitara Colony",
+      "Talal Chaudhry",
+      "Tandlian Wala",
+      "Tandlianwala Tehsil",
+      "Tehsil",
+      "Tehsils",
+      "Thjkri Wala",
+      "Tribal religions in India",
+      "United States",
+      "Zoroastrianism",
+      "air officer",
+      "folk singer",
+      "medicinal chemistry",
+      "molecular biologist",
+      "pharmaceutical",
+      "revolutionary",
+      "science historian"
+    ]
+  },
+  {
+    "name": "Peshawar",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "peshawar"
+    ],
+    "areas": [
+      "Adezai",
+      "Board Bazaar",
+      "Chamkani",
+      "Charsadda Road",
+      "City Circular Road",
+      "DHA Peshawar",
+      "Dabgari Garden",
+      "Dalazak Road",
+      "Gulbahar",
+      "Hayatabad - Phase 1",
+      "Hayatabad - Phase 2",
+      "Hayatabad - Phase 3",
+      "Hayatabad - Phase 4",
+      "Hayatabad - Phase 5",
+      "Hayatabad - Phase 6",
+      "Hayatabad - Phase 7",
+      "Karkhano Market",
+      "Kohat Road",
+      "Mattani",
+      "Nodeh Bala",
+      "Peshawar",
+      "Regi Model Town",
+      "Ring Road",
+      "Saddar Cantt",
+      "Tehkal",
+      "University Town",
+      "Warsak Road"
+    ]
+  },
+  {
+    "name": "Multan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "multan"
+    ],
+    "areas": [
+      "Ad-Dharmi",
+      "Al Jilan Town",
+      "Al Qureshi Housing Scheme",
+      "Anglo-Indian people",
+      "Basti Kayan Pur",
+      "British Christianity",
+      "British people",
+      "Buddhism",
+      "Cantonment",
+      "Christianity",
+      "Deputy Commissioner",
+      "Faizabad",
+      "Ghanta Ghar Chowk",
+      "Gulgasht Colony",
+      "Gulraiz Town",
+      "Gulshan-e-Qadir",
+      "Headquarters",
+      "Hinduism",
+      "Iqra Town",
+      "Islam",
+      "Jahangirabad",
+      "Jainism",
+      "Jalalabad",
+      "Jalalpur Pirwala Tehsil",
+      "Jamilabad Housing Scheme",
+      "Jhakarpur",
+      "Jinnah Town",
+      "Johar Town",
+      "Judaism",
+      "Karam Khanwala",
+      "MDA Officers Housing Society",
+      "Maitla Town",
+      "Mayor",
+      "Mewati language",
+      "Model Town A",
+      "Moza Nigana Durana",
+      "Mujahid Town",
+      "Multan",
+      "Multan Arts Council",
+      "Multan City Tehsil",
+      "Multan Division",
+      "Multan Saddar Tehsil",
+      "Muzafarabad",
+      "Naseerabad",
+      "New Multan - Block V",
+      "Rehmat Town",
+      "Saleemabad",
+      "Saraiki language",
+      "Satellite Town",
+      "Second Anglo-Sikh War",
+      "SherShah Town",
+      "Shujabad Tehsil",
+      "Sikhism",
+      "Sikhs",
+      "Sutlej",
+      "Tehsil",
+      "Tribal religions in India",
+      "Wapda Town",
+      "Waqas Town",
+      "Yasrab Madina Town",
+      "Zakariya Town",
+      "Zoroastrianism"
+    ]
+  },
+  {
+    "name": "Gujranwala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "gujranwala"
+    ],
+    "areas": [
+      "Ad-Dharmi",
+      "Afsharid dynasty",
+      "Ahmad Shah Abdali",
+      "Ahmadiyya",
+      "Akbar",
+      "Ali Pur Chatta",
+      "Alipur Chahta",
+      "Allah Rakha Town",
+      "Amrita Pritam",
+      "Anglo-Indian people",
+      "Arain",
+      "Aurangzeb",
+      "Baghdad Town",
+      "Bhatti",
+      "Bilal Town",
+      "British Christianity",
+      "British Raj",
+      "Buddhism",
+      "Charat Singh",
+      "Chattha",
+      "Christianity",
+      "Company rule in India",
+      "DHA Phase 2",
+      "Deputy Commissioner",
+      "Divisions of Azad Kashmir",
+      "Divisions of Balochistan",
+      "Divisions of Gilgit-Baltistan",
+      "Divisions of Khyber Pakhtunkhwa",
+      "Dogra dynasty",
+      "Durrani Empire",
+      "Eminabad",
+      "Faiz Alam Town",
+      "Fareed Town",
+      "Fazal Town",
+      "Fizaia Housing Scheme",
+      "Ghaznavids",
+      "Ghulam Muhammad Chattha",
+      "Ghulam Muhammad Town",
+      "Gujjar",
+      "Gujranwala",
+      "Gujranwala Cantonment",
+      "Gujranwala City Tehsil",
+      "Gujranwala Division",
+      "Gujranwala Electric Power Company",
+      "Gujranwala Saddar Tehsil",
+      "Gulzar Colony",
+      "Gurjar",
+      "Hafizabad",
+      "Hafizabad Tehsil",
+      "Hajweri Town",
+      "Hari Singh Nalwa",
+      "Hinduism",
+      "Hiuen Tsiang",
+      "Indian Institute of Technology, Kharagpur",
+      "Indian Rebellion of 1857",
+      "Industrial Estate",
+      "Islam",
+      "Islam Pura",
+      "Jainism",
+      "Jalil Town",
+      "Jat Muslim",
+      "Jinnah Stadium, Gujranwala",
+      "Judaism",
+      "Judicial Housing Colony",
+      "Kamoke Tehsil",
+      "Karachi-Peshawar Line",
+      "Kashmiris",
+      "Kasturi Lal Chopra",
+      "Kripa Sagar",
+      "Lahore",
+      "Lahore Division",
+      "Lalazar Colony",
+      "Luqman Butt",
+      "Maha Singh",
+      "Mahmud of Ghazni",
+      "Majha",
+      "Materials science",
+      "Mohafiz Town",
+      "Mughal Empire",
+      "Mughal people",
+      "Mughal rule",
+      "Mughals",
+      "Muslim",
+      "Muslim Rajputs",
+      "Muslim Town",
+      "Nader Shah",
+      "Nandipur",
+      "Nowshera Virkan Tehsil",
+      "Nur Muhammad Chattha",
+      "Peoples Colony",
+      "Pharmacology",
+      "Pir Muhammad Chattha",
+      "Qazi Town",
+      "Qila Didar Singh",
+      "Rachna Doab",
+      "Rahwali Cantonments",
+      "Rajput Town",
+      "Ram Nath Chopra",
+      "Ranjit Singh",
+      "Rasool Nagar",
+      "Religion in India",
+      "Sadaat Town",
+      "Satellite Town",
+      "Second Anglo-Sikh War",
+      "Shaista Nuzhat",
+      "Shalimar Town",
+      "Siddique Akbar Town",
+      "Sikh Empire",
+      "Sikh Misls",
+      "Sikhism",
+      "Sufi",
+      "Sukerchakia Misl",
+      "Sulaiman Town",
+      "Tehsil",
+      "Tribal religions in India",
+      "Uggu Chak",
+      "Wapda Town",
+      "Wazirabad",
+      "Wazirabad Tehsil",
+      "Zoroastrianism",
+      "dargah",
+      "missionary",
+      "notified area",
+      "pargana"
+    ]
+  },
+  {
+    "name": "Sialkot",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sialkot"
+    ],
+    "areas": [
+      "A. K. Hangal",
+      "Abdal Bela",
+      "Abdul Hakim Sialkoti",
+      "Abdullah Shafique",
+      "Abdur Rehman",
+      "Achaemenid dynasty",
+      "Ad-Dharmi",
+      "Addah",
+      "Ahmad Shah Durrani",
+      "Air marshal",
+      "Akhtar Ali Vario",
+      "Alexander the Great",
+      "Ali Mardan Khan",
+      "Allo Mahar",
+      "Amjad Islam Amjad",
+      "Amritsar",
+      "Anglo-Indian people",
+      "Arabs",
+      "Armaghan Subhani",
+      "Asif Bajwa",
+      "Bahria Town",
+      "Beerh",
+      "Begwal",
+      "Bhoth",
+      "Bilal Saeed",
+      "British Christianity",
+      "Buddhism",
+      "Chacha Cricket",
+      "Chairman Joint Chiefs of Staff Committee",
+      "Chak Mandhar",
+      "Chaudhry Amir Hussain",
+      "Chenab Colony",
+      "Chief of Air Staff",
+      "Chitti Sheikhan",
+      "Choudhary Khush Akhtar Subhani",
+      "Daluwali",
+      "Daradas",
+      "Daska Tehsil",
+      "Delhi Sultanate",
+      "Deputy Commissioner",
+      "Dheera Sandha",
+      "Dhudianwali",
+      "Faiz Ahmad Faiz",
+      "Fazl-i-Hussain",
+      "Firdous Ashiq Awan",
+      "Ghaznavids",
+      "Ghuinke",
+      "Ghulam Ali",
+      "Gujranwala Division",
+      "Gulzarilal Nanda",
+      "Gupta Empire",
+      "Gurdaspur",
+      "Hamid Mir",
+      "Haripur",
+      "Haris Sohail",
+      "Hephthalite Empire",
+      "Hindu Shahi",
+      "Hinduism",
+      "Ijaz Ahmed",
+      "Indian Rebellion of 1857",
+      "Indo-Aryan peoples",
+      "Indo-Greek kingdom",
+      "Indus Valley Civilization",
+      "Islam",
+      "Jainism",
+      "Jamke Cheema Town",
+      "Jammu and Kashmir",
+      "Jawaid Iqbal",
+      "Jhai",
+      "Kabul",
+      "Kais",
+      "Kalaswala Town",
+      "Kamanwala",
+      "Kambojas",
+      "Kamran Ashraf",
+      "Kekaya",
+      "Khalid Hasan",
+      "Khalid Shameem Wynne",
+      "Kharota Syedan",
+      "Khawaja Masood Akhtar",
+      "Khawaja Muhammad Asif",
+      "Khawaja Muhammad Safdar",
+      "Khichian",
+      "Kuldip Nayar",
+      "Kuru Kingdom",
+      "Kushan Empire",
+      "Kushano-Hephthalites",
+      "Lahore",
+      "Lahore Division",
+      "Langeriali",
+      "Machhi Khokar",
+      "Mahmood Hussain",
+      "Mahmud of Ghazni",
+      "Malavas",
+      "Malik Riaz",
+      "Mansoor Amjad",
+      "Maqsood Hussain",
+      "Marakiwal",
+      "Maurya Empire",
+      "Merajke",
+      "Mewati",
+      "Mewati language",
+      "Miani",
+      "Mughal Empire",
+      "Mughal Town Gunjianwala",
+      "Muhammad Ibrahim Mir Sialkoti",
+      "Muhammad Iqbal",
+      "Muhammad Waqas",
+      "Muhammad Zafarullah Khan",
+      "Mukhtar Ahmed",
+      "Munir Bhatti",
+      "Muslim Town",
+      "Muslims",
+      "Naseer Ahmad Malhi",
+      "Nasir Ali",
+      "Nizam al-Din 'Ishrat Sialkoti",
+      "Panegyric",
+      "Partition of India",
+      "Pashto",
+      "Pashtun people",
+      "Pasrur Tehsil",
+      "Pauravas",
+      "Pervaiz Iqbal Cheema",
+      "Rajender Kumar",
+      "Rajinder Singh Bedi",
+      "Rechna Doab",
+      "Religion in India",
+      "Sabuktigin",
+      "Sambrial Tehsil",
+      "Second Anglo-Sikh War",
+      "Shah Jahan",
+      "Shahab-ud-Din Virk",
+      "Shahabpura",
+      "Shahnaz Sheikh",
+      "Shoaib Malik",
+      "Sialkot",
+      "Sialkot Cantonment",
+      "Sialkot Cantt",
+      "Sialkot City",
+      "Sialkot Tehsil",
+      "Sikandar Raza",
+      "Sikhism",
+      "Sikhs",
+      "Syed Faiz-ul Hassan Shah",
+      "Syed Iftikhar Ul Hassan",
+      "Tariq Sheikh",
+      "Taufiq Rafat",
+      "Tehsil",
+      "Tribal religions in India",
+      "Tufail Kot",
+      "Ulama",
+      "United Nations General Assembly",
+      "Usman Dar",
+      "Vedic period",
+      "Waheed Murad",
+      "Yaudheya",
+      "Zafar Ali Khan",
+      "Zafar Chaudhry",
+      "Zafarwal",
+      "Zaheer Abbas",
+      "Zahid Fazal",
+      "Zoroastrianism",
+      "court poet",
+      "pargana",
+      "tehsil"
+    ]
+  },
+  {
+    "name": "Hyderabad",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "hyderabad"
+    ],
+    "areas": [
+      "Abdullah Sports City",
+      "Al Fazal Town",
+      "Bismillah City Phase 1",
+      "Cantonment",
+      "Choti Gitty",
+      "Defence Housing Society",
+      "Gulshan-e-Fatima",
+      "Gulshan-e-Hali",
+      "Gulshan-e-Hameed Ali Housing Scheme",
+      "Hali Nagar",
+      "Hussainabad",
+      "Hyderabad - Autobhan Road",
+      "Hyderabad City Taluka",
+      "Isra Village",
+      "Jamil Ahmed",
+      "Kohsar Housing Scheme",
+      "Labor Colony",
+      "Latifabad",
+      "Latifabad Tehsil",
+      "London Town",
+      "Madina Town",
+      "Mayor of Hyderabad",
+      "Model Town",
+      "Muhammadi Town",
+      "PTCL Colony",
+      "Pathan Colony",
+      "Phulleli",
+      "Qasimabad",
+      "Qasimabad Taluka",
+      "Qasimabad Tehsil",
+      "Saddar",
+      "Shah Latif",
+      "Shahbaz Town",
+      "Site Area",
+      "Solider Bazaar",
+      "municipal services"
+    ]
+  },
+  {
+    "name": "Abbottabad",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "abbottabad"
+    ],
+    "areas": [
+      "Abbottabad"
+    ]
+  },
+  {
+    "name": "Adezai",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "adezai"
+    ],
+    "areas": [
+      "Adezai"
+    ]
+  },
+  {
+    "name": "Ahmedpur East",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ahmedpureast",
+      "ahmedpur east"
+    ],
+    "areas": [
+      "Ahmedpur East"
+    ]
+  },
+  {
+    "name": "Ali Bandar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "alibandar",
+      "ali bandar"
+    ],
+    "areas": [
+      "Ali Bandar"
+    ]
+  },
+  {
+    "name": "Ali Pur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "alipur",
+      "ali pur"
+    ],
+    "areas": [
+      "Ali Pur"
+    ]
+  },
+  {
+    "name": "Arif Wala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "arif wala",
+      "arifwala"
+    ],
+    "areas": [
+      "Arif Wala City Center",
+      "Arif Wala Main Bazar",
+      "Arif Wala Cantonment",
+      "Arif Wala Civil Lines",
+      "Arif Wala Model Town",
+      "Arif Wala Commercial Market"
+    ]
+  },
+  {
+    "name": "Arifwala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "arifwala"
+    ],
+    "areas": [
+      "Arifwala"
+    ]
+  },
+  {
+    "name": "Astor",
+    "province": "Gilgit & Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "astor"
+    ],
+    "areas": [
+      "Astor"
+    ]
+  },
+  {
+    "name": "Attock",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "attock"
+    ],
+    "areas": [
+      "Attock"
+    ]
+  },
+  {
+    "name": "Ayubia",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ayubia"
+    ],
+    "areas": [
+      "Ayubia"
+    ]
+  },
+  {
+    "name": "Baden",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "baden"
+    ],
+    "areas": [
+      "Baden"
+    ]
+  },
+  {
+    "name": "Badin",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "badin"
+    ],
+    "areas": [
+      "Badin City Center",
+      "Badin Main Bazar",
+      "Badin Cantonment",
+      "Badin Civil Lines",
+      "Badin Model Town",
+      "Badin Commercial Market"
+    ]
+  },
+  {
+    "name": "Bagh",
+    "province": "Azad Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bagh"
+    ],
+    "areas": [
+      "Bagh"
+    ]
+  },
+  {
+    "name": "Bahawalnagar",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bahawalnagar"
+    ],
+    "areas": [
+      "Bahawalnagar"
+    ]
+  },
+  {
+    "name": "Bahawalpur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bahawalpur"
+    ],
+    "areas": [
+      "Bahawalpur"
+    ]
+  },
+  {
+    "name": "Bajaur",
+    "province": "Fata",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bajaur"
+    ],
+    "areas": [
+      "Bajaur"
+    ]
+  },
+  {
+    "name": "Banda Daud Shah",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bandadaudshah",
+      "banda daud shah"
+    ],
+    "areas": [
+      "Banda Daud Shah"
+    ]
+  },
+  {
+    "name": "Bannu",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bannu"
+    ],
+    "areas": [
+      "Bannu"
+    ]
+  },
+  {
+    "name": "Barikot",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "barikot"
+    ],
+    "areas": [
+      "Barikot City Center",
+      "Barikot Main Bazar",
+      "Barikot Cantonment",
+      "Barikot Civil Lines",
+      "Barikot Model Town",
+      "Barikot Commercial Market"
+    ]
+  },
+  {
+    "name": "Basti Malook",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "basti malook",
+      "bastimalook"
+    ],
+    "areas": [
+      "Basti Malook"
+    ]
+  },
+  {
+    "name": "Batagram",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "batagram"
+    ],
+    "areas": [
+      "Batagram"
+    ]
+  },
+  {
+    "name": "Bhaipheru",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bhaipheru"
+    ],
+    "areas": [
+      "Bhaipheru"
+    ]
+  },
+  {
+    "name": "Bhakkar",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bhakkar"
+    ],
+    "areas": [
+      "Bhakkar",
+      "Darya Khan"
+    ]
+  },
+  {
+    "name": "Bhalwal",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bhalwal"
+    ],
+    "areas": [
+      "Bhalwal"
+    ]
+  },
+  {
+    "name": "Bhimber",
+    "province": "Azad Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bhimber"
+    ],
+    "areas": [
+      "Bhimber"
+    ]
+  },
+  {
+    "name": "Bholari",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "bholari"
+    ],
+    "areas": [
+      "Bholari City Center",
+      "Bholari Main Bazar",
+      "Bholari Cantonment",
+      "Bholari Civil Lines",
+      "Bholari Model Town",
+      "Bholari Commercial Market"
+    ]
+  },
+  {
+    "name": "Birote",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "birote"
+    ],
+    "areas": [
+      "Birote"
+    ]
+  },
+  {
+    "name": "Buner",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "buner"
+    ],
+    "areas": [
+      "Buner"
+    ]
+  },
+  {
+    "name": "Burewala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "burewala"
+    ],
+    "areas": [
+      "Burewala"
+    ]
+  },
+  {
+    "name": "Chachro",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chachro"
+    ],
+    "areas": [
+      "Chachro"
+    ]
+  },
+  {
+    "name": "Chailianwala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chailianwala"
+    ],
+    "areas": [
+      "Chailianwala"
+    ]
+  },
+  {
+    "name": "Chakdara",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chakdara"
+    ],
+    "areas": [
+      "Chakdara"
+    ]
+  },
+  {
+    "name": "Chakwal",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chakwal"
+    ],
+    "areas": [
+      "Balkassar",
+      "Chakwal",
+      "Choa Saiden Shah",
+      "Kallar Kahar",
+      "Talagang"
+    ]
+  },
+  {
+    "name": "Charsadda",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "charsadda"
+    ],
+    "areas": [
+      "Charsadda"
+    ]
+  },
+  {
+    "name": "Chichawatni",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chichawatni"
+    ],
+    "areas": [
+      "Chichawatni"
+    ]
+  },
+  {
+    "name": "Chilas",
+    "province": "Gilgit-Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chilas"
+    ],
+    "areas": [
+      "Chilas City Center",
+      "Chilas Main Bazar",
+      "Chilas Cantonment",
+      "Chilas Civil Lines",
+      "Chilas Model Town",
+      "Chilas Commercial Market"
+    ]
+  },
+  {
+    "name": "Chiniot",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chiniot"
+    ],
+    "areas": [
+      "Chiniot"
+    ]
+  },
+  {
+    "name": "Chishtian",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chishtian"
+    ],
+    "areas": [
+      "Chishtian City Center",
+      "Chishtian Main Bazar",
+      "Chishtian Cantonment",
+      "Chishtian Civil Lines",
+      "Chishtian Model Town",
+      "Chishtian Commercial Market"
+    ]
+  },
+  {
+    "name": "Chitral",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chitral"
+    ],
+    "areas": [
+      "Chitral"
+    ]
+  },
+  {
+    "name": "Chowk Azam",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chowk azam",
+      "chowkazam"
+    ],
+    "areas": [
+      "Chowk Azam"
+    ]
+  },
+  {
+    "name": "Chowk Sarwar Shaheed",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "chowk sarwar shaheed",
+      "chowksarwarshaheed"
+    ],
+    "areas": [
+      "Chowk Sarwar Shaheed"
+    ]
+  },
+  {
+    "name": "Dadu",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dadu"
+    ],
+    "areas": [
+      "Dadu"
+    ]
+  },
+  {
+    "name": "Dammam",
+    "province": "Eastern Province",
+    "country": "Saudi Arabia",
+    "countryCode": "+966",
+    "flag": "🇸🇦",
+    "aliases": [
+      "dammam"
+    ],
+    "areas": [
+      "Al Adamah",
+      "Al Dana",
+      "Al Faisaliyah",
+      "Al Hamra",
+      "Al Jalawiyah",
+      "Al Mazrouiyah",
+      "Al Noor",
+      "Al Shati"
+    ]
+  },
+  {
+    "name": "Dargai",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dargai"
+    ],
+    "areas": [
+      "Dargai"
+    ]
+  },
+  {
+    "name": "Darya Khan",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "daryakhan",
+      "darya khan"
+    ],
+    "areas": [
+      "Darya Khan"
+    ]
+  },
+  {
+    "name": "Daska",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "daska"
+    ],
+    "areas": [
+      "Daska"
+    ]
+  },
+  {
+    "name": "Dera Ghazi Khan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dera ghazi khan",
+      "deraghazikhan"
+    ],
+    "areas": [
+      "Dera Ghazi Khan"
+    ]
+  },
+  {
+    "name": "Dera Ismail Khan",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dera ismail khan",
+      "deraismailkhan"
+    ],
+    "areas": [
+      "Dera Ismail Khan"
+    ]
+  },
+  {
+    "name": "Derawar Fort",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "derawarfort",
+      "derawar fort"
+    ],
+    "areas": [
+      "Derawar Fort"
+    ]
+  },
+  {
+    "name": "Dhaular",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dhaular"
+    ],
+    "areas": [
+      "Dhaular"
+    ]
+  },
+  {
+    "name": "Digri",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "digri"
+    ],
+    "areas": [
+      "Digri"
+    ]
+  },
+  {
+    "name": "Dina city",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dinacity",
+      "dina city"
+    ],
+    "areas": [
+      "Dina city City Center",
+      "Dina city Main Bazar",
+      "Dina city Cantonment",
+      "Dina city Civil Lines",
+      "Dina city Model Town",
+      "Dina city Commercial Market"
+    ]
+  },
+  {
+    "name": "Dinga",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dinga"
+    ],
+    "areas": [
+      "Dinga"
+    ]
+  },
+  {
+    "name": "Dipalpur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dipalpur"
+    ],
+    "areas": [
+      "Dipalpur"
+    ]
+  },
+  {
+    "name": "Diplo",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "diplo"
+    ],
+    "areas": [
+      "Diplo"
+    ]
+  },
+  {
+    "name": "Dokri",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "dokri"
+    ],
+    "areas": [
+      "Dokri"
+    ]
+  },
+  {
+    "name": "Drasan",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "drasan"
+    ],
+    "areas": [
+      "Drasan"
+    ]
+  },
+  {
+    "name": "Drosh",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "drosh"
+    ],
+    "areas": [
+      "Drosh"
+    ]
+  },
+  {
+    "name": "Farooqabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "farooqabad"
+    ],
+    "areas": [
+      "Farooqabad City Center",
+      "Farooqabad Main Bazar",
+      "Farooqabad Cantonment",
+      "Farooqabad Civil Lines",
+      "Farooqabad Model Town",
+      "Farooqabad Commercial Market"
+    ]
+  },
+  {
+    "name": "Fateh Jang",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "fateh jang",
+      "fatehjang"
+    ],
+    "areas": [
+      "Fateh Jang"
+    ]
+  },
+  {
+    "name": "Ferozewala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ferozewala"
+    ],
+    "areas": [
+      "Ferozewala City Center",
+      "Ferozewala Main Bazar",
+      "Ferozewala Cantonment",
+      "Ferozewala Civil Lines",
+      "Ferozewala Model Town",
+      "Ferozewala Commercial Market"
+    ]
+  },
+  {
+    "name": "Ghakhar Mandi",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ghakharmandi",
+      "ghakhar mandi"
+    ],
+    "areas": [
+      "Ghakhar Mandi"
+    ]
+  },
+  {
+    "name": "Ghanche",
+    "province": "Gilgit-Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ghanche"
+    ],
+    "areas": [
+      "Ghanche City Center",
+      "Ghanche Main Bazar",
+      "Ghanche Cantonment",
+      "Ghanche Civil Lines",
+      "Ghanche Model Town",
+      "Ghanche Commercial Market"
+    ]
+  },
+  {
+    "name": "Ghauspur",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ghauspur"
+    ],
+    "areas": [
+      "Ghauspur"
+    ]
+  },
+  {
+    "name": "Ghotki",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ghotki"
+    ],
+    "areas": [
+      "Ghotki"
+    ]
+  },
+  {
+    "name": "Gilgit",
+    "province": "Gilgit-Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "gilgit"
+    ],
+    "areas": [
+      "Gilgit City Center",
+      "Gilgit Main Bazar",
+      "Gilgit Cantonment",
+      "Gilgit Civil Lines",
+      "Gilgit Model Town",
+      "Gilgit Commercial Market"
+    ]
+  },
+  {
+    "name": "Gojra",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "gojra"
+    ],
+    "areas": [
+      "Gojra City Center",
+      "Gojra Main Bazar",
+      "Gojra Cantonment",
+      "Gojra Civil Lines",
+      "Gojra Model Town",
+      "Gojra Commercial Market"
+    ]
+  },
+  {
+    "name": "Gujar Khan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "gujarkhan",
+      "gujar khan"
+    ],
+    "areas": [
+      "Gujar Khan"
+    ]
+  },
+  {
+    "name": "Gujranwala Cantonment",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "gujranwalacantonment",
+      "gujranwala cantonment"
+    ],
+    "areas": [
+      "Gujranwala Cantonment City Center",
+      "Gujranwala Cantonment Main Bazar",
+      "Gujranwala Cantonment Cantonment",
+      "Gujranwala Cantonment Civil Lines",
+      "Gujranwala Cantonment Model Town",
+      "Gujranwala Cantonment Commercial Market"
+    ]
+  },
+  {
+    "name": "Gujrat",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "gujrat"
+    ],
+    "areas": [
+      "Ali Town",
+      "Awan Town",
+      "Baghdad Colony",
+      "Banth",
+      "Bihar Colony",
+      "Cheema Colony",
+      "Dheerkay Khurd",
+      "Ellahi Colony",
+      "Faizabad",
+      "Garhi Ahmedabad",
+      "Green Town",
+      "Gujarpur",
+      "Gujrat",
+      "Gulshan-e-Ghulam Nabi",
+      "Haryawala",
+      "Islam Nagar",
+      "Jamalpur Syedan",
+      "Khokar Colony",
+      "Kot Randhawa",
+      "Lala Musa",
+      "Lalwari Village",
+      "Mohla Kalan",
+      "Murapur",
+      "Muslimabad",
+      "Muslimpura",
+      "Qadir Colony",
+      "Railway Road Area",
+      "Sargodha Road Area",
+      "Shadola Road Area",
+      "Spall Town",
+      "Sultanabad",
+      "Tibbi Ghorian"
+    ]
+  },
+  {
+    "name": "Hafizabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "hafizabad"
+    ],
+    "areas": [
+      "Hafizabad",
+      "Pindi Bhattian"
+    ]
+  },
+  {
+    "name": "Hala",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "hala"
+    ],
+    "areas": [
+      "Hala"
+    ]
+  },
+  {
+    "name": "Hangu",
+    "province": "Fata",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "hangu"
+    ],
+    "areas": [
+      "Hangu"
+    ]
+  },
+  {
+    "name": "Haripur",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "haripur"
+    ],
+    "areas": [
+      "Haripur"
+    ]
+  },
+  {
+    "name": "Haroonabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "haroonabad"
+    ],
+    "areas": [
+      "Haroonabad"
+    ]
+  },
+  {
+    "name": "Haroonabad, Bahawalnagar",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "haroonabad, bahawalnagar",
+      "haroonabad,bahawalnagar"
+    ],
+    "areas": [
+      "Haroonabad, Bahawalnagar City Center",
+      "Haroonabad, Bahawalnagar Main Bazar",
+      "Haroonabad, Bahawalnagar Cantonment",
+      "Haroonabad, Bahawalnagar Civil Lines",
+      "Haroonabad, Bahawalnagar Model Town",
+      "Haroonabad, Bahawalnagar Commercial Market"
+    ]
+  },
+  {
+    "name": "Hasilpur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "hasilpur"
+    ],
+    "areas": [
+      "Hasilpur"
+    ]
+  },
+  {
+    "name": "Haveli Lakha",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "havelilakha",
+      "haveli lakha"
+    ],
+    "areas": [
+      "Haveli Lakha"
+    ]
+  },
+  {
+    "name": "Hunza",
+    "province": "Gilgit-Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "hunza"
+    ],
+    "areas": [
+      "Hunza"
+    ]
+  },
+  {
+    "name": "Islamkot",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "islamkot"
+    ],
+    "areas": [
+      "Islamkot"
+    ]
+  },
+  {
+    "name": "Jacobabad",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jacobabad"
+    ],
+    "areas": [
+      "Jacobabad"
+    ]
+  },
+  {
+    "name": "Jahania",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jahania"
+    ],
+    "areas": [
+      "Jahania"
+    ]
+  },
+  {
+    "name": "Jalalpur Jattan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jalalpurjattan",
+      "jalalpur jattan"
+    ],
+    "areas": [
+      "Jalalpur Jattan City Center",
+      "Jalalpur Jattan Main Bazar",
+      "Jalalpur Jattan Cantonment",
+      "Jalalpur Jattan Civil Lines",
+      "Jalalpur Jattan Model Town",
+      "Jalalpur Jattan Commercial Market"
+    ]
+  },
+  {
+    "name": "Jalla Araain",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jalla araain",
+      "jallaaraain"
+    ],
+    "areas": [
+      "Jalla Araain"
+    ]
+  },
+  {
+    "name": "Jamesabad",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jamesabad"
+    ],
+    "areas": [
+      "Jamesabad"
+    ]
+  },
+  {
+    "name": "Jampur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jampur"
+    ],
+    "areas": [
+      "Jampur"
+    ]
+  },
+  {
+    "name": "Jamshoro",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jamshoro"
+    ],
+    "areas": [
+      "Jamshoro"
+    ]
+  },
+  {
+    "name": "Janghar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "janghar"
+    ],
+    "areas": [
+      "Janghar"
+    ]
+  },
+  {
+    "name": "Jaranwala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jaranwala"
+    ],
+    "areas": [
+      "Jaranwala City Center",
+      "Jaranwala Main Bazar",
+      "Jaranwala Cantonment",
+      "Jaranwala Civil Lines",
+      "Jaranwala Model Town",
+      "Jaranwala Commercial Market"
+    ]
+  },
+  {
+    "name": "Jatoi",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jatoi"
+    ],
+    "areas": [
+      "Jatoi City Center",
+      "Jatoi Main Bazar",
+      "Jatoi Cantonment",
+      "Jatoi Civil Lines",
+      "Jatoi Model Town",
+      "Jatoi Commercial Market"
+    ]
+  },
+  {
+    "name": "Jauharabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jauharabad"
+    ],
+    "areas": [
+      "Jauharabad"
+    ]
+  },
+  {
+    "name": "Jeddah",
+    "province": "Makkah Province",
+    "country": "Saudi Arabia",
+    "countryCode": "+966",
+    "flag": "🇸🇦",
+    "aliases": [
+      "jeddah"
+    ],
+    "areas": [
+      "Al Andalus",
+      "Al Balad",
+      "Al Bawadi",
+      "Al Fayhaa",
+      "Al Hamra",
+      "Al Marwah",
+      "Al Mohammadiyyah",
+      "Al Naeem",
+      "Al Rawdah",
+      "Al Safa",
+      "Al Salamah",
+      "Al Shatie",
+      "Al Zahra",
+      "Corniche",
+      "Obhur Al Shamaliyah"
+    ]
+  },
+  {
+    "name": "Jhang",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jhang"
+    ],
+    "areas": [
+      "Ahmed Pur",
+      "Chiniot",
+      "Jhang",
+      "Shorkot"
+    ]
+  },
+  {
+    "name": "Jhelum",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jhelum"
+    ],
+    "areas": [
+      "Army Quarters",
+      "Arsal Town",
+      "Bagh Mohalla",
+      "Bilal Town",
+      "Chittan",
+      "Dhoke Firdous",
+      "Fozila Colony",
+      "Gul Afshan Colony",
+      "Gulshan Town",
+      "Gulzari Colony",
+      "Iqbal Colony",
+      "Jhelum",
+      "Jinnah Colony",
+      "Karimpura",
+      "Lalazar Colony",
+      "Lota Village",
+      "Mehmoodabad",
+      "Model Colony",
+      "Mujahid Abad",
+      "Nawab Colony",
+      "Naya Mohallah Jhelum",
+      "New Christian Colony",
+      "Shadab Colony",
+      "Shamali Mohalla",
+      "West Colony"
+    ]
+  },
+  {
+    "name": "Jhudo",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jhudo"
+    ],
+    "areas": [
+      "Jhudo"
+    ]
+  },
+  {
+    "name": "Jungshahi",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "jungshahi"
+    ],
+    "areas": [
+      "Jungshahi"
+    ]
+  },
+  {
+    "name": "KOTLI",
+    "province": "Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kotli"
+    ],
+    "areas": [
+      "KOTLI"
+    ]
+  },
+  {
+    "name": "Kabal, Khyber Pakhtunkhwa",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kabal,khyberpakhtunkhwa",
+      "kabal, khyber pakhtunkhwa"
+    ],
+    "areas": [
+      "Kabal, Khyber Pakhtunkhwa City Center",
+      "Kabal, Khyber Pakhtunkhwa Main Bazar",
+      "Kabal, Khyber Pakhtunkhwa Cantonment",
+      "Kabal, Khyber Pakhtunkhwa Civil Lines",
+      "Kabal, Khyber Pakhtunkhwa Model Town",
+      "Kabal, Khyber Pakhtunkhwa Commercial Market"
+    ]
+  },
+  {
+    "name": "Kalabagh",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kalabagh"
+    ],
+    "areas": [
+      "Kalabagh"
+    ]
+  },
+  {
+    "name": "Kalam",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kalam"
+    ],
+    "areas": [
+      "Kalam"
+    ]
+  },
+  {
+    "name": "Kamalia",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kamalia"
+    ],
+    "areas": [
+      "Kamalia"
+    ]
+  },
+  {
+    "name": "Kamber Ali Khan",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kamberalikhan",
+      "kamber ali khan"
+    ],
+    "areas": [
+      "Kamber Ali Khan City Center",
+      "Kamber Ali Khan Main Bazar",
+      "Kamber Ali Khan Cantonment",
+      "Kamber Ali Khan Civil Lines",
+      "Kamber Ali Khan Model Town",
+      "Kamber Ali Khan Commercial Market"
+    ]
+  },
+  {
+    "name": "Kamoke",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kamoke"
+    ],
+    "areas": [
+      "Kamoke City Center",
+      "Kamoke Main Bazar",
+      "Kamoke Cantonment",
+      "Kamoke Civil Lines",
+      "Kamoke Model Town",
+      "Kamoke Commercial Market"
+    ]
+  },
+  {
+    "name": "Kamokey",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kamokey"
+    ],
+    "areas": [
+      "Kamokey"
+    ]
+  },
+  {
+    "name": "Kandhkot",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kandhkot"
+    ],
+    "areas": [
+      "Kandhkot City Center",
+      "Kandhkot Main Bazar",
+      "Kandhkot Cantonment",
+      "Kandhkot Civil Lines",
+      "Kandhkot Model Town",
+      "Kandhkot Commercial Market"
+    ]
+  },
+  {
+    "name": "Kandiaro",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kandiaro"
+    ],
+    "areas": [
+      "Kandiaro"
+    ]
+  },
+  {
+    "name": "Karak",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "karak"
+    ],
+    "areas": [
+      "Karak"
+    ]
+  },
+  {
+    "name": "Karor Lal Esan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "karorlalesan",
+      "karor lal esan"
+    ],
+    "areas": [
+      "Karor Lal Esan"
+    ]
+  },
+  {
+    "name": "Kashmor",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kashmor"
+    ],
+    "areas": [
+      "Kashmor"
+    ]
+  },
+  {
+    "name": "Kashmore",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kashmore"
+    ],
+    "areas": [
+      "Kashmore City Center",
+      "Kashmore Main Bazar",
+      "Kashmore Cantonment",
+      "Kashmore Civil Lines",
+      "Kashmore Model Town",
+      "Kashmore Commercial Market"
+    ]
+  },
+  {
+    "name": "Kasur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kasur"
+    ],
+    "areas": [
+      "Chunian",
+      "Gulberg Colony - Kasur",
+      "Kasur",
+      "Khudian Khas",
+      "Pattoki"
+    ]
+  },
+  {
+    "name": "Keti Bandar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "keti bandar",
+      "ketibandar"
+    ],
+    "areas": [
+      "Keti Bandar"
+    ]
+  },
+  {
+    "name": "Khairpur",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khairpur"
+    ],
+    "areas": [
+      "Khairpur"
+    ]
+  },
+  {
+    "name": "Khanaspur",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khanaspur"
+    ],
+    "areas": [
+      "Khanaspur"
+    ]
+  },
+  {
+    "name": "Khanewal",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khanewal"
+    ],
+    "areas": [
+      "Jahanian",
+      "Kabirwala",
+      "Khanewal",
+      "Mian Channu"
+    ]
+  },
+  {
+    "name": "Khanpur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khanpur"
+    ],
+    "areas": [
+      "Khanpur"
+    ]
+  },
+  {
+    "name": "Khanpur, Rahim Yar Khan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khanpur, rahim yar khan",
+      "khanpur,rahimyarkhan"
+    ],
+    "areas": [
+      "Khanpur, Rahim Yar Khan City Center",
+      "Khanpur, Rahim Yar Khan Main Bazar",
+      "Khanpur, Rahim Yar Khan Cantonment",
+      "Khanpur, Rahim Yar Khan Civil Lines",
+      "Khanpur, Rahim Yar Khan Model Town",
+      "Khanpur, Rahim Yar Khan Commercial Market"
+    ]
+  },
+  {
+    "name": "Kharian",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kharian"
+    ],
+    "areas": [
+      "Kharian"
+    ]
+  },
+  {
+    "name": "Khokhropur",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khokhropur"
+    ],
+    "areas": [
+      "Khokhropur"
+    ]
+  },
+  {
+    "name": "Khushab",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khushab"
+    ],
+    "areas": [
+      "Khushab",
+      "Naushera",
+      "Nurpur",
+      "Quaidabad"
+    ]
+  },
+  {
+    "name": "Kohat",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kohat"
+    ],
+    "areas": [
+      "Kohat"
+    ]
+  },
+  {
+    "name": "Kohistan",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kohistan"
+    ],
+    "areas": [
+      "Kohistan"
+    ]
+  },
+  {
+    "name": "Kot Abdul Malik",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kotabdulmalik",
+      "kot abdul malik"
+    ],
+    "areas": [
+      "Kot Abdul Malik City Center",
+      "Kot Abdul Malik Main Bazar",
+      "Kot Abdul Malik Cantonment",
+      "Kot Abdul Malik Civil Lines",
+      "Kot Abdul Malik Model Town",
+      "Kot Abdul Malik Commercial Market"
+    ]
+  },
+  {
+    "name": "Kot Addu",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kotaddu",
+      "kot addu"
+    ],
+    "areas": [
+      "Kot Addu"
+    ]
+  },
+  {
+    "name": "Kot Radha Kishan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kot radha kishan",
+      "kotradhakishan"
+    ],
+    "areas": [
+      "Kot Radha Kishan City Center",
+      "Kot Radha Kishan Main Bazar",
+      "Kot Radha Kishan Cantonment",
+      "Kot Radha Kishan Civil Lines",
+      "Kot Radha Kishan Model Town",
+      "Kot Radha Kishan Commercial Market"
+    ]
+  },
+  {
+    "name": "Kotli",
+    "province": "Azad Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kotli"
+    ],
+    "areas": [
+      "Kotli City Center",
+      "Kotli Main Bazar",
+      "Kotli Cantonment",
+      "Kotli Civil Lines",
+      "Kotli Model Town",
+      "Kotli Commercial Market"
+    ]
+  },
+  {
+    "name": "Kotri",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kotri"
+    ],
+    "areas": [
+      "Kotri"
+    ]
+  },
+  {
+    "name": "Kāmoke",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "kāmoke"
+    ],
+    "areas": [
+      "Kāmoke City Center",
+      "Kāmoke Main Bazar",
+      "Kāmoke Cantonment",
+      "Kāmoke Civil Lines",
+      "Kāmoke Model Town",
+      "Kāmoke Commercial Market"
+    ]
+  },
+  {
+    "name": "Laar",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "laar"
+    ],
+    "areas": [
+      "Laar"
+    ]
+  },
+  {
+    "name": "Lakki Marwat",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "lakkimarwat",
+      "lakki marwat"
+    ],
+    "areas": [
+      "Lakki Marwat"
+    ]
+  },
+  {
+    "name": "Lalamusa",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "lalamusa"
+    ],
+    "areas": [
+      "Lalamusa"
+    ]
+  },
+  {
+    "name": "Larkana",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "larkana"
+    ],
+    "areas": [
+      "Ahsan Housing Colony",
+      "Al Madina Colony",
+      "Ali Goharabad",
+      "Allahabad",
+      "Baharpur Mohalla",
+      "Baqapur",
+      "Bheda Goth",
+      "Ghabi Khan Chandio Mohalla",
+      "Goth Aitbar Dahani",
+      "Goth Dolat Khuhro",
+      "Goth Ghulab Bhutto",
+      "Goth Gullan Korai",
+      "Goth Kotai Bhutto",
+      "Goth Udha",
+      "Goth Wada Phul",
+      "Kanga",
+      "Karma Bagh",
+      "Khaliq Colony",
+      "Khosa",
+      "Mahar Wada",
+      "Noor Housing Colony",
+      "Rahmatpur Mohalla",
+      "Seerai Bazu",
+      "Shahbaz Colony",
+      "Site Area",
+      "Waleed Mohalla",
+      "Zamaan Goth"
+    ]
+  },
+  {
+    "name": "Latamber",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "latamber"
+    ],
+    "areas": [
+      "Latamber"
+    ]
+  },
+  {
+    "name": "Layyah",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "layyah"
+    ],
+    "areas": [
+      "Chaubara",
+      "Chowk Azam",
+      "Fatehpur",
+      "Karor Lal Esan",
+      "Kot Sultan",
+      "Layyah"
+    ]
+  },
+  {
+    "name": "Lodhran",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "lodhran"
+    ],
+    "areas": [
+      "Dunyapur",
+      "Kahror Pakka",
+      "Lodhran"
+    ]
+  },
+  {
+    "name": "Lower Dir",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "lower dir",
+      "lowerdir"
+    ],
+    "areas": [
+      "Lower Dir"
+    ]
+  },
+  {
+    "name": "Ludhewala Waraich",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ludhewala waraich",
+      "ludhewalawaraich"
+    ],
+    "areas": [
+      "Ludhewala Waraich City Center",
+      "Ludhewala Waraich Main Bazar",
+      "Ludhewala Waraich Cantonment",
+      "Ludhewala Waraich Civil Lines",
+      "Ludhewala Waraich Model Town",
+      "Ludhewala Waraich Commercial Market"
+    ]
+  },
+  {
+    "name": "Lund",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "lund"
+    ],
+    "areas": [
+      "Lund"
+    ]
+  },
+  {
+    "name": "MANSEHRA",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mansehra"
+    ],
+    "areas": [
+      "MANSEHRA"
+    ]
+  },
+  {
+    "name": "MARDAN",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mardan"
+    ],
+    "areas": [
+      "MARDAN"
+    ]
+  },
+  {
+    "name": "MIRPUR",
+    "province": "Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mirpur"
+    ],
+    "areas": [
+      "MIRPUR"
+    ]
+  },
+  {
+    "name": "MUZAFFARABAD",
+    "province": "Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "muzaffarabad"
+    ],
+    "areas": [
+      "MUZAFFARABAD"
+    ]
+  },
+  {
+    "name": "Madinah",
+    "province": "Madinah Province",
+    "country": "Saudi Arabia",
+    "countryCode": "+966",
+    "flag": "🇸🇦",
+    "aliases": [
+      "madinah"
+    ],
+    "areas": [
+      "Al Anbariya",
+      "Al Iskan",
+      "Al Khalidiyyah",
+      "Al Qiblatayn",
+      "Al Ranuna",
+      "Al Rawabi",
+      "Al Uyun",
+      "Sayyid Al Shuhada"
+    ]
+  },
+  {
+    "name": "Madyan",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "madyan"
+    ],
+    "areas": [
+      "Madyan"
+    ]
+  },
+  {
+    "name": "Mailsi",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mailsi"
+    ],
+    "areas": [
+      "Mailsi"
+    ]
+  },
+  {
+    "name": "Makhdoom Aali",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "makhdoomaali",
+      "makhdoom aali"
+    ],
+    "areas": [
+      "Makhdoom Aali"
+    ]
+  },
+  {
+    "name": "Makkah",
+    "province": "Makkah Province",
+    "country": "Saudi Arabia",
+    "countryCode": "+966",
+    "flag": "🇸🇦",
+    "aliases": [
+      "makkah"
+    ],
+    "areas": [
+      "Al Aziziyah",
+      "Al Hindawiyyah",
+      "Al Jamiah",
+      "Al Kakiyyah",
+      "Al Naseem",
+      "Al Rusaifah",
+      "Al Shawqiyyah",
+      "Al Zahir",
+      "Jabal Omar"
+    ]
+  },
+  {
+    "name": "Malakand",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "malakand"
+    ],
+    "areas": [
+      "Malakand"
+    ]
+  },
+  {
+    "name": "Mamoori",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mamoori"
+    ],
+    "areas": [
+      "Mamoori"
+    ]
+  },
+  {
+    "name": "Mandi Bahauddin",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mandi bahauddin",
+      "mandibahauddin"
+    ],
+    "areas": [
+      "Mandi Bahauddin"
+    ]
+  },
+  {
+    "name": "Mandi Warburton",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mandi warburton",
+      "mandiwarburton"
+    ],
+    "areas": [
+      "Mandi Warburton"
+    ]
+  },
+  {
+    "name": "Mangla",
+    "province": "Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mangla"
+    ],
+    "areas": [
+      "Mangla"
+    ]
+  },
+  {
+    "name": "Mansehra",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mansehra"
+    ],
+    "areas": [
+      "Mansehra City Center",
+      "Mansehra Main Bazar",
+      "Mansehra Cantonment",
+      "Mansehra Civil Lines",
+      "Mansehra Model Town",
+      "Mansehra Commercial Market"
+    ]
+  },
+  {
+    "name": "Mardan",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mardan"
+    ],
+    "areas": [
+      "Mardan City Center",
+      "Mardan Main Bazar",
+      "Mardan Cantonment",
+      "Mardan Civil Lines",
+      "Mardan Model Town",
+      "Mardan Commercial Market"
+    ]
+  },
+  {
+    "name": "Mastuj",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mastuj"
+    ],
+    "areas": [
+      "Mastuj"
+    ]
+  },
+  {
+    "name": "Mathi",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mathi"
+    ],
+    "areas": [
+      "Mathi"
+    ]
+  },
+  {
+    "name": "Matiari",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "matiari"
+    ],
+    "areas": [
+      "Matiari"
+    ]
+  },
+  {
+    "name": "Mehar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mehar"
+    ],
+    "areas": [
+      "Mehar"
+    ]
+  },
+  {
+    "name": "Mian Channu",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mianchannu",
+      "mian channu"
+    ],
+    "areas": [
+      "Mian Channu City Center",
+      "Mian Channu Main Bazar",
+      "Mian Channu Cantonment",
+      "Mian Channu Civil Lines",
+      "Mian Channu Model Town",
+      "Mian Channu Commercial Market"
+    ]
+  },
+  {
+    "name": "Mianwali",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mianwali"
+    ],
+    "areas": [
+      "Isakhel",
+      "Mianwali",
+      "Piplan"
+    ]
+  },
+  {
+    "name": "Minawala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "minawala"
+    ],
+    "areas": [
+      "Minawala"
+    ]
+  },
+  {
+    "name": "Mingora",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mingora"
+    ],
+    "areas": [
+      "Mingora City Center",
+      "Mingora Main Bazar",
+      "Mingora Cantonment",
+      "Mingora Civil Lines",
+      "Mingora Model Town",
+      "Mingora Commercial Market"
+    ]
+  },
+  {
+    "name": "Miram Shah",
+    "province": "Fata",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "miram shah",
+      "miramshah"
+    ],
+    "areas": [
+      "Miram Shah"
+    ]
+  },
+  {
+    "name": "Mirpur",
+    "province": "Azad Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mirpur"
+    ],
+    "areas": [
+      "Mirpur City Center",
+      "Mirpur Main Bazar",
+      "Mirpur Cantonment",
+      "Mirpur Civil Lines",
+      "Mirpur Model Town",
+      "Mirpur Commercial Market"
+    ]
+  },
+  {
+    "name": "Mirpur Batoro",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mirpurbatoro",
+      "mirpur batoro"
+    ],
+    "areas": [
+      "Mirpur Batoro"
+    ]
+  },
+  {
+    "name": "Mirpur Khas",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mirpur khas",
+      "mirpurkhas"
+    ],
+    "areas": [
+      "Mirpur Khas",
+      "Umer Kot"
+    ]
+  },
+  {
+    "name": "Mirpur Sakro",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mirpur sakro",
+      "mirpursakro"
+    ],
+    "areas": [
+      "Mirpur Sakro"
+    ]
+  },
+  {
+    "name": "Mirpur, Azad Kashmir",
+    "province": "Azad Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mirpur,azadkashmir",
+      "mirpur, azad kashmir"
+    ],
+    "areas": [
+      "Mirpur, Azad Kashmir City Center",
+      "Mirpur, Azad Kashmir Main Bazar",
+      "Mirpur, Azad Kashmir Cantonment",
+      "Mirpur, Azad Kashmir Civil Lines",
+      "Mirpur, Azad Kashmir Model Town",
+      "Mirpur, Azad Kashmir Commercial Market"
+    ]
+  },
+  {
+    "name": "Mithani",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mithani"
+    ],
+    "areas": [
+      "Mithani"
+    ]
+  },
+  {
+    "name": "Mithi",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mithi"
+    ],
+    "areas": [
+      "Mithi"
+    ]
+  },
+  {
+    "name": "Mongora",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "mongora"
+    ],
+    "areas": [
+      "Mongora"
+    ]
+  },
+  {
+    "name": "Moro",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "moro"
+    ],
+    "areas": [
+      "Moro"
+    ]
+  },
+  {
+    "name": "Muridke",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "muridke"
+    ],
+    "areas": [
+      "Muridke"
+    ]
+  },
+  {
+    "name": "Murree",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "murree"
+    ],
+    "areas": [
+      "Murree"
+    ]
+  },
+  {
+    "name": "Muzaffarabad",
+    "province": "Azad Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "muzaffarabad"
+    ],
+    "areas": [
+      "Muzaffarabad City Center",
+      "Muzaffarabad Main Bazar",
+      "Muzaffarabad Cantonment",
+      "Muzaffarabad Civil Lines",
+      "Muzaffarabad Model Town",
+      "Muzaffarabad Commercial Market"
+    ]
+  },
+  {
+    "name": "Muzaffargarh",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "muzaffargarh"
+    ],
+    "areas": [
+      "Alipur",
+      "Jatoi",
+      "Kot Addu",
+      "Muzaffargarh"
+    ]
+  },
+  {
+    "name": "Nagar",
+    "province": "Gilgit & Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "nagar"
+    ],
+    "areas": [
+      "Nagar"
+    ]
+  },
+  {
+    "name": "Nagar Parkar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "nagarparkar",
+      "nagar parkar"
+    ],
+    "areas": [
+      "Nagar Parkar"
+    ]
+  },
+  {
+    "name": "Nankana Sahib",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "nankanasahib",
+      "nankana sahib"
+    ],
+    "areas": [
+      "Nankana Sahib City Center",
+      "Nankana Sahib Main Bazar",
+      "Nankana Sahib Cantonment",
+      "Nankana Sahib Civil Lines",
+      "Nankana Sahib Model Town",
+      "Nankana Sahib Commercial Market"
+    ]
+  },
+  {
+    "name": "Naokot",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "naokot"
+    ],
+    "areas": [
+      "Naokot"
+    ]
+  },
+  {
+    "name": "Narowal",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "narowal"
+    ],
+    "areas": [
+      "Narowal",
+      "Shakkargarh"
+    ]
+  },
+  {
+    "name": "Naudero",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "naudero"
+    ],
+    "areas": [
+      "Naudero"
+    ]
+  },
+  {
+    "name": "Naushahro Feroze",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "naushahro feroze",
+      "naushahroferoze"
+    ],
+    "areas": [
+      "Naushahro Feroze City Center",
+      "Naushahro Feroze Main Bazar",
+      "Naushahro Feroze Cantonment",
+      "Naushahro Feroze Civil Lines",
+      "Naushahro Feroze Model Town",
+      "Naushahro Feroze Commercial Market"
+    ]
+  },
+  {
+    "name": "Naushara",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "naushara"
+    ],
+    "areas": [
+      "Naushara"
+    ]
+  },
+  {
+    "name": "Nawabshah",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "nawabshah"
+    ],
+    "areas": [
+      "Nawabshah"
+    ]
+  },
+  {
+    "name": "Nazimabad",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "nazimabad"
+    ],
+    "areas": [
+      "Nazimabad"
+    ]
+  },
+  {
+    "name": "North Waziristan",
+    "province": "Fata",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "northwaziristan",
+      "north waziristan"
+    ],
+    "areas": [
+      "North Waziristan"
+    ]
+  },
+  {
+    "name": "Noushero Feroz",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "noushero feroz",
+      "nousheroferoz"
+    ],
+    "areas": [
+      "Noushero Feroz"
+    ]
+  },
+  {
+    "name": "Nowshera",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "nowshera"
+    ],
+    "areas": [
+      "Nowshera"
+    ]
+  },
+  {
+    "name": "Nowshera, Khyber Pakhtunkhwa",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "nowshera, khyber pakhtunkhwa",
+      "nowshera,khyberpakhtunkhwa"
+    ],
+    "areas": [
+      "Nowshera, Khyber Pakhtunkhwa City Center",
+      "Nowshera, Khyber Pakhtunkhwa Main Bazar",
+      "Nowshera, Khyber Pakhtunkhwa Cantonment",
+      "Nowshera, Khyber Pakhtunkhwa Civil Lines",
+      "Nowshera, Khyber Pakhtunkhwa Model Town",
+      "Nowshera, Khyber Pakhtunkhwa Commercial Market"
+    ]
+  },
+  {
+    "name": "Okara",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "okara"
+    ],
+    "areas": [
+      "Ameer Colony",
+      "Bari Town",
+      "Basti Iqbal Nagar",
+      "Basti Rehmatpura",
+      "Block A",
+      "Block B",
+      "Block D",
+      "Canal View",
+      "Chak 4/4 L",
+      "Chak 56/2 L",
+      "Depalpur",
+      "Faisal Mehmood Colony",
+      "Faizabad Colony",
+      "Farid Town",
+      "Green City",
+      "Gulshan Iqbal Town",
+      "Imran Town",
+      "Irshad Town",
+      "Kot Jan Muhammad",
+      "Mehar Colony",
+      "Model Cooperative Housing Society",
+      "Niazi",
+      "Noor Garden",
+      "Okara",
+      "Rehan Kot",
+      "Saad City",
+      "Sabir Piya Town",
+      "Sabri Colony",
+      "Sakri Colony",
+      "Sher Rubani Town"
+    ]
+  },
+  {
+    "name": "Paharpur",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "paharpur"
+    ],
+    "areas": [
+      "Paharpur"
+    ]
+  },
+  {
+    "name": "Pak Pattan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "pak pattan",
+      "pakpattan"
+    ],
+    "areas": [
+      "Pak Pattan"
+    ]
+  },
+  {
+    "name": "Pakpattan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "pakpattan"
+    ],
+    "areas": [
+      "Pakpattan City Center",
+      "Pakpattan Main Bazar",
+      "Pakpattan Cantonment",
+      "Pakpattan Civil Lines",
+      "Pakpattan Model Town",
+      "Pakpattan Commercial Market"
+    ]
+  },
+  {
+    "name": "Pasrur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "pasrur"
+    ],
+    "areas": [
+      "Pasrur City Center",
+      "Pasrur Main Bazar",
+      "Pasrur Cantonment",
+      "Pasrur Civil Lines",
+      "Pasrur Model Town",
+      "Pasrur Commercial Market"
+    ]
+  },
+  {
+    "name": "Pattoki",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "pattoki"
+    ],
+    "areas": [
+      "Pattoki"
+    ]
+  },
+  {
+    "name": "Phool Nagar",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "phoolnagar",
+      "phool nagar"
+    ],
+    "areas": [
+      "Phool Nagar City Center",
+      "Phool Nagar Main Bazar",
+      "Phool Nagar Cantonment",
+      "Phool Nagar Civil Lines",
+      "Phool Nagar Model Town",
+      "Phool Nagar Commercial Market"
+    ]
+  },
+  {
+    "name": "Plandri",
+    "province": "Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "plandri"
+    ],
+    "areas": [
+      "Plandri"
+    ]
+  },
+  {
+    "name": "Qambar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "qambar"
+    ],
+    "areas": [
+      "Qambar"
+    ]
+  },
+  {
+    "name": "Qazi Ahmad",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "qaziahmad",
+      "qazi ahmad"
+    ],
+    "areas": [
+      "Qazi Ahmad"
+    ]
+  },
+  {
+    "name": "Qila Didar Singh",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "qila didar singh",
+      "qiladidarsingh"
+    ],
+    "areas": [
+      "Qila Didar Singh"
+    ]
+  },
+  {
+    "name": "Rabwah",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "rabwah"
+    ],
+    "areas": [
+      "Rabwah"
+    ]
+  },
+  {
+    "name": "Rahim Yar Khan",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "rahimyarkhan",
+      "rahim yar khan"
+    ],
+    "areas": [
+      "Abasia Bungalows",
+      "Basti Amanat Ali",
+      "Block Y",
+      "Chak 110/P",
+      "Dari Sangi",
+      "Dastagir Colony",
+      "Gulberg Town",
+      "Gulshan-e-Usmani",
+      "Habib Colony",
+      "Hanifia Colony",
+      "Hassan Colony",
+      "Jaddah Town",
+      "Kacha Sadiqabad Road",
+      "Kanjo Muhalla",
+      "Niazi Colony",
+      "Rahim Yar Khan",
+      "Rehman Colony",
+      "Rehmat Nyazi Colony",
+      "Scheme 2",
+      "Shafi Town",
+      "Trust Colony",
+      "Zafar Abad Colony"
+    ]
+  },
+  {
+    "name": "Raiwind",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "raiwind"
+    ],
+    "areas": [
+      "Raiwind"
+    ]
+  },
+  {
+    "name": "Rajan Pur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "rajan pur",
+      "rajanpur"
+    ],
+    "areas": [
+      "Rajan Pur"
+    ]
+  },
+  {
+    "name": "Rajanpur",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "rajanpur"
+    ],
+    "areas": [
+      "Rajanpur City Center",
+      "Rajanpur Main Bazar",
+      "Rajanpur Cantonment",
+      "Rajanpur Civil Lines",
+      "Rajanpur Model Town",
+      "Rajanpur Commercial Market"
+    ]
+  },
+  {
+    "name": "Ranipur",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ranipur"
+    ],
+    "areas": [
+      "Ranipur"
+    ]
+  },
+  {
+    "name": "Ratodero",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "ratodero"
+    ],
+    "areas": [
+      "Ratodero"
+    ]
+  },
+  {
+    "name": "Rawalakot",
+    "province": "Azad Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "rawalakot"
+    ],
+    "areas": [
+      "Kahutta Haveli",
+      "Rawalakot"
+    ]
+  },
+  {
+    "name": "Renala Khurd",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "renala khurd",
+      "renalakhurd"
+    ],
+    "areas": [
+      "Renala Khurd"
+    ]
+  },
+  {
+    "name": "Riyadh",
+    "province": "Riyadh Province",
+    "country": "Saudi Arabia",
+    "countryCode": "+966",
+    "flag": "🇸🇦",
+    "aliases": [
+      "riyadh"
+    ],
+    "areas": [
+      "Al Aqiq",
+      "Al Hamra",
+      "Al Malaz",
+      "Al Murabba",
+      "Al Mursalat",
+      "Al Nakheel",
+      "Al Narjis",
+      "Al Olaya",
+      "Al Quds",
+      "Al Rawdah",
+      "Al Sahafah",
+      "Al Sulaimaniyah",
+      "Al Wurud",
+      "Al Yarmouk",
+      "Al Yasmin",
+      "Diplomatic Quarter (Al Safarat)",
+      "Hittin",
+      "King Abdullah Financial District (KAFD)",
+      "Qurtubah"
+    ]
+  },
+  {
+    "name": "Rohri",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "rohri"
+    ],
+    "areas": [
+      "Rohri"
+    ]
+  },
+  {
+    "name": "Sadiqabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sadiqabad"
+    ],
+    "areas": [
+      "Sadiqabad"
+    ]
+  },
+  {
+    "name": "Sahiwal",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sahiwal"
+    ],
+    "areas": [
+      "Al Haseeb Town",
+      "Al Janett Colony",
+      "Alawal Colony",
+      "Barkat Town",
+      "Bashir Town",
+      "Bhutto Nagar",
+      "Canal Colony",
+      "Daudpur",
+      "Farid Town",
+      "Ganj Shakar Colony",
+      "Haseeb Town",
+      "Heera Mandi",
+      "Hussain Colony",
+      "Jewan City",
+      "Johar Town",
+      "Ladu Basti",
+      "Lalazar Colony",
+      "Main Market",
+      "Muhammadi Colony",
+      "Nai Abadi",
+      "Rafi Gardens",
+      "Sabir Town",
+      "Sadiq Town",
+      "Sadman Town",
+      "Saeed Ullah Mokal Colony",
+      "Shadab Town",
+      "Shah Din",
+      "Tariq Bin Ziad Colony",
+      "Wahdat Colony",
+      "Wapda Colony"
+    ]
+  },
+  {
+    "name": "Sakesar",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sakesar"
+    ],
+    "areas": [
+      "Sakesar"
+    ]
+  },
+  {
+    "name": "Sakrand",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sakrand"
+    ],
+    "areas": [
+      "Sakrand"
+    ]
+  },
+  {
+    "name": "Samberial",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "samberial"
+    ],
+    "areas": [
+      "Samberial"
+    ]
+  },
+  {
+    "name": "Sambrial",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sambrial"
+    ],
+    "areas": [
+      "Sambrial City Center",
+      "Sambrial Main Bazar",
+      "Sambrial Cantonment",
+      "Sambrial Civil Lines",
+      "Sambrial Model Town",
+      "Sambrial Commercial Market"
+    ]
+  },
+  {
+    "name": "Samundri",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "samundri"
+    ],
+    "areas": [
+      "Samundri City Center",
+      "Samundri Main Bazar",
+      "Samundri Cantonment",
+      "Samundri Civil Lines",
+      "Samundri Model Town",
+      "Samundri Commercial Market"
+    ]
+  },
+  {
+    "name": "Sanghar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sanghar"
+    ],
+    "areas": [
+      "Sanghar"
+    ]
+  },
+  {
+    "name": "Sangla Hill",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sangla hill",
+      "sanglahill"
+    ],
+    "areas": [
+      "Sangla Hill"
+    ]
+  },
+  {
+    "name": "Sarai Alamgir",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sarai alamgir",
+      "saraialamgir"
+    ],
+    "areas": [
+      "Sarai Alamgir"
+    ]
+  },
+  {
+    "name": "Sargodha",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sargodha"
+    ],
+    "areas": [
+      "Ashiana Housing Scheme",
+      "Awan Abad",
+      "Aziz Bhatti Town",
+      "Block X",
+      "Block Y",
+      "Block Z",
+      "Cantonment",
+      "Cheema Colony",
+      "Dhudi Colony",
+      "Eagle City Housing Project",
+      "Eden Life Housing Scheme",
+      "Fatima Jinnah Colony",
+      "Gulshan-e-Hayat Colony",
+      "Istaqlal Abad Colony",
+      "Johar Colony",
+      "Khayaban-e-Sher",
+      "Mahil Town",
+      "Maryam Town",
+      "National Town",
+      "Nawab City",
+      "New Civil Lines",
+      "New Satellite Town",
+      "Officers Colony",
+      "PAF Colony",
+      "Qadirabad Colony",
+      "Raza Garden Phase 1",
+      "Sargodha",
+      "Shaheen Colony",
+      "Sujanpur",
+      "Superior Town",
+      "Waris Town"
+    ]
+  },
+  {
+    "name": "Shabqadar",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shabqadar"
+    ],
+    "areas": [
+      "Shabqadar City Center",
+      "Shabqadar Main Bazar",
+      "Shabqadar Cantonment",
+      "Shabqadar Civil Lines",
+      "Shabqadar Model Town",
+      "Shabqadar Commercial Market"
+    ]
+  },
+  {
+    "name": "Shadadkhot",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shadadkhot"
+    ],
+    "areas": [
+      "Shadadkhot"
+    ]
+  },
+  {
+    "name": "Shahbandar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shahbandar"
+    ],
+    "areas": [
+      "Shahbandar"
+    ]
+  },
+  {
+    "name": "Shahdadkot",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shahdadkot"
+    ],
+    "areas": [
+      "Shahdadkot City Center",
+      "Shahdadkot Main Bazar",
+      "Shahdadkot Cantonment",
+      "Shahdadkot Civil Lines",
+      "Shahdadkot Model Town",
+      "Shahdadkot Commercial Market"
+    ]
+  },
+  {
+    "name": "Shahdadpur",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shahdadpur"
+    ],
+    "areas": [
+      "Shahdadpur"
+    ]
+  },
+  {
+    "name": "Shahpur Chakar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shahpur chakar",
+      "shahpurchakar"
+    ],
+    "areas": [
+      "Shahpur Chakar"
+    ]
+  },
+  {
+    "name": "Shakargarh",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shakargarh"
+    ],
+    "areas": [
+      "Shakargarh"
+    ]
+  },
+  {
+    "name": "Shandur",
+    "province": "Gilgit & Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shandur"
+    ],
+    "areas": [
+      "Shandur"
+    ]
+  },
+  {
+    "name": "Shangla",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shangla"
+    ],
+    "areas": [
+      "Shangla"
+    ]
+  },
+  {
+    "name": "Shangrila",
+    "province": "Gilgit & Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shangrila"
+    ],
+    "areas": [
+      "Shangrila"
+    ]
+  },
+  {
+    "name": "Sheikhupura",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sheikhupura"
+    ],
+    "areas": [
+      "Baddo Murade",
+      "Bhatti Dhilwan",
+      "Chappa",
+      "Defence Colony",
+      "Dera Dhilwan",
+      "E Community Housing Society",
+      "Garden Town",
+      "Gloria Colony",
+      "Housing Colony",
+      "Mairajpura",
+      "Mandiala",
+      "Mansoorabad",
+      "Mohalla Farooq Ganj",
+      "Mohalla Marajpura",
+      "Mohalla Sultanpur",
+      "New Civil Lines",
+      "Rehmanpura",
+      "Sharaqpur",
+      "Sharif Colony",
+      "Sultan Colony Residences",
+      "Sultanpura",
+      "Sun City",
+      "Tup Dar",
+      "Zafar Abad"
+    ]
+  },
+  {
+    "name": "Shikarpur",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shikarpur"
+    ],
+    "areas": [
+      "Shikarpur"
+    ]
+  },
+  {
+    "name": "Shujabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "shujabad"
+    ],
+    "areas": [
+      "Shujabad City Center",
+      "Shujabad Main Bazar",
+      "Shujabad Cantonment",
+      "Shujabad Civil Lines",
+      "Shujabad Model Town",
+      "Shujabad Commercial Market"
+    ]
+  },
+  {
+    "name": "Skardu",
+    "province": "Gilgit-Baltistan",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "skardu"
+    ],
+    "areas": [
+      "Skardu"
+    ]
+  },
+  {
+    "name": "Sohawa",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sohawa"
+    ],
+    "areas": [
+      "Sohawa"
+    ]
+  },
+  {
+    "name": "Sooianwala",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sooianwala"
+    ],
+    "areas": [
+      "Sooianwala"
+    ]
+  },
+  {
+    "name": "South Waziristan",
+    "province": "Fata",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "south waziristan",
+      "southwaziristan"
+    ],
+    "areas": [
+      "South Waziristan"
+    ]
+  },
+  {
+    "name": "Sujawal",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sujawal"
+    ],
+    "areas": [
+      "Sujawal"
+    ]
+  },
+  {
+    "name": "Sukkur",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "sukkur"
+    ],
+    "areas": [
+      "Abdullah Shar",
+      "Agri Eng Workshop Residential Colony",
+      "Arain Mohalla",
+      "Bachal Shah Miani",
+      "Barrage Colony",
+      "G.E.C.H.S",
+      "Garam Gaudi",
+      "Golimar Area",
+      "Gulshan-e-Iqbal",
+      "Industrial Area Sukkur",
+      "Jaffarabad",
+      "Makka Goth",
+      "Malook Shar",
+      "Memon Mohalla",
+      "Miandad Khan Khoso",
+      "Nasirabad",
+      "Nawa Goth",
+      "New Pind",
+      "Old Sukkur",
+      "Pir Murad Shah Colony",
+      "Sasti Basti",
+      "Shah Khalid Colony",
+      "Shahi Bazaar",
+      "Soomar Goth",
+      "Sukkur Cooperative Housing Society",
+      "Sukkur Township",
+      "Takkar Muhalla",
+      "Thermal Colony",
+      "Wari Tar"
+    ]
+  },
+  {
+    "name": "Swabi",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "swabi"
+    ],
+    "areas": [
+      "Swabi"
+    ]
+  },
+  {
+    "name": "Swat",
+    "province": "Khyber Pakhtunkhwa",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "swat"
+    ],
+    "areas": [
+      "Swat"
+    ]
+  },
+  {
+    "name": "Taif",
+    "province": "Makkah Province",
+    "country": "Saudi Arabia",
+    "countryCode": "+966",
+    "flag": "🇸🇦",
+    "aliases": [
+      "taif"
+    ],
+    "areas": [
+      "Al Faisaliyah",
+      "Al Hada",
+      "Al Hawiyah",
+      "Al Khalidiyah",
+      "Al Qimariyyah",
+      "Al Shafa"
+    ]
+  },
+  {
+    "name": "Takhtbai",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "takhtbai"
+    ],
+    "areas": [
+      "Takhtbai"
+    ]
+  },
+  {
+    "name": "Talagang",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "talagang"
+    ],
+    "areas": [
+      "Talagang"
+    ]
+  },
+  {
+    "name": "Tando Adam",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tandoadam",
+      "tando adam"
+    ],
+    "areas": [
+      "Tando Adam"
+    ]
+  },
+  {
+    "name": "Tando Adam Khan",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tandoadamkhan",
+      "tando adam khan"
+    ],
+    "areas": [
+      "Tando Adam Khan City Center",
+      "Tando Adam Khan Main Bazar",
+      "Tando Adam Khan Cantonment",
+      "Tando Adam Khan Civil Lines",
+      "Tando Adam Khan Model Town",
+      "Tando Adam Khan Commercial Market"
+    ]
+  },
+  {
+    "name": "Tando Allahyar",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tandoallahyar",
+      "tando allahyar"
+    ],
+    "areas": [
+      "Tando Allahyar"
+    ]
+  },
+  {
+    "name": "Tando Bago",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tando bago",
+      "tandobago"
+    ],
+    "areas": [
+      "Tando Bago"
+    ]
+  },
+  {
+    "name": "Tando Muhammad Khan",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tando muhammad khan",
+      "tandomuhammadkhan"
+    ],
+    "areas": [
+      "Tando Muhammad Khan City Center",
+      "Tando Muhammad Khan Main Bazar",
+      "Tando Muhammad Khan Cantonment",
+      "Tando Muhammad Khan Civil Lines",
+      "Tando Muhammad Khan Model Town",
+      "Tando Muhammad Khan Commercial Market"
+    ]
+  },
+  {
+    "name": "Tangi",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tangi"
+    ],
+    "areas": [
+      "Tangi"
+    ]
+  },
+  {
+    "name": "Tarbela",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tarbela"
+    ],
+    "areas": [
+      "Tarbela"
+    ]
+  },
+  {
+    "name": "Taxila",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "taxila"
+    ],
+    "areas": [
+      "Taxila"
+    ]
+  },
+  {
+    "name": "Thall",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "thall"
+    ],
+    "areas": [
+      "Thall"
+    ]
+  },
+  {
+    "name": "Thatta",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "thatta"
+    ],
+    "areas": [
+      "Thatta"
+    ]
+  },
+  {
+    "name": "Toba Tek Singh",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "toba tek singh",
+      "tobateksingh"
+    ],
+    "areas": [
+      "Gojra",
+      "Kamalia",
+      "Toba Tek Singh"
+    ]
+  },
+  {
+    "name": "Tonsa",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tonsa"
+    ],
+    "areas": [
+      "Tonsa City Center",
+      "Tonsa Main Bazar",
+      "Tonsa Cantonment",
+      "Tonsa Civil Lines",
+      "Tonsa Model Town",
+      "Tonsa Commercial Market"
+    ]
+  },
+  {
+    "name": "Tordher",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "tordher"
+    ],
+    "areas": [
+      "Tordher"
+    ]
+  },
+  {
+    "name": "Umarkot",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "umarkot"
+    ],
+    "areas": [
+      "Umarkot"
+    ]
+  },
+  {
+    "name": "Umerkot",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "umerkot"
+    ],
+    "areas": [
+      "Umerkot City Center",
+      "Umerkot Main Bazar",
+      "Umerkot Cantonment",
+      "Umerkot Civil Lines",
+      "Umerkot Model Town",
+      "Umerkot Commercial Market"
+    ]
+  },
+  {
+    "name": "Upper Dir",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "upperdir",
+      "upper dir"
+    ],
+    "areas": [
+      "Upper Dir"
+    ]
+  },
+  {
+    "name": "Vehari",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "vehari"
+    ],
+    "areas": [
+      "Burewala",
+      "Mailsi",
+      "Vehari"
+    ]
+  },
+  {
+    "name": "Wah Cantonment",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "wahcantonment",
+      "wah cantonment"
+    ],
+    "areas": [
+      "Wah Cantonment"
+    ]
+  },
+  {
+    "name": "Wah Cantt",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "wahcantt",
+      "wah cantt"
+    ],
+    "areas": [
+      "Wah Cantt City Center",
+      "Wah Cantt Main Bazar",
+      "Wah Cantt Cantonment",
+      "Wah Cantt Civil Lines",
+      "Wah Cantt Model Town",
+      "Wah Cantt Commercial Market"
+    ]
+  },
+  {
+    "name": "Wana",
+    "province": "Fata",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "wana"
+    ],
+    "areas": [
+      "Wana"
+    ]
+  },
+  {
+    "name": "Warah",
+    "province": "Sindh",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "warah"
+    ],
+    "areas": [
+      "Warah"
+    ]
+  },
+  {
+    "name": "Wazirabad",
+    "province": "Punjab",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "wazirabad"
+    ],
+    "areas": [
+      "Wazirabad"
+    ]
+  },
+  {
+    "name": "khuiratta",
+    "province": "Kashmir",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "khuiratta"
+    ],
+    "areas": [
+      "khuiratta"
+    ]
+  },
+  {
+    "name": "saidu sharif",
+    "province": "KPK",
+    "country": "Pakistan",
+    "countryCode": "+92",
+    "flag": "🇵🇰",
+    "aliases": [
+      "saidusharif",
+      "saidu sharif"
+    ],
+    "areas": [
+      "saidu sharif"
+    ]
+  }
+]
