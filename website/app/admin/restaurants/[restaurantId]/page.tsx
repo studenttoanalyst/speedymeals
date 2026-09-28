@@ -35,7 +35,6 @@ export default function AdminRestaurantDetailPage({
     <div className="flex-1 flex flex-col">
       <Topbar
         title={restaurant?.name || 'Restaurant File'}
-        description="Partner account parameters and contract conditions."
         actions={
           <Link
             href="/admin/restaurants"

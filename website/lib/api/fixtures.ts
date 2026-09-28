@@ -1,21 +1,43 @@
 /**
  * SpeedyMeals Fixtures
- * Realistic mock data strictly matching backend models.
- * Used for development preview, storybook, and offline fallback.
+ * Realistic mock data strictly matching backend models and frontend domain contracts.
+ * Enhanced with Unsplash food images, restaurant logos, storefront banners,
+ * modifier groups, rider KYC documents, and marketing promotions.
  */
 
-import { AdminDashboardSummary, AdminOrderDetail, AdminOrderSummary, CashDiscrepancy, RestaurantAdmin, Settlement, AdminReportsResponse } from '@/types/admin';
+import {
+  AdminDashboardSummary,
+  AdminOrderDetail,
+  AdminOrderSummary,
+  CashDiscrepancy,
+  RestaurantAdmin,
+  Settlement,
+  AdminReportsResponse,
+  PromotionAdmin,
+  CustomerAdmin,
+} from '@/types/admin';
 import { RiderAdmin, RiderPayout } from '@/types/rider';
-import { MenuItem, RestaurantOrderDetail, RestaurantOrderSummary, RestaurantProfile, RestaurantSettlement } from '@/types/restaurant';
+import {
+  MenuItem,
+  RestaurantOrderDetail,
+  RestaurantOrderSummary,
+  RestaurantProfile,
+  RestaurantSettlement,
+  RestaurantDashboardMetrics,
+} from '@/types/restaurant';
 
 export const mockAdminDashboard: AdminDashboardSummary = {
   date: new Date().toISOString().split('T')[0],
-  total_orders_today: 142,
-  gross_revenue_today: 184500.0,
-  net_revenue_today: 19870.0, // 10% commission + Rs 10 per delivered order
+  total_orders_today: 184,
+  gross_revenue_today: 248500.0,
+  net_revenue_today: 24850.0, // Flat 10% platform commission
   pending_restaurant_settlements: 432100.0,
-  total_rider_wallet_balance: 68500.0,
-  total_pending_cod_cash: 52400.0,
+  total_rider_wallet_balance: 78500.0,
+  total_pending_cod_cash: 62400.0,
+  active_deliveries_count: 42,
+  riders_exceeding_float_count: 3, // Over PKR 15,000 threshold
+  pending_restaurant_kyc_count: 2,
+  pending_rider_kyc_count: 4,
 };
 
 export const mockRestaurants: RestaurantAdmin[] = [
@@ -26,6 +48,10 @@ export const mockRestaurants: RestaurantAdmin[] = [
     phone_number: '+923001112233',
     status: 'active',
     commission_rate: 10.0,
+    logo_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&auto=format&fit=crop&q=80',
+    banner_url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200&auto=format&fit=crop&q=80',
+    active_menu_items_count: 28,
+    total_orders_count: 1420,
     created_at: '2026-08-10T12:00:00Z',
   },
   {
@@ -34,7 +60,11 @@ export const mockRestaurants: RestaurantAdmin[] = [
     email: 'clifton@burgerlab.pk',
     phone_number: '+923004445566',
     status: 'active',
-    commission_rate: 12.5,
+    commission_rate: 10.0,
+    logo_url: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=200&auto=format&fit=crop&q=80',
+    banner_url: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1200&auto=format&fit=crop&q=80',
+    active_menu_items_count: 19,
+    total_orders_count: 890,
     created_at: '2026-08-14T09:30:00Z',
   },
   {
@@ -42,8 +72,12 @@ export const mockRestaurants: RestaurantAdmin[] = [
     name: 'Ginsoy Extreme Chinese',
     email: 'orders@ginsoy.pk',
     phone_number: '+923219998877',
-    status: 'inactive',
+    status: 'pending',
     commission_rate: 10.0,
+    logo_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&auto=format&fit=crop&q=80',
+    banner_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&auto=format&fit=crop&q=80',
+    active_menu_items_count: 34,
+    total_orders_count: 0,
     created_at: '2026-08-20T16:15:00Z',
   },
   {
@@ -52,7 +86,11 @@ export const mockRestaurants: RestaurantAdmin[] = [
     email: 'gulshan@pizzamax.com.pk',
     phone_number: '+923337776655',
     status: 'active',
-    commission_rate: 8.0,
+    commission_rate: 10.0,
+    logo_url: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=200&auto=format&fit=crop&q=80',
+    banner_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&auto=format&fit=crop&q=80',
+    active_menu_items_count: 22,
+    total_orders_count: 610,
     created_at: '2026-08-25T11:00:00Z',
   },
 ];
@@ -63,13 +101,19 @@ export const mockRiders: RiderAdmin[] = [
     name: 'Tariq Mahmood',
     phone_number: '+923011234567',
     cnic_number: '42101-1234567-1',
-    vehicle_type: 'Motorcycle',
+    vehicle_type: 'Motorcycle (Honda 125)',
     vehicle_registration: 'KHI-7890',
     approval_status: 'approved',
-    wallet_balance: 1450.0,
-    pending_cash_owed: 3200.0,
+    wallet_balance: 3450.0,
+    pending_cash_owed: 7200.0, // Below 15,000 limit
+    max_cash_float_limit: 15000.0,
     is_online: true,
     is_active: true,
+    cnic_front_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+    cnic_back_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+    license_url: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&auto=format&fit=crop&q=80',
+    rating: 4.9,
+    completed_deliveries_count: 384,
     created_at: '2026-08-12T10:00:00Z',
   },
   {
@@ -77,13 +121,18 @@ export const mockRiders: RiderAdmin[] = [
     name: 'Zubair Ahmed',
     phone_number: '+923029876543',
     cnic_number: '42201-7654321-3',
-    vehicle_type: 'Motorcycle',
+    vehicle_type: 'Motorcycle (Yamaha YBR)',
     vehicle_registration: 'KHI-2341',
     approval_status: 'pending',
     wallet_balance: 500.0,
     pending_cash_owed: 0.0,
+    max_cash_float_limit: 15000.0,
     is_online: false,
     is_active: true,
+    cnic_front_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+    license_url: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&auto=format&fit=crop&q=80',
+    rating: 5.0,
+    completed_deliveries_count: 0,
     created_at: '2026-09-01T14:20:00Z',
   },
   {
@@ -91,47 +140,70 @@ export const mockRiders: RiderAdmin[] = [
     name: 'Kashif Ali',
     phone_number: '+923453332211',
     cnic_number: '42301-4455667-5',
-    vehicle_type: 'Motorcycle',
+    vehicle_type: 'Motorcycle (Super Power 70)',
     vehicle_registration: 'KHI-9988',
-    approval_status: 'rejected',
-    wallet_balance: 200.0,
-    pending_cash_owed: 1500.0,
-    is_online: false,
-    is_active: false,
+    approval_status: 'approved',
+    wallet_balance: 1200.0,
+    pending_cash_owed: 18450.0, // EXCEEDS 15,000 LIMIT -> FLAGGED
+    max_cash_float_limit: 15000.0,
+    is_online: true,
+    is_active: true,
+    cnic_front_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
+    license_url: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&auto=format&fit=crop&q=80',
+    rating: 4.4,
+    completed_deliveries_count: 142,
     created_at: '2026-08-18T08:10:00Z',
   },
 ];
 
 export const mockAdminOrders: AdminOrderSummary[] = [
   {
-    id: 'e4f5a6b7-8901-42cd-ef01-234567890abc',
+    id: 'a1b2c3d4-8901-42cd-ef01-234567890abc',
     restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1001',
     restaurant_name: 'Karachi Biryani House',
     rider_id: 'd2e3f4a5-6789-40ab-bcde-f12345678901',
+    rider_name: 'Tariq Mahmood',
     status: 'On the Way',
     payment_method: 'COD',
     total_amount: 1450.0,
     placed_at: '2026-09-13T01:45:00Z',
+    elapsed_time_mins: 28,
   },
   {
-    id: 'e4f5a6b7-8901-42cd-ef01-234567890abd',
+    id: 'b2c3d4e5-8901-42cd-ef01-234567890abd',
     restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1002',
     restaurant_name: 'Burger Lab Clifton',
     rider_id: null,
+    rider_name: null,
     status: 'Preparing',
     payment_method: 'Digital',
     total_amount: 2150.0,
     placed_at: '2026-09-13T02:10:00Z',
+    elapsed_time_mins: 14,
   },
   {
-    id: 'e4f5a6b7-8901-42cd-ef01-234567890abe',
+    id: 'c3d4e5f6-8901-42cd-ef01-234567890abe',
     restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1001',
     restaurant_name: 'Karachi Biryani House',
     rider_id: 'd2e3f4a5-6789-40ab-bcde-f12345678901',
+    rider_name: 'Tariq Mahmood',
     status: 'Delivered',
     payment_method: 'COD',
     total_amount: 980.0,
     placed_at: '2026-09-13T00:30:00Z',
+    elapsed_time_mins: 42,
+  },
+  {
+    id: 'd4e5f6a7-8901-42cd-ef01-234567890abf',
+    restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1004',
+    restaurant_name: 'Pizza Max Gulshan',
+    rider_id: null,
+    rider_name: null,
+    status: 'Placed',
+    payment_method: 'COD',
+    total_amount: 3200.0,
+    placed_at: '2026-09-13T02:22:00Z',
+    elapsed_time_mins: 4,
   },
 ];
 
@@ -143,10 +215,11 @@ export const mockSettlements: Settlement[] = [
     period_start: '2026-09-01',
     period_end: '2026-09-07',
     total_sales: 125000.0,
-    commission_deducted: 12500.0,
+    commission_deducted: 12500.0, // Exactly 10%
     net_payable: 112500.0,
     status: 'Settled',
     paid_at: '2026-09-08T15:00:00Z',
+    reference_code: 'PAY-KBH-89211',
   },
   {
     id: 'f5a6b7c8-9012-43de-f012-34567890abce',
@@ -155,10 +228,11 @@ export const mockSettlements: Settlement[] = [
     period_start: '2026-09-01',
     period_end: '2026-09-07',
     total_sales: 184000.0,
-    commission_deducted: 23000.0,
-    net_payable: 161000.0,
+    commission_deducted: 18400.0, // Exactly 10%
+    net_payable: 165600.0,
     status: 'Pending',
     paid_at: null,
+    reference_code: null,
   },
 ];
 
@@ -169,9 +243,12 @@ export const mockRiderPayouts: RiderPayout[] = [
     rider_name: 'Tariq Mahmood',
     period_start: '2026-09-01',
     period_end: '2026-09-07',
-    total_earning: 14850.0,
+    total_earning: 14850.0, // 100% of delivery fees retained
+    cod_cash_deducted: 11200.0,
+    net_payout: 3650.0,
     status: 'Paid',
     paid_at: '2026-09-08T12:00:00Z',
+    reference_code: 'RDR-TRQ-4491',
   },
   {
     id: 'a1b2c3d4-e5f6-47a8-b901-234567890124',
@@ -180,21 +257,75 @@ export const mockRiderPayouts: RiderPayout[] = [
     period_start: '2026-09-01',
     period_end: '2026-09-07',
     total_earning: 8200.0,
+    cod_cash_deducted: 8200.0,
+    net_payout: 0.0,
     status: 'Pending',
     paid_at: null,
   },
 ];
 
-export const mockCashDiscrepancies: CashDiscrepancy[] = [
+export const mockPromotions: PromotionAdmin[] = [
   {
-    id: 'c3d4e5f6-a7b8-49c0-d123-456789012345',
-    rider_id: 'd2e3f4a5-6789-40ab-bcde-f12345678903',
-    rider_name: 'Kashif Ali',
-    expected_amount: 8500.0,
-    amount_submitted: 7000.0,
-    discrepancy: -1500.0,
-    verified_by_admin: false,
-    created_at: '2026-09-10T22:30:00Z',
+    id: 'p1-1111-2222-3333-4444',
+    code: 'FEAST50',
+    title: '50% Weekend Feast Promotion',
+    description: 'Flat 50% discount on orders above PKR 1,500',
+    banner_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&auto=format&fit=crop&q=80',
+    discount_type: 'percentage',
+    discount_value: 50,
+    min_order_value: 1500,
+    max_discount_amount: 500,
+    valid_from: '2026-09-10T00:00:00Z',
+    valid_until: '2026-09-25T23:59:59Z',
+    is_active: true,
+    usage_count: 342,
+  },
+  {
+    id: 'p1-1111-2222-3333-5555',
+    code: 'FREEDELIVERY',
+    title: 'Zero Delivery Fee Campaign',
+    description: 'Free delivery sponsored on all partner stores',
+    banner_url: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=1200&auto=format&fit=crop&q=80',
+    discount_type: 'flat',
+    discount_value: 120,
+    min_order_value: 800,
+    valid_from: '2026-09-01T00:00:00Z',
+    valid_until: '2026-09-30T23:59:59Z',
+    is_active: true,
+    usage_count: 819,
+  },
+];
+
+export const mockCustomers: CustomerAdmin[] = [
+  {
+    id: 'c1-1111-2222-3333-4444',
+    name: 'Ahmed Faraz',
+    phone_number: '+923001239876',
+    email: 'ahmed.faraz@gmail.com',
+    wallet_balance: 450.0,
+    total_orders_count: 24,
+    is_active: true,
+    created_at: '2026-08-01T10:00:00Z',
+  },
+  {
+    id: 'c1-1111-2222-3333-5555',
+    name: 'Sara Khan',
+    phone_number: '+923218765432',
+    email: 'sara.khan@hotmail.com',
+    wallet_balance: 1200.0,
+    total_orders_count: 18,
+    is_active: true,
+    created_at: '2026-08-05T14:30:00Z',
+  },
+  {
+    id: 'c1-1111-2222-3333-6666',
+    name: 'Bilal Siddiqui',
+    phone_number: '+923334567890',
+    email: 'bilal.s@yahoo.com',
+    wallet_balance: 0.0,
+    total_orders_count: 5,
+    is_active: false, // suspended
+    created_at: '2026-08-15T09:15:00Z',
   },
 ];
 
@@ -203,51 +334,82 @@ export const mockMenuItems: MenuItem[] = [
     id: 'm1-1111-2222-3333-444455556666',
     restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1001',
     name: 'Special Chicken Biryani (Double)',
-    description: 'Fragrant basmati rice served with two tender chicken pieces and potato.',
+    description: 'Fragrant basmati rice served with two tender chicken pieces, steamed potato, and signature masala.',
     price: 450.0,
     category: 'Rice & Biryani',
-    photo_url: null,
-    variants: null,
+    photo_url: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=80',
+    image_url: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=80',
     is_available: true,
+    is_popular: true,
+    dietary_type: 'non-veg',
+    modifier_groups: [
+      {
+        id: 'mod-portion',
+        name: 'Portion Size',
+        min_selection: 1,
+        max_selection: 1,
+        options: [
+          { id: 'opt-reg', name: 'Regular Double', price_delta: 0, is_default: true },
+          { id: 'opt-jumbo', name: 'Jumbo Family (4 pcs)', price_delta: 400 },
+        ],
+      },
+      {
+        id: 'mod-addons',
+        name: 'Sides & Add-ons',
+        min_selection: 0,
+        max_selection: 3,
+        options: [
+          { id: 'opt-raita', name: 'Extra Zeera Raita', price_delta: 50 },
+          { id: 'opt-salad', name: 'Fresh Kachumber Salad', price_delta: 50 },
+          { id: 'opt-shami', name: 'Beef Shami Kabab (1 pc)', price_delta: 120 },
+        ],
+      },
+    ],
   },
   {
     id: 'm1-1111-2222-3333-444455556667',
     restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1001',
-    name: 'Mutton Pulao Kabab',
-    description: 'Traditional Degi mutton pulao served with 2 seekh kababs and raita.',
+    name: 'Mutton Pulao Kabab Feast',
+    description: 'Traditional Degi mutton pulao served with 2 beef seekh kababs, mint chutney, and fresh salad.',
     price: 780.0,
     category: 'Rice & Biryani',
-    photo_url: null,
-    variants: null,
+    photo_url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+    image_url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
     is_available: true,
+    is_popular: true,
+    dietary_type: 'non-veg',
   },
   {
     id: 'm1-1111-2222-3333-444455556668',
     restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1001',
     name: 'Chicken Malai Boti (8 pcs)',
-    description: 'Boneless chicken cubes marinated in heavy cream and mild spices.',
+    description: 'Boneless chicken cubes marinated in heavy dairy cream, green chillies, and mild royal spices.',
     price: 650.0,
     category: 'BBQ & Grills',
-    photo_url: null,
-    variants: null,
-    is_available: false,
+    photo_url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
+    image_url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
+    is_available: false, // 86'd / Sold out
+    is_popular: false,
+    dietary_type: 'non-veg',
   },
   {
     id: 'm1-1111-2222-3333-444455556669',
     restaurant_id: 'b1f4c728-1122-48ea-8b43-982c7f0a1001',
-    name: 'Roghni Naan',
-    description: 'Soft tandoori naan topped with sesame seeds and butter.',
+    name: 'Roghni Naan (Sesame)',
+    description: 'Fluffy tandoori clay oven naan glazed with desi butter and toasted white sesame seeds.',
     price: 80.0,
     category: 'Tandoor',
-    photo_url: null,
-    variants: null,
+    photo_url: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800&auto=format&fit=crop&q=80',
+    image_url: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800&auto=format&fit=crop&q=80',
     is_available: true,
+    is_popular: false,
+    dietary_type: 'veg',
   },
 ];
 
 export const mockRestaurantOrders: RestaurantOrderSummary[] = [
   {
-    id: 'e4f5a6b7-8901-42cd-ef01-234567890abc',
+    id: 'a1b2c3d4-8901-42cd-ef01-234567890abc',
     status: 'Preparing',
     payment_method: 'COD',
     food_subtotal: 1350.0,
@@ -257,7 +419,7 @@ export const mockRestaurantOrders: RestaurantOrderSummary[] = [
     customer_name: 'Ahmed Faraz',
   },
   {
-    id: 'e4f5a6b7-8901-42cd-ef01-234567890abd',
+    id: 'b2c3d4e5-8901-42cd-ef01-234567890abd',
     status: 'Ready for Pickup',
     payment_method: 'Digital',
     food_subtotal: 900.0,
@@ -267,7 +429,17 @@ export const mockRestaurantOrders: RestaurantOrderSummary[] = [
     customer_name: 'Sara Khan',
   },
   {
-    id: 'e4f5a6b7-8901-42cd-ef01-234567890abe',
+    id: 'd4e5f6a7-8901-42cd-ef01-234567890abf',
+    status: 'Placed',
+    payment_method: 'COD',
+    food_subtotal: 1560.0,
+    delivery_fee: 100.0,
+    total_amount: 1660.0,
+    placed_at: '2026-09-13T02:24:00Z',
+    customer_name: 'Hamza Nadeem',
+  },
+  {
+    id: 'c3d4e5f6-8901-42cd-ef01-234567890abe',
     status: 'Delivered',
     payment_method: 'COD',
     food_subtotal: 450.0,
@@ -277,3 +449,27 @@ export const mockRestaurantOrders: RestaurantOrderSummary[] = [
     customer_name: 'Usman Ghani',
   },
 ];
+
+export const mockCashDiscrepancies: CashDiscrepancy[] = [
+  {
+    id: 'disc-001',
+    rider_id: 'r1a2b3c4-d5e6-47f8-a901-b2c3d4e5f6a1',
+    rider_name: 'Kamran Akmal',
+    expected_amount: 14200.0,
+    amount_submitted: 13500.0,
+    discrepancy: 700.0,
+    verified_by_admin: false,
+    created_at: '2026-09-12T20:30:00Z',
+  },
+  {
+    id: 'disc-002',
+    rider_id: 'r1a2b3c4-d5e6-47f8-a901-b2c3d4e5f6a2',
+    rider_name: 'Bilal Asif',
+    expected_amount: 8600.0,
+    amount_submitted: 8600.0,
+    discrepancy: 0.0,
+    verified_by_admin: true,
+    created_at: '2026-09-11T19:15:00Z',
+  },
+];
+

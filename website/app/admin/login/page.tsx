@@ -32,10 +32,14 @@ export default function AdminLoginPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('sm_remembered_admin_email', email);
       }
-      await loginAdmin({ email, password });
-      router.push('/admin/dashboard');
+      const tokens = await loginAdmin({ email, password });
+      if (tokens.must_change_password) {
+        router.push('/admin/change-initial-password');
+      } else {
+        router.push('/admin/dashboard');
+      }
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials or server error.');
+      setError(err.message || 'Incorrect email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +65,7 @@ export default function AdminLoginPage() {
               SPEEDY<span className="text-rose-600">MEALS</span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Platform Administration Center
+              Admin Portal
             </p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -80,7 +84,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
             <label className="block font-semibold text-slate-700 mb-1">
-              Administrator Email
+              Admin Email
             </label>
             <div className="relative">
               <EnvelopeSimple size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -89,16 +93,24 @@ export default function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@speedymeals.pk"
+                placeholder="admin@speedymealservices.com"
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
-              Secret Password
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-semibold text-slate-700">
+                Password
+              </label>
+              <Link
+                href="/admin/forgot-password"
+                className="text-slate-400 hover:text-rose-600 transition-colors font-medium text-[11px]"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -125,7 +137,7 @@ export default function AdminLoginPage() {
             disabled={isLoading}
             className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            <span>{isLoading ? 'Verifying Admin Session...' : 'Authenticate as Admin'}</span>
+            <span>{isLoading ? 'Signing in...' : 'Log In to Admin Portal'}</span>
             <ArrowRight size={14} weight="bold" />
           </button>
         </form>

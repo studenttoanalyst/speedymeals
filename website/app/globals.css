@@ -200,3 +200,13 @@ html {
   }
 }
 
+/* Universal SpeedyMeals Brand Red Text Highlighting */
+::selection {
+  background-color: #E23A2E !important;
+  color: #FFFFFF !important;
+}
+
+::-moz-selection {
+  background-color: #E23A2E !important;
+  color: #FFFFFF !important;
+}

@@ -325,3 +325,63 @@ class PlaceOrderResponseSchema(BaseModel):
     rider_earning: float
     placed_at: datetime
     items: list[RestaurantOrderItemResponseSchema]
+
+
+# --- Restaurant Portal schemas ---
+
+
+class RestaurantProfileResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    email: str
+    phone_number: str
+    address: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    commission_rate: float
+    logo_url: str | None = None
+    banner_url: str | None = None
+    cover_photo_url: str | None = None
+    opening_time: str | None = None
+    closing_time: str | None = None
+    prep_time_minutes: int | None = 20
+    currency: str
+    status: str
+
+
+class RestaurantProfileUpdateSchema(BaseModel):
+    name: str | None = None
+    address: str | None = None
+    opening_time: str | None = None
+    closing_time: str | None = None
+    prep_time_minutes: int | None = None
+    logo_url: str | None = None
+    cover_photo_url: str | None = None
+    banner_url: str | None = None
+
+
+class RestaurantDashboardMetricsSchema(BaseModel):
+    active_orders_count: int
+    today_orders_count: int
+    today_sales_gross: float
+    net_payable_estimate: float
+    pending_settlement_estimate: float
+    avg_prep_time_mins: float
+    cancellation_rate_pct: float
+
+
+class RestaurantSettlementResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    restaurant_id: uuid.UUID
+    period_start: str | None
+    period_end: str | None
+    total_sales: float
+    commission_deducted: float
+    net_payable: float
+    status: str
+    paid_at: str | None = None
+

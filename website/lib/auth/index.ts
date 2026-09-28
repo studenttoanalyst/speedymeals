@@ -3,7 +3,8 @@
  * Handles session tokens, cookies, role verification, and API auth calls.
  */
 
-import { TokenResponse, AdminLoginPayload, RestaurantLoginPayload, OTPRequestPayload, OTPVerifyPayload, AuthSessionUser, UserRole } from '@/types/auth';
+import { TokenResponse, AdminTokenResponse, AdminLoginPayload, RestaurantLoginPayload, OTPRequestPayload, OTPVerifyPayload, AuthSessionUser, UserRole, ChangeInitialPasswordPayload } from '@/types/auth';
+
 import { apiClient } from '../api/client';
 
 const ACCESS_TOKEN_KEY = 'sm_access_token';
@@ -92,14 +93,20 @@ export function parseJwtRole(token: string): UserRole | null {
 /**
  * Admin Login via email & password
  */
-export async function loginAdmin(payload: AdminLoginPayload): Promise<TokenResponse> {
-  const fallbackTokens: TokenResponse = {
-    access_token: 'mock-admin-access-token-jwt',
-    refresh_token: 'mock-admin-refresh-token',
-    token_type: 'bearer',
-  };
+export async function loginAdmin(payload: AdminLoginPayload): Promise<AdminTokenResponse> {
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const fallbackTokens: AdminTokenResponse | undefined = isMockMode
+    ? {
+        access_token: 'mock-admin-access-token-jwt',
+        refresh_token: 'mock-admin-refresh-token',
+        token_type: 'bearer',
+        must_change_password: false,
+        permissions: ['*'],
+        role_name: 'Superadmin',
+      }
+    : undefined;
 
-  const tokens = await apiClient<TokenResponse>('/auth/admin/login', {
+  const tokens = await apiClient<AdminTokenResponse>('/auth/admin/login', {
     method: 'POST',
     body: JSON.stringify(payload),
     skipAuth: true,
@@ -107,15 +114,44 @@ export async function loginAdmin(payload: AdminLoginPayload): Promise<TokenRespo
   });
 
   const user: AuthSessionUser = {
-    id: 'admin-1',
-    email: payload.email,
+    id: tokens.admin_id || 'admin-1',
+    email: tokens.email || payload.email,
     role: 'admin',
-    name: 'Platform Admin',
+    name: tokens.role_name ? `Admin (${tokens.role_name})` : 'Platform Admin',
+    must_change_password: tokens.must_change_password,
+    permissions: tokens.permissions || [],
+    role_name: tokens.role_name,
   };
 
   saveSession(tokens, user);
   return tokens;
 }
+
+/**
+ * Change Initial Password (mandatory first-login rotation)
+ */
+export async function changeInitialPassword(payload: ChangeInitialPasswordPayload): Promise<{ message: string; access_token: string; refresh_token: string }> {
+  const res = await apiClient<{ message: string; access_token: string; refresh_token: string }>('/auth/admin/change-initial-password', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  // Update local session with new tokens and clear must_change_password flag
+  const currentUser = getStoredUser();
+  if (currentUser) {
+    currentUser.must_change_password = false;
+    localStorage.setItem('sm_user_data', JSON.stringify(currentUser));
+  }
+  if (res.access_token && res.refresh_token) {
+    saveSession(
+      { access_token: res.access_token, refresh_token: res.refresh_token, token_type: 'bearer' },
+      currentUser || { id: 'admin', role: 'admin' }
+    );
+  }
+
+  return res;
+}
+
 
 /**
  * Restaurant Login via email & password
@@ -197,17 +233,61 @@ export async function verifyRestaurantOTP(payload: OTPVerifyPayload): Promise<To
  */
 export async function logout(): Promise<void> {
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
-  if (refreshToken) {
+  if (refreshToken && !refreshToken.startsWith('mock-')) {
     try {
-      await apiClient('/auth/logout', {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+      await fetch(`${baseUrl}/auth/logout`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh_token: refreshToken }),
-        skipAuth: true,
-        fallbackData: { message: 'Logged out.' },
       });
     } catch {
-      // Clean up locally regardless
+      // Local session is cleared regardless
     }
   }
   clearSession();
+}
+
+/**
+ * Admin Forgot Password
+ */
+export async function requestAdminForgotPassword(email: string): Promise<{ message: string; reset_token?: string; reset_url?: string }> {
+  return apiClient<{ message: string; reset_token?: string; reset_url?: string }>('/auth/admin/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+    skipAuth: true,
+  });
+}
+
+/**
+ * Admin Reset Password with Token
+ */
+export async function resetAdminPassword(token: string, new_password: string): Promise<{ message: string }> {
+  return apiClient<{ message: string }>('/auth/admin/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, new_password }),
+    skipAuth: true,
+  });
+}
+
+/**
+ * Restaurant Forgot Password
+ */
+export async function requestRestaurantForgotPassword(email: string): Promise<{ message: string; reset_token?: string; reset_url?: string }> {
+  return apiClient<{ message: string; reset_token?: string; reset_url?: string }>('/auth/restaurant/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+    skipAuth: true,
+  });
+}
+
+/**
+ * Restaurant Reset Password with Token
+ */
+export async function resetRestaurantPassword(token: string, new_password: string): Promise<{ message: string }> {
+  return apiClient<{ message: string }>('/auth/restaurant/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, new_password }),
+    skipAuth: true,
+  });
 }

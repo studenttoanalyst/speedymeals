@@ -39,7 +39,6 @@ export default function RestaurantMenuItemDetailPage({
     <div className="flex-1 flex flex-col">
       <Topbar
         title={item?.name || 'Dish Details'}
-        description="Individual recipe parameters, price schedule, and inventory."
         actions={
           <Link
             href="/restaurant/menu"
