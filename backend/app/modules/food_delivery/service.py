@@ -21,6 +21,7 @@ from app.core import maps_client, storage
 from app.core.redis_client import redis_client
 from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating, Restaurant
 from app.platform.wallet_payment.models import Rider
+from app.platform.users.models import Address
 from app.platform.wallet_payment.service import (
     DELIVERED_STATUS,
     DELIVERY_WALLET_DEDUCTION,
@@ -355,6 +356,130 @@ def get_order_rider_location(
         "latitude": latitude,
         "longitude": longitude,
         "updated_at": updated_at,
+    }
+
+def get_order_tracking(db: Session, viewer_id: uuid.UUID, order_id: uuid.UUID) -> dict:
+    """Customer-facing order tracking including restaurant and customer coordinates.
+
+    Authorization: the customer who placed the order. Returns 404 if not found.
+    """
+    # Owner check (customer)
+    order = (
+        db.query(Order)
+        .filter(Order.id == order_id, Order.user_id == viewer_id)
+        .first()
+    )
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+
+    # Fetch related entities
+    restaurant = db.query(Restaurant).filter(Restaurant.id == order.restaurant_id).first()
+    address = db.query(Address).filter(Address.id == order.delivery_address_id).first()
+    rider_name: str | None = None
+    rider_phone: str | None = None
+    rider_lat: float | None = None
+    rider_lng: float | None = None
+    if order.rider_id is not None:
+        rider = db.query(Rider).filter(Rider.id == order.rider_id).first()
+        if rider:
+            rider_name = rider.name
+            rider_phone = rider.phone_number
+        # Live rider GPS from Redis (same key the write path uses)
+        raw = redis_client.get(_rider_location_key(order.rider_id))
+        if raw is not None:
+            try:
+                loc = json.loads(raw)
+                rider_lat = float(loc["lat"])
+                rider_lng = float(loc["lng"])
+            except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+                pass  # corrupt/missing -> nulls, never a 500
+
+    # Order items with menu item names
+    item_rows = (
+        db.query(OrderItem, MenuItem.name)
+        .join(MenuItem, OrderItem.menu_item_id == MenuItem.id)
+        .filter(OrderItem.order_id == order.id)
+        .all()
+    )
+    items = [
+        {
+            "menu_item_id": item.menu_item_id,
+            "name": item_name,
+            "quantity": item.quantity,
+            "selected_variant": item.selected_variant,
+            "price_at_order": item.price_at_order,
+        }
+        for item, item_name in item_rows
+    ]
+
+    # Point 4 — immutable per-order coordinate snapshots frozen at
+    # placement. Falling back to the live Restaurant/Address columns only
+    # for legacy orders placed before the snapshot columns existed (their
+    # snapshots are None).
+    restaurant_lat = (
+        order.restaurant_lat if order.restaurant_lat is not None
+        else (restaurant.latitude if restaurant else None)
+    )
+    restaurant_lng = (
+        order.restaurant_lng if order.restaurant_lng is not None
+        else (restaurant.longitude if restaurant else None)
+    )
+    customer_lat = (
+        order.customer_lat if order.customer_lat is not None
+        else (address.latitude if address else None)
+    )
+    customer_lng = (
+        order.customer_lng if order.customer_lng is not None
+        else (address.longitude if address else None)
+    )
+
+    # Point 3 — live route estimate (distance, duration, ETA, polyline)
+    # restaurant -> customer for the tracking map. Computed from the
+    # SNAPSHOT coordinates so the displayed route can never silently shift
+    # after an address edit or restaurant relocation. get_route_details
+    # never raises (Haversine fallback internally); the try/except is
+    # purely defensive. Skipped when either endpoint lacks coordinates.
+    route = None
+    if (
+        restaurant_lat is not None
+        and restaurant_lng is not None
+        and customer_lat is not None
+        and customer_lng is not None
+    ):
+        try:
+            route = maps_client.get_route_details(
+                float(restaurant_lat),
+                float(restaurant_lng),
+                float(customer_lat),
+                float(customer_lng),
+            )
+        except Exception:
+            route = None
+
+    return {
+        "id": order.id,
+        "status": order.status,
+        "payment_method": order.payment_method,
+        "food_subtotal": order.food_subtotal,
+        "delivery_distance_km": order.delivery_distance_km,
+        "delivery_fee": order.delivery_fee,
+        "total_amount": order.total_amount,
+        "restaurant_name": restaurant.name if restaurant else None,
+        "restaurant_lat": restaurant_lat,
+        "restaurant_lng": restaurant_lng,
+        "customer_lat": customer_lat,
+        "customer_lng": customer_lng,
+        "rider_name": rider_name,
+        "rider_phone": rider_phone,
+        "rider_lat": rider_lat,
+        "rider_lng": rider_lng,
+        "route_distance_km": route["distance_km"] if route else None,
+        "duration_mins": route["duration_mins"] if route else None,
+        "eta": route["eta"] if route else None,
+        "polyline": route["polyline"] if route else None,
+        "placed_at": order.placed_at,
+        "delivered_at": order.delivered_at,
+        "items": items,
     }
 
 
@@ -719,6 +844,9 @@ def rider_advance_delivery_status(
     db.commit()
     db.refresh(order)
 
+    # Fetch location snapshot for response
+    restaurant = db.query(Restaurant.latitude, Restaurant.longitude).filter(Restaurant.id == order.restaurant_id).first()
+    address = db.query(Address.full_address, Address.latitude, Address.longitude).filter(Address.id == order.delivery_address_id).first()
     return {
         "id": order.id,
         "status": order.status,
@@ -728,6 +856,11 @@ def rider_advance_delivery_status(
         "delivery_fee": order.delivery_fee,
         "total_amount": order.total_amount,
         "rider_earning": order.rider_earning,
+        "restaurant_lat": float(restaurant[0]) if restaurant and restaurant[0] is not None else None,
+        "restaurant_lng": float(restaurant[1]) if restaurant and restaurant[1] is not None else None,
+        "customer_lat": float(address[1]) if address and address[1] is not None else None,
+        "customer_lng": float(address[2]) if address and address[2] is not None else None,
+        "delivery_address": address[0] if address else None,
     }
 
 
@@ -1146,11 +1279,11 @@ def _build_checkout_context(
     customer is never shown a price the order would not honor.
 
     Address ownership: WHERE user_id == customer_id (same pattern as the
-    browse endpoint) — another customer's address_id is a 404. Distance is
-    the real road distance from Maps Distance Matrix (restaurant ->
-    address); a Maps outage surfaces as a clean 503, never a crash. Every
-    price is re-read from Postgres — Redis cart and client never supply
-    financial values.
+    browse endpoint) — another customer's address_id is a 404. The route
+    (distance, duration, ETA, polyline) comes from the Google Directions
+    API (restaurant -> address); a Maps outage degrades to a Haversine
+    estimate, never a crash or a 503. Every price is re-read from Postgres
+    — Redis cart and client never supply financial values.
     """
     restaurant = _get_active_restaurant(db, restaurant_id)
 
@@ -1204,33 +1337,32 @@ def _build_checkout_context(
     food_subtotal = food_subtotal.quantize(Decimal("0.01"))
 
     cache_key = f"checkout_dist:{restaurant_id}:{address_id}"
-    distance_km = None
+    route = None
     try:
-        cached_dist = redis_client.get(cache_key)
-        if cached_dist is not None:
-            distance_km = float(cached_dist)
+        cached_route = redis_client.get(cache_key)
+        if cached_route is not None:
+            route = json.loads(cached_route)
     except Exception:
-        pass
+        route = None
 
-    if distance_km is None:
+    if route is None:
+        # Point 3 — full route (distance, duration, ETA, polyline) from the
+        # Directions API, same Redis cache + 600s TTL the old distance-only
+        # path used. get_route_details never raises: on budget exhaustion or
+        # any Maps failure it returns a Haversine-based estimate
+        # (polyline=None), so checkout degrades gracefully instead of 503ing.
+        route = maps_client.get_route_details(
+            float(restaurant.latitude),
+            float(restaurant.longitude),
+            float(address.latitude),
+            float(address.longitude),
+        )
         try:
-            distance_km = maps_client.get_road_distance_km(
-                float(restaurant.latitude),
-                float(restaurant.longitude),
-                float(address.latitude),
-                float(address.longitude),
-            )
-            try:
-                redis_client.setex(cache_key, 600, str(distance_km))
-            except Exception:
-                pass
-        except maps_client.MapsError:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Could not calculate delivery distance. Please try again shortly.",
-            )
+            redis_client.setex(cache_key, 600, json.dumps(route))
+        except Exception:
+            pass
 
-    delivery_distance_km = Decimal(str(round(distance_km, 2)))
+    delivery_distance_km = Decimal(str(round(route["distance_km"], 2)))
     delivery_fee = calculate_delivery_fee(delivery_distance_km)
     total = (food_subtotal + delivery_fee).quantize(Decimal("0.01"))
 
@@ -1244,6 +1376,7 @@ def _build_checkout_context(
         "delivery_distance_km": delivery_distance_km,
         "delivery_fee": delivery_fee,
         "total": total,
+        "route": route,
     }
 
 
@@ -1261,6 +1394,7 @@ def preview_checkout(
         "delivery_distance_km": ctx["delivery_distance_km"],
         "delivery_fee": ctx["delivery_fee"],
         "total": ctx["total"],
+        "route": ctx["route"],
     }
 
 
@@ -1369,6 +1503,16 @@ def place_order(
         rider_earning=rider_earning,
         country_code=restaurant.country_code,
         currency=restaurant.currency,
+        # Point 4 — immutable location snapshots copied from the
+        # already-loaded checkout context objects (zero extra queries).
+        # Frozen so later address edits / restaurant relocation can never
+        # move a historical order's coordinates. Both are guaranteed
+        # non-null here: the checkout context 400s on null restaurant
+        # coordinates and addresses always carry lat/lng.
+        customer_lat=ctx["address"].latitude,
+        customer_lng=ctx["address"].longitude,
+        restaurant_lat=restaurant.latitude,
+        restaurant_lng=restaurant.longitude,
         placed_at=datetime.now(timezone.utc),
     )
     db.add(order)
@@ -1400,6 +1544,7 @@ def place_order(
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
         "total_amount": order.total_amount,
+        "route": ctx["route"],
         "commission_amount": order.commission_amount,
         "restaurant_payable": order.restaurant_payable,
         "rider_earning": order.rider_earning,

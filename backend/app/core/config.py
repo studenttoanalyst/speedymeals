@@ -5,6 +5,7 @@ actual values always come from environment (.env locally, Secrets Manager in pro
 """
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Always resolve .env relative to this file's own folder (app/), not the
@@ -36,6 +37,35 @@ class Settings(BaseSettings):
     GOOGLE_MAPS_API_KEY: str
     GOOGLE_PLACES_API_KEY: str = ""
     MAPS_DAILY_CALL_BUDGET: int = 300
+
+    # CORS (production-ready browser security)
+    # Browser origins allowed to call this API cross-origin. Locally the
+    # defaults cover the dev website (3000) and dev mobile web (8080).
+    # Override via env as a JSON list — ALLOWED_ORIGINS=["https://app.example.com"]
+    # — or as a plain comma-separated string for convenience in .env files:
+    # ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
+    # The literal "*" is supported for local development only; main.py
+    # pairs it with allow_credentials=False (wildcard + credentials is a
+    # browser-rejected combination and must never ship).
+    ALLOWED_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "http://127.0.0.1:3000",
+    ]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def _parse_allowed_origins(cls, value):
+        """Accept either a JSON list (pydantic-settings native) or a
+        comma-separated string from env, and normalize entries (trim
+        whitespace, drop empties)."""
+        if isinstance(value, str):
+            value = [origin.strip() for origin in value.split(",")]
+        if isinstance(value, (list, tuple)):
+            cleaned = [str(origin).strip() for origin in value if str(origin).strip()]
+            if cleaned:
+                return cleaned
+        return value
 
 
     # First Admin Auto-Seed (Phase 2, Step 10 - see ADR-002)

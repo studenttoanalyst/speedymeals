@@ -131,7 +131,7 @@ class DeliveryStatusUpdateSchema(BaseModel):
 
 
 class DeliveryStatusResponseSchema(BaseModel):
-    """Response after a rider advances delivery status."""
+    """Response after a rider advances delivery status. Includes location snapshot."""
     id: uuid.UUID
     status: str
     rider_id: uuid.UUID | None
@@ -140,6 +140,12 @@ class DeliveryStatusResponseSchema(BaseModel):
     delivery_fee: float
     total_amount: float
     rider_earning: float
+    # New location fields
+    restaurant_lat: float | None = None
+    restaurant_lng: float | None = None
+    customer_lat: float | None = None
+    customer_lng: float | None = None
+    delivery_address: str | None = None
 
 
 class RiderDocumentUploadResponseSchema(BaseModel):
@@ -167,7 +173,8 @@ class RiderWalletProfileResponseSchema(BaseModel):
 class RiderAssignmentItemSchema(BaseModel):
     """One assigned order in GET /wallet/assignments — payout fields are
     the frozen per-order snapshots (rider_earning = 100% of delivery fee,
-    spec Sec 3.3), never recomputed at read time."""
+    spec Sec 3.3), never recomputed at read time. Includes location snapshot.
+    """
     id: uuid.UUID
     status: str
     payment_method: str
@@ -177,6 +184,12 @@ class RiderAssignmentItemSchema(BaseModel):
     rider_earning: float
     placed_at: datetime | None
     delivered_at: datetime | None
+    # New location fields
+    restaurant_lat: float | None = None
+    restaurant_lng: float | None = None
+    customer_lat: float | None = None
+    customer_lng: float | None = None
+    delivery_address: str | None = None
 
 
 class RiderAssignmentsResponseSchema(BaseModel):

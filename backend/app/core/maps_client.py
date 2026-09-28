@@ -1,9 +1,12 @@
 """
-Google Maps Distance Matrix client — Phase 5, Step 5.
+Google Maps client — Phase 5, Step 5 (Distance Matrix) + Point 3
+(route calculation via the Directions API: distance, duration, ETA,
+polyline).
 
 The ONLY Maps-touching module (same isolation pattern as core/storage.py
 being the only S3-touching module). The API key comes from settings
 (never hardcoded); httpx was added in Phase 0 for exactly this call.
+get_route_details() never raises — it degrades to a local estimate instead.
 
 Failure policy: any network/HTTP/payload problem raises MapsError — the
 service layer decides the HTTP response (503), so an outage degrades one
@@ -11,7 +14,7 @@ request, never the app.
 """
 import logging
 import math
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 import httpx
 
 from app.core.config import settings
@@ -21,12 +24,36 @@ logger = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT_SECONDS = 10
 DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json"
+DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
 DRIVING_ROAD_FACTOR = 1.3
+# Fallback duration estimate when Google cannot answer: an average urban
+# driving speed (25 km/h) keeps the ETA conservative without a Maps call.
+FALLBACK_AVG_SPEED_KMH = 25
 
 
 class MapsError(Exception):
     """Google Maps could not provide a distance (network, HTTP error, or
     non-OK element status like ZERO_RESULTS / REQUEST_DENIED)."""
+
+
+class MapsBudgetExceededError(MapsError):
+    """Point 5 — today's MAPS_DAILY_CALL_BUDGET is exhausted. Raised BEFORE
+    any Google call so no endpoint can overspend; the routes layer maps it
+    to a clean 503 (the client is told to retry later, never shown a
+    crash)."""
+
+
+def _enforce_daily_budget() -> None:
+    """Point 5 — single source of truth for Google API spend control:
+    raises MapsBudgetExceededError when today's budget is exhausted.
+    Called by EVERY Google-touching function (Distance Matrix, Directions,
+    Geocoding, Places autocomplete/details) so no product surface can make
+    uncapped billable calls."""
+    if not _check_and_increment_daily_budget():
+        logger.warning(
+            "[MAPS_CIRCUIT_BREAKER] Daily budget reached — Google call blocked."
+        )
+        raise MapsBudgetExceededError("Daily Google Maps API budget exhausted.")
 
 
 def _calculate_haversine_distance(
@@ -81,6 +108,9 @@ def get_road_distance_km(
         )
         return _calculate_haversine_distance(origin_lat, origin_lon, dest_lat, dest_lon)
 
+    # (Point 5: distance/directions keep the in-function Haversine fallback
+    # instead of raising — checkout must never hard-fail on Maps outages.)
+
     params = {
         "origins": f"{origin_lat},{origin_lon}",
         "destinations": f"{dest_lat},{dest_lon}",
@@ -100,6 +130,78 @@ def get_road_distance_km(
     return element["distance"]["value"] / 1000.0  # meters -> km
 
 
+def _haversine_fallback_route(
+    origin_lat: float, origin_lon: float, dest_lat: float, dest_lon: float
+) -> dict:
+    """Graceful degradation for Point 3: estimate distance via the existing
+    Haversine formula, duration from an average urban driving speed, and the
+    ETA from that duration. The polyline is unknowable without Google's
+    actual route geometry, so it is None — the client renders no path.
+    Never raises; used both when the daily budget is exhausted and when the
+    Directions call itself fails."""
+    distance_km = _calculate_haversine_distance(origin_lat, origin_lon, dest_lat, dest_lon)
+    duration_mins = max(1, round(distance_km / FALLBACK_AVG_SPEED_KMH * 60))
+    eta = (datetime.now(timezone.utc) + timedelta(minutes=duration_mins)).isoformat()
+    return {
+        "distance_km": round(distance_km, 2),
+        "duration_mins": duration_mins,
+        "eta": eta,
+        "polyline": None,
+    }
+
+
+def get_route_details(
+    origin_lat: float, origin_lng: float, dest_lat: float, dest_lng: float
+) -> dict:
+    """Point 3 — full route calculation between two lat/lon points (driving
+    mode) via the Google Directions API. Returns a dict with:
+
+    - distance_km: road distance in kilometres (float)
+    - duration_mins: travel time in whole minutes (int)
+    - eta: ISO-8601 UTC timestamp = now + duration (str)
+    - polyline: encoded overview_polyline.points for map rendering (str)
+
+    Reuses the same daily-budget circuit breaker as Distance Matrix. On
+    budget exhaustion OR any network/HTTP/payload failure it degrades to the
+    Haversine-based fallback route (polyline=None) instead of raising, per
+    the Point 3 error-handling policy — checkout/tracking must not break
+    because Google is down."""
+    if not _check_and_increment_daily_budget():
+        logger.warning(
+            "[MAPS_CIRCUIT_BREAKER] Daily budget reached. Falling back to Haversine route estimate."
+        )
+        return _haversine_fallback_route(origin_lat, origin_lng, dest_lat, dest_lng)
+
+    # (Point 5: route details keep the in-function fallback, same as above.)
+
+    params = {
+        "origin": f"{origin_lat},{origin_lng}",
+        "destination": f"{dest_lat},{dest_lng}",
+        "mode": "driving",
+        "key": settings.GOOGLE_MAPS_API_KEY,
+    }
+    try:
+        response = httpx.get(DIRECTIONS_URL, params=params, timeout=REQUEST_TIMEOUT_SECONDS)
+        response.raise_for_status()
+        data = response.json()
+        route = data["routes"][0]
+        leg = route["legs"][0]
+        distance_km = leg["distance"]["value"] / 1000.0  # meters -> km
+        duration_mins = max(1, round(leg["duration"]["value"] / 60.0))  # seconds -> mins
+        polyline = route["overview_polyline"]["points"]
+    except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as exc:
+        logger.warning(f"[MAPS_DIRECTIONS] Directions lookup failed, using fallback: {exc}")
+        return _haversine_fallback_route(origin_lat, origin_lng, dest_lat, dest_lng)
+
+    eta = (datetime.now(timezone.utc) + timedelta(minutes=duration_mins)).isoformat()
+
+    return {
+        "distance_km": round(distance_km, 2),
+        "duration_mins": duration_mins,
+        "eta": eta,
+        "polyline": polyline,
+    }
+
 
 GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
@@ -109,6 +211,9 @@ async def reverse_geocode(lat: float, lng: float) -> dict:
     Reverse geocode latitude and longitude to human-readable address components
     and place ID using Google Geocoding API.
     """
+    # Point 5 — geocoding is a billable Google call: count it against the
+    # daily budget and refuse (before any network I/O) when exhausted.
+    _enforce_daily_budget()
     params = {
         "latlng": f"{lat},{lng}",
         "key": settings.GOOGLE_MAPS_API_KEY,
@@ -166,6 +271,9 @@ async def autocomplete_places(input_text: str, session_token: str | None = None)
     Search for address autocomplete predictions using Google Places API.
     Supports session tokens for cost protection.
     """
+    # Point 5 — Places autocomplete is billable AND the most expensive
+    # per-call product here: same budget gate, no uncapped calls.
+    _enforce_daily_budget()
     params = {
         "input": input_text,
         "key": _get_places_api_key(),
@@ -203,6 +311,8 @@ async def get_place_details(place_id: str, session_token: str | None = None) -> 
     Fetch place details (lat/lng and address components) for a given place_id using Google Places API.
     Supports session tokens to close out autocomplete billing sessions.
     """
+    # Point 5 — billable Google call: same budget gate as autocomplete.
+    _enforce_daily_budget()
     params = {
         "place_id": place_id,
         "key": _get_places_api_key(),

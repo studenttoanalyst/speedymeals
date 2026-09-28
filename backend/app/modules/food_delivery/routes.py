@@ -7,6 +7,7 @@ token; the customer browse route requires "customer" — rider/restaurant/
 admin tokens get 403 either way, same RBAC pattern as
 platform/users/routes.py.
 """
+from fastapi import APIRouter, Depends, status, HTTPException
 import json
 import uuid
 from datetime import date

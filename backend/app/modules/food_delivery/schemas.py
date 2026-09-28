@@ -187,20 +187,37 @@ class CartUpdateItemSchema(BaseModel):
     qty: int = Field(gt=0)
 
 
+class RouteDetailSchema(BaseModel):
+    """Point 3 — one Google Directions route (restaurant -> delivery
+    address). eta is an ISO-8601 UTC timestamp (now + duration); polyline is
+    the encoded overview_polyline.points for map rendering, None when the
+    route came from the Haversine fallback (no real geometry without
+    Google). All fields optional per the Point 3 contract — a totally
+    unavailable route is surfaced as a null object."""
+    distance_km: float | None = None
+    duration_mins: int | None = None
+    eta: str | None = None
+    polyline: str | None = None
+
+
 class CheckoutPreviewResponseSchema(BaseModel):
     """Price breakdown for GET .../cart/checkout-preview — Step 5.
-    Calculation only: no order is placed, nothing is cleared."""
+    Calculation only: no order is placed, nothing is cleared. route carries
+    the Point 3 route parameters (distance, duration, ETA, polyline)."""
     food_subtotal: float
     delivery_distance_km: float
     delivery_fee: float
     total: float
+    route: RouteDetailSchema | None = None
 
 
 class OrderTrackingResponseSchema(BaseModel):
-    """Phase 7, Step 1 — poll-based customer tracking. restaurant_name is
-    always present (joined from restaurants in the same read, no duplicate
-    query); rider_name/rider_phone are only populated once a rider is
-    assigned (Step 2); None before that, never a placeholder."""
+    """Phase 7, Step 1 — poll-based customer tracking. Includes restaurant and
+    customer coordinates, plus optional live rider coordinates.
+    restaurant_name is always present (joined from restaurants in the same read),
+    rider_name/rider_phone are only populated once a rider is assigned (Step 2).
+    New fields: restaurant_lat/lng, customer_lat/lng, rider_lat/lng (optional).
+    """
     id: uuid.UUID
     status: str
     payment_method: str
@@ -209,8 +226,20 @@ class OrderTrackingResponseSchema(BaseModel):
     delivery_fee: float
     total_amount: float
     restaurant_name: str
+    restaurant_lat: float | None = None
+    restaurant_lng: float | None = None
+    customer_lat: float | None = None
+    customer_lng: float | None = None
     rider_name: str | None
     rider_phone: str | None
+    rider_lat: float | None = None
+    rider_lng: float | None = None
+    # Point 3 — live route parameters restaurant -> customer, recomputed per
+    # tracking read. Null when either endpoint lacks coordinates.
+    route_distance_km: float | None = None
+    duration_mins: int | None = None
+    eta: str | None = None
+    polyline: str | None = None
     placed_at: datetime
     delivered_at: datetime | None
     items: list[RestaurantOrderItemResponseSchema]
@@ -280,7 +309,8 @@ class PlaceOrderSchema(BaseModel):
 
 class PlaceOrderResponseSchema(BaseModel):
     """The placed order — financial values are the FROZEN snapshot written
-    at placement (never recomputed later)."""
+    at placement (never recomputed later). route is the Point 3 route
+    snapshot captured at placement time."""
     id: uuid.UUID
     status: str
     payment_method: str
@@ -289,6 +319,7 @@ class PlaceOrderResponseSchema(BaseModel):
     delivery_distance_km: float
     delivery_fee: float
     total_amount: float
+    route: RouteDetailSchema | None = None
     commission_amount: float
     restaurant_payable: float
     rider_earning: float

@@ -31,7 +31,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core import storage
 from app.core.redis_client import redis_client
-from app.modules.food_delivery.models import Order
+from app.modules.food_delivery.models import Order, Restaurant
+from app.platform.users.models import Address
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, WalletTransaction
 
 # Wallet thresholds
@@ -563,22 +564,34 @@ def get_rider_wallet_profile(db: Session, rider_id: uuid.UUID) -> dict:
     }
 
 
+def _snapshot_or_live(snapshot: float | None, live: float | None) -> float | None:
+    """Point 4 helper — per-order snapshot coordinate if present (orders
+    placed after the snapshot migration), else the live Restaurant/Address
+    value (legacy orders), else None."""
+    value = snapshot if snapshot is not None else live
+    return float(value) if value is not None else None
+
+
 def get_rider_assignments(db: Session, rider_id: uuid.UUID) -> dict:
     """
     GET /wallet/assignments — this rider's assigned orders, newest first,
     split into active (still in flight) and past (Delivered). Payout
     details are the frozen per-order snapshot columns, never recomputed.
-
-    Own assignments only (WHERE rider_id == rider_id — same no-leak-by-
-    omission pattern as everywhere else; ownership comes from the
-    authenticated token, never from the request). A rejected order drops
-    rider_id to NULL on reject, so it disappears from this list
-    automatically. Raises 404 if the rider row doesn't exist.
+    Includes location snapshot for each assignment.
     """
     _get_rider_or_404(db, rider_id)
 
-    orders = (
-        db.query(Order)
+    rows = (
+        db.query(
+            Order,
+            Restaurant.latitude.label("live_restaurant_lat"),
+            Restaurant.longitude.label("live_restaurant_lng"),
+            Address.latitude.label("live_customer_lat"),
+            Address.longitude.label("live_customer_lng"),
+            Address.full_address.label("delivery_address"),
+        )
+        .join(Restaurant, Order.restaurant_id == Restaurant.id)
+        .join(Address, Order.delivery_address_id == Address.id)
         .filter(Order.rider_id == rider_id)
         .order_by(Order.placed_at.desc())
         .all()
@@ -586,7 +599,11 @@ def get_rider_assignments(db: Session, rider_id: uuid.UUID) -> dict:
 
     active: list[dict] = []
     past: list[dict] = []
-    for order in orders:
+    for order, rest_lat, rest_lng, cust_lat, cust_lng, address_str in rows:
+        # Point 4 — prefer the immutable per-order snapshots frozen at
+        # placement; fall back to the live Restaurant/Address coordinates
+        # only for legacy orders placed before the snapshot columns existed
+        # (snapshots are None there).
         item = {
             "id": order.id,
             "status": order.status,
@@ -597,6 +614,11 @@ def get_rider_assignments(db: Session, rider_id: uuid.UUID) -> dict:
             "rider_earning": float(order.rider_earning),
             "placed_at": order.placed_at,
             "delivered_at": order.delivered_at,
+            "restaurant_lat": _snapshot_or_live(order.restaurant_lat, rest_lat),
+            "restaurant_lng": _snapshot_or_live(order.restaurant_lng, rest_lng),
+            "customer_lat": _snapshot_or_live(order.customer_lat, cust_lat),
+            "customer_lng": _snapshot_or_live(order.customer_lng, cust_lng),
+            "delivery_address": address_str,
         }
         (past if order.status == DELIVERED_STATUS else active).append(item)
 

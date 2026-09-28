@@ -113,7 +113,16 @@ def _run_full_lifecycle(db_session, monkeypatch, payment_method: str):
     address = _make_address(db_session, customer)
     rider = _make_eligible_rider(db_session)
 
-    monkeypatch.setattr(maps_client, "get_road_distance_km", lambda *a: 3.0)
+    monkeypatch.setattr(
+        maps_client,
+        "get_route_details",
+        lambda *a: {
+            "distance_km": 3.0,
+            "duration_mins": 15,
+            "eta": "2026-09-28T12:15:00+00:00",
+            "polyline": "fake_encoded_polyline",
+        },
+    )
 
     try:
         food_service.add_cart_item(

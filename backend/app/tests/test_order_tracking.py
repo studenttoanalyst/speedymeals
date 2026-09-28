@@ -125,6 +125,25 @@ def tracking_client(db_session):
 # --- service-level tests ---
 
 
+@pytest.fixture(autouse=True)
+def mock_route_details(monkeypatch):
+    """Point 3 — get_order_tracking now recomputes a live route per read.
+    Mock the Directions boundary so these tests never touch the network and
+    get deterministic route fields back."""
+    from app.core import maps_client
+
+    monkeypatch.setattr(
+        maps_client,
+        "get_route_details",
+        lambda *a: {
+            "distance_km": 3.72,
+            "duration_mins": 15,
+            "eta": "2026-09-28T12:15:00+00:00",
+            "polyline": "fake_encoded_polyline",
+        },
+    )
+
+
 def test_tracking_returns_status_and_totals(db_session, customer, address, restaurant, menu_item):
     order = _make_order(db_session, customer, restaurant, address)
     db_session.add(OrderItem(

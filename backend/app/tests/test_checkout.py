@@ -167,7 +167,18 @@ def test_maps_client_raises_maps_error_on_bad_element(monkeypatch):
 
 
 def _fake_maps(monkeypatch, km):
-    monkeypatch.setattr(maps_client, "get_road_distance_km", lambda *a: km)
+    """Point 3 — mock the route boundary (get_route_details) with a
+    Google-shaped route dict carrying the given road distance."""
+    monkeypatch.setattr(
+        maps_client,
+        "get_route_details",
+        lambda *a: {
+            "distance_km": km,
+            "duration_mins": 15,
+            "eta": "2026-09-28T12:15:00+00:00",
+            "polyline": "fake_encoded_polyline",
+        },
+    )
 
 
 def test_preview_happy_path_full_breakdown(db_session, customer, address, track_carts, monkeypatch):
@@ -208,9 +219,14 @@ def test_checkout_caching_eliminates_duplicate_maps_calls(db_session, customer, 
 
     def tracking_maps(*args):
         call_count["count"] += 1
-        return 3.0
+        return {
+            "distance_km": 3.0,
+            "duration_mins": 15,
+            "eta": "2026-09-28T12:15:00+00:00",
+            "polyline": "fake_encoded_polyline",
+        }
 
-    monkeypatch.setattr(maps_client, "get_road_distance_km", tracking_maps)
+    monkeypatch.setattr(maps_client, "get_route_details", tracking_maps)
 
     # First call: preview_checkout -> triggers 1 Maps API call
     preview = service.preview_checkout(db_session, customer.id, restaurant.id, address.id)
@@ -221,6 +237,80 @@ def test_checkout_caching_eliminates_duplicate_maps_calls(db_session, customer, 
     order = service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
     assert order["delivery_distance_km"] == Decimal("3.00")
     assert call_count["count"] == 1  # Still 1 call!
+
+
+def test_place_order_persists_location_snapshots(db_session, customer, address, track_carts, monkeypatch):
+    """Point 4 — the placed Order row freezes the customer and restaurant
+    coordinates from the checkout context (zero extra queries) as an
+    immutable snapshot."""
+    from app.modules.food_delivery.models import Order as OrderModel
+
+    restaurant = _make_restaurant(db_session, "Snapshot Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Karahi", 900)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+
+    order = db_session.query(OrderModel).filter(OrderModel.user_id == customer.id).one()
+    assert order.customer_lat is not None and order.customer_lng is not None
+    assert order.restaurant_lat is not None and order.restaurant_lng is not None
+    assert float(order.customer_lat) == pytest.approx(31.5204)
+    assert float(order.customer_lng) == pytest.approx(74.3587)
+    assert float(order.restaurant_lat) == pytest.approx(31.53)
+    assert float(order.restaurant_lng) == pytest.approx(74.36)
+
+
+def test_place_order_snapshots_survive_address_edit(db_session, customer, address, track_carts, monkeypatch):
+    """Point 4 immutability contract — editing the saved address AFTER
+    placement must not move the historical order's frozen coordinates."""
+    from app.modules.food_delivery.models import Order as OrderModel
+
+    restaurant = _make_restaurant(db_session, "Snapshot Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Karahi", 900)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+    order = db_session.query(OrderModel).filter(OrderModel.user_id == customer.id).one()
+
+    # Customer relocates: the live address row changes underneath.
+    address.latitude = 25.0
+    address.longitude = 67.0
+    db_session.commit()
+    db_session.refresh(order)
+
+    assert float(order.customer_lat) == pytest.approx(31.5204)
+    assert float(order.customer_lng) == pytest.approx(74.3587)
+
+
+def test_tracking_uses_snapshot_coordinates(db_session, customer, address, track_carts, monkeypatch):
+    """Point 4 — get_order_tracking reads the frozen snapshots, not the live
+    Address/Restaurant rows (legacy fallback is covered implicitly: null
+    snapshots fall back to the live join values)."""
+    restaurant = _make_restaurant(db_session, "Snapshot Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Karahi", 900)
+    _seed_cart(db_session, customer, restaurant, item, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+    from app.modules.food_delivery.models import Order as OrderModel
+
+    order = db_session.query(OrderModel).filter(OrderModel.user_id == customer.id).one()
+
+    # Simulate relocation AFTER placement: live rows move, snapshots don't.
+    address.latitude = 25.0
+    address.longitude = 67.0
+    restaurant.latitude = 20.0
+    restaurant.longitude = 21.0
+    db_session.commit()
+
+    tracking = service.get_order_tracking(db_session, customer.id, order.id)
+
+    assert float(tracking["customer_lat"]) == pytest.approx(31.5204)
+    assert float(tracking["customer_lng"]) == pytest.approx(74.3587)
+    assert float(tracking["restaurant_lat"]) == pytest.approx(31.53)
+    assert float(tracking["restaurant_lng"]) == pytest.approx(74.36)
 
 
 
@@ -303,19 +393,29 @@ def test_preview_stale_menu_item_rejected_400(db_session, customer, address, tra
     assert exc_info.value.status_code == 400
 
 
-def test_preview_maps_failure_is_503_and_cart_untouched(db_session, customer, address, track_carts, monkeypatch):
+def test_preview_maps_failure_falls_back_to_haversine(db_session, customer, address, track_carts, monkeypatch):
+    """Point 3 error policy — a Maps outage degrades to the Haversine route
+    estimate (polyline=None) instead of failing the preview; the cart
+    survives untouched either way. Simulated at the httpx boundary so the
+    real in-client fallback logic runs."""
     restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
     item = _make_menu_item(db_session, restaurant, "Karahi", 900)
     _seed_cart(db_session, customer, restaurant, item, qty=2, track=track_carts)
 
-    def boom(*args):
-        raise maps_client.MapsError("Distance lookup failed.")
+    def network_down(*args, **kwargs):
+        raise maps_client.httpx.ConnectError("network down")
 
-    monkeypatch.setattr(maps_client, "get_road_distance_km", boom)
+    monkeypatch.setattr(maps_client.httpx, "get", network_down)
 
-    with pytest.raises(HTTPException) as exc_info:
-        service.preview_checkout(db_session, customer.id, restaurant.id, address.id)
-    assert exc_info.value.status_code == 503
+    result = service.preview_checkout(db_session, customer.id, restaurant.id, address.id)
+
+    assert float(result["delivery_distance_km"]) > 0
+    assert result["route"]["polyline"] is None
+    assert result["route"]["duration_mins"] > 0
+    assert result["route"]["eta"]
+    assert float(result["route"]["distance_km"]) == pytest.approx(
+        float(result["delivery_distance_km"])
+    )
 
     # External failure must not mutate anything: the cart survives intact.
     cart = service.get_cart(db_session, customer.id, restaurant.id)
@@ -483,19 +583,27 @@ def test_place_order_clears_cart_only_after_success(db_session, customer, addres
     assert service.get_cart(db_session, customer.id, restaurant.id)["items"] == []
 
 
-def test_place_order_cart_survives_maps_failure(db_session, customer, address, track_carts, monkeypatch):
+def test_place_order_maps_failure_falls_back_to_haversine(db_session, customer, address, track_carts, monkeypatch):
+    """Point 3 error policy — placement survives a Maps outage via the
+    Haversine fallback route (polyline=None); the cart still clears only
+    after the successful commit. Simulated at the httpx boundary so the
+    real in-client fallback logic runs."""
     restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
     item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
     _seed_cart(db_session, customer, restaurant, item, track=track_carts)
 
-    def boom(*args):
-        raise maps_client.MapsError("Distance lookup failed.")
+    def network_down(*args, **kwargs):
+        raise maps_client.httpx.ConnectError("network down")
 
-    monkeypatch.setattr(maps_client, "get_road_distance_km", boom)
-    with pytest.raises(HTTPException) as exc_info:
-        service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
-    assert exc_info.value.status_code == 503
-    assert len(service.get_cart(db_session, customer.id, restaurant.id)["items"]) == 1
+    monkeypatch.setattr(maps_client.httpx, "get", network_down)
+
+    order = service.place_order(db_session, customer.id, restaurant.id, address.id, "COD")
+
+    assert float(order["delivery_distance_km"]) > 0
+    assert order["route"]["polyline"] is None
+    assert order["route"]["duration_mins"] > 0
+    assert order["route"]["eta"]
+    assert service.get_cart(db_session, customer.id, restaurant.id)["items"] == []
 
 
 def test_place_order_cart_survives_sold_out_item(db_session, customer, address, track_carts, monkeypatch):

@@ -83,6 +83,15 @@ class Order(BaseModel):
     currency: Mapped[str] = mapped_column(String, nullable=False)
     cancellation_reason: Mapped[str | None] = mapped_column(String, nullable=True)
     cancelled_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Point 4 — immutable location snapshots frozen at order placement.
+    # Coordinates live here so tracking/rider views never shift if the
+    # customer edits their address or the restaurant relocates afterwards.
+    # Nullable: legacy orders placed before this migration have nulls and
+    # read paths fall back to the live Restaurant/Address joins.
+    customer_lat: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    customer_lng: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    restaurant_lat: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    restaurant_lng: Mapped[float | None] = mapped_column(Numeric, nullable=True)
     placed_at: Mapped[object | None] = mapped_column(
         DateTime(timezone=True), nullable=True, index=True
     )  # admin dashboard/report date ranges + newest-first ordering

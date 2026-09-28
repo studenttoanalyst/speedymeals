@@ -4,7 +4,9 @@ App entry point. Run with:
 (run this command from inside backend/ folder, not backend/app/)
 """
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
 from app.core.database import SessionLocal
 from app.platform.auth import service as auth_service
 from app.platform.auth.routes import router as auth_router
@@ -20,6 +22,21 @@ from app.modules.food_delivery.routes import (
 )
 
 app = FastAPI(title="SpeedyMeals API", version="0.1.0")
+
+# --- Production-ready CORS ---
+# Allowed browser origins come from settings.ALLOWED_ORIGINS (env-driven —
+# JSON list or comma-separated; see config.py). Never hardcoded per-origin
+# in code, and never a blind wildcard: when the env sets ["*"] for local
+# dev we drop credentials instead (browsers reject "*" + credentials, and
+# shipping that combo would be an auth-continuation hazard).
+_wildcard_origins = any(o.strip() == "*" for o in settings.ALLOWED_ORIGINS)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"] if _wildcard_origins else settings.ALLOWED_ORIGINS,
+    allow_credentials=not _wildcard_origins,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+)
 
 app.include_router(auth_router)
 app.include_router(location_router)

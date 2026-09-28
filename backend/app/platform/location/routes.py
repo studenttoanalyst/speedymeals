@@ -1,7 +1,16 @@
-from fastapi import APIRouter, HTTPException, Request, Query, status
+"""
+Point 5 — Places/Location proxy endpoints. Every endpoint here triggers a
+billable Google Maps/Places API call, so NONE of them may be reachable by
+anonymous traffic: all three require a valid access token
+(get_current_user — any role; customers, riders, restaurant and admin staff
+all legitimately use address search), and all three are per-user rate
+limited via the shared Redis limiter (core/rate_limiter.py).
+"""
+from fastapi import APIRouter, Depends, HTTPException, Request, Query, status
 
 from app.core.maps_client import MapsError
 from app.core.rate_limiter import enforce_rate_limit
+from app.platform.auth.dependencies import CurrentUser, get_current_user
 from app.platform.location import service
 from app.platform.location.schemas import (
     PlaceDetailsResponseSchema,
@@ -17,13 +26,13 @@ async def reverse_geocode(
     request: Request,
     lat: float = Query(..., ge=-90.0, le=90.0, description="Latitude"),
     lng: float = Query(..., ge=-180.0, le=180.0, description="Longitude"),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
     """
     Reverse geocode latitude and longitude to a human-readable address.
-    Rate limited to 20 requests per minute per IP.
+    Auth required; rate limited to 20 requests per minute per user.
     """
-    client_ip = request.client.host if request.client else "unknown"
-    enforce_rate_limit(client_ip, "reverse_geocode", max_attempts=20, window_seconds=60)
+    enforce_rate_limit(str(current_user.id), "reverse_geocode", max_attempts=20, window_seconds=60)
 
     try:
         return await service.get_reverse_geocode(lat, lng)
@@ -44,11 +53,15 @@ async def reverse_geocode(
 @router.get("/places/autocomplete", response_model=list[PlacePredictionSchema])
 async def places_autocomplete(
     q: str = Query(..., min_length=1, max_length=200, description="Address search query text"),
-    session_token: str | None = Query(default=None, description="Google Places Session Token for billing grouping"),
+    session_token: str | None = Query(default=None, max_length=100, description="Google Places Session Token for billing grouping"),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
     """
     Search place autocomplete suggestions using Google Places API proxy.
+    Auth required; rate limited to 30 requests per minute per user.
     """
+    enforce_rate_limit(str(current_user.id), "places_autocomplete", max_attempts=30, window_seconds=60)
+
     try:
         return await service.autocomplete_places(q, session_token)
     except MapsError as exc:
@@ -60,12 +73,16 @@ async def places_autocomplete(
 
 @router.get("/places/details", response_model=PlaceDetailsResponseSchema)
 async def place_details(
-    place_id: str = Query(..., min_length=1, description="Google Place ID"),
-    session_token: str | None = Query(default=None, description="Google Places Session Token"),
+    place_id: str = Query(..., min_length=1, max_length=200, description="Google Place ID"),
+    session_token: str | None = Query(default=None, max_length=100, description="Google Places Session Token"),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
     """
     Fetch lat/lng and structured address components for a Google Place ID.
+    Auth required; rate limited to 20 requests per minute per user.
     """
+    enforce_rate_limit(str(current_user.id), "places_details", max_attempts=20, window_seconds=60)
+
     try:
         return await service.get_place_details(place_id, session_token)
     except MapsError as exc:
@@ -79,4 +96,3 @@ async def place_details(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Place details service is currently unavailable.",
         ) from exc
-
