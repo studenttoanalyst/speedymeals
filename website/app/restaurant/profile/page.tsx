@@ -25,12 +25,8 @@ export default function RestaurantProfilePage() {
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Editable fields
-  const [logoUrl, setLogoUrl] = useState<string | null>(
-    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200'
-  );
-  const [bannerUrl, setBannerUrl] = useState<string | null>(
-    'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200'
-  );
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [prepTime, setPrepTime] = useState(20);
   const [openingTime, setOpeningTime] = useState('11:00');
@@ -43,7 +39,7 @@ export default function RestaurantProfilePage() {
         const data = await getRestaurantProfile();
         setProfile(data);
         setName(data.name);
-        setAddress(data.address || 'Shop # 4, Main Boat Basin, Clifton Block 5, Karachi');
+        setAddress(data.address || '');
         setOpeningTime(data.opening_time || '11:00');
         setClosingTime(data.closing_time || '23:30');
         setPrepTime(data.prep_time_minutes || 20);

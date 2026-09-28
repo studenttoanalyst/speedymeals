@@ -218,7 +218,7 @@ export default function AdminSettlementsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             label="Total Disbursed Net (90%)"
-            value={formatPKR(totalSettled || 112500)}
+            value={formatPKR(totalSettled)}
             subValue="Completed bank disbursements"
             accent="emerald"
             icon={<CheckCircle size={18} weight="bold" />}
@@ -227,7 +227,7 @@ export default function AdminSettlementsPage() {
 
           <StatCard
             label="Pending Settlement Queue"
-            value={formatPKR(totalPending || 161000)}
+            value={formatPKR(totalPending)}
             subValue="Scheduled next batch payout"
             accent="amber"
             icon={<Clock size={18} weight="bold" />}
@@ -236,7 +236,7 @@ export default function AdminSettlementsPage() {
 
           <StatCard
             label="Platform Commission (10%)"
-            value={formatPKR(totalCommission || 30900)}
+            value={formatPKR(totalCommission)}
             subValue="Platform revenue share"
             accent="blue"
             icon={<Coins size={18} weight="bold" />}

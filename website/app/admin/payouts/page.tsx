@@ -198,7 +198,7 @@ export default function AdminPayoutsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             label="Total Courier Delivery Fees"
-            value={formatPKR(totalEarned || 23050)}
+            value={formatPKR(totalEarned)}
             subValue="100% credited to couriers"
             accent="blue"
             icon={<Bicycle size={18} weight="bold" />}
@@ -207,7 +207,7 @@ export default function AdminPayoutsPage() {
 
           <StatCard
             label="Total Disbursed Net"
-            value={formatPKR(totalPaid || 3650)}
+            value={formatPKR(totalPaid)}
             subValue="Transferred to Easypaisa / Jazzcash"
             accent="emerald"
             icon={<CheckCircle size={18} weight="bold" />}

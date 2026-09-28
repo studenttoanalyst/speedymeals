@@ -29,12 +29,12 @@ export default function RestaurantLoginPage() {
   const [tab, setTab] = useState<'password' | 'otp'>('password');
 
   // Password Login State
-  const [email, setEmail] = useState('contact@karachibiryani.pk');
-  const [password, setPassword] = useState('Partner@123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   // OTP Login State
-  const [phoneNumber, setPhoneNumber] = useState('3001112233');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -164,28 +164,19 @@ export default function RestaurantLoginPage() {
               setError(null);
               setSuccessMsg(null);
             }}
-            className={`py-2 rounded-lg transition-all ${
-              tab === 'password'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
+            className="py-2 rounded-lg transition-all bg-white text-slate-900 shadow-2xs font-semibold"
           >
             Email & Password
           </button>
           <button
             type="button"
-            onClick={() => {
-              setTab('otp');
-              setError(null);
-              setSuccessMsg(null);
-            }}
-            className={`py-2 rounded-lg transition-all ${
-              tab === 'otp'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
+            disabled
+            title="Mobile SMS login is temporarily locked pending SMS gateway configuration. Please sign in with your email and password."
+            className="py-2 px-1 rounded-lg text-slate-400 cursor-not-allowed flex items-center justify-center gap-1 opacity-70 select-none"
           >
-            Mobile Code (SMS)
+            <Lock size={12} weight="bold" />
+            <span>Mobile Code</span>
+            <span className="text-[9px] bg-slate-200 text-slate-600 font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Locked</span>
           </button>
         </div>
 
@@ -217,7 +208,7 @@ export default function RestaurantLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="contact@karachibiryani.pk"
+                  placeholder="partner@restaurant.com"
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
                 />
               </div>
@@ -287,7 +278,7 @@ export default function RestaurantLoginPage() {
                         required
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                        placeholder="3001112233"
+                        placeholder="3001234567"
                         className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono font-medium focus:bg-white focus:ring-2 focus:ring-rose-500/20"
                       />
                     </div>

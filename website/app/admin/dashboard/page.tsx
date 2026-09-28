@@ -46,6 +46,7 @@ import { RiderAdmin } from '@/types/rider';
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null);
   const [recentOrders, setRecentOrders] = useState<AdminOrderSummary[]>([]);
+  const [allRiders, setAllRiders] = useState<RiderAdmin[]>([]);
   const [pendingRiders, setPendingRiders] = useState<RiderAdmin[]>([]);
   const [pendingRestaurants, setPendingRestaurants] = useState<RestaurantAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +63,7 @@ export default function AdminDashboardPage() {
       ]);
       setSummary(dash);
       setRecentOrders(orders);
+      setAllRiders(riders);
       setPendingRiders(riders.filter((r) => r.approval_status === 'pending'));
       setPendingRestaurants(restaurants.filter((r) => r.status === 'pending'));
     } catch (err) {
@@ -82,24 +84,16 @@ export default function AdminDashboardPage() {
   };
 
   // Couriers exceeding cash limit (>15,000 PKR)
-  const floatBreachedRiders = pendingRiders.length > 0
-    ? pendingRiders
-    : [
-        {
-          id: 'd2e3f4a5-6789-40ab-bcde-f12345678903',
-          name: 'Kashif Ali',
-          phone_number: '+923453332211',
-          cnic_number: '42301-4455667-5',
-          vehicle_type: 'Motorcycle',
-          approval_status: 'approved',
-          wallet_balance: 1200.0,
-          pending_cash_owed: 18450.0,
-          max_cash_float_limit: 15000.0,
-          is_online: true,
-          is_active: true,
-          created_at: '2026-08-18T08:10:00Z',
-        },
-      ];
+  const floatBreachedRiders = allRiders.filter(
+    (r) => (r.pending_cash_owed || 0) > (r.max_cash_float_limit || 15000)
+  );
+
+  const placedCount = recentOrders.filter((o) => o.status === 'Placed').length;
+  const prepCount = recentOrders.filter((o) => o.status === 'Accepted' || o.status === 'Preparing').length;
+  const handoverCount = recentOrders.filter((o) => o.status === 'Ready for Pickup').length;
+  const transitCount = recentOrders.filter((o) => o.status === 'Out for Delivery').length;
+  const deliveredCount = recentOrders.filter((o) => o.status === 'Delivered').length;
+  const totalRecent = recentOrders.length || 1;
 
   const orderColumns: Column<AdminOrderSummary>[] = [
     {
@@ -206,8 +200,8 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Total Food Sales (Today)"
-            value={formatPKR(summary?.gross_revenue_today ?? 248500)}
-            change={{ value: '+14.2%', isPositive: true, period: 'vs target' }}
+            value={formatPKR(summary?.gross_revenue_today ?? 0)}
+            change={summary?.gross_revenue_today ? { value: '+14.2%', isPositive: true, period: 'vs target' } : undefined}
             accent="blue"
             icon={<ChartLineUp size={18} weight="bold" />}
             targetBenchmark="Daily Target: 220K"
@@ -215,7 +209,7 @@ export default function AdminDashboardPage() {
 
           <StatCard
             label="Platform Fee Revenue (10%)"
-            value={formatPKR(summary?.net_revenue_today ?? 24850)}
+            value={formatPKR(summary?.net_revenue_today ?? 0)}
             subValue="Strict 10% Restaurant Commission"
             accent="emerald"
             icon={<Coins size={18} weight="bold" />}
@@ -224,7 +218,7 @@ export default function AdminDashboardPage() {
 
           <StatCard
             label="Riders Delivering Now"
-            value={`${summary?.active_deliveries_count ?? 42} Active`}
+            value={`${summary?.active_deliveries_count ?? 0} Active`}
             subValue="Riders on active orders"
             accent="none"
             icon={<Bicycle size={18} weight="bold" />}
@@ -233,8 +227,8 @@ export default function AdminDashboardPage() {
 
           <StatCard
             label="Pending Rider Cash (COD)"
-            value={formatPKR(summary?.total_pending_cod_cash ?? 62400)}
-            change={{ value: '3 High', isPositive: false, period: 'Over PKR 15k limit' }}
+            value={formatPKR(summary?.total_pending_cod_cash ?? 0)}
+            change={summary?.total_pending_cod_cash ? { value: 'COD Active', isPositive: true, period: 'Current Hold' } : undefined}
             accent="amber"
             icon={<ShieldWarning size={18} weight="bold" />}
             targetBenchmark="Max Limit: PKR 15,000"
@@ -261,11 +255,11 @@ export default function AdminDashboardPage() {
 
               <div className="space-y-3.5">
                 {[
-                  { stage: '1. Placed (Pending Accept)', count: 4, color: 'bg-indigo-500', pct: 'w-1/6' },
-                  { stage: '2. Kitchen Prep', count: 18, color: 'bg-amber-500', pct: 'w-2/5' },
-                  { stage: '3. Ready for Courier Handover', count: 8, color: 'bg-blue-500', pct: 'w-1/4' },
-                  { stage: '4. Out for Delivery (In-Transit)', count: 42, color: 'bg-sky-500', pct: 'w-3/4' },
-                  { stage: '5. Completed / Delivered', count: 112, color: 'bg-emerald-600', pct: 'w-full' },
+                  { stage: '1. Placed (Pending Accept)', count: placedCount, color: 'bg-indigo-500', pct: `${Math.round((placedCount / totalRecent) * 100)}%` },
+                  { stage: '2. Kitchen Prep', count: prepCount, color: 'bg-amber-500', pct: `${Math.round((prepCount / totalRecent) * 100)}%` },
+                  { stage: '3. Ready for Courier Handover', count: handoverCount, color: 'bg-blue-500', pct: `${Math.round((handoverCount / totalRecent) * 100)}%` },
+                  { stage: '4. Out for Delivery (In-Transit)', count: transitCount, color: 'bg-sky-500', pct: `${Math.round((transitCount / totalRecent) * 100)}%` },
+                  { stage: '5. Completed / Delivered', count: deliveredCount, color: 'bg-emerald-600', pct: `${Math.round((deliveredCount / totalRecent) * 100)}%` },
                 ].map((s) => (
                   <div key={s.stage} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
@@ -273,7 +267,7 @@ export default function AdminDashboardPage() {
                       <span className="font-mono font-bold text-slate-900">{s.count}</span>
                     </div>
                     <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div className={`h-full rounded-full ${s.color} ${s.pct}`} />
+                      <div className={`h-full rounded-full ${s.color}`} style={{ width: s.count > 0 ? s.pct : '0%' }} />
                     </div>
                   </div>
                 ))}

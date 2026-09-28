@@ -41,8 +41,8 @@ export default function RestaurantMenuPage() {
   const [formData, setFormData] = useState<MenuItemCreatePayload>({
     name: '',
     description: '',
-    price: 450,
-    category: 'Rice & Biryani',
+    price: 0,
+    category: '',
     photo_url: '',
     image_url: '',
     is_available: true,
@@ -81,10 +81,10 @@ export default function RestaurantMenuPage() {
     setFormData({
       name: '',
       description: '',
-      price: 450,
-      category: 'Rice & Biryani',
-      photo_url: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800',
-      image_url: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800',
+      price: 0,
+      category: '',
+      photo_url: '',
+      image_url: '',
       is_available: true,
       is_popular: false,
       dietary_type: 'non-veg',
@@ -210,7 +210,7 @@ export default function RestaurantMenuPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredItems.map((dish) => {
-              const photo = dish.photo_url || dish.image_url || 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800';
+              const photo = dish.photo_url || dish.image_url;
               return (
                 <div
                   key={dish.id}
@@ -220,15 +220,19 @@ export default function RestaurantMenuPage() {
                 >
                   <div>
                     {/* Dish Photo Container */}
-                    <div className="relative aspect-[4/3] w-full bg-slate-100 overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={photo}
-                        alt={dish.name}
-                        className={`w-full h-full object-cover transition-transform duration-300 hover:scale-103 ${
-                          !dish.is_available ? 'grayscale-50' : ''
-                        }`}
-                      />
+                    <div className="relative aspect-[4/3] w-full bg-slate-100 overflow-hidden flex items-center justify-center">
+                      {photo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={photo}
+                          alt={dish.name}
+                          className={`w-full h-full object-cover transition-transform duration-300 hover:scale-103 ${
+                            !dish.is_available ? 'grayscale-50' : ''
+                          }`}
+                        />
+                      ) : (
+                        <ForkKnife size={36} className="text-slate-300" />
+                      )}
 
                       {/* Top Badges */}
                       <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">

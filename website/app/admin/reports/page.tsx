@@ -219,8 +219,8 @@ export default function AdminReportsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Total Orders in Period"
-            value={reports?.total_orders ?? 890}
-            change={{ value: '+22.4%', isPositive: true, period: 'monthly growth' }}
+            value={reports?.total_orders ?? 0}
+            change={reports?.total_orders ? { value: '+22.4%', isPositive: true, period: 'monthly growth' } : undefined}
             accent="blue"
             icon={<ChartLineUp size={18} weight="bold" />}
             targetBenchmark="Fulfilled"
@@ -228,7 +228,7 @@ export default function AdminReportsPage() {
 
           <StatCard
             label="Gross Merchandise (GMV)"
-            value={formatPKR(reports?.total_revenue ?? 1145000)}
+            value={formatPKR(reports?.total_revenue ?? 0)}
             subValue="Customer gross spending"
             accent="emerald"
             icon={<Coins size={18} weight="bold" />}
@@ -237,7 +237,7 @@ export default function AdminReportsPage() {
 
           <StatCard
             label="Courier Delivery Fees (100%)"
-            value={formatPKR(reports?.total_rider_payouts ?? 78500)}
+            value={formatPKR(reports?.total_rider_payouts ?? 0)}
             subValue="Fully disbursed to couriers"
             accent="none"
             icon={<Bicycle size={18} weight="bold" />}
@@ -246,8 +246,8 @@ export default function AdminReportsPage() {
 
           <StatCard
             label="Cash Deposit Discrepancies"
-            value={formatPKR(reports?.cash_discrepancy_total ?? 3500)}
-            change={{ value: 'Audit Flag', isPositive: false }}
+            value={formatPKR(reports?.cash_discrepancy_total ?? 0)}
+            change={reports?.cash_discrepancy_total ? { value: 'Audit Flag', isPositive: false } : undefined}
             accent="red"
             icon={<ShieldWarning size={18} weight="bold" />}
             targetBenchmark="Requires Audit"

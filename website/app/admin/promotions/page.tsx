@@ -35,11 +35,11 @@ export default function AdminPromotionsPage() {
     code: '',
     title: '',
     description: '',
-    banner_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200',
+    banner_url: '',
     discount_type: 'percentage',
-    discount_value: 20,
-    min_order_value: 1000,
-    max_discount_amount: 500,
+    discount_value: 0,
+    min_order_value: 0,
+    max_discount_amount: 0,
     valid_from: new Date().toISOString(),
     valid_until: new Date(Date.now() + 14 * 86400000).toISOString(),
     is_active: true,
@@ -72,8 +72,9 @@ export default function AdminPromotionsPage() {
         description: '',
         banner_url: '',
         discount_type: 'percentage',
-        discount_value: 20,
-        min_order_value: 1000,
+        discount_value: 0,
+        min_order_value: 0,
+        max_discount_amount: 0,
         valid_from: new Date().toISOString(),
         valid_until: new Date(Date.now() + 14 * 86400000).toISOString(),
         is_active: true,
@@ -220,12 +221,16 @@ export default function AdminPromotionsPage() {
                 key={promo.id}
                 className="relative aspect-[3/1] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group shadow-xs"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={promo.banner_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200'}
-                  alt={promo.title}
-                  className="w-full h-full object-cover"
-                />
+                {promo.banner_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={promo.banner_url}
+                    alt={promo.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-800" />
+                )}
                 <div className="absolute inset-0 bg-linear-to-t from-slate-900/70 via-slate-900/20 to-transparent p-3 flex flex-col justify-end">
                   <div className="font-mono text-[10px] font-bold text-rose-300">
                     CODE: {promo.code}

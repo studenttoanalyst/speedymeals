@@ -170,11 +170,22 @@ export async function loginRestaurant(payload: RestaurantLoginPayload): Promise<
     fallbackData: fallbackTokens,
   });
 
+  let decodedSub = 'restaurant';
+  let decodedName = payload.email ? payload.email.split('@')[0] : 'Restaurant Partner';
+  try {
+    const payloadPart = tokens.access_token.split('.')[1];
+    if (payloadPart) {
+      const decoded = JSON.parse(atob(payloadPart));
+      if (decoded.sub) decodedSub = decoded.sub;
+      if (decoded.name) decodedName = decoded.name;
+    }
+  } catch {}
+
   const user: AuthSessionUser = {
-    id: 'rest-1',
+    id: decodedSub,
     email: payload.email,
     role: 'restaurant',
-    name: 'Karachi Biryani House',
+    name: decodedName || 'Restaurant Partner',
   };
 
   saveSession(tokens, user);
@@ -217,11 +228,22 @@ export async function verifyRestaurantOTP(payload: OTPVerifyPayload): Promise<To
     fallbackData: fallbackTokens,
   });
 
+  let decodedSub = 'restaurant';
+  let decodedName = 'Restaurant Partner';
+  try {
+    const payloadPart = tokens.access_token.split('.')[1];
+    if (payloadPart) {
+      const decoded = JSON.parse(atob(payloadPart));
+      if (decoded.sub) decodedSub = decoded.sub;
+      if (decoded.name) decodedName = decoded.name;
+    }
+  } catch {}
+
   const user: AuthSessionUser = {
-    id: 'rest-1',
+    id: decodedSub,
     phoneNumber: `${payload.country_code ?? '+92'}${payload.phone_number}`,
     role: 'restaurant',
-    name: 'Karachi Biryani House',
+    name: decodedName,
   };
 
   saveSession(tokens, user);
