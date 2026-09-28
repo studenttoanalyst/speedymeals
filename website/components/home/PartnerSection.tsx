@@ -92,7 +92,7 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     address: '',
     vehicleType: '',
     businessName: '',
-    cuisineType: 'Pakistani / BBQ & Grills',
+    cuisineType: '',
     branches: '1-3',
     devicePlatform: '',
     serviceInterest: '',
@@ -1441,7 +1441,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       <input
                         id="form-cuisine"
                         type="text"
-                        value={formData.cuisineType}
+                        value={formData.cuisineType || ''}
                         onChange={(e) => setFormData({ ...formData, cuisineType: e.target.value })}
                         placeholder="e.g. Biryani & Kebabs, Cafe, Pizza"
                         className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}

@@ -1,31 +1,46 @@
 """
-S3 storage abstraction — the ONLY place that talks to AWS S3.
+S3 and Supabase storage abstraction - the ONLY place that talks to Object Storage.
 
 Kept deliberately thin: one function per asset kind, no generic
 "upload anything" API, same shared-instance pattern as redis_client.py.
 
-Prefix strategy (established here, followed by every later upload):
-- `menu-items/`  — customer-facing food photos, PUBLIC-read. Anyone with
-  the URL can view them (they're shown in the customer browse/menu UI).
-- `rider-docs/`  — reserved for private documents (CNIC, license, vehicle
-  photos, Phase 8 scope). Never public-read. Menu photos are stored under
-  their own prefix so they are never mixed with sensitive documents.
+Prefix and bucket strategy:
+- `menu-items` (public): Customer-facing food photos, public-read.
+- `restaurant-assets` (public): Storefront cover banners and logos.
+- `rider-docs` (private): Sensitive documents (CNIC, license, vehicle registration).
 """
 import uuid
-
 import boto3
 
 from app.core.config import settings
 
-_s3_client = boto3.client(
-    "s3",
-    region_name=settings.AWS_REGION,
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-)
+_s3_kwargs = {
+    "region_name": settings.AWS_REGION,
+    "aws_access_key_id": settings.AWS_ACCESS_KEY_ID,
+    "aws_secret_access_key": settings.AWS_SECRET_ACCESS_KEY,
+}
+if settings.S3_ENDPOINT_URL:
+    _s3_kwargs["endpoint_url"] = settings.S3_ENDPOINT_URL
 
-MENU_PHOTO_PREFIX = "menu-items"
-RIDER_DOCS_PREFIX = "rider-docs"
+_s3_client = boto3.client("s3", **_s3_kwargs)
+
+MENU_BUCKET = "menu-items"
+RESTAURANT_BUCKET = "restaurant-assets"
+RIDER_BUCKET = "rider-docs"
+
+
+def _is_supabase() -> bool:
+    return bool(settings.S3_ENDPOINT_URL and "supabase" in settings.S3_ENDPOINT_URL)
+
+
+def _get_supabase_base_url() -> str:
+    if settings.SUPABASE_URL:
+        return settings.SUPABASE_URL.rstrip("/")
+    if settings.S3_ENDPOINT_URL and "supabase.co" in settings.S3_ENDPOINT_URL:
+        # Extract base project url from s3 endpoint url
+        parts = settings.S3_ENDPOINT_URL.split("/storage/v1/s3")
+        return parts[0].rstrip("/")
+    return "https://cmvmbylcocfwnanxdxlh.supabase.co"
 
 
 def upload_menu_photo(
@@ -36,22 +51,66 @@ def upload_menu_photo(
     extension: str,
 ) -> str:
     """
-    Upload a menu item photo as a public object and return its URL.
-
-    Key is scoped under the restaurant id so even same-name files can never
-    collide across restaurants. Raises on any AWS failure — callers turn
-    that into a clean 5xx response (nothing is written to the DB unless
-    this returns successfully).
+    Upload a menu item photo as a public object and return its CDN URL.
+    Scoped under restaurant_id so dish photos are organized cleanly.
     """
-    key = f"{MENU_PHOTO_PREFIX}/{restaurant_id}/{menu_item_id}.{extension}"
-    _s3_client.put_object(
-        Bucket=settings.S3_BUCKET_NAME,
-        Key=key,
-        Body=file_bytes,
-        ContentType=content_type,
-        ACL="public-read",  # customer-facing asset (spec: menu photos shown to customers)
-    )
-    return f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
+    if _is_supabase():
+        bucket = MENU_BUCKET
+        key = f"{restaurant_id}/{menu_item_id}.{extension}"
+        _s3_client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=file_bytes,
+            ContentType=content_type,
+        )
+        base_url = _get_supabase_base_url()
+        return f"{base_url}/storage/v1/object/public/{bucket}/{key}"
+    else:
+        bucket = settings.S3_BUCKET_NAME
+        key = f"{MENU_BUCKET}/{restaurant_id}/{menu_item_id}.{extension}"
+        _s3_client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=file_bytes,
+            ContentType=content_type,
+            ACL="public-read",
+        )
+        return f"https://{bucket}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
+
+
+def upload_restaurant_asset(
+    restaurant_id: uuid.UUID,
+    asset_type: str,
+    file_bytes: bytes,
+    content_type: str,
+    extension: str,
+) -> str:
+    """
+    Upload a restaurant storefront banner or logo as a public object.
+    asset_type: 'cover' or 'logo'
+    """
+    if _is_supabase():
+        bucket = RESTAURANT_BUCKET
+        key = f"{restaurant_id}/{asset_type}.{extension}"
+        _s3_client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=file_bytes,
+            ContentType=content_type,
+        )
+        base_url = _get_supabase_base_url()
+        return f"{base_url}/storage/v1/object/public/{bucket}/{key}"
+    else:
+        bucket = settings.S3_BUCKET_NAME
+        key = f"{RESTAURANT_BUCKET}/{restaurant_id}/{asset_type}.{extension}"
+        _s3_client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=file_bytes,
+            ContentType=content_type,
+            ACL="public-read",
+        )
+        return f"https://{bucket}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
 
 
 def upload_rider_document(
@@ -62,23 +121,38 @@ def upload_rider_document(
     extension: str,
 ) -> str:
     """
-    Gap 2 fix — CNIC/license/vehicle document upload. Unlike
-    upload_menu_photo, deliberately has NO `ACL="public-read"` — these are
-    private per spec Sec 6 Step 1 (legal-recourse documents, not
-    customer-facing) and per the prefix reservation this file already
-    documented. Bucket policy must keep `rider-docs/` non-public; this
-    function never overrides that with a public ACL, unlike the menu
-    photo path above.
-
-    Key is scoped under rider_id and doc_type (cnic/license/vehicle) so a
-    re-upload of the same doc type overwrites the previous file rather
-    than accumulating orphaned objects.
+    Upload sensitive rider documents (CNIC, driving license, vehicle registration).
+    Stored in private bucket without public access.
     """
-    key = f"{RIDER_DOCS_PREFIX}/{rider_id}/{doc_type}.{extension}"
-    _s3_client.put_object(
-        Bucket=settings.S3_BUCKET_NAME,
-        Key=key,
-        Body=file_bytes,
-        ContentType=content_type,
+    if _is_supabase():
+        bucket = RIDER_BUCKET
+        key = f"{rider_id}/{doc_type}.{extension}"
+        _s3_client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=file_bytes,
+            ContentType=content_type,
+        )
+        base_url = _get_supabase_base_url()
+        return f"{base_url}/storage/v1/object/authenticated/{bucket}/{key}"
+    else:
+        bucket = settings.S3_BUCKET_NAME
+        key = f"{RIDER_BUCKET}/{rider_id}/{doc_type}.{extension}"
+        _s3_client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=file_bytes,
+            ContentType=content_type,
+        )
+        return f"https://{bucket}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
+
+
+def get_signed_document_url(bucket_name: str, key: str, expires_in: int = 300) -> str:
+    """
+    Generate a temporary pre-signed URL for private rider documents.
+    """
+    return _s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket_name, "Key": key},
+        ExpiresIn=expires_in,
     )
-    return f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
