@@ -58,6 +58,9 @@ class Settings(BaseSettings):
         "http://localhost:8080",
         "https://speedymeals.pk",
         "https://www.speedymeals.pk",
+        "https://speedymealservices.com",
+        "https://www.speedymealservices.com",
+        "https://api.speedymealservices.com",
     ]
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
