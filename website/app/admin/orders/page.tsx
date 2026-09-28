@@ -61,6 +61,18 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (cancelModalOpen) setCancelModalOpen(false);
+        else if (reassignModalOpen) setReassignModalOpen(false);
+        else if (selectedOrder) setSelectedOrder(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cancelModalOpen, reassignModalOpen, selectedOrder]);
+
   const handleRowClick = async (orderSummary: AdminOrderSummary) => {
     try {
       const detail = await getAdminOrder(orderSummary.id);
@@ -185,7 +197,6 @@ export default function AdminOrdersPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Global Order Operations Console"
-        description="Monitor system-wide food delivery tickets, manage emergency courier reassignments, and authorize customer refunds."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchOrders();
@@ -199,6 +210,7 @@ export default function AdminOrdersPage() {
           columns={columns}
           keyExtractor={(o) => o.id}
           isLoading={isLoading}
+          enableCityFilter
           onRowClick={handleRowClick}
           searchPlaceholder="Search order ID, restaurant, or courier..."
           searchFilter={(o, q) =>

@@ -190,7 +190,6 @@ export default function RestaurantDashboardPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Kitchen Dispatch Terminal"
-        description="Real-time order throughput, kitchen prep SLAs, and daily settlement estimates."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchData();
@@ -270,16 +269,17 @@ export default function RestaurantDashboardPage() {
           <div className="lg:col-span-2">
             <FlowingVelocityChart
               title="Hourly Kitchen Order Throughput & Rush Windows"
-              subtitle="Real-time prep velocity comparing lunch peak (1:00–3:00 PM) vs dinner peak (8:00–11:00 PM)"
+              subtitle="Real-time prep velocity: Lunch peak (12:00 - 15:00) vs Dinner peak (19:00 - 23:00)"
               data={[
-                { time: '12:00', orders: 4, gmv: 4200 },
-                { time: '13:00', orders: 9, gmv: 10800, peak: true },
-                { time: '14:00', orders: 7, gmv: 8400, peak: true },
-                { time: '15:00', orders: 3, gmv: 3600 },
-                { time: '19:00', orders: 5, gmv: 6200 },
-                { time: '20:00', orders: 11, gmv: 14500, peak: true },
-                { time: '21:00', orders: 8, gmv: 10400, peak: true },
-                { time: '22:00', orders: 4, gmv: 5100 },
+                { time: '12:00', orders: 18, gmv: 21600, prepTimeMinutes: 14, slaPercent: 99.2 },
+                { time: '13:00', orders: 36, gmv: 43200, peak: true, prepTimeMinutes: 17, slaPercent: 98.6 },
+                { time: '14:00', orders: 28, gmv: 33600, peak: true, prepTimeMinutes: 16, slaPercent: 98.9 },
+                { time: '15:00', orders: 12, gmv: 14400, prepTimeMinutes: 13, slaPercent: 100 },
+                { time: '18:00', orders: 16, gmv: 19200, prepTimeMinutes: 14, slaPercent: 99.4 },
+                { time: '19:00', orders: 32, gmv: 38400, prepTimeMinutes: 16, slaPercent: 98.7 },
+                { time: '20:00', orders: 54, gmv: 64800, peak: true, prepTimeMinutes: 19, slaPercent: 98.2 },
+                { time: '21:00', orders: 44, gmv: 52800, peak: true, prepTimeMinutes: 18, slaPercent: 98.5 },
+                { time: '22:00', orders: 22, gmv: 26400, prepTimeMinutes: 15, slaPercent: 99.1 },
               ]}
             />
           </div>

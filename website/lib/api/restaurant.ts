@@ -269,3 +269,20 @@ export async function getRestaurantProfile(): Promise<RestaurantProfile> {
     fallbackData: fallback,
   });
 }
+
+export async function updateRestaurantProfile(
+  payload: Partial<RestaurantProfile>
+): Promise<RestaurantProfile> {
+  const base = await getRestaurantProfile();
+  const fallback: RestaurantProfile = {
+    ...base,
+    ...payload,
+  };
+
+  return apiClient<RestaurantProfile>('/restaurants/me/profile', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+    fallbackData: fallback,
+  });
+}
+

@@ -177,7 +177,6 @@ export default function AdminDashboardPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Platform Administration Console"
-        description="Global system telemetry, GMV revenue aggregation, courier cash float guard, and KYC verification."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchData();

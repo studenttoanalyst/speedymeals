@@ -192,7 +192,6 @@ export default function AdminRidersPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Fleet & Courier Management"
-        description="Courier compliance verification, CNIC/License inspection, real-time COD cash float control, and wallet payouts."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchRiders();
@@ -206,6 +205,7 @@ export default function AdminRidersPage() {
           columns={columns}
           keyExtractor={(r) => r.id}
           isLoading={isLoading}
+          enableCityFilter
           searchPlaceholder="Search courier name, phone, CNIC, or plate..."
           searchFilter={(r, q) =>
             r.name.toLowerCase().includes(q.toLowerCase()) ||

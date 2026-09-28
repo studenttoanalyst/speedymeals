@@ -161,7 +161,6 @@ export default function AdminReportsPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Platform Business Intelligence & Audit Reports"
-        description="Comprehensive volume trends, partner performance, and courier cash deposit audit exceptions."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchReports();

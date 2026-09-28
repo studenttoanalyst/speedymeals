@@ -24,10 +24,14 @@ export function Topbar({
     let isMounted = true;
     const checkHealth = async () => {
       try {
-        const res = await fetch('http://localhost:8000/health', { method: 'GET' });
+        const res = await fetch('/api/health', { method: 'GET' });
         if (isMounted) {
-          if (res.ok) setBackendStatus('connected');
-          else setBackendStatus('fallback');
+          if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setBackendStatus(data.status === 'connected' ? 'connected' : 'fallback');
+          } else {
+            setBackendStatus('fallback');
+          }
         }
       } catch {
         if (isMounted) setBackendStatus('fallback');

@@ -107,6 +107,50 @@ export default function RestaurantOrdersPage() {
   const readyOrders = orders.filter((o) => o.status === 'Ready for Pickup');
   const completedOrders = orders.filter((o) => ['Delivered', 'Cancelled', 'Rejected'].includes(o.status));
 
+  // Operator Keyboard Hotkeys: [A] Accept, [P] Prep Ready, [K] Toggle View, [Esc] Close Modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.tagName === 'SELECT';
+
+      if (e.key === 'Escape') {
+        if (acceptModalOrder) setAcceptModalOrder(null);
+        else if (rejectModalOrder) setRejectModalOrder(null);
+        else if (selectedOrder) setSelectedOrder(null);
+        return;
+      }
+
+      if (isInput) return;
+
+      const key = e.key.toLowerCase();
+      if (key === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        if (acceptModalOrder) {
+          handleAcceptSubmit();
+        } else if (placedOrders.length > 0) {
+          setAcceptModalOrder(placedOrders[0]);
+        }
+      } else if (key === 'p' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        if (selectedOrder && ['Accepted', 'Preparing'].includes(selectedOrder.status)) {
+          handleUpdateStatus(selectedOrder.id, 'Ready for Pickup');
+        } else if (prepOrders.length > 0) {
+          handleUpdateStatus(prepOrders[0].id, 'Ready for Pickup');
+        }
+      } else if (key === 'k' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        setViewMode((v) => (v === 'kanban' ? 'table' : 'kanban'));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [acceptModalOrder, rejectModalOrder, selectedOrder, placedOrders, prepOrders]);
+
   // Table columns
   const tableColumns: Column<RestaurantOrderSummary>[] = [
     {
@@ -170,7 +214,6 @@ export default function RestaurantOrdersPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Kitchen Dispatch Terminal"
-        description="Incoming order audio chime, prep time countdowns, and courier handover signals."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchOrders();
@@ -221,12 +264,46 @@ export default function RestaurantOrdersPage() {
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full flex-1 flex flex-col">
+        {/* Hotkey Operator Command Bar */}
+        <div className="mb-4 px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-600">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
+              Hotkeys:
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px]">
+              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">A</kbd>
+              <span>Accept Next Ticket</span>
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px]">
+              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">P</kbd>
+              <span>Prep Ready</span>
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px]">
+              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">/</kbd>
+              <span>Search</span>
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px]">
+              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">K</kbd>
+              <span>Toggle Board</span>
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px]">
+              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">Esc</kbd>
+              <span>Close</span>
+            </span>
+          </div>
+
+          <div className="text-[11px] text-slate-500 font-medium">
+            <span className="text-amber-600 font-bold">{placedOrders.length}</span> New Incoming · <span className="text-blue-600 font-bold">{prepOrders.length}</span> In Kitchen
+          </div>
+        </div>
+
         {viewMode === 'table' ? (
           <DataTable
             data={orders}
             columns={tableColumns}
             keyExtractor={(o) => o.id}
             isLoading={isLoading}
+            enableCityFilter
             onRowClick={(o) => handleOpenDetail(o.id)}
             searchPlaceholder="Search by customer name or ID..."
             searchFilter={(o, q) =>

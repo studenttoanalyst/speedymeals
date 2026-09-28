@@ -15,12 +15,13 @@ import {
 } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { ImageUpload } from '@/components/common/ImageUpload';
-import { getRestaurantProfile } from '@/lib/api/restaurant';
+import { getRestaurantProfile, updateRestaurantProfile } from '@/lib/api/restaurant';
 import { RestaurantProfile } from '@/types/restaurant';
 
 export default function RestaurantProfilePage() {
   const [profile, setProfile] = useState<RestaurantProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Editable fields
@@ -57,18 +58,32 @@ export default function RestaurantProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    setIsSaving(true);
+    try {
+      await updateRestaurantProfile({
+        name,
+        address,
+        opening_time: openingTime,
+        closing_time: closingTime,
+        prep_time_minutes: prepTime,
+        logo_url: logoUrl,
+        banner_url: bannerUrl,
+        cover_photo_url: bannerUrl,
+      });
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to save profile', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
-      <Topbar
-        title="Storefront & Brand Media"
-        description="Upload official restaurant logos, high-resolution cover banners, and kitchen operating parameters."
-      />
+      <Topbar title="Storefront & Brand Media" />
 
       <div className="p-6 max-w-5xl mx-auto w-full space-y-6">
         {savedSuccess && (
@@ -85,55 +100,74 @@ export default function RestaurantProfilePage() {
           </div>
         ) : (
           <form onSubmit={handleSave} className="space-y-6">
-            {/* STOREFRONT PREVIEW HERO */}
+            {/* FACEBOOK-STYLE PROFILE HERO (Aspect Ratio Optimized + Overlapping Avatar) */}
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-              <div className="relative h-44 w-full bg-slate-900/10 overflow-hidden">
+              {/* Cover Banner (16:9 / 2:1 widescreen frame to fit landscape photos naturally) */}
+              <div className="relative w-full aspect-[2/1] sm:aspect-[2.3/1] md:aspect-[2.5/1] max-h-72 sm:max-h-80 bg-slate-900/10 overflow-hidden">
                 {bannerUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={bannerUrl}
                     alt="Storefront Banner Preview"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">
-                    No banner uploaded
+                    No cover banner uploaded (Recommended: 16:9 or 2:1 ratio, min 1280x640px)
                   </div>
                 )}
-                <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              <div className="px-6 pb-6 pt-0 relative flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12">
-                <div className="flex items-end gap-4">
-                  <div className="relative w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-md overflow-hidden shrink-0">
-                    {logoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
-                        <Storefront size={32} />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mb-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-bold text-slate-900 leading-tight">
-                        {name || 'Restaurant Name'}
-                      </h2>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
-                        Verified Store
-                      </span>
+              {/* Profile Bar with Overlapping Avatar */}
+              <div className="px-6 sm:px-8 pb-6 pt-0 relative bg-white">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                  {/* Left: Avatar (pulls up into cover) & Identity (fully on clean white background) */}
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center gap-5 text-center sm:text-left">
+                    {/* Only the avatar overlaps the cover photo */}
+                    <div className="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-white border-4 border-white shadow-xl overflow-hidden shrink-0 -mt-16 sm:-mt-20 z-10">
+                      {logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                          <Storefront size={44} />
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
-                      <MapPin size={13} className="text-slate-400" />
-                      <span>{address}</span>
-                    </p>
-                  </div>
-                </div>
 
-                <div className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 self-start sm:self-end">
-                  SpeedyMeals Commission: <span className="text-rose-600 font-bold">10.0% Flat</span>
+                    {/* Identity sits cleanly and fully on the white background */}
+                    <div className="pt-2 sm:pt-3 space-y-1.5">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                          {name || 'Restaurant Name'}
+                        </h2>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+                          <CheckCircle size={13} weight="fill" className="text-emerald-500" />
+                          Verified Store
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 flex items-center justify-center sm:justify-start gap-1.5 font-medium">
+                        <MapPin size={14} className="text-rose-500 shrink-0" />
+                        <span>{address}</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500 font-mono flex items-center justify-center sm:justify-start gap-2 pt-0.5">
+                        <span>Hours: {openingTime} - {closingTime}</span>
+                        <span>·</span>
+                        <span>Prep SLA: {prepTime} mins</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: Badges & Rates */}
+                  <div className="flex flex-wrap items-center justify-center md:justify-end gap-2.5 pt-2 md:pt-0">
+                    <div className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs">
+                      Platform Fee: <span className="text-rose-600 font-bold">10.0% Flat</span>
+                    </div>
+                    <div className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                      Auto Dispatch Active
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -143,7 +177,7 @@ export default function RestaurantProfilePage() {
               <div className="border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-bold text-slate-900">Brand Media Assets</h3>
                 <p className="text-xs text-slate-400">
-                  Visible to customers browsing the SpeedyMeals marketplace and storefront listings.
+                  Upload official storefront logo (1:1) and cover banner (~2.7:1 Facebook standard ratio).
                 </p>
               </div>
 
@@ -249,10 +283,11 @@ export default function RestaurantProfilePage() {
             <div className="flex items-center justify-end">
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-2 transition-colors"
+                disabled={isSaving}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <FloppyDisk size={16} weight="bold" />
-                <span>Save Profile & Media</span>
+                <span>{isSaving ? 'Saving Changes...' : 'Save Profile & Media'}</span>
               </button>
             </div>
           </form>

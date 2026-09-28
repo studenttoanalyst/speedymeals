@@ -121,7 +121,6 @@ export default function AdminCustomersPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Customer Directory & Account Controls"
-        description="Search consumer accounts, inspect stored credits, and manage platform safety access."
         onRefresh={fetchCustomers}
       />
 
@@ -131,6 +130,7 @@ export default function AdminCustomersPage() {
           columns={columns}
           keyExtractor={(c) => c.id}
           isLoading={isLoading}
+          enableCityFilter
           searchPlaceholder="Search by customer name, phone, or email..."
           searchFilter={(c, q) =>
             (c.name?.toLowerCase().includes(q.toLowerCase()) ?? false) ||

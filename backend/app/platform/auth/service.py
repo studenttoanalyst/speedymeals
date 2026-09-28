@@ -185,10 +185,13 @@ def issue_tokens(db: Session, subject_id: uuid.UUID, role: str) -> dict:
 
 def revoke_refresh_token(db: Session, raw_refresh_token: str) -> None:
     """
-    Step 6 — logout. Marks the matching RefreshToken row as revoked so it
+    Step 6 - logout. Marks the matching RefreshToken row as revoked so it
     can never be used again to mint a new access token, even though the
     JWT itself would still decode successfully until its natural expiry.
     """
+    if not raw_refresh_token or raw_refresh_token.startswith("mock-"):
+        return
+
     token_hash = _hash_token(raw_refresh_token)
     record = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
 
@@ -303,3 +306,78 @@ def seed_first_admin(db: Session) -> None:
         is_active=True,
     ))
     db.commit()
+
+
+def seed_demo_restaurant(db: Session) -> None:
+    """
+    Auto-seed default demo restaurant on app startup if not present,
+    matching the restaurant login portal credentials.
+    """
+    import datetime
+    from app.modules.food_delivery.models import MenuItem
+
+    restaurant = db.query(Restaurant).filter(Restaurant.email == "contact@karachibiryani.pk").first()
+    if not restaurant:
+        restaurant = Restaurant(
+            name="Karachi Biryani House",
+            email="contact@karachibiryani.pk",
+            password_hash=hash_password("Partner@123"),
+            phone_number="+923001112233",
+            address="Shop # 4, Main Boat Basin, Clifton Block 5, Karachi",
+            latitude=24.8234,
+            longitude=67.0345,
+            commission_rate=10.00,
+            logo_url="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500",
+            cover_photo_url="https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200",
+            status="active",
+            opening_time=datetime.time(11, 0),
+            closing_time=datetime.time(23, 30),
+            country_code="+92",
+            currency="PKR",
+        )
+        db.add(restaurant)
+        db.commit()
+        db.refresh(restaurant)
+
+    # Also seed initial menu items if none exist
+    if db.query(MenuItem).filter(MenuItem.restaurant_id == restaurant.id).count() == 0:
+        items = [
+            MenuItem(
+                restaurant_id=restaurant.id,
+                name="Special Chicken Biryani (Double Gosht)",
+                description="Fragrant basmati rice cooked with tender marinated chicken pieces, aloo bukhara, and authentic Karachi spices.",
+                price=550.0,
+                category="Biryani & Rice",
+                photo_url="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=500",
+                is_available=True,
+            ),
+            MenuItem(
+                restaurant_id=restaurant.id,
+                name="Mutton Karachi Karahi",
+                description="Fresh mutton cooked in wok over high flame with fresh tomatoes, ginger, green chilies and black pepper.",
+                price=1650.0,
+                category="Karahi & Curries",
+                photo_url="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=500",
+                is_available=True,
+            ),
+            MenuItem(
+                restaurant_id=restaurant.id,
+                name="Chicken Malai Boti (8 Pcs)",
+                description="Melt-in-mouth chicken cubes marinated in rich fresh cream, mild spices and char-grilled to perfection.",
+                price=620.0,
+                category="BBQ & Grills",
+                photo_url="https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500",
+                is_available=True,
+            ),
+            MenuItem(
+                restaurant_id=restaurant.id,
+                name="Tandoori Roghani Naan",
+                description="Fluffy leavened flatbread brushed with butter and sprinkled with sesame seeds.",
+                price=90.0,
+                category="Breads",
+                photo_url="https://images.unsplash.com/photo-1626074353765-517a681e40be?w=500",
+                is_available=True,
+            ),
+        ]
+        db.add_all(items)
+        db.commit()

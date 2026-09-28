@@ -65,7 +65,7 @@ export async function apiClient<T>(
     // 1. If 401 Unauthorized, automatically attempt refresh with refresh_token
     if (res.status === 401 && !skipAuth && typeof window !== 'undefined') {
       const refreshToken = localStorage.getItem('sm_refresh_token');
-      if (refreshToken) {
+      if (refreshToken && !refreshToken.startsWith('mock-')) {
         try {
           const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
@@ -89,6 +89,11 @@ export async function apiClient<T>(
                 headers: requestHeaders,
               });
             }
+          } else if (refreshRes.status === 401) {
+            // Stale or revoked refresh token - clear storage to avoid cyclic 401 calls
+            localStorage.removeItem('sm_access_token');
+            localStorage.removeItem('sm_refresh_token');
+            document.cookie = 'sm_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
           }
         } catch (refreshErr) {
           console.warn('[SpeedyMeals API] Automatic token refresh attempt failed:', refreshErr);

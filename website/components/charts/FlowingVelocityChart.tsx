@@ -2,13 +2,15 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendUp, Flame, Clock } from '@phosphor-icons/react';
+import { TrendUp, Flame, Clock, Timer, CheckCircle } from '@phosphor-icons/react';
 
 export interface VelocityDataPoint {
   time: string;
   orders: number;
   gmv: number;
   peak?: boolean;
+  prepTimeMinutes?: number;
+  slaPercent?: number;
 }
 
 interface FlowingVelocityChartProps {
@@ -18,47 +20,76 @@ interface FlowingVelocityChartProps {
 }
 
 const DEFAULT_DATA: VelocityDataPoint[] = [
-  { time: '08:00', orders: 6, gmv: 8400 },
-  { time: '10:00', orders: 14, gmv: 19600 },
-  { time: '12:00', orders: 38, gmv: 53200, peak: true },
-  { time: '14:00', orders: 45, gmv: 63000, peak: true },
-  { time: '16:00', orders: 18, gmv: 25200 },
-  { time: '18:00', orders: 25, gmv: 35000 },
-  { time: '20:00', orders: 54, gmv: 75600, peak: true },
-  { time: '22:00', orders: 42, gmv: 58800, peak: true },
-  { time: '00:00', orders: 12, gmv: 16800 },
+  { time: '08:00', orders: 6, gmv: 8400, prepTimeMinutes: 12, slaPercent: 100 },
+  { time: '10:00', orders: 14, gmv: 19600, prepTimeMinutes: 14, slaPercent: 99.1 },
+  { time: '12:00', orders: 38, gmv: 53200, peak: true, prepTimeMinutes: 16, slaPercent: 98.5 },
+  { time: '14:00', orders: 45, gmv: 63000, peak: true, prepTimeMinutes: 18, slaPercent: 97.9 },
+  { time: '16:00', orders: 18, gmv: 25200, prepTimeMinutes: 13, slaPercent: 99.4 },
+  { time: '18:00', orders: 25, gmv: 35000, prepTimeMinutes: 15, slaPercent: 98.8 },
+  { time: '20:00', orders: 54, gmv: 75600, peak: true, prepTimeMinutes: 19, slaPercent: 98.4 },
+  { time: '22:00', orders: 42, gmv: 58800, peak: true, prepTimeMinutes: 17, slaPercent: 98.1 },
+  { time: '00:00', orders: 12, gmv: 16800, prepTimeMinutes: 11, slaPercent: 100 },
 ];
 
 export function FlowingVelocityChart({
   data = DEFAULT_DATA,
-  title = '24-Hour Platform Order Velocity & Volume',
-  subtitle = 'Real-time throughput curve with continuous flow telemetry',
+  title = 'Hourly Kitchen Order Throughput & Rush Windows',
+  subtitle = 'Dual-peak velocity tracking: Lunch (12:00 - 15:00) vs Dinner (19:00 - 23:00)',
 }: FlowingVelocityChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [showComparison, setShowComparison] = useState<boolean>(true);
 
   const width = 800;
-  const height = 220;
-  const paddingX = 40;
-  const paddingY = 30;
+  const height = 230;
+  const paddingX = 42;
+  const paddingY = 32;
 
-  const maxOrders = useMemo(() => Math.max(...data.map((d) => d.orders)) * 1.15, [data]);
+  const maxOrders = useMemo(() => {
+    const highest = Math.max(...data.map((d) => d.orders), 1);
+    return Math.ceil(highest * 1.25);
+  }, [data]);
+
+  const totalOrders = useMemo(() => data.reduce((acc, curr) => acc + curr.orders, 0), [data]);
+  const peakPoint = useMemo(() => {
+    return [...data].sort((a, b) => b.orders - a.orders)[0] || data[0];
+  }, [data]);
 
   // Compute (x, y) coordinates for each point
   const points = useMemo(() => {
+    const count = data.length;
+    const availableWidth = width - paddingX * 2;
+    const availableHeight = height - paddingY * 2;
+
     return data.map((d, i) => {
-      const x = paddingX + (i / (data.length - 1)) * (width - paddingX * 2);
-      const y = height - paddingY - (d.orders / maxOrders) * (height - paddingY * 2);
-      return { x, y, ...d };
+      const x = paddingX + (i / Math.max(count - 1, 1)) * availableWidth;
+      const y = height - paddingY - (d.orders / maxOrders) * availableHeight;
+      const barHeight = (d.orders / maxOrders) * availableHeight;
+      const hourNum = parseInt(d.time.split(':')[0], 10) || 0;
+      const isLunchRush = hourNum >= 12 && hourNum <= 15;
+      const isDinnerRush = hourNum >= 19 && hourNum <= 23;
+
+      return {
+        ...d,
+        x,
+        y,
+        barHeight,
+        barY: height - paddingY - barHeight,
+        isLunchRush,
+        isDinnerRush,
+        prepMins: d.prepTimeMinutes || (d.peak ? 18 : 13),
+        sla: d.slaPercent || (d.peak ? 98.4 : 99.5),
+      };
     });
   }, [data, maxOrders]);
 
-  // Smooth Catmull-Rom / Cubic Bezier curve path calculation
+  // Spline line and area
   const { linePath, areaPath } = useMemo(() => {
     if (points.length === 0) return { linePath: '', areaPath: '' };
+    if (points.length === 1) {
+      return { linePath: `M ${points[0].x},${points[0].y}`, areaPath: '' };
+    }
 
     let d = `M ${points[0].x},${points[0].y}`;
-
     for (let i = 0; i < points.length - 1; i++) {
       const p0 = points[i === 0 ? 0 : i - 1];
       const p1 = points[i];
@@ -73,51 +104,29 @@ export function FlowingVelocityChart({
       d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
     }
 
-    const area = `${d} L ${points[points.length - 1].x},${height - paddingY} L ${points[0].x},${height - paddingY} Z`;
+    const lastX = points[points.length - 1].x;
+    const firstX = points[0].x;
+    const bottomY = height - paddingY;
+    const area = `${d} L ${lastX},${bottomY} L ${firstX},${bottomY} Z`;
 
     return { linePath: d, areaPath: area };
   }, [points]);
 
-  // Yesterday comparison baseline (slightly lower volume)
-  const comparisonPath = useMemo(() => {
-    if (points.length === 0) return '';
-    const compPoints = points.map((p) => ({
-      x: p.x,
-      y: p.y + 16 + (Math.sin(p.x) * 6),
-    }));
-
-    let d = `M ${compPoints[0].x},${compPoints[0].y}`;
-    for (let i = 0; i < compPoints.length - 1; i++) {
-      const p0 = compPoints[i === 0 ? 0 : i - 1];
-      const p1 = compPoints[i];
-      const p2 = compPoints[i + 1];
-      const p3 = compPoints[i + 2 >= compPoints.length ? compPoints.length - 1 : i + 2];
-
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-
-      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
-    }
-    return d;
-  }, [points]);
-
-  const activePoint = hoveredIndex !== null ? points[hoveredIndex] : points[points.length - 3];
+  const activePoint = hoveredIndex !== null ? points[hoveredIndex] : points.find((p) => p.time === peakPoint.time) || points[points.length - 1];
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs relative overflow-hidden flex flex-col justify-between">
       {/* Top Header & Telemetry Badges */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">{title}</h2>
             <span className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse" />
-              LIVE STREAM
+              LIVE TELEMETRY
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+          {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -130,132 +139,153 @@ export function FlowingVelocityChart({
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
             }`}
           >
-            {showComparison ? '✓ vs Yesterday' : '+ Compare'}
+            {showComparison ? '✓ Capacity Bands' : '+ Show Bands'}
           </button>
-          <div className="text-right pl-2 border-l border-slate-200 hidden xs:block">
+          <div className="text-right pl-3 border-l border-slate-200 hidden xs:block">
             <div className="text-xs font-mono font-bold text-slate-900">
-              {data.reduce((acc, curr) => acc + curr.orders, 0)} Orders
+              {totalOrders} Orders
             </div>
             <div className="text-[10px] font-mono text-emerald-600 font-semibold flex items-center gap-0.5">
               <TrendUp size={12} weight="bold" />
-              <span>+18.2% velocity</span>
+              <span>+18.2% peak surge</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* SVG Flowing Interactive Chart */}
-      <div className="relative w-full overflow-hidden select-none">
+      {/* Rush Window Legend Indicators */}
+      <div className="flex flex-wrap items-center gap-2 mb-2 text-[11px] font-mono">
+        <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1 font-semibold">
+          <span className="w-2 h-2 rounded-xs bg-amber-400" />
+          Lunch Peak: 12:00 - 15:00
+        </span>
+        <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1 font-semibold">
+          <span className="w-2 h-2 rounded-xs bg-rose-500" />
+          Dinner Peak: 19:00 - 23:00
+        </span>
+        <span className="text-slate-400 ml-auto hidden md:inline">
+          Hover hours to inspect prep throughput & SLA
+        </span>
+      </div>
+
+      {/* SVG Multi-Layer Operational Chart */}
+      <div className="relative w-full overflow-hidden select-none bg-slate-50/50 rounded-xl border border-slate-100 p-2">
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-48 sm:h-56 overflow-visible"
+          className="w-full h-52 sm:h-60 overflow-visible"
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <defs>
-            {/* Soft glowing area gradient */}
-            <linearGradient id="velocityAreaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E23A2E" stopOpacity="0.28" />
-              <stop offset="60%" stopColor="#E23A2E" stopOpacity="0.06" />
-              <stop offset="100%" stopColor="#E23A2E" stopOpacity="0.0" />
+            {/* Shaded Area Gradient */}
+            <linearGradient id="opVelocityAreaGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#E23A2E" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#E23A2E" stopOpacity="0.01" />
             </linearGradient>
 
-            {/* Continuous Flowing Electrical Stroke Gradient */}
-            <linearGradient id="flowingStrokeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#E23A2E">
-                <animate attributeName="stop-color" values="#E23A2E;#F43F5E;#FB7185;#E23A2E" dur="4s" repeatCount="indefinite" />
-              </stop>
-              <stop offset="50%" stopColor="#FB7185">
-                <animate attributeName="stop-color" values="#FB7185;#E23A2E;#F43F5E;#FB7185" dur="4s" repeatCount="indefinite" />
-              </stop>
-              <stop offset="100%" stopColor="#E23A2E">
-                <animate attributeName="stop-color" values="#E23A2E;#F43F5E;#FB7185;#E23A2E" dur="4s" repeatCount="indefinite" />
-              </stop>
+            {/* Glowing Spline Stroke */}
+            <linearGradient id="opStrokeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#E23A2E" />
+              <stop offset="50%" stopColor="#F43F5E" />
+              <stop offset="100%" stopColor="#E23A2E" />
             </linearGradient>
 
-            {/* Horizontal Grid Pattern */}
-            <pattern id="gridLines" width={width} height="40" patternUnits="userSpaceOnUse">
-              <line x1="0" y1="40" x2={width} y2="40" stroke="#F1F5F9" strokeWidth="1" />
+            {/* Background Grid Pattern */}
+            <pattern id="opGridLines" width={width} height="40" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="40" x2={width} y2="40" stroke="#E2E8F0" strokeWidth="1" strokeDasharray="3 3" />
             </pattern>
           </defs>
 
-          {/* Background Grid */}
-          <rect x="0" y="0" width={width} height={height - paddingY} fill="url(#gridLines)" />
+          {/* Grid Background */}
+          <rect x="0" y="0" width={width} height={height - paddingY} fill="url(#opGridLines)" />
 
-          {/* Yesterday Comparison Curve (Dashed) */}
-          {showComparison && (
-            <motion.path
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.45 }}
-              transition={{ duration: 0.6 }}
-              d={comparisonPath}
-              fill="none"
-              stroke="#94A3B8"
-              strokeWidth="2"
-              strokeDasharray="4 4"
-            />
-          )}
+          {/* Rush Hour Window Shaded Bands (When Enabled) */}
+          {showComparison && points.map((p, i) => {
+            if (!p.isLunchRush && !p.isDinnerRush) return null;
+            const barW = Math.max(32, (width - paddingX * 2) / points.length);
+            const fillCol = p.isLunchRush ? 'rgba(251, 191, 36, 0.09)' : 'rgba(244, 63, 94, 0.09)';
+            const strokeCol = p.isLunchRush ? 'rgba(245, 158, 11, 0.25)' : 'rgba(225, 29, 72, 0.25)';
 
-          {/* Animated Area Fill */}
+            return (
+              <rect
+                key={`band-${p.time}`}
+                x={p.x - barW / 2}
+                y={paddingY}
+                width={barW}
+                height={height - paddingY * 2}
+                fill={fillCol}
+                stroke={strokeCol}
+                strokeWidth="1"
+                rx="6"
+              />
+            );
+          })}
+
+          {/* Hourly Volume Columns (Bars) */}
+          {points.map((p, i) => {
+            const isHovered = hoveredIndex === i;
+            const barW = Math.max(16, (width - paddingX * 2) / (points.length * 2.4));
+            const fill = isHovered
+              ? '#BE123C'
+              : p.peak
+              ? '#E23A2E'
+              : '#94A3B8';
+
+            return (
+              <g key={`bar-${p.time}`} className="cursor-pointer" onMouseEnter={() => setHoveredIndex(i)}>
+                {/* Column Bar */}
+                <rect
+                  x={p.x - barW / 2}
+                  y={p.barY}
+                  width={barW}
+                  height={Math.max(4, p.barHeight)}
+                  rx="4"
+                  fill={fill}
+                  opacity={isHovered ? 0.95 : p.peak ? 0.75 : 0.4}
+                  className="transition-all duration-150"
+                />
+              </g>
+            );
+          })}
+
+          {/* Spline Area Fill */}
           <motion.path
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+            transition={{ duration: 0.6 }}
             d={areaPath}
-            fill="url(#velocityAreaGradient)"
+            fill="url(#opVelocityAreaGradient)"
           />
 
-          {/* Primary Flowing Wave Path */}
+          {/* Spline Stroke Line */}
           <motion.path
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1.2, ease: 'easeInOut' }}
+            transition={{ duration: 1 }}
             d={linePath}
             fill="none"
-            stroke="url(#flowingStrokeGradient)"
-            strokeWidth="3.5"
+            stroke="url(#opStrokeGradient)"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
 
-          {/* Secondary animated glowing pulse line gliding along the stroke */}
-          <path
-            d={linePath}
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth="1.5"
-            strokeDasharray="40 180"
-            className="opacity-75"
-          >
-            <animate
-              attributeName="stroke-dashoffset"
-              from="220"
-              to="-220"
-              dur="2.5s"
-              repeatCount="indefinite"
-            />
-          </path>
-
-          {/* Interactive Data Points & Hover Targets */}
+          {/* Data Points Nodes */}
           {points.map((p, i) => {
             const isHovered = hoveredIndex === i;
             const isPeak = p.peak;
 
             return (
-              <g
-                key={p.time}
-                className="cursor-pointer"
-                onMouseEnter={() => setHoveredIndex(i)}
-              >
-                {/* Transparent wider touch/hover target */}
+              <g key={`point-${p.time}`} className="cursor-pointer" onMouseEnter={() => setHoveredIndex(i)}>
+                {/* Wide invisible scrub target */}
                 <rect
-                  x={p.x - 20}
+                  x={p.x - 22}
                   y={0}
-                  width={40}
+                  width={44}
                   height={height}
                   fill="transparent"
                 />
 
-                {/* Vertical scrub line when hovered */}
+                {/* Vertical scrub guide */}
                 {isHovered && (
                   <line
                     x1={p.x}
@@ -264,28 +294,27 @@ export function FlowingVelocityChart({
                     y2={height - paddingY}
                     stroke="#E23A2E"
                     strokeWidth="1.5"
-                    strokeDasharray="3 3"
-                    className="opacity-70"
+                    strokeDasharray="2 2"
                   />
                 )}
 
-                {/* Point circles */}
+                {/* Node Circle */}
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r={isHovered ? 6 : isPeak ? 4.5 : 3}
-                  fill={isHovered ? '#E23A2E' : isPeak ? '#E23A2E' : '#FFFFFF'}
-                  stroke={isHovered ? '#FFFFFF' : '#E23A2E'}
-                  strokeWidth={isHovered ? 2.5 : 2}
-                  className="transition-all duration-150"
+                  r={isHovered ? 6 : isPeak ? 4.5 : 3.5}
+                  fill={isHovered ? '#FFFFFF' : isPeak ? '#E23A2E' : '#FFFFFF'}
+                  stroke={isHovered ? '#E23A2E' : isPeak ? '#FFFFFF' : '#64748B'}
+                  strokeWidth={isHovered ? 3 : 2}
+                  className="transition-all duration-150 shadow-sm"
                 />
 
-                {/* Live pulsating beacon on active peak point */}
+                {/* Pulsing halo on peak point */}
                 {isPeak && !isHovered && (
                   <circle
                     cx={p.x}
                     cy={p.y}
-                    r="9"
+                    r="8"
                     fill="#E23A2E"
                     opacity="0.25"
                     className="animate-ping"
@@ -295,80 +324,104 @@ export function FlowingVelocityChart({
             );
           })}
 
-          {/* Bottom X-Axis Time Baseline */}
+          {/* Baseline X-axis */}
           <line
             x1={paddingX}
             y1={height - paddingY}
             x2={width - paddingX}
             y2={height - paddingY}
-            stroke="#E2E8F0"
+            stroke="#CBD5E1"
             strokeWidth="1.5"
           />
         </svg>
 
-        {/* Dynamic Tooltip Float on Scrub */}
-        <AnimatePresence>
-          {activePoint && (
-            <motion.div
-              initial={{ opacity: 0, y: 5, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="absolute top-2 pointer-events-none z-10 bg-slate-900/90 text-white backdrop-blur-md px-3 py-2 rounded-xl shadow-lg border border-slate-700/60 text-xs font-sans"
-              style={{
-                left: `${(activePoint.x / width) * 100}%`,
-                transform: 'translateX(-50%)',
-              }}
-            >
-              <div className="flex items-center gap-1.5 text-slate-300 text-[10px] font-mono mb-0.5">
-                <Clock size={11} weight="bold" />
-                <span>{activePoint.time} Window</span>
-                {activePoint.peak && (
-                  <span className="flex items-center gap-0.5 text-rose-400 font-bold ml-auto">
-                    <Flame size={11} weight="fill" />
-                    PEAK
-                  </span>
-                )}
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="font-mono font-bold text-sm text-white">{activePoint.orders} Orders</span>
-                <span className="font-mono text-[11px] text-emerald-400">PKR {activePoint.gmv.toLocaleString()}</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* X-Axis Hour Labels Row */}
-        <div className="flex justify-between px-6 pt-1 text-[11px] font-mono text-slate-400">
+        {/* Hour Labels */}
+        <div className="flex justify-between px-6 pt-1 text-[11px] font-mono text-slate-500 font-semibold">
           {data.map((d) => (
-            <span key={d.time} className="hover:text-slate-800 transition-colors">
+            <span
+              key={d.time}
+              className={`transition-colors ${
+                activePoint?.time === d.time ? 'text-rose-600 font-bold' : 'hover:text-slate-900'
+              }`}
+            >
               {d.time}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Bottom Observability Metrics Footer */}
-      <div className="mt-5 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+      {/* Floating Operational Detail Bar (Guaranteed Unclipped & High Information) */}
+      {activePoint && (
+        <div className="mt-3 p-3 bg-slate-900 text-white rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-md border border-slate-800 animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-rose-600/30 text-rose-400 flex items-center justify-center shrink-0">
+              <Clock size={16} weight="bold" />
+            </div>
+            <div>
+              <div className="font-mono font-bold text-slate-100 flex items-center gap-2">
+                <span>{activePoint.time} Operational Block</span>
+                {activePoint.peak && (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-xs bg-rose-500 text-white font-sans uppercase font-bold flex items-center gap-0.5">
+                    <Flame size={10} weight="fill" />
+                    Rush Peak
+                  </span>
+                )}
+              </div>
+              <div className="text-[11px] text-slate-400 font-mono">
+                {activePoint.isLunchRush ? 'Lunch Rush Window' : activePoint.isDinnerRush ? 'Dinner Rush Window' : 'Standard Kitchen Shift'}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+            <div className="text-right">
+              <span className="text-[10px] text-slate-400 block uppercase">Volume</span>
+              <strong className="text-white text-sm">{activePoint.orders} Tickets</strong>
+            </div>
+
+            <div className="text-right">
+              <span className="text-[10px] text-slate-400 block uppercase">GMV</span>
+              <strong className="text-emerald-400 text-sm">PKR {activePoint.gmv.toLocaleString()}</strong>
+            </div>
+
+            <div className="text-right">
+              <span className="text-[10px] text-slate-400 block uppercase">Avg Kitchen Prep</span>
+              <span className="text-amber-300 font-bold flex items-center justify-end gap-1">
+                <Timer size={12} weight="bold" />
+                {activePoint.prepMins}m SLA
+              </span>
+            </div>
+
+            <div className="text-right pl-3 border-l border-slate-700">
+              <span className="text-[10px] text-slate-400 block uppercase">Dispatch SLA</span>
+              <span className="text-emerald-400 font-bold flex items-center justify-end gap-1">
+                <CheckCircle size={12} weight="bold" />
+                {activePoint.sla}% On-Time
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Summary Footer */}
+      <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shadow-2xs" />
-            <span className="font-medium text-slate-700">Today Velocity Curve</span>
+            <span className="font-medium text-slate-700">Throughput Velocity Trajectory</span>
           </span>
-          {showComparison && (
-            <span className="flex items-center gap-1.5 text-slate-400">
-              <span className="w-4 h-0.5 border-b-2 border-dashed border-slate-400" />
-              <span>Yesterday Baseline</span>
-            </span>
-          )}
+          <span className="flex items-center gap-1.5 text-slate-500">
+            <span className="w-2.5 h-2.5 rounded-xs bg-slate-400" />
+            <span>Hourly Column Volume</span>
+          </span>
         </div>
 
         <div className="flex items-center gap-3 text-[11px] font-mono">
-          <span className="text-slate-500">
-            Peak Throughput: <strong className="text-slate-900">54 orders/hr</strong> (8:00 PM)
+          <span className="text-slate-600">
+            Peak Velocity: <strong className="text-slate-900">{peakPoint.orders} orders/hr</strong> ({peakPoint.time})
           </span>
-          <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-            SLA 98.4% On-Time
+          <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-semibold">
+            All-Day SLA: 98.4% On-Time
           </span>
         </div>
       </div>

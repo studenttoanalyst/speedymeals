@@ -200,7 +200,7 @@ export async function verifyRestaurantOTP(payload: OTPVerifyPayload): Promise<To
  */
 export async function logout(): Promise<void> {
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
-  if (refreshToken) {
+  if (refreshToken && !refreshToken.startsWith('mock-')) {
     try {
       await apiClient('/auth/logout', {
         method: 'POST',

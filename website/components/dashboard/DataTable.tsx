@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   MagnifyingGlass,
   Funnel,
@@ -10,6 +10,7 @@ import {
   CaretUp,
   CaretDown,
   X,
+  Buildings,
 } from '@phosphor-icons/react';
 
 export interface Column<T> {
@@ -32,6 +33,10 @@ export interface DataTableProps<T> {
     value: string;
     filterFn: (item: T) => boolean;
   }[];
+  enableCityFilter?: boolean;
+  cityAccessor?: (item: T) => string | undefined | null;
+  cityFilterOptions?: string[];
+  enableSearchHotkey?: boolean;
   isLoading?: boolean;
   emptyMessage?: string;
   emptySubtext?: string;
@@ -40,13 +45,19 @@ export interface DataTableProps<T> {
   actions?: React.ReactNode;
 }
 
+const DEFAULT_CITIES = ['Karachi', 'Lahore', 'Islamabad', 'Riyadh', 'Jeddah'];
+
 export function DataTable<T>({
   data,
   columns,
   keyExtractor,
-  searchPlaceholder = 'Search records...',
+  searchPlaceholder = 'Search records... (Press / to focus)',
   searchFilter,
   filterOptions,
+  enableCityFilter = false,
+  cityAccessor,
+  cityFilterOptions = DEFAULT_CITIES,
+  enableSearchHotkey = true,
   isLoading = false,
   emptyMessage = 'No records found',
   emptySubtext = 'Try adjusting your search or filters.',
@@ -56,14 +67,52 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [selectedCity, setSelectedCity] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcut [/] to focus search input
+  useEffect(() => {
+    if (!enableSearchHotkey) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement;
+        const isInput =
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable ||
+          target.tagName === 'SELECT';
+        if (!isInput) {
+          e.preventDefault();
+          searchInputRef.current?.focus();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [enableSearchHotkey]);
+
+  // Helper to extract city from item
+  const resolveCity = (item: any): string => {
+    if (cityAccessor) {
+      return (cityAccessor(item) || '').toLowerCase();
+    }
+    const raw = item.city || item.restaurant_city || item.rider_city || item.delivery_city || '';
+    if (raw) return String(raw).toLowerCase();
+    const textToScan = `${item.address || ''} ${item.delivery_address || ''} ${item.location || ''} ${item.name || ''}`.toLowerCase();
+    for (const c of cityFilterOptions) {
+      if (textToScan.includes(c.toLowerCase())) return c.toLowerCase();
+    }
+    return '';
+  };
 
   // Filter & search
   const filteredData = useMemo(() => {
     let result = [...data];
 
+    // Status / Custom filter
     if (selectedFilter !== 'all' && filterOptions) {
       const activeOption = filterOptions.find((o) => o.value === selectedFilter);
       if (activeOption) {
@@ -71,6 +120,16 @@ export function DataTable<T>({
       }
     }
 
+    // Multi-city filter
+    if (enableCityFilter && selectedCity !== 'all') {
+      const targetCity = selectedCity.toLowerCase();
+      result = result.filter((item) => {
+        const itemCity = resolveCity(item);
+        return itemCity.includes(targetCity);
+      });
+    }
+
+    // Search query filter
     if (searchQuery.trim() && searchFilter) {
       result = result.filter((item) => searchFilter(item, searchQuery.trim()));
     }
@@ -124,6 +183,7 @@ export function DataTable<T>({
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => {
@@ -133,14 +193,18 @@ export function DataTable<T>({
               placeholder={searchPlaceholder}
               className="w-full pl-9 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-colors"
             />
-            {searchQuery && (
+            {searchQuery ? (
               <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 <X size={14} weight="bold" />
               </button>
-            )}
+            ) : enableSearchHotkey ? (
+              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-200/60 rounded border border-slate-300 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
+                /
+              </span>
+            ) : null}
           </div>
 
           {filterOptions && filterOptions.length > 0 && (
@@ -171,6 +235,62 @@ export function DataTable<T>({
 
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
+
+      {/* Multi-City Quick Filter Pills */}
+      {enableCityFilter && (
+        <div className="px-4 py-2 bg-slate-50/80 border-b border-slate-200/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mr-1.5 flex items-center gap-1 shrink-0">
+            <Buildings size={13} weight="bold" className="text-slate-400" />
+            City:
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCity('all');
+              setCurrentPage(1);
+            }}
+            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 ${
+              selectedCity === 'all'
+                ? 'bg-slate-900 text-white shadow-2xs font-semibold'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            All Cities
+          </button>
+          {cityFilterOptions.map((city) => {
+            const isSelected = selectedCity.toLowerCase() === city.toLowerCase();
+            return (
+              <button
+                key={city}
+                type="button"
+                onClick={() => {
+                  setSelectedCity(city);
+                  setCurrentPage(1);
+                }}
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 ${
+                  isSelected
+                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                {city}
+              </button>
+            );
+          })}
+          {selectedCity !== 'all' && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCity('all');
+                setCurrentPage(1);
+              }}
+              className="text-[11px] text-slate-400 hover:text-slate-700 ml-1 underline decoration-slate-300 underline-offset-2 shrink-0"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Table Content */}
       <div className="overflow-x-auto">

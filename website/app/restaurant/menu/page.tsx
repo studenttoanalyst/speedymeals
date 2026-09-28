@@ -156,7 +156,6 @@ export default function RestaurantMenuPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Menu & Media Catalog"
-        description="Manage food photography, dish descriptions, modifier add-ons, and instant 86-ing / out-of-stock switches."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchMenu();

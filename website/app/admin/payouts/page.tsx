@@ -177,7 +177,6 @@ export default function AdminPayoutsPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Rider Payouts & Cash Reconciliation"
-        description="Weekly delivery fee compensation ledger for active couriers (100% customer delivery fee retention)."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchPayouts();

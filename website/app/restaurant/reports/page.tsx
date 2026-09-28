@@ -94,7 +94,6 @@ export default function RestaurantReportsPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Sales Analytics & Trends"
-        description="Daily sales volume, platform commission, and kitchen revenue performance."
         actions={
           <button
             type="button"

@@ -187,7 +187,6 @@ export default function AdminPromotionsPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Promotions & Marketing Studio"
-        description="Platform-wide customer discount vouchers, promo carousel banners, and subsidized marketing campaigns."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchPromotions();

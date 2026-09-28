@@ -207,7 +207,6 @@ export default function AdminRestaurantsPage() {
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title="Restaurant Partners Directory"
-        description="Partner onboarding, brand asset verification, contracted 10% commission tiers, and operational status."
         onRefresh={() => {
           setIsRefreshing(true);
           fetchRestaurants();
@@ -230,6 +229,7 @@ export default function AdminRestaurantsPage() {
           columns={columns}
           keyExtractor={(r) => r.id}
           isLoading={isLoading}
+          enableCityFilter
           searchPlaceholder="Search restaurant name, email, or ID..."
           searchFilter={(r, q) =>
             r.name.toLowerCase().includes(q.toLowerCase()) ||
