@@ -42,8 +42,8 @@ export default function AdminRestaurantsPage() {
     phone_number: '',
     commission_rate: 10.0,
     country_code: '+92',
-    logo_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200',
-    banner_url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200',
+    logo_url: '',
+    banner_url: '',
   });
 
   // Commission Modal State
@@ -126,13 +126,17 @@ export default function AdminRestaurantsPage() {
       sortable: true,
       render: (r) => (
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={r.logo_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200'}
-              alt={r.name}
-              className="w-full h-full object-cover"
-            />
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
+            {r.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={r.logo_url}
+                alt={r.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Storefront size={20} className="text-slate-400" />
+            )}
           </div>
           <div>
             <div className="font-bold text-slate-900 text-xs">{r.name}</div>

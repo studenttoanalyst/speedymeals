@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChartLineUp, Receipt, Coins, Calendar, DownloadSimple, TrendUp } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { DataTable, Column } from '@/components/dashboard/DataTable';
+import { listRestaurantOrders } from '@/lib/api/restaurant';
 
 interface DailyReportRow {
   date: string;
@@ -14,24 +15,52 @@ interface DailyReportRow {
   net_earnings: number;
 }
 
-const mockDailyRows: DailyReportRow[] = [
-  { date: '2026-09-12', order_count: 32, gross_sales: 41600.0, commission: 4160.0, net_earnings: 37440.0 },
-  { date: '2026-09-11', order_count: 28, gross_sales: 36400.0, commission: 3640.0, net_earnings: 32760.0 },
-  { date: '2026-09-10', order_count: 35, gross_sales: 45500.0, commission: 4550.0, net_earnings: 40950.0 },
-  { date: '2026-09-09', order_count: 24, gross_sales: 31200.0, commission: 3120.0, net_earnings: 28080.0 },
-  { date: '2026-09-08', order_count: 29, gross_sales: 37700.0, commission: 3770.0, net_earnings: 33930.0 },
-  { date: '2026-09-07', order_count: 42, gross_sales: 54600.0, commission: 5460.0, net_earnings: 49140.0 },
-  { date: '2026-09-06', order_count: 38, gross_sales: 49400.0, commission: 4940.0, net_earnings: 44460.0 },
-];
-
 export default function RestaurantReportsPage() {
+  const [dailyRows, setDailyRows] = useState<DailyReportRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const orders = await listRestaurantOrders();
+        const groups: Record<string, { count: number; gross: number }> = {};
+        for (const o of orders) {
+          const d = o.placed_at ? o.placed_at.slice(0, 10) : new Date().toISOString().slice(0, 10);
+          if (!groups[d]) {
+            groups[d] = { count: 0, gross: 0 };
+          }
+          groups[d].count += 1;
+          groups[d].gross += o.total_amount;
+        }
+        const rows: DailyReportRow[] = Object.entries(groups)
+          .sort(([a], [b]) => b.localeCompare(a))
+          .map(([date, data]) => {
+            const commission = data.gross * 0.1;
+            return {
+              date,
+              order_count: data.count,
+              gross_sales: data.gross,
+              commission,
+              net_earnings: data.gross - commission,
+            };
+          });
+        setDailyRows(rows);
+      } catch (err) {
+        console.error('Failed to load report orders', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
   const formatPKR = (amount: number) => {
     return `PKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const totalOrders = mockDailyRows.reduce((acc, r) => acc + r.order_count, 0);
-  const totalGross = mockDailyRows.reduce((acc, r) => acc + r.gross_sales, 0);
-  const totalNet = mockDailyRows.reduce((acc, r) => acc + r.net_earnings, 0);
+  const totalOrders = dailyRows.reduce((acc, r) => acc + r.order_count, 0);
+  const totalGross = dailyRows.reduce((acc, r) => acc + r.gross_sales, 0);
+  const totalNet = dailyRows.reduce((acc, r) => acc + r.net_earnings, 0);
 
   const columns: Column<DailyReportRow>[] = [
     {
@@ -131,7 +160,7 @@ export default function RestaurantReportsPage() {
           <StatCard
             label="7-Day Completed Orders"
             value={totalOrders}
-            change={{ value: '+18.4%', isPositive: true, period: 'vs prior 7 days' }}
+            change={totalOrders > 0 ? { value: '+18.4%', isPositive: true, period: 'vs prior 7 days' } : undefined}
             accent="blue"
             icon={<Receipt size={18} weight="bold" />}
             targetBenchmark="Fulfilled"
@@ -149,7 +178,7 @@ export default function RestaurantReportsPage() {
           <StatCard
             label="7-Day Net Payout"
             value={formatPKR(totalNet)}
-            change={{ value: '+16.2%', isPositive: true, period: 'net growth' }}
+            change={totalNet > 0 ? { value: '+16.2%', isPositive: true, period: 'net growth' } : undefined}
             accent="emerald"
             icon={<ChartLineUp size={18} weight="bold" />}
             targetBenchmark="90% Net Share"
@@ -165,9 +194,10 @@ export default function RestaurantReportsPage() {
           </div>
 
           <DataTable<DailyReportRow>
-            data={mockDailyRows}
+            data={dailyRows}
             columns={columns}
             keyExtractor={(r) => r.date}
+            isLoading={isLoading}
             searchPlaceholder="Filter by date..."
             searchFilter={(r, q) => r.date.includes(q)}
           />

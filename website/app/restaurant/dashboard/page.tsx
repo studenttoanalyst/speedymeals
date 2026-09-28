@@ -228,8 +228,8 @@ export default function RestaurantDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Today's Gross Sales"
-            value={formatPKR(metrics?.today_sales_gross ?? 31200)}
-            change={{ value: '+14.8%', isPositive: true, period: 'vs yesterday' }}
+            value={formatPKR(metrics?.today_sales_gross ?? 0)}
+            change={metrics?.today_sales_gross ? { value: '+0.0%', isPositive: true, period: 'today' } : undefined}
             accent="emerald"
             icon={<Coins size={18} weight="bold" />}
             targetBenchmark="Daily Target: 30K"
@@ -237,7 +237,7 @@ export default function RestaurantDashboardPage() {
 
           <StatCard
             label="Net Payable (90% Share)"
-            value={formatPKR(metrics?.net_payable_estimate ?? (31200 * 0.9))}
+            value={formatPKR(metrics?.net_payable_estimate ?? ((metrics?.today_sales_gross ?? 0) * 0.9))}
             subValue="After 10% Platform Commission"
             accent="blue"
             icon={<Receipt size={18} weight="bold" />}
@@ -246,8 +246,8 @@ export default function RestaurantDashboardPage() {
 
           <StatCard
             label="Active Kitchen Orders"
-            value={metrics?.active_orders_count ?? 3}
-            subValue="1 Placed · 2 Preparing"
+            value={metrics?.active_orders_count ?? 0}
+            subValue={metrics ? `${metrics.today_orders_count ?? 0} orders today` : '0 orders today'}
             accent="blue"
             icon={<Clock size={18} weight="bold" />}
             targetBenchmark="Capacity: 8 orders"
@@ -255,8 +255,8 @@ export default function RestaurantDashboardPage() {
 
           <StatCard
             label="Avg Cooking / Prep Time"
-            value="16.4 mins"
-            change={{ value: '-2.1m', isPositive: true, period: 'faster than target' }}
+            value={metrics?.avg_prep_time_mins ? `${metrics.avg_prep_time_mins} mins` : '--'}
+            change={metrics?.avg_prep_time_mins ? { value: 'Target: 20m', isPositive: true, period: 'SLA' } : undefined}
             accent="amber"
             icon={<Timer size={18} weight="bold" />}
             targetBenchmark="Target: < 20 mins"
@@ -300,39 +300,52 @@ export default function RestaurantDashboardPage() {
             </div>
 
             <div className="space-y-3">
-              {popularDishes.map((dish, idx) => (
-                <div
-                  key={dish.id}
-                  className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
-                >
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-200 shrink-0 border border-slate-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={dish.photo_url || dish.image_url || 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=200'}
-                      alt={dish.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-slate-900/80 text-white text-[9px] font-bold flex items-center justify-center">
-                      #{idx + 1}
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-xs font-semibold text-slate-900 truncate">
-                      {dish.name}
-                    </h3>
-                    <div className="text-[11px] text-slate-400 font-mono">
-                      {formatPKR(dish.price)} · {dish.category || 'Special'}
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-bold text-slate-800 font-mono">
-                      {idx === 0 ? '18 sold' : idx === 1 ? '12 sold' : '8 sold'}
-                    </span>
-                  </div>
+              {popularDishes.length === 0 ? (
+                <div className="p-6 text-center text-slate-400 text-xs">
+                  No menu items found. Add dishes to track top performers.
                 </div>
-              ))}
+              ) : (
+                popularDishes.map((dish, idx) => {
+                  const photo = dish.photo_url || dish.image_url;
+                  return (
+                    <div
+                      key={dish.id}
+                      className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
+                        {photo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={photo}
+                            alt={dish.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ForkKnife size={20} className="text-slate-400" />
+                        )}
+                        <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-slate-900/80 text-white text-[9px] font-bold flex items-center justify-center">
+                          #{idx + 1}
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs font-semibold text-slate-900 truncate">
+                          {dish.name}
+                        </h3>
+                        <div className="text-[11px] text-slate-400 font-mono">
+                          {formatPKR(dish.price)} · {dish.category || 'Special'}
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-semibold text-slate-600 font-mono">
+                          {dish.is_popular ? 'Featured' : 'Active'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">

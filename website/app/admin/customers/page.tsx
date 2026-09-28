@@ -87,7 +87,7 @@ export default function AdminCustomersPage() {
       sortable: true,
       render: (c) => (
         <span className="font-mono text-xs font-semibold text-slate-800 px-2 py-0.5 rounded-md bg-slate-100">
-          {c.total_orders_count || 12} orders
+          {c.total_orders_count ?? 0} orders
         </span>
       ),
     },

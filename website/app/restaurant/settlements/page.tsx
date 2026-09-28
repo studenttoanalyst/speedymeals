@@ -34,15 +34,6 @@ export interface BankAccountData {
   status: 'active' | 'pending_verification';
 }
 
-const DEFAULT_BANK_ACCOUNT: BankAccountData = {
-  bankName: 'Habib Bank Limited (HBL)',
-  accountTitle: 'Karachi Biryani House',
-  iban: 'PK36HABB0001234567890123',
-  branchCode: '0142',
-  verified: true,
-  lastVerifiedAt: '2026-09-20',
-  status: 'active',
-};
 
 const SUPPORTED_BANKS = [
   'Habib Bank Limited (HBL)',
@@ -61,13 +52,13 @@ export default function RestaurantSettlementsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Production-grade Bank Account state & pairing modal
-  const [bankAccount, setBankAccount] = useState<BankAccountData>(DEFAULT_BANK_ACCOUNT);
+  const [bankAccount, setBankAccount] = useState<BankAccountData | null>(null);
   const [isPairingModalOpen, setIsPairingModalOpen] = useState(false);
   const [pairingStep, setPairingStep] = useState<1 | 2 | 3>(1);
-  const [formBank, setFormBank] = useState(DEFAULT_BANK_ACCOUNT.bankName);
-  const [formTitle, setFormTitle] = useState(DEFAULT_BANK_ACCOUNT.accountTitle);
-  const [formIban, setFormIban] = useState(DEFAULT_BANK_ACCOUNT.iban);
-  const [formBranch, setFormBranch] = useState(DEFAULT_BANK_ACCOUNT.branchCode || '0142');
+  const [formBank, setFormBank] = useState(SUPPORTED_BANKS[0]);
+  const [formTitle, setFormTitle] = useState('');
+  const [formIban, setFormIban] = useState('');
+  const [formBranch, setFormBranch] = useState('');
   const [authPin, setAuthPin] = useState('');
   const [pinError, setPinError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -109,10 +100,10 @@ export default function RestaurantSettlementsPage() {
   };
 
   const handleOpenPairing = () => {
-    setFormBank(bankAccount.bankName);
-    setFormTitle(bankAccount.accountTitle);
-    setFormIban(bankAccount.iban);
-    setFormBranch(bankAccount.branchCode || '0142');
+    setFormBank(bankAccount?.bankName || SUPPORTED_BANKS[0]);
+    setFormTitle(bankAccount?.accountTitle || '');
+    setFormIban(bankAccount?.iban || '');
+    setFormBranch(bankAccount?.branchCode || '');
     setAuthPin('');
     setPinError('');
     setPairingStep(1);
@@ -130,7 +121,7 @@ export default function RestaurantSettlementsPage() {
   const handleStep2Authorize = (e: React.FormEvent) => {
     e.preventDefault();
     if (!authPin || authPin.length < 6) {
-      setPinError('Please enter your 6-digit authentication PIN (Demo: 842190)');
+      setPinError('Please enter your 6-digit authentication PIN');
       return;
     }
     setPinError('');
@@ -281,7 +272,7 @@ export default function RestaurantSettlementsPage() {
             <div className="flex items-center gap-2">
               <CheckCircle size={16} weight="bold" className="text-emerald-600" />
               <span>
-                1Link / Raast Gateway ping successful: Verified live routing to {bankAccount.bankName} ({maskIban(bankAccount.iban)})
+                1Link / Raast Gateway ping successful: Verified live routing to {bankAccount?.bankName} ({bankAccount ? maskIban(bankAccount.iban) : ''})
               </span>
             </div>
             <span className="text-[10px] font-mono text-emerald-600 uppercase">Audit Ref #PK-RAAST-9281</span>
@@ -312,7 +303,7 @@ export default function RestaurantSettlementsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             label="Total Disbursed to Bank"
-            value={formatPKR(totalSettled || 112500)}
+            value={formatPKR(totalSettled)}
             subValue="Verified bank transfers"
             accent="emerald"
             icon={<CheckCircle size={18} weight="bold" />}
@@ -321,7 +312,7 @@ export default function RestaurantSettlementsPage() {
 
           <StatCard
             label="Pending Settlement"
-            value={formatPKR(totalPending || 161000)}
+            value={formatPKR(totalPending)}
             subValue="Scheduled next Friday"
             accent="amber"
             icon={<Clock size={18} weight="bold" />}
@@ -341,47 +332,65 @@ export default function RestaurantSettlementsPage() {
         {/* Bank Account Info Card with Functional Pairing & Authentication */}
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${bankAccount ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'}`}>
               <Bank size={24} weight="bold" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-900">{bankAccount.bankName}</span>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 flex items-center gap-1">
-                  <ShieldCheck size={12} weight="bold" className="text-emerald-600" />
-                  Verified Payout Route
+                <span className="text-sm font-bold text-slate-900">
+                  {bankAccount ? bankAccount.bankName : 'No Direct Payout Route Linked'}
                 </span>
+                {bankAccount ? (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 flex items-center gap-1">
+                    <ShieldCheck size={12} weight="bold" className="text-emerald-600" />
+                    Verified Payout Route
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 flex items-center gap-1">
+                    Action Required
+                  </span>
+                )}
               </div>
               <div className="text-xs text-slate-500 font-mono mt-0.5 flex flex-wrap items-center gap-2">
-                <span>IBAN: {maskIban(bankAccount.iban)}</span>
-                <span className="text-slate-300">|</span>
-                <span className="text-slate-600 font-sans">Title: <strong>{bankAccount.accountTitle}</strong></span>
-                {bankAccount.branchCode && (
+                {bankAccount ? (
                   <>
+                    <span>IBAN: {maskIban(bankAccount.iban)}</span>
                     <span className="text-slate-300">|</span>
-                    <span>Branch: #{bankAccount.branchCode}</span>
+                    <span className="text-slate-600 font-sans">Title: <strong>{bankAccount.accountTitle}</strong></span>
+                    {bankAccount.branchCode && (
+                      <>
+                        <span className="text-slate-300">|</span>
+                        <span>Branch: #{bankAccount.branchCode}</span>
+                      </>
+                    )}
                   </>
+                ) : (
+                  <span className="font-sans text-slate-500">
+                    Connect your commercial bank account to enable automated Friday disbursements.
+                  </span>
                 )}
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-            <button
-              type="button"
-              onClick={handleTestPing}
-              className="px-3 py-1.5 text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
-            >
-              <ArrowsClockwise size={13} weight="bold" />
-              <span>Ping Gateway</span>
-            </button>
+            {bankAccount && (
+              <button
+                type="button"
+                onClick={handleTestPing}
+                className="px-3 py-1.5 text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
+              >
+                <ArrowsClockwise size={13} weight="bold" />
+                <span>Ping Gateway</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleOpenPairing}
               className="px-3.5 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
             >
               <Lock size={13} weight="bold" />
-              <span>Pair / Update Account</span>
+              <span>{bankAccount ? 'Pair / Update Account' : 'Connect Bank Account'}</span>
             </button>
           </div>
         </div>
@@ -469,7 +478,7 @@ export default function RestaurantSettlementsPage() {
                       required
                       value={formTitle}
                       onChange={(e) => setFormTitle(e.target.value)}
-                      placeholder="e.g. Karachi Biryani House (Pvt) Ltd"
+                      placeholder="e.g. Restaurant Business Title (Pvt) Ltd"
                       className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-rose-500/20"
                     />
                     <p className="text-[11px] text-slate-400">Must strictly match official commercial registration and tax profile.</p>
@@ -484,7 +493,7 @@ export default function RestaurantSettlementsPage() {
                         maxLength={30}
                         value={formIban}
                         onChange={(e) => setFormIban(e.target.value.toUpperCase())}
-                        placeholder="PK36HABB0001234567890123"
+                        placeholder="PK00XXXX0000000000000000"
                         className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold tracking-wider focus:ring-2 focus:ring-rose-500/20 uppercase"
                       />
                     </div>
@@ -494,7 +503,7 @@ export default function RestaurantSettlementsPage() {
                         type="text"
                         value={formBranch}
                         onChange={(e) => setFormBranch(e.target.value)}
-                        placeholder="0142"
+                        placeholder="0000"
                         className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono"
                       />
                     </div>
@@ -609,15 +618,15 @@ export default function RestaurantSettlementsPage() {
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left font-mono text-xs space-y-1.5 max-w-sm mx-auto">
                     <div className="flex justify-between text-slate-500">
                       <span>Bank:</span>
-                      <strong className="text-slate-800">{bankAccount.bankName}</strong>
+                      <strong className="text-slate-800">{bankAccount?.bankName}</strong>
                     </div>
                     <div className="flex justify-between text-slate-500">
                       <span>Account Title:</span>
-                      <strong className="text-slate-800">{bankAccount.accountTitle}</strong>
+                      <strong className="text-slate-800">{bankAccount?.accountTitle}</strong>
                     </div>
                     <div className="flex justify-between text-slate-500">
                       <span>IBAN:</span>
-                      <strong className="text-slate-800">{maskIban(bankAccount.iban)}</strong>
+                      <strong className="text-slate-800">{bankAccount ? maskIban(bankAccount.iban) : ''}</strong>
                     </div>
                     <div className="flex justify-between text-slate-500">
                       <span>Status:</span>

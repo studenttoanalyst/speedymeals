@@ -172,7 +172,7 @@ export default function AdminRiderDetailPage({
                   {formatPKR(rider.pending_cash_owed)}
                 </div>
                 <div className="text-xs text-slate-500 flex items-center justify-between">
-                  <span>Float Limit: PKR {rider.max_cash_float_limit || 15000}</span>
+                  <span>{rider.max_cash_float_limit ? `Float Limit: ${formatPKR(rider.max_cash_float_limit)}` : 'Standard Float Limit'}</span>
                   {isFloatBreached && (
                     <span className="text-[11px] font-bold text-rose-600 bg-rose-100 px-2 py-0.5 rounded-full">
                       Dispatch Suspended
@@ -197,39 +197,60 @@ export default function AdminRiderDetailPage({
                 {/* CNIC Front */}
                 <div className="space-y-1.5">
                   <div className="text-xs font-semibold text-slate-700">CNIC Front Side</div>
-                  <div className="aspect-[3/2] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={rider.cnic_front_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600'}
-                      alt="CNIC Front"
-                      className="w-full h-full object-cover group-hover:scale-103 transition-transform"
-                    />
+                  <div className="aspect-[3/2] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group relative flex items-center justify-center">
+                    {rider.cnic_front_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={rider.cnic_front_url}
+                        alt="CNIC Front"
+                        className="w-full h-full object-cover group-hover:scale-103 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-1 p-4 text-center">
+                        <IdentificationCard size={32} />
+                        <span className="text-[11px] font-medium">Document Not Provided</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* CNIC Back */}
                 <div className="space-y-1.5">
                   <div className="text-xs font-semibold text-slate-700">CNIC Back Side</div>
-                  <div className="aspect-[3/2] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={rider.cnic_back_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600'}
-                      alt="CNIC Back"
-                      className="w-full h-full object-cover group-hover:scale-103 transition-transform"
-                    />
+                  <div className="aspect-[3/2] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group relative flex items-center justify-center">
+                    {rider.cnic_back_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={rider.cnic_back_url}
+                        alt="CNIC Back"
+                        className="w-full h-full object-cover group-hover:scale-103 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-1 p-4 text-center">
+                        <IdentificationCard size={32} />
+                        <span className="text-[11px] font-medium">Document Not Provided</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Driving License */}
                 <div className="space-y-1.5">
                   <div className="text-xs font-semibold text-slate-700">Motorcycle License</div>
-                  <div className="aspect-[3/2] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={rider.license_url || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600'}
-                      alt="Driving License"
-                      className="w-full h-full object-cover group-hover:scale-103 transition-transform"
-                    />
+                  <div className="aspect-[3/2] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group relative flex items-center justify-center">
+                    {rider.license_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={rider.license_url}
+                        alt="Driving License"
+                        className="w-full h-full object-cover group-hover:scale-103 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-1 p-4 text-center">
+                        <IdentificationCard size={32} />
+                        <span className="text-[11px] font-medium">License Not Provided</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -241,19 +262,21 @@ export default function AdminRiderDetailPage({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                 <div>
                   <span className="text-slate-400 block">Vehicle Category</span>
-                  <span className="font-semibold text-slate-800">{rider.vehicle_type || 'Motorcycle'}</span>
+                  <span className="font-semibold text-slate-800">{rider.vehicle_type || 'Unspecified'}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Registration Plate</span>
-                  <span className="font-mono font-bold text-slate-800">{rider.vehicle_registration || 'KHI-7890'}</span>
+                  <span className="font-mono font-bold text-slate-800">{rider.vehicle_registration || 'Not Registered'}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Completed Deliveries</span>
-                  <span className="font-mono font-bold text-slate-800">{rider.completed_deliveries_count || 384}</span>
+                  <span className="font-mono font-bold text-slate-800">{rider.completed_deliveries_count ?? 0}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Customer Rating</span>
-                  <span className="font-mono font-bold text-amber-600">★ {rider.rating || 4.9}</span>
+                  <span className="font-mono font-bold text-amber-600">
+                    {rider.rating ? `★ ${rider.rating}` : 'Unrated'}
+                  </span>
                 </div>
               </div>
             </div>

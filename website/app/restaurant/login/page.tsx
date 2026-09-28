@@ -29,12 +29,12 @@ export default function RestaurantLoginPage() {
   const [tab, setTab] = useState<'password' | 'otp'>('password');
 
   // Password Login State
-  const [email, setEmail] = useState('contact@karachibiryani.pk');
-  const [password, setPassword] = useState('Partner@123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   // OTP Login State
-  const [phoneNumber, setPhoneNumber] = useState('3001112233');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -217,7 +217,7 @@ export default function RestaurantLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="contact@karachibiryani.pk"
+                  placeholder="partner@restaurant.com"
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
                 />
               </div>
@@ -287,7 +287,7 @@ export default function RestaurantLoginPage() {
                         required
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                        placeholder="3001112233"
+                        placeholder="3001234567"
                         className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono font-medium focus:bg-white focus:ring-2 focus:ring-rose-500/20"
                       />
                     </div>
