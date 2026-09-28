@@ -185,7 +185,7 @@ export default function AdminPayoutsPage() {
         actions={
           <button
             onClick={() => setGenerateModalOpen(true)}
-            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus size={14} weight="bold" />
             <span>Generate Rider Payouts</span>
@@ -280,14 +280,14 @@ export default function AdminPayoutsPage() {
                 <button
                   type="button"
                   onClick={() => setGenerateModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isGenerating}
-                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
+                  className="px-4 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
                 >
                   {isGenerating ? 'Calculating...' : 'Run Payouts'}
                 </button>

@@ -238,9 +238,9 @@ export default function RestaurantOrdersPage() {
             <div className="flex items-center p-0.5 rounded-lg border border-slate-200 bg-white">
               <button
                 onClick={() => setViewMode('kanban')}
-                className={`p-1.5 rounded-md text-xs transition-colors ${
+                className={`p-1.5 rounded-md text-xs transition-colors cursor-pointer ${
                   viewMode === 'kanban'
-                    ? 'bg-rose-50 text-rose-700 font-semibold'
+                    ? 'bg-slate-900 text-white font-semibold'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
                 title="Kanban Board View"
@@ -249,9 +249,9 @@ export default function RestaurantOrdersPage() {
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-md text-xs transition-colors ${
+                className={`p-1.5 rounded-md text-xs transition-colors cursor-pointer ${
                   viewMode === 'table'
-                    ? 'bg-rose-50 text-rose-700 font-semibold'
+                    ? 'bg-slate-900 text-white font-semibold'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
                 title="Dense List View"
@@ -318,12 +318,12 @@ export default function RestaurantOrdersPage() {
             <div className="bg-slate-100/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
                     New Incoming
                   </h3>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
                   {placedOrders.length}
                 </span>
               </div>
@@ -333,11 +333,11 @@ export default function RestaurantOrdersPage() {
                   <div
                     key={o.id}
                     onClick={() => handleOpenDetail(o.id)}
-                    className="p-4 bg-white border border-rose-200 rounded-xl shadow-xs space-y-3 cursor-pointer hover:border-rose-300 transition-all"
+                    className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs space-y-3 cursor-pointer hover:border-slate-300 transition-all"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-[11px] font-mono font-bold text-rose-600">
+                        <span className="text-[11px] font-mono font-medium text-slate-500">
                           #{o.id.slice(0, 8)}
                         </span>
                         <div className="text-sm font-bold text-slate-900 mt-0.5">
@@ -362,7 +362,7 @@ export default function RestaurantOrdersPage() {
                           e.stopPropagation();
                           setRejectModalOrder(o);
                         }}
-                        className="py-1.5 px-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 text-xs font-semibold rounded-lg transition-colors text-center"
+                        className="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg transition-colors text-center cursor-pointer"
                       >
                         Reject
                       </button>
@@ -372,7 +372,7 @@ export default function RestaurantOrdersPage() {
                           e.stopPropagation();
                           setAcceptModalOrder(o);
                         }}
-                        className="py-1.5 px-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors text-center"
+                        className="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors text-center cursor-pointer"
                       >
                         Accept
                       </button>
@@ -664,7 +664,7 @@ export default function RestaurantOrdersPage() {
                     setSelectedOrder(null);
                     setAcceptModalOrder(orders.find((o) => o.id === current.id) || null);
                   }}
-                  className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs"
+                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer"
                 >
                   Accept Order
                 </button>
@@ -676,7 +676,7 @@ export default function RestaurantOrdersPage() {
                   onClick={async () => {
                     await handleUpdateStatus(selectedOrder.id, 'Ready for Pickup');
                   }}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Check size={14} weight="bold" />
                   Mark Ready for Pickup
@@ -699,16 +699,16 @@ export default function RestaurantOrdersPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-700">Estimated Kitchen Prep SLA</label>
+              <label className="text-xs font-semibold text-slate-700">Estimated Cooking / Prep Time</label>
               <div className="grid grid-cols-3 gap-2">
                 {[15, 25, 35].map((mins) => (
                   <button
                     key={mins}
                     type="button"
                     onClick={() => setPrepMinutes(mins)}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       prepMinutes === mins
-                        ? 'border-rose-600 bg-rose-50 text-rose-700 shadow-2xs ring-2 ring-rose-500/20'
+                        ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
                         : 'border-slate-200 text-slate-700 hover:bg-slate-50'
                     }`}
                   >
@@ -722,14 +722,14 @@ export default function RestaurantOrdersPage() {
               <button
                 type="button"
                 onClick={() => setAcceptModalOrder(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleAcceptSubmit}
-                className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
+                className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs cursor-pointer"
               >
                 Confirm & Start Kitchen
               </button>

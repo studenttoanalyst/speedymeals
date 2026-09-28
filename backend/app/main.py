@@ -12,6 +12,8 @@ from app.platform.auth.routes import router as auth_router
 from app.platform.users.routes import router as users_router
 from app.platform.wallet_payment.routes import router as wallet_router
 from app.modules.admin.routes import router as admin_router
+from app.modules.admin_roles.routes import router as admin_roles_router
+from app.modules.admin_accounts.routes import router as admin_accounts_router
 from app.modules.food_delivery.routes import (
     customer_orders_router,
     customer_router,
@@ -54,6 +56,8 @@ app.include_router(restaurant_portal_router)
 app.include_router(customer_router)
 app.include_router(customer_orders_router)
 app.include_router(admin_router)
+app.include_router(admin_roles_router)
+app.include_router(admin_accounts_router)
 
 
 @app.on_event("startup")

@@ -191,12 +191,12 @@ export function DataTable<T>({
                 setCurrentPage(1);
               }}
               placeholder={searchPlaceholder}
-              className="w-full pl-9 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-colors"
+              className="w-full pl-9 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors"
             />
             {searchQuery ? (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X size={14} weight="bold" />
               </button>
@@ -215,7 +215,7 @@ export function DataTable<T>({
                   setSelectedFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="appearance-none pl-8 pr-7 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 cursor-pointer"
+                className="appearance-none pl-8 pr-7 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 cursor-pointer"
               >
                 <option value="all">All Records</option>
                 {filterOptions.map((opt) => (
@@ -249,7 +249,7 @@ export function DataTable<T>({
               setSelectedCity('all');
               setCurrentPage(1);
             }}
-            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 ${
+            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 cursor-pointer ${
               selectedCity === 'all'
                 ? 'bg-slate-900 text-white shadow-2xs font-semibold'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
@@ -267,9 +267,9 @@ export function DataTable<T>({
                   setSelectedCity(city);
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 ${
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 cursor-pointer ${
                   isSelected
-                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                    ? 'bg-slate-900 text-white shadow-2xs font-semibold'
                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
@@ -284,7 +284,7 @@ export function DataTable<T>({
                 setSelectedCity('all');
                 setCurrentPage(1);
               }}
-              className="text-[11px] text-slate-400 hover:text-slate-700 ml-1 underline decoration-slate-300 underline-offset-2 shrink-0"
+              className="text-[11px] text-slate-400 hover:text-slate-700 ml-1 underline decoration-slate-300 underline-offset-2 shrink-0 cursor-pointer"
             >
               Clear
             </button>
@@ -330,9 +330,9 @@ export function DataTable<T>({
                         <span className="text-slate-400">
                           {isSorted ? (
                             sortDirection === 'asc' ? (
-                              <CaretUp size={12} weight="bold" className="text-rose-600" />
+                              <CaretUp size={12} weight="bold" className="text-slate-900" />
                             ) : (
-                              <CaretDown size={12} weight="bold" className="text-rose-600" />
+                              <CaretDown size={12} weight="bold" className="text-slate-900" />
                             )
                           ) : (
                             <CaretUpDown size={12} />
@@ -391,7 +391,7 @@ export function DataTable<T>({
                           : 'text-left'
                       }`}
                     >
-                      {col.render ? col.render(item) : (item as any)[col.key] ?? '—'}
+                      {col.render ? col.render(item) : (item as any)[col.key] ?? '-'}
                     </td>
                   ))}
                 </tr>

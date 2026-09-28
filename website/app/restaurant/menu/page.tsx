@@ -164,7 +164,7 @@ export default function RestaurantMenuPage() {
         actions={
           <button
             onClick={handleOpenCreate}
-            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus size={15} weight="bold" />
             <span>Add New Dish</span>
@@ -179,9 +179,9 @@ export default function RestaurantMenuPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-rose-600 text-white shadow-xs'
+                  ? 'bg-slate-900 text-white shadow-xs'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
@@ -215,7 +215,7 @@ export default function RestaurantMenuPage() {
                 <div
                   key={dish.id}
                   className={`bg-white border rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between ${
-                    dish.is_available ? 'border-slate-200' : 'border-rose-200 bg-rose-50/10 opacity-75'
+                    dish.is_available ? 'border-slate-200' : 'border-slate-200 bg-slate-50/50 opacity-75'
                   }`}
                 >
                   <div>
@@ -241,7 +241,7 @@ export default function RestaurantMenuPage() {
                             Veg
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-700 text-white">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-white">
                             Halal
                           </span>
                         )}
@@ -256,8 +256,8 @@ export default function RestaurantMenuPage() {
 
                       {!dish.is_available && (
                         <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-2xs flex items-center justify-center">
-                          <span className="px-3 py-1 bg-rose-600 text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md">
-                            86'd / Sold Out
+                          <span className="px-3 py-1 bg-slate-900/90 text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md">
+                            Sold Out
                           </span>
                         </div>
                       )}

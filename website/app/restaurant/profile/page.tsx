@@ -83,13 +83,13 @@ export default function RestaurantProfilePage() {
 
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
-      <Topbar title="Storefront & Brand Media" />
+      <Topbar title="Restaurant Profile & Photos" />
 
       <div className="p-6 max-w-5xl mx-auto w-full space-y-6">
         {savedSuccess && (
           <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-in fade-in">
             <CheckCircle size={16} weight="bold" className="text-emerald-600" />
-            <span>Storefront profile and media assets updated successfully!</span>
+            <span>Restaurant profile and photos updated successfully!</span>
           </div>
         )}
 
@@ -108,12 +108,12 @@ export default function RestaurantProfilePage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={bannerUrl}
-                    alt="Storefront Banner Preview"
+                    alt="Cover Preview"
                     className="w-full h-full object-cover object-center"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">
-                    No cover banner uploaded (Recommended: 16:9 or 2:1 ratio, min 1280x640px)
+                    No cover photo uploaded (Recommended wide photo, at least 1280x640px)
                   </div>
                 )}
                 <div className="absolute inset-0 bg-linear-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
@@ -144,7 +144,7 @@ export default function RestaurantProfilePage() {
                         </h2>
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
                           <CheckCircle size={13} weight="fill" className="text-emerald-500" />
-                          Verified Store
+                          Verified Restaurant
                         </span>
                       </div>
                       <p className="text-xs text-slate-600 flex items-center justify-center sm:justify-start gap-1.5 font-medium">
@@ -154,7 +154,7 @@ export default function RestaurantProfilePage() {
                       <p className="text-[11px] text-slate-500 font-mono flex items-center justify-center sm:justify-start gap-2 pt-0.5">
                         <span>Hours: {openingTime} - {closingTime}</span>
                         <span>·</span>
-                        <span>Prep SLA: {prepTime} mins</span>
+                        <span>Cooking Time: {prepTime} mins</span>
                       </p>
                     </div>
                   </div>
@@ -165,7 +165,7 @@ export default function RestaurantProfilePage() {
                       Platform Fee: <span className="text-rose-600 font-bold">10.0% Flat</span>
                     </div>
                     <div className="text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
-                      Auto Dispatch Active
+                      Rider Auto-Dispatch: On
                     </div>
                   </div>
                 </div>
@@ -175,29 +175,29 @@ export default function RestaurantProfilePage() {
             {/* MEDIA ASSETS UPLOAD SECTION */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
               <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-sm font-bold text-slate-900">Brand Media Assets</h3>
+                <h3 className="text-sm font-bold text-slate-900">Logo & Cover Photos</h3>
                 <p className="text-xs text-slate-400">
-                  Upload official storefront logo (1:1) and cover banner (~2.7:1 Facebook standard ratio).
+                  Upload your square restaurant logo and wide cover banner photo.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 1:1 Logo Uploader */}
                 <ImageUpload
-                  label="Official Storefront Logo"
+                  label="Restaurant Logo"
                   aspectRatio="1:1"
                   value={logoUrl}
                   onChange={setLogoUrl}
-                  hint="Square avatar (1:1 ratio, min 512×512px)"
+                  hint="Square photo (1:1 ratio, min 512×512px)"
                 />
 
                 {/* 16:9 / 3:1 Cover Banner Uploader */}
                 <ImageUpload
-                  label="Storefront Hero Cover Banner"
+                  label="Restaurant Cover Photo"
                   aspectRatio="16:9"
                   value={bannerUrl}
                   onChange={setBannerUrl}
-                  hint="Widescreen banner (min 1280×720px)"
+                  hint="Wide banner photo (min 1280×720px)"
                 />
               </div>
             </div>
@@ -205,15 +205,15 @@ export default function RestaurantProfilePage() {
             {/* OPERATIONAL PARAMETERS */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
               <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-sm font-bold text-slate-900">Kitchen & Operational Details</h3>
+                <h3 className="text-sm font-bold text-slate-900">Cooking Time & Daily Schedule</h3>
                 <p className="text-xs text-slate-400">
-                  SLA estimates and daily operating schedules.
+                  Cooking time and daily store schedule.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Display Store Name</label>
+                  <label className="font-semibold text-slate-700">Restaurant Name</label>
                   <input
                     type="text"
                     required
@@ -226,7 +226,7 @@ export default function RestaurantProfilePage() {
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-700 flex items-center gap-1">
                     <Timer size={13} className="text-slate-400" />
-                    Default Kitchen Prep SLA (Minutes)
+                    Cooking Time / Food Prep (Minutes)
                   </label>
                   <input
                     type="number"
@@ -287,7 +287,7 @@ export default function RestaurantProfilePage() {
                 className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <FloppyDisk size={16} weight="bold" />
-                <span>{isSaving ? 'Saving Changes...' : 'Save Profile & Media'}</span>
+                <span>{isSaving ? 'Saving Changes...' : 'Save Profile Changes'}</span>
               </button>
             </div>
           </form>

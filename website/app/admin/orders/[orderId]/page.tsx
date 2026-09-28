@@ -50,7 +50,6 @@ export default function AdminOrderDetailPage({
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title={`Global Order #${resolvedParams.orderId.slice(0, 8)}`}
-        description="Contract financial audit breakdown, courier transit logs, and order lifecycle snapshot."
         actions={
           <div className="flex items-center gap-2">
             <button

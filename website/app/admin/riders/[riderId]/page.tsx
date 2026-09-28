@@ -67,7 +67,6 @@ export default function AdminRiderDetailPage({
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title={rider?.name || 'Courier KYC File'}
-        description="Official CNIC, driving license verification, vehicle registration, and COD cash float control."
         actions={
           <Link
             href="/admin/riders"

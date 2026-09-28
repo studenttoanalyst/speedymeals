@@ -188,17 +188,17 @@ export function RegionalDistributionChart({
                   <span className="font-mono font-bold text-slate-900">{z.orderCount} orders</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Delivery SLA:</span>
+                  <span className="text-slate-400">Avg Delivery Time:</span>
                   <span className="font-mono font-semibold text-emerald-600">{z.avgSlaMins} mins</span>
                 </div>
                 <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
                   <span className="flex items-center gap-1 text-slate-500">
                     <Bicycle size={12} />
-                    <span>{z.activeCouriers} couriers</span>
+                    <span>{z.activeCouriers} riders</span>
                   </span>
                   <span className="flex items-center gap-1 text-slate-500">
                     <Storefront size={12} />
-                    <span>{z.activeRestaurants} stores</span>
+                    <span>{z.activeRestaurants} restaurants</span>
                   </span>
                 </div>
               </div>

@@ -10,9 +10,13 @@ export default function RestaurantLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/restaurant/login';
+  const isPublicAuthPage = [
+    '/restaurant/login',
+    '/restaurant/forgot-password',
+    '/restaurant/reset-password',
+  ].includes(pathname);
 
-  if (isLoginPage) {
+  if (isPublicAuthPage) {
     return <main className="min-h-screen bg-paper-off">{children}</main>;
   }
 

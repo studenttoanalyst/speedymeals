@@ -13,11 +13,16 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isLoginPage = pathname === '/admin/login';
+  const isPublicAuthPage = [
+    '/admin/login',
+    '/admin/forgot-password',
+    '/admin/reset-password',
+    '/admin/change-initial-password',
+  ].includes(pathname);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (isLoginPage) {
+    if (isPublicAuthPage) {
       setIsAuthorized(true);
       return;
     }
@@ -30,9 +35,9 @@ export default function AdminLayout({
     } else {
       setIsAuthorized(true);
     }
-  }, [pathname, isLoginPage, router]);
+  }, [pathname, isPublicAuthPage, router]);
 
-  if (isLoginPage) {
+  if (isPublicAuthPage) {
     return <main className="min-h-screen bg-paper-off">{children}</main>;
   }
 
@@ -40,8 +45,8 @@ export default function AdminLayout({
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper-off">
         <div className="flex flex-col items-center gap-3 text-slate-500">
-          <Spinner size={32} className="animate-spin text-rose-600" />
-          <p className="text-xs font-medium tracking-wide uppercase">Verifying administrative credentials...</p>
+          <Spinner size={28} className="animate-spin text-slate-700" />
+          <p className="text-xs font-medium tracking-wide text-slate-500">Loading staff dashboard...</p>
         </div>
       </div>
     );

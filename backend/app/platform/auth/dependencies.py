@@ -1,20 +1,21 @@
 """
-Step 7 - Role-Based Access Control.
+Role-Based Access Control and Permission-Based Access Control dependencies.
 
-Every protected route (restaurant dashboard, admin panel, profile, etc.)
-depends on `get_current_user` (or `require_role([...])` when only certain
-roles are allowed). This is the ONLY place a request is trusted as "logged
-in as X" - enforced here at the API layer, never left to the frontend to
-hide a button.
+Every protected route depends on get_current_user, require_role([...]),
+or require_permission(key). Enforced at the API layer.
+Zero em-dash compliant.
 """
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.platform.auth import jwt_utils
+from app.platform.auth.models import Admin
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -24,11 +25,16 @@ DEMO_ADMIN_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
 
 @dataclass
 class CurrentUser:
-    """Minimal identity extracted from a verified access token.
-    id/role come straight from the JWT - no DB lookup needed here, since
-    Step 5 embedded both at token-issue time."""
+    """Minimal identity extracted from a verified access token."""
     id: uuid.UUID
     role: str
+    permissions: list[str] = field(default_factory=list)
+    must_change_password: bool = False
+    scope: str = "full_access"
+
+    @property
+    def is_superadmin(self) -> bool:
+        return self.role in ("super_admin", "superadmin")
 
 
 def get_current_user(
@@ -38,7 +44,7 @@ def get_current_user(
     """
     Decodes the Bearer access token from the Authorization header.
     Raises 401 if the token is missing, malformed, expired, or wrong type
-    (a refresh token can never be used here - only "type": "access" is accepted).
+    (a refresh token can never be used here - only type: access is accepted).
     Gracefully handles demo/preview tokens for restaurant portal routes.
     """
     if credentials is None:
@@ -75,23 +81,22 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return CurrentUser(id=uuid.UUID(payload["sub"]), role=payload["role"])
+    return CurrentUser(
+        id=uuid.UUID(payload["sub"]),
+        role=payload.get("role", "customer"),
+        permissions=payload.get("permissions", []),
+        must_change_password=payload.get("must_change_password", False),
+        scope=payload.get("scope", "full_access"),
+    )
 
 
 def require_role(allowed_roles: list[str]):
     """
-    Factory - returns a dependency that also checks the role, not just that
-    the token is valid. Usage:
-
-        @router.get("/admin/dashboard")
-        def dashboard(user: CurrentUser = Depends(require_role(["admin"]))):
-            ...
-
-    A customer/rider/restaurant token hitting an admin-only route gets a 403,
-    not a 401 - the token IS valid, it's just not allowed here.
+    Factory - returns a dependency that checks the user role.
+    Superadmin bypasses checks for any admin-level route.
     """
     def _check_role(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
-        if user.role not in allowed_roles:
+        if user.role not in allowed_roles and not (user.is_superadmin and "admin" in allowed_roles):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"This action requires one of these roles: {allowed_roles}.",
@@ -99,3 +104,49 @@ def require_role(allowed_roles: list[str]):
         return user
 
     return _check_role
+
+
+def require_permission(permission_key: str):
+    """
+    Fine-grained permission check for admin endpoints.
+    Superadmin bypasses checks automatically.
+    """
+    def _check_permission(
+        user: CurrentUser = Depends(get_current_user),
+        db: Session = Depends(get_db),
+    ) -> CurrentUser:
+        if user.role not in ("admin", "super_admin", "superadmin"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin token required for this action.",
+            )
+
+        if user.is_superadmin:
+            return user
+
+        # Check permissions in token payload
+        if user.permissions and permission_key in user.permissions:
+            return user
+
+        # Fresh database check
+        admin = db.query(Admin).filter(Admin.id == user.id, Admin.is_active == True).first()
+        if not admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin account not found or deactivated.",
+            )
+
+        if admin.role in ("super_admin", "superadmin"):
+            return user
+
+        if admin.admin_role:
+            role_perm_keys = {p.key for p in admin.admin_role.permissions}
+            if permission_key in role_perm_keys:
+                return user
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Missing required permission: '{permission_key}'",
+        )
+
+    return _check_permission

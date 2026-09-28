@@ -62,7 +62,6 @@ export default function RestaurantOrderDetailPage({
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
         title={`Kitchen Ticket #${resolvedParams.orderId.slice(0, 8)}`}
-        description="Detailed prep requirements, customer notes, and courier handover signals."
         actions={
           <div className="flex items-center gap-2">
             <button

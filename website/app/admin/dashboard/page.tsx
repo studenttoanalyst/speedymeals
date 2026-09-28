@@ -176,7 +176,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Platform Administration Console"
+        title="Admin Dashboard"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchData();
@@ -188,24 +188,24 @@ export default function AdminDashboardPage() {
               href="/admin/promotions"
               className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs flex items-center gap-1.5"
             >
-              <span>Promotions & Banners</span>
+              <span>Offers & Discounts</span>
             </Link>
             <Link
               href="/admin/restaurants"
-              className="px-3.5 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs flex items-center gap-1.5"
+              className="px-3.5 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus size={14} weight="bold" />
-              <span>Onboard Restaurant</span>
+              <span>Add Restaurant</span>
             </Link>
           </div>
         }
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
-        {/* LEVEL 1: Headline Executive Platform KPIs per dashboard-designer */}
+        {/* Headline Executive Platform KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            label="Gross Merchandise Value (GMV)"
+            label="Total Food Sales (Today)"
             value={formatPKR(summary?.gross_revenue_today ?? 248500)}
             change={{ value: '+14.2%', isPositive: true, period: 'vs target' }}
             accent="blue"
@@ -214,7 +214,7 @@ export default function AdminDashboardPage() {
           />
 
           <StatCard
-            label="Platform Net Revenue (10%)"
+            label="Platform Fee Revenue (10%)"
             value={formatPKR(summary?.net_revenue_today ?? 24850)}
             subValue="Strict 10% Restaurant Commission"
             accent="emerald"
@@ -223,19 +223,19 @@ export default function AdminDashboardPage() {
           />
 
           <StatCard
-            label="Active Fleet in Flight"
+            label="Riders Delivering Now"
             value={`${summary?.active_deliveries_count ?? 42} Active`}
-            subValue="Couriers on live deliveries"
+            subValue="Riders on active orders"
             accent="none"
             icon={<Bicycle size={18} weight="bold" />}
-            targetBenchmark="98.4% SLA Met"
+            targetBenchmark="98.4% On-Time"
           />
 
           <StatCard
-            label="Pending COD Cash Float Risk"
+            label="Pending Rider Cash (COD)"
             value={formatPKR(summary?.total_pending_cod_cash ?? 62400)}
-            change={{ value: '3 Breaches', isPositive: false, period: '> PKR 15k limit' }}
-            accent="red"
+            change={{ value: '3 High', isPositive: false, period: 'Over PKR 15k limit' }}
+            accent="amber"
             icon={<ShieldWarning size={18} weight="bold" />}
             targetBenchmark="Max Limit: PKR 15,000"
           />
@@ -253,7 +253,7 @@ export default function AdminDashboardPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                  <Funnel size={16} weight="bold" className="text-rose-600" />
+                  <Funnel size={16} weight="bold" className="text-slate-700" />
                   Live Dispatch Funnel
                 </h2>
                 <span className="text-xs font-mono text-slate-400">Real-time</span>
@@ -264,7 +264,7 @@ export default function AdminDashboardPage() {
                   { stage: '1. Placed (Pending Accept)', count: 4, color: 'bg-indigo-500', pct: 'w-1/6' },
                   { stage: '2. Kitchen Prep', count: 18, color: 'bg-amber-500', pct: 'w-2/5' },
                   { stage: '3. Ready for Courier Handover', count: 8, color: 'bg-blue-500', pct: 'w-1/4' },
-                  { stage: '4. Out for Delivery (In-Transit)', count: 42, color: 'bg-rose-600', pct: 'w-3/4' },
+                  { stage: '4. Out for Delivery (In-Transit)', count: 42, color: 'bg-sky-500', pct: 'w-3/4' },
                   { stage: '5. Completed / Delivered', count: 112, color: 'bg-emerald-600', pct: 'w-full' },
                 ].map((s) => (
                   <div key={s.stage} className="space-y-1">
@@ -332,9 +332,9 @@ export default function AdminDashboardPage() {
               </button>
               <button
                 onClick={() => setActiveQueueTab('float')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   activeQueueTab === 'float'
-                    ? 'bg-white text-rose-700 shadow-2xs font-bold'
+                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -361,7 +361,7 @@ export default function AdminDashboardPage() {
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-slate-900">Pending Courier Onboarding Approvals</h3>
-                <Link href="/admin/riders" className="text-xs text-rose-600 font-semibold hover:underline">
+                <Link href="/admin/riders" className="text-xs text-slate-700 font-semibold hover:underline">
                   View All Riders
                 </Link>
               </div>
@@ -395,9 +395,9 @@ export default function AdminDashboardPage() {
           )}
 
           {activeQueueTab === 'float' && (
-            <div className="bg-white border border-rose-200 rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
                   <ShieldWarning size={22} weight="bold" />
                 </div>
                 <div>
@@ -422,7 +422,7 @@ export default function AdminDashboardPage() {
 
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <div className="font-mono font-bold text-rose-600 text-sm">
+                        <div className="font-mono font-bold text-amber-800 text-sm">
                           {formatPKR(r.pending_cash_owed)}
                         </div>
                         <div className="text-[10px] text-slate-400">Limit: PKR 15,000</div>
@@ -430,7 +430,7 @@ export default function AdminDashboardPage() {
 
                       <Link
                         href={`/admin/riders/${r.id}`}
-                        className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow-xs"
+                        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
                       >
                         Reconcile Cash
                       </Link>

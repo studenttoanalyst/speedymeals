@@ -6,16 +6,16 @@ import { Timer, CheckCircle, WarningCircle, ShieldCheck, Lightning } from '@phos
 
 export function SlaLatencyChart() {
   const percentiles = [
-    { label: 'P50 (Median)', value: '18.4 mins', status: 'Lightning', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'P90 Target', value: '25.8 mins', status: 'On Track', color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'P99 Tail', value: '34.2 mins', status: 'Investigating', color: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Average (Median)', value: '18.4 mins', status: 'Fast', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Most Deliveries (90%)', value: '25.8 mins', status: 'On Time', color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Slowest (99%)', value: '34.2 mins', status: 'Needs Review', color: 'text-rose-600', bg: 'bg-rose-50' },
   ];
 
   const buckets = [
-    { range: '< 20 mins', count: 94, pct: 51.1, color: 'bg-emerald-500', label: 'Ultra Fast' },
-    { range: '20–30 mins', count: 72, pct: 39.1, color: 'bg-blue-500', label: 'On Target' },
-    { range: '30–40 mins', count: 14, pct: 7.6, color: 'bg-amber-500', label: 'Elevated Prep' },
-    { range: '> 40 mins', count: 4, pct: 2.2, color: 'bg-rose-600', label: 'SLA Breached' },
+    { range: '< 20 mins', count: 94, pct: 51.1, color: 'bg-emerald-500', label: 'Very Fast' },
+    { range: '20-30 mins', count: 72, pct: 39.1, color: 'bg-blue-500', label: 'On Time' },
+    { range: '30-40 mins', count: 14, pct: 7.6, color: 'bg-amber-500', label: 'Slower Prep' },
+    { range: '> 40 mins', count: 4, pct: 2.2, color: 'bg-rose-600', label: 'Late (>40 mins)' },
   ];
 
   const errorBudgetCompliant = 97.4;
@@ -32,13 +32,13 @@ export function SlaLatencyChart() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-slate-900 tracking-tight">
-                  Delivery Latency & SLO Error Budget
+                  Delivery Times & 30-Minute Target
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                  SLO TARGET &lt; 30 MINS
+                  TARGET: UNDER 30 MINS
                 </span>
               </div>
-              <p className="text-xs text-slate-400">P50 / P90 / P99 fulfillment latency percentiles across active Karachi zones</p>
+              <p className="text-xs text-slate-400">Fastest, average, and slowest delivery times across Karachi</p>
             </div>
           </div>
 
@@ -46,7 +46,7 @@ export function SlaLatencyChart() {
             <div className="text-sm font-mono font-bold text-emerald-600">
               {errorBudgetCompliant}%
             </div>
-            <div className="text-[10px] font-mono text-slate-400">SLO Adherence</div>
+            <div className="text-[10px] font-mono text-slate-400">On-Time Rate</div>
           </div>
         </div>
 
@@ -66,8 +66,8 @@ export function SlaLatencyChart() {
         {/* Latency Distribution Histogram */}
         <div className="space-y-2 mt-4">
           <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
-            <span>Fulfillment Time Distribution (184 orders)</span>
-            <span>Error Budget Remaining: 89.2%</span>
+            <span>Delivery Times Breakdown (184 orders)</span>
+            <span>On-Time Score: 89.2%</span>
           </div>
 
           <div className="space-y-2">
@@ -102,7 +102,7 @@ export function SlaLatencyChart() {
           <ShieldCheck size={15} weight="bold" />
           <span>97.4% customer orders delivered within 30-minute promise</span>
         </span>
-        <span className="text-slate-400 font-mono text-[11px]">SRE Engine v2.4</span>
+        <span className="text-slate-400 font-mono text-[11px]">SpeedyMeals Dispatch</span>
       </div>
     </div>
   );

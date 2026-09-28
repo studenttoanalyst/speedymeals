@@ -72,7 +72,7 @@ export default function RestaurantReportsPage() {
       align: 'right',
       sortable: true,
       render: (r) => (
-        <span className="font-mono text-xs font-medium text-rose-600">
+        <span className="font-mono text-xs font-medium text-slate-600">
           −{formatPKR(r.commission)}
         </span>
       ),

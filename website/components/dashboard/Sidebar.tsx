@@ -58,30 +58,37 @@ export function Sidebar({ role }: SidebarProps) {
     {
       title: 'Overview',
       items: [
-        { label: 'Executive Dashboard', href: '/admin/dashboard', icon: ChartLineUp },
+        { label: 'Admin Dashboard', href: '/admin/dashboard', icon: ChartLineUp },
       ],
     },
     {
       title: 'Platform Management',
       items: [
         { label: 'Restaurants', href: '/admin/restaurants', icon: Storefront },
-        { label: 'Riders Fleet', href: '/admin/riders', icon: Bicycle },
+        { label: 'Riders & Couriers', href: '/admin/riders', icon: Bicycle },
         { label: 'Customers', href: '/admin/customers', icon: Users },
       ],
     },
     {
-      title: 'Operations & Marketing',
+      title: 'Orders & Marketing',
       items: [
-        { label: 'Global Orders', href: '/admin/orders', icon: Receipt },
-        { label: 'Promotions & Banners', href: '/admin/promotions', icon: Tag },
+        { label: 'All Orders', href: '/admin/orders', icon: Receipt },
+        { label: 'Offers & Discounts', href: '/admin/promotions', icon: Tag },
       ],
     },
     {
-      title: 'Finance & Ledgers',
+      title: 'Money & Payouts',
       items: [
-        { label: 'Restaurant Settlements', href: '/admin/settlements', icon: Coins },
-        { label: 'Rider Payouts & Float', href: '/admin/payouts', icon: CurrencyDollar },
+        { label: 'Restaurant Payouts', href: '/admin/settlements', icon: Coins },
+        { label: 'Rider Payouts & Cash', href: '/admin/payouts', icon: CurrencyDollar },
         { label: 'Analytics & Reports', href: '/admin/reports', icon: ChartLineUp },
+      ],
+    },
+    {
+      title: 'Roles & Staff Access',
+      items: [
+        { label: 'Roles & Permissions', href: '/admin/roles', icon: ShieldCheck },
+        { label: 'Staff Accounts', href: '/admin/accounts', icon: Users },
       ],
     },
   ];
@@ -90,32 +97,32 @@ export function Sidebar({ role }: SidebarProps) {
     {
       title: 'Overview',
       items: [
-        { label: 'Kitchen Overview', href: '/restaurant/dashboard', icon: ChartLineUp },
+        { label: 'Restaurant Dashboard', href: '/restaurant/dashboard', icon: ChartLineUp },
       ],
     },
     {
-      title: 'Operations',
+      title: 'Orders',
       items: [
-        { label: 'Live Kitchen Orders', href: '/restaurant/orders', icon: Receipt },
+        { label: 'Kitchen Orders', href: '/restaurant/orders', icon: Receipt },
       ],
     },
     {
-      title: 'Menu Catalog',
+      title: 'Food Menu',
       items: [
-        { label: 'Dishes & Modifiers', href: '/restaurant/menu', icon: ForkKnife },
+        { label: 'Food Menu & Dishes', href: '/restaurant/menu', icon: ForkKnife },
       ],
     },
     {
-      title: 'Finance & Earnings',
+      title: 'Money & Earnings',
       items: [
-        { label: 'Weekly Settlements', href: '/restaurant/settlements', icon: Coins },
+        { label: 'Weekly Payouts', href: '/restaurant/settlements', icon: Coins },
         { label: 'Performance Reports', href: '/restaurant/reports', icon: ChartLineUp },
       ],
     },
     {
-      title: 'Storefront Settings',
+      title: 'Restaurant Settings',
       items: [
-        { label: 'Brand & Media Profile', href: '/restaurant/profile', icon: Sliders },
+        { label: 'Profile & Photos', href: '/restaurant/profile', icon: Sliders },
       ],
     },
   ];
@@ -143,7 +150,7 @@ export function Sidebar({ role }: SidebarProps) {
                 SPEEDY<span className="text-rose-600">MEALS</span>
               </div>
               <div className="text-[10px] text-slate-400 font-medium">
-                {role === 'admin' ? 'Administration Center' : 'Partner Restaurant Portal'}
+                {role === 'admin' ? 'Admin Management Portal' : 'Restaurant Portal'}
               </div>
             </div>
           </Link>
@@ -154,7 +161,7 @@ export function Sidebar({ role }: SidebarProps) {
                 : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
             }`}
           >
-            {role === 'admin' ? 'Admin' : 'Partner'}
+            {role === 'admin' ? 'Admin' : 'Restaurant'}
           </span>
         </div>
 
@@ -179,21 +186,23 @@ export function Sidebar({ role }: SidebarProps) {
                     href={item.href}
                     className={`flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all ${
                       isActive
-                        ? 'bg-rose-50 text-rose-700 font-semibold shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon
                         size={17}
                         weight={isActive ? 'bold' : 'regular'}
-                        className={isActive ? 'text-rose-600' : 'text-slate-400'}
+                        className={isActive ? 'text-white' : 'text-slate-400'}
                       />
                       <span>{item.label}</span>
                     </div>
 
                     {item.badge !== undefined && (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700">
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                        isActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700'
+                      }`}>
                         {item.badge}
                       </span>
                     )}
@@ -209,7 +218,7 @@ export function Sidebar({ role }: SidebarProps) {
       <div className="p-3 border-t border-slate-100 bg-slate-50/50">
         <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-white border border-slate-200">
           <div className="flex items-center gap-2 truncate">
-            <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase shrink-0">
+            <div className="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold uppercase shrink-0">
               {mounted && user?.email ? user.email.charAt(0) : (role === 'admin' ? 'A' : 'R')}
             </div>
             <div className="truncate text-left">
@@ -225,7 +234,7 @@ export function Sidebar({ role }: SidebarProps) {
           <button
             onClick={handleLogout}
             title="Sign out"
-            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
           >
             <SignOut size={16} weight="bold" />
           </button>

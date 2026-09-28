@@ -1,18 +1,20 @@
 """
-OTP business logic — generate, send (console-mode for now), verify, resend-cooldown.
-Also: Step 5/6 — issuing JWT tokens after a successful OTP verify, and
+OTP business logic - generate, send (console-mode for now), verify, resend-cooldown.
+Also: Step 5/6 - issuing JWT tokens after a successful OTP verify, and
 tracking/revoking refresh tokens (logout).
+Also: Forgot password flows and mandatory initial password rotation.
 
 Per ADR-001 (docs/decisions/ADR-001-otp-sms-provider.md):
 - Real SMS provider is not yet decided.
 - `_send_otp_via_console` is the ONLY place that "sends" the OTP. When a real
-  Pakistani provider is chosen post-MVP, only this function needs to change —
+  Pakistani provider is chosen post-MVP, only this function needs to change -
   nothing else in this file, and nothing in routes.py, needs to know about it.
 """
 import hashlib
 import random
+import secrets
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -21,7 +23,7 @@ from app.core.config import settings
 from app.core.redis_client import redis_client
 from app.core.security import hash_password, verify_password
 from app.platform.auth import jwt_utils
-from app.platform.auth.models import Admin, RefreshToken
+from app.platform.auth.models import Admin, RefreshToken, PasswordResetToken
 from app.platform.users.models import User
 from app.modules.food_delivery.models import Restaurant
 from app.platform.wallet_payment.models import Rider
@@ -40,8 +42,8 @@ def _cooldown_key(phone_number: str) -> str:
 
 def _send_otp_via_console(phone_number: str, otp_code: str) -> None:
     """
-    Step 2 — console/log-mode sender (dev/test default, SMS_PROVIDER_MODE=console).
-    Prints the OTP to the server log instead of sending a real SMS — zero cost,
+    Step 2 - console/log-mode sender (dev/test default, SMS_PROVIDER_MODE=console).
+    Prints the OTP to the server log instead of sending a real SMS - zero cost,
     zero external dependency, while the rest of the auth flow is built.
     """
     print(f"[OTP-CONSOLE] Sending OTP {otp_code} to {phone_number}")
@@ -49,7 +51,7 @@ def _send_otp_via_console(phone_number: str, otp_code: str) -> None:
 
 def generate_and_send_otp(phone_number: str) -> None:
     """
-    Step 2 (with Step 4 cooldown guard) — generate a 6-digit OTP, store it in
+    Step 2 (with Step 4 cooldown guard) - generate a 6-digit OTP, store it in
     Redis with a 5-minute expiry, and send it (console mode for now).
     Raises 429 if the caller is still inside the resend cooldown window.
     """
@@ -70,7 +72,7 @@ def generate_and_send_otp(phone_number: str) -> None:
 
 def verify_otp(phone_number: str, otp_code: str) -> None:
     """
-    Step 3 — check the submitted code against what's stored in Redis.
+    Step 3 - check the submitted code against what's stored in Redis.
     On success, the OTP is deleted immediately (one-time use, prevents replay).
     Raises 400 on missing/expired/mismatched OTP.
     """
@@ -88,19 +90,19 @@ def verify_otp(phone_number: str, otp_code: str) -> None:
             detail="Incorrect OTP.",
         )
 
-    # One-time use — delete immediately after a successful match.
+    # One-time use - delete immediately after a successful match.
     redis_client.delete(_otp_key(phone_number))
 
 
 def _hash_token(raw_token: str) -> str:
-    """We store a hash of the refresh token, never the raw value — same
+    """We store a hash of the refresh token, never the raw value - same
     principle as password hashing. If the DB leaks, tokens can't be reused."""
     return hashlib.sha256(raw_token.encode()).hexdigest()
 
 
 def get_or_create_customer(db: Session, phone_number: str, country_code: str) -> User:
     """
-    Step 5 — after OTP verify succeeds, find the User row for this phone
+    Step 5 - after OTP verify succeeds, find the User row for this phone
     number, or create one if it's their first time (spec Section 7 Step 2:
     name is collected separately/later, so we use a placeholder here).
     """
@@ -111,7 +113,7 @@ def get_or_create_customer(db: Session, phone_number: str, country_code: str) ->
     user = User(
         phone_number=phone_number,
         country_code=country_code,
-        name="New User",  # placeholder — updated later via profile endpoint (Step 11)
+        name="New User",  # placeholder - updated later via profile endpoint (Step 11)
     )
     db.add(user)
     db.commit()
@@ -129,9 +131,9 @@ def get_or_create_rider(
     vehicle_registration: str | None,
 ) -> Rider:
     """
-    Phase 3 Step 0 (prerequisite) — mirrors get_or_create_customer, but for
+    Phase 3 Step 0 (prerequisite) - mirrors get_or_create_customer, but for
     riders. First-time phone -> create Rider row, approval_status="pending"
-    (Admin approval, spec Sec 8 Step 2, is a separate later step — not
+    (Admin approval, spec Sec 8 Step 2, is a separate later step - not
     enforced here, this only handles account creation + login).
     Existing phone -> plain login, signup fields in the request are ignored
     (rider is already on file, no re-submit / no overwrite on every login).
@@ -159,12 +161,24 @@ def get_or_create_rider(
     return rider
 
 
-def issue_tokens(db: Session, subject_id: uuid.UUID, role: str) -> dict:
+def issue_tokens(
+    db: Session,
+    subject_id: uuid.UUID,
+    role: str,
+    permissions: list[str] | None = None,
+    must_change_password: bool = False,
+) -> dict:
     """
-    Step 5 + Step 6 — create an access token (not persisted, stateless) and
+    Step 5 + Step 6 - create an access token (not persisted, stateless) and
     a refresh token (persisted as a hash so logout/revocation is possible).
+    Supports optional permissions array and must_change_password flag for RBAC.
     """
-    access_token = jwt_utils.create_access_token(subject_id, role)
+    access_token = jwt_utils.create_access_token(
+        subject_id,
+        role,
+        permissions=permissions,
+        must_change_password=must_change_password,
+    )
     refresh_token, expires_at = jwt_utils.create_refresh_token(subject_id, role)
 
     db.add(RefreshToken(
@@ -180,6 +194,7 @@ def issue_tokens(db: Session, subject_id: uuid.UUID, role: str) -> dict:
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
+        "must_change_password": must_change_password,
     }
 
 
@@ -207,10 +222,7 @@ def revoke_refresh_token(db: Session, raw_refresh_token: str) -> None:
 
 def refresh_access_token(db: Session, raw_refresh_token: str) -> dict:
     """
-    Phase 10 hardening — Step 6 was missing the actual refresh endpoint:
-    revoke() existed (logout) and issue_tokens() existed (login), but
-    nothing let an expired-access-token client trade a still-valid
-    refresh token for a new pair. Rotates on use (old refresh token is
+    Phase 10 hardening - rotates on use (old refresh token is
     revoked here, a brand new pair is issued) so a leaked-but-unused
     refresh token has a single-use window, not a 30-day one.
     """
@@ -235,7 +247,7 @@ def refresh_access_token(db: Session, raw_refresh_token: str) -> dict:
 
 def authenticate_restaurant_by_password(db: Session, email: str, password: str) -> Restaurant:
     """
-    Step 9, Path A — email+password login. Restaurant rows are created by
+    Step 9, Path A - email+password login. Restaurant rows are created by
     Admin during onboarding (spec Sec 9 Step 1), never by self-signup, so
     unlike get_or_create_customer there is no "create" branch here: if the
     email doesn't exist or the password is wrong, both fail the same way
@@ -254,7 +266,7 @@ def authenticate_restaurant_by_password(db: Session, email: str, password: str) 
 
 def get_restaurant_by_phone(db: Session, phone_number: str) -> Restaurant:
     """
-    Step 9, Path B — after OTP verify succeeds, look up the restaurant by
+    Step 9, Path B - after OTP verify succeeds, look up the restaurant by
     phone. No auto-create (unlike get_or_create_customer): a restaurant
     logging in via OTP must already exist from Admin onboarding.
     """
@@ -271,12 +283,12 @@ def get_restaurant_by_phone(db: Session, phone_number: str) -> Restaurant:
 
 def authenticate_admin(db: Session, email: str, password: str) -> Admin:
     """
-    Step 10 — admin email+password login. Same 401-for-both-cases pattern
+    Step 10 - admin email+password login. Same 401-for-both-cases pattern
     as authenticate_restaurant_by_password, so we never leak whether an
     email is a registered admin. Also rejects a deactivated admin
     (is_active=False) with the same generic message.
     """
-    admin = db.query(Admin).filter(Admin.email == email).first()
+    admin = db.query(Admin).filter(Admin.email == email.strip().lower()).first()
 
     if admin is None or not admin.is_active or not verify_password(password, admin.password_hash):
         raise HTTPException(
@@ -284,26 +296,177 @@ def authenticate_admin(db: Session, email: str, password: str) -> Admin:
             detail="Incorrect email or password.",
         )
 
+    admin.last_login_at = datetime.now(timezone.utc)
+    db.commit()
     return admin
+
+
+def get_admin_permissions(admin: Admin) -> list[str]:
+    """Helper to extract active permission keys for an Admin entity."""
+    if admin.role in ("super_admin", "superadmin"):
+        return ["*"]
+    if admin.admin_role:
+        return [p.key for p in admin.admin_role.permissions]
+    return []
+
+
+def request_password_reset(db: Session, email: str, role: str) -> dict:
+    """
+    Forgot Password Flow:
+    Generates a cryptographically secure 32-character random token, stores its
+    SHA-256 hash in password_reset_tokens table with 30-minute expiration,
+    and returns a success message (with dev/test reset link logged).
+    Uniform response prevents account enumeration.
+    """
+    email_clean = email.strip().lower()
+    user_exists = False
+
+    if role == "admin":
+        user_exists = db.query(Admin).filter(Admin.email == email_clean, Admin.is_active == True).first() is not None
+    elif role == "restaurant":
+        user_exists = db.query(Restaurant).filter(Restaurant.email == email_clean).first() is not None
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported role for password reset.")
+
+    if not user_exists:
+        return {
+            "message": "If an active account exists with that email, password reset instructions have been generated.",
+            "reset_token": None,
+        }
+
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+
+    # Invalidate previous unused reset tokens for this email and role
+    db.query(PasswordResetToken).filter(
+        PasswordResetToken.email == email_clean,
+        PasswordResetToken.role == role,
+        PasswordResetToken.status == "valid",
+    ).update({"status": "expired"})
+
+    reset_record = PasswordResetToken(
+        email=email_clean,
+        role=role,
+        token_hash=token_hash,
+        status="valid",
+        expires_at=expires_at,
+    )
+    db.add(reset_record)
+    db.commit()
+
+    portal_path = "/admin/reset-password" if role == "admin" else "/restaurant/reset-password"
+    reset_url = f"https://speedymeals.pk{portal_path}?token={raw_token}"
+    print(f"[AUTH-RESET] Password reset link for {role} <{email_clean}>: {reset_url}")
+
+    return {
+        "message": "If an active account exists with that email, password reset instructions have been generated.",
+        "reset_token": raw_token,
+        "reset_url": reset_url,
+    }
+
+
+def verify_and_consume_reset_token(db: Session, token: str, new_password: str, role: str) -> dict:
+    """
+    Validates password reset token, updates password with fresh bcrypt hash,
+    and invalidates all active sessions for that account.
+    """
+    token_hash = hashlib.sha256(token.strip().encode()).hexdigest()
+    record = db.query(PasswordResetToken).filter(
+        PasswordResetToken.token_hash == token_hash,
+        PasswordResetToken.role == role,
+        PasswordResetToken.status == "valid",
+    ).first()
+
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired password reset token.",
+        )
+
+    now = datetime.now(timezone.utc)
+    if record.expires_at < now:
+        record.status = "expired"
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password reset token has expired. Please request a new one.",
+        )
+
+    new_hash = hash_password(new_password)
+    user_id = None
+
+    if role == "admin":
+        admin = db.query(Admin).filter(Admin.email == record.email).first()
+        if not admin:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin account not found.")
+        admin.password_hash = new_hash
+        admin.must_change_password = False
+        user_id = admin.id
+    elif role == "restaurant":
+        restaurant = db.query(Restaurant).filter(Restaurant.email == record.email).first()
+        if not restaurant:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Restaurant account not found.")
+        restaurant.password_hash = new_hash
+        user_id = restaurant.id
+
+    record.status = "used"
+
+    # Revoke all active refresh tokens for security
+    if user_id:
+        db.query(RefreshToken).filter(
+            RefreshToken.subject_id == user_id,
+            RefreshToken.role == role,
+        ).update({"status": "revoked"})
+
+    db.commit()
+    return {"message": "Password has been successfully reset. Please log in with your new password."}
+
+
+def change_initial_password(db: Session, admin_id: uuid.UUID, new_password: str) -> dict:
+    """
+    Mandatory initial password change upon first login for newly provisioned admin staff.
+    """
+    admin = db.query(Admin).filter(Admin.id == admin_id, Admin.is_active == True).first()
+    if not admin:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin account not found.")
+
+    admin.password_hash = hash_password(new_password)
+    admin.must_change_password = False
+    admin.last_login_at = datetime.now(timezone.utc)
+    db.commit()
+
+    perms = get_admin_permissions(admin)
+    return issue_tokens(db, admin.id, role="admin", permissions=perms, must_change_password=False)
 
 
 def seed_first_admin(db: Session) -> None:
     """
-    Step 10 — auto-seed on app startup (see ADR-002-first-admin-seed.md).
-    Runs once per startup: no-op if ANY admin row already exists (does not
-    re-check by email, since the whole point is "is the table empty").
-    Password is bcrypt-hashed before insert, same as every other password
-    field — never stored/logged raw.
+    Step 10 - auto-seed on app startup (see ADR-002-first-admin-seed.md).
+    Runs once per startup: no-op if ANY admin row already exists.
+    Assigns the seeded Superadmin role if available.
     """
-    admin_exists = db.query(Admin).first() is not None
-    if admin_exists:
+    admin = db.query(Admin).first()
+
+    from app.modules.admin_roles.models import AdminRole
+    superadmin_role = db.query(AdminRole).filter(AdminRole.slug == "superadmin").first()
+    superadmin_role_id = superadmin_role.id if superadmin_role else None
+
+    if admin is not None:
+        if admin.role_id is None and superadmin_role_id is not None:
+            admin.role_id = superadmin_role_id
+            db.commit()
         return
 
     db.add(Admin(
         email=settings.FIRST_ADMIN_EMAIL,
         password_hash=hash_password(settings.FIRST_ADMIN_PASSWORD),
         role="super_admin",
+        role_id=superadmin_role_id,
+        first_name="Super",
+        last_name="Admin",
         is_active=True,
+        must_change_password=False,
     ))
     db.commit()
 
@@ -380,4 +543,4 @@ def seed_demo_restaurant(db: Session) -> None:
             ),
         ]
         db.add_all(items)
-        db.commit()
+        db.commit()

@@ -164,7 +164,7 @@ export function FlowingVelocityChart({
           Dinner Peak: 19:00 - 23:00
         </span>
         <span className="text-slate-400 ml-auto hidden md:inline">
-          Hover hours to inspect prep throughput & SLA
+          Hover hours to inspect order count & speed
         </span>
       </div>
 
@@ -385,15 +385,15 @@ export function FlowingVelocityChart({
             </div>
 
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 block uppercase">Avg Kitchen Prep</span>
+              <span className="text-[10px] text-slate-400 block uppercase">Avg Kitchen Cooking</span>
               <span className="text-amber-300 font-bold flex items-center justify-end gap-1">
                 <Timer size={12} weight="bold" />
-                {activePoint.prepMins}m SLA
+                {activePoint.prepMins}m Prep
               </span>
             </div>
 
             <div className="text-right pl-3 border-l border-slate-700">
-              <span className="text-[10px] text-slate-400 block uppercase">Dispatch SLA</span>
+              <span className="text-[10px] text-slate-400 block uppercase">Delivery Speed</span>
               <span className="text-emerald-400 font-bold flex items-center justify-end gap-1">
                 <CheckCircle size={12} weight="bold" />
                 {activePoint.sla}% On-Time
@@ -408,20 +408,20 @@ export function FlowingVelocityChart({
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shadow-2xs" />
-            <span className="font-medium text-slate-700">Throughput Velocity Trajectory</span>
+            <span className="font-medium text-slate-700">Orders Flow Trend</span>
           </span>
           <span className="flex items-center gap-1.5 text-slate-500">
             <span className="w-2.5 h-2.5 rounded-xs bg-slate-400" />
-            <span>Hourly Column Volume</span>
+            <span>Hourly Orders Bar</span>
           </span>
         </div>
 
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <span className="text-slate-600">
-            Peak Velocity: <strong className="text-slate-900">{peakPoint.orders} orders/hr</strong> ({peakPoint.time})
+            Peak Hour: <strong className="text-slate-900">{peakPoint.orders} orders/hr</strong> ({peakPoint.time})
           </span>
           <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-semibold">
-            All-Day SLA: 98.4% On-Time
+            All-Day On-Time: 98.4%
           </span>
         </div>
       </div>

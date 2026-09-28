@@ -177,7 +177,7 @@ export default function AdminOrdersPage() {
     },
     {
       key: 'actions',
-      title: 'Intervention',
+      title: 'Actions',
       align: 'right',
       render: (o) => (
         <button
@@ -185,9 +185,9 @@ export default function AdminOrdersPage() {
             e.stopPropagation();
             handleRowClick(o);
           }}
-          className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs"
+          className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs cursor-pointer"
         >
-          Inspect
+          View Details
         </button>
       ),
     },
@@ -196,7 +196,7 @@ export default function AdminOrdersPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Global Order Operations Console"
+        title="All Orders & Live Dispatch"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchOrders();
@@ -234,10 +234,10 @@ export default function AdminOrdersPage() {
             <div className="p-6 space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                  <span className="font-mono text-xs font-bold text-rose-600">
+                  <span className="font-mono text-xs font-bold text-slate-500">
                     #{selectedOrder.id.slice(0, 8)}
                   </span>
-                  <h2 className="text-base font-bold text-slate-900">Order Telemetry</h2>
+                  <h2 className="text-base font-bold text-slate-900">Order Details & Status</h2>
                 </div>
                 <button
                   onClick={() => setSelectedOrder(null)}
@@ -328,16 +328,16 @@ export default function AdminOrdersPage() {
                 <button
                   type="button"
                   onClick={() => setReassignModalOpen(true)}
-                  className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs"
+                  className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs cursor-pointer"
                 >
                   Reassign Courier
                 </button>
                 <button
                   type="button"
                   onClick={() => setCancelModalOpen(true)}
-                  className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow-xs"
+                  className="flex-1 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-semibold rounded-lg text-xs border border-slate-200 transition-colors cursor-pointer"
                 >
-                  Emergency Cancel
+                  Cancel Order
                 </button>
               </div>
             )}
@@ -362,7 +362,7 @@ export default function AdminOrdersPage() {
                   <option value="">Select courier...</option>
                   {availableRiders.map((r) => (
                     <option key={r.id} value={r.id}>
-                      {r.name} ({r.vehicle_type || 'Motorcycle'}) — {r.phone_number}
+                      {r.name} ({r.vehicle_type || 'Motorcycle'}) - {r.phone_number}
                     </option>
                   ))}
                 </select>
@@ -372,13 +372,13 @@ export default function AdminOrdersPage() {
                 <button
                   type="button"
                   onClick={() => setReassignModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
+                  className="px-4 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
                 >
                   Confirm Reassign
                 </button>
@@ -392,16 +392,16 @@ export default function AdminOrdersPage() {
       {cancelModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
-            <h3 className="text-base font-bold text-slate-900">Emergency Cancel Order</h3>
+            <h3 className="text-base font-bold text-slate-900">Cancel Order</h3>
             <form onSubmit={handleCancelOrder} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Cancellation Rationale</label>
+                <label className="font-semibold text-slate-700">Reason for Cancellation</label>
                 <textarea
                   required
                   rows={3}
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  placeholder="Specify reason for manual administrative cancellation..."
+                  placeholder="Specify reason for cancelling this order..."
                   className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
                 />
               </div>
@@ -410,13 +410,13 @@ export default function AdminOrdersPage() {
                 <button
                   type="button"
                   onClick={() => setCancelModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Go Back
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
+                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs cursor-pointer"
                 >
                   Cancel & Refund
                 </button>

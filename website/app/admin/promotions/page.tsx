@@ -122,7 +122,7 @@ export default function AdminPromotionsPage() {
       sortable: true,
       render: (p) => (
         <div>
-          <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+          <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
             {p.code}
           </span>
           <div className="font-semibold text-slate-900 text-xs mt-1">{p.title}</div>
@@ -168,7 +168,7 @@ export default function AdminPromotionsPage() {
       render: (p) => (
         <button
           onClick={() => handleToggle(p)}
-          className={`text-xs font-semibold flex items-center gap-1.5 transition-colors ml-auto ${
+          className={`text-xs font-semibold flex items-center gap-1.5 transition-colors ml-auto cursor-pointer ${
             p.is_active ? 'text-emerald-700' : 'text-slate-400'
           }`}
         >
@@ -186,7 +186,7 @@ export default function AdminPromotionsPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Promotions & Marketing Studio"
+        title="Offers & Discounts"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchPromotions();
@@ -195,7 +195,7 @@ export default function AdminPromotionsPage() {
         actions={
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus size={15} weight="bold" />
             <span>Create Campaign</span>
@@ -208,7 +208,7 @@ export default function AdminPromotionsPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Megaphone size={16} weight="bold" className="text-rose-600" />
+              <Megaphone size={16} weight="bold" className="text-slate-700" />
               Live Customer App Carousel Banners
             </h3>
             <span className="text-xs text-slate-400">Dimensions: 1200×400px (3:1)</span>
@@ -357,7 +357,7 @@ export default function AdminPromotionsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
+                  className="px-5 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs"
                 >
                   Launch Campaign
                 </button>

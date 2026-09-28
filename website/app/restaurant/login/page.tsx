@@ -135,7 +135,7 @@ export default function RestaurantLoginPage() {
           className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium"
         >
           <ArrowLeft size={13} weight="bold" />
-          <span>Return to SpeedyMeals Home</span>
+          <span>Back to SpeedyMeals Home</span>
         </Link>
       </div>
 
@@ -147,7 +147,7 @@ export default function RestaurantLoginPage() {
               SPEEDY<span className="text-rose-600">MEALS</span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Restaurant Partner Portal
+              Restaurant Portal
             </p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -185,7 +185,7 @@ export default function RestaurantLoginPage() {
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            Mobile OTP Login
+            Mobile Code (SMS)
           </button>
         </div>
 
@@ -208,7 +208,7 @@ export default function RestaurantLoginPage() {
           <form onSubmit={handlePasswordLogin} className="space-y-4 text-xs">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Storefront Email
+                Restaurant Email
               </label>
               <div className="relative">
                 <EnvelopeSimple size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -224,9 +224,17 @@ export default function RestaurantLoginPage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Store Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-semibold text-slate-700">
+                  Password
+                </label>
+                <Link
+                  href="/restaurant/forgot-password"
+                  className="text-slate-400 hover:text-rose-600 transition-colors font-medium text-[11px]"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
@@ -251,9 +259,9 @@ export default function RestaurantLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
-              <span>{isLoading ? 'Authenticating Partner...' : 'Enter Kitchen Console'}</span>
+              <span>{isLoading ? 'Logging In...' : 'Log In to Restaurant Portal'}</span>
               <ArrowRight size={14} weight="bold" />
             </button>
           </form>
@@ -266,7 +274,7 @@ export default function RestaurantLoginPage() {
               <form onSubmit={handleRequestOTP} className="space-y-4">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Store Registered Mobile (Pakistan)
+                    Registered Mobile Number
                   </label>
                   <div className="flex gap-2">
                     <div className="px-3 py-2.5 border border-slate-200 bg-slate-100 rounded-xl font-mono text-slate-600 font-semibold">
@@ -289,9 +297,9 @@ export default function RestaurantLoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading || !phoneNumber}
-                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
-                  <span>{isLoading ? 'Sending SMS OTP...' : 'Send Verification OTP'}</span>
+                  <span>{isLoading ? 'Sending SMS Code...' : 'Send Login Code'}</span>
                   <ArrowRight size={14} weight="bold" />
                 </button>
               </form>
@@ -299,11 +307,11 @@ export default function RestaurantLoginPage() {
               <form onSubmit={handleVerifyOTP} className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="font-semibold text-slate-700">Enter 6-Digit OTP</label>
+                    <label className="font-semibold text-slate-700">Enter 6-Digit Code</label>
                     <button
                       type="button"
                       onClick={() => setOtpSent(false)}
-                      className="text-[11px] text-rose-600 hover:underline font-semibold"
+                      className="text-[11px] text-rose-600 hover:underline font-semibold cursor-pointer"
                     >
                       Change Number
                     </button>
@@ -322,9 +330,9 @@ export default function RestaurantLoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading || otpCode.length < 4}
-                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
-                  <span>{isLoading ? 'Verifying OTP...' : 'Verify OTP & Log In'}</span>
+                  <span>{isLoading ? 'Verifying Code...' : 'Verify Code & Log In'}</span>
                   <ArrowRight size={14} weight="bold" />
                 </button>
 
@@ -333,9 +341,9 @@ export default function RestaurantLoginPage() {
                     type="button"
                     disabled={cooldown > 0 || isLoading}
                     onClick={handleRequestOTP}
-                    className="text-slate-400 hover:text-slate-700 text-[11px] disabled:opacity-50 font-medium"
+                    className="text-slate-400 hover:text-slate-700 text-[11px] disabled:opacity-50 font-medium cursor-pointer"
                   >
-                    {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP to Mobile'}
+                    {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend Code by SMS'}
                   </button>
                 </div>
               </form>

@@ -49,11 +49,6 @@ export function Topbar({
         <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
           {title}
         </h1>
-        {description && (
-          <p className="text-xs text-slate-500 hidden sm:block print:block print:mt-1">
-            {description}
-          </p>
-        )}
       </div>
 
       <div className="flex items-center gap-3 print:hidden">
@@ -61,18 +56,18 @@ export function Topbar({
         <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-[11px] font-medium text-slate-600">
           {backendStatus === 'connected' ? (
             <>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>FastAPI Backend Active</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Server Connected</span>
             </>
           ) : backendStatus === 'checking' ? (
             <>
               <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span>Checking Backend...</span>
+              <span>Connecting to Server...</span>
             </>
           ) : (
             <>
               <span className="w-2 h-2 rounded-full bg-slate-400" />
-              <span>Offline / Local Data Mode</span>
+              <span>Offline Mode (Local Data)</span>
             </>
           )}
         </div>
@@ -82,9 +77,9 @@ export function Topbar({
             onClick={onRefresh}
             disabled={isRefreshing}
             title="Refresh Data"
-            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-40"
+            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-40 cursor-pointer"
           >
-            <ArrowClockwise size={15} weight="bold" className={isRefreshing ? 'animate-spin text-rose-600' : ''} />
+            <ArrowClockwise size={15} weight="bold" className={isRefreshing ? 'animate-spin text-slate-700' : ''} />
           </button>
         )}
 

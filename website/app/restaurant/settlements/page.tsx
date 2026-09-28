@@ -177,7 +177,7 @@ export default function RestaurantSettlementsPage() {
   const columns: Column<RestaurantSettlement>[] = [
     {
       key: 'period',
-      title: 'Settlement Period',
+      title: 'Payout Period',
       sortable: true,
       render: (s) => (
         <div>
@@ -190,7 +190,7 @@ export default function RestaurantSettlementsPage() {
     },
     {
       key: 'total_sales',
-      title: 'Gross Food Volume',
+      title: 'Total Food Sales',
       align: 'right',
       sortable: true,
       render: (s) => (
@@ -205,14 +205,14 @@ export default function RestaurantSettlementsPage() {
       align: 'right',
       sortable: true,
       render: (s) => (
-        <span className="font-mono font-medium text-rose-600">
+        <span className="font-mono font-medium text-slate-600">
           −{formatPKR(s.commission_deducted)}
         </span>
       ),
     },
     {
       key: 'net_payable',
-      title: 'Net Bank Transfer',
+      title: 'Your Bank Payout (Net)',
       align: 'right',
       sortable: true,
       render: (s) => (
@@ -228,7 +228,7 @@ export default function RestaurantSettlementsPage() {
     },
     {
       key: 'paid_at',
-      title: 'Disbursement Date',
+      title: 'Payout Date',
       render: (s) => (
         <span className="text-xs text-slate-500 font-mono">
           {s.paid_at ? new Date(s.paid_at).toLocaleDateString() : 'Scheduled Friday'}
@@ -237,17 +237,17 @@ export default function RestaurantSettlementsPage() {
     },
     {
       key: 'actions',
-      title: 'Invoice',
+      title: 'Bill / Receipt',
       align: 'right',
       render: (s) => (
         <button
           type="button"
           onClick={() => window.print()}
-          className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 inline-flex items-center gap-1 text-xs"
-          title="Download Statement"
+          className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 inline-flex items-center gap-1 text-xs cursor-pointer"
+          title="Download Receipt"
         >
           <DownloadSimple size={13} weight="bold" />
-          <span>Statement</span>
+          <span>Receipt</span>
         </button>
       ),
     },
@@ -256,7 +256,7 @@ export default function RestaurantSettlementsPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Weekly Settlement History"
+        title="Weekly Payouts & Earnings"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchSettlements();

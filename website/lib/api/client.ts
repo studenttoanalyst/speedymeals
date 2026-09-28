@@ -1,7 +1,7 @@
 /**
  * SpeedyMeals API Client Wrapper
  * Handles base URL, auth token injection, JSON parsing, error throwing,
- * and seamless fallback to offline mock fixtures when backend is unavailable.
+ * deduplicated token refresh mutex, and seamless fallback to offline fixtures.
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
@@ -30,6 +30,72 @@ export class ApiError extends Error {
 function getStoredAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('sm_access_token');
+}
+
+/**
+ * Singleton In-Flight Refresh Mutex
+ * Prevents the thundering-herd problem where multiple concurrent 401 requests
+ * trigger duplicate /auth/refresh calls with rotated refresh tokens.
+ */
+let activeRefreshPromise: Promise<string | null> | null = null;
+
+async function requestTokenRefresh(failedToken?: string | null): Promise<string | null> {
+  if (typeof window === 'undefined') return null;
+
+  // If another concurrent request already refreshed the access token in the meantime,
+  // we do not need to call the server again; reuse the new token immediately.
+  const currentToken = localStorage.getItem('sm_access_token');
+  if (currentToken && failedToken && currentToken !== failedToken) {
+    return currentToken;
+  }
+
+  // If a refresh is already in-flight, await the same promise
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
+  }
+
+  activeRefreshPromise = (async () => {
+    try {
+      const refreshToken = localStorage.getItem('sm_refresh_token');
+      if (!refreshToken || refreshToken.startsWith('mock-')) {
+        return null;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.access_token) {
+          localStorage.setItem('sm_access_token', data.access_token);
+          if (data.refresh_token) {
+            localStorage.setItem('sm_refresh_token', data.refresh_token);
+          }
+          document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax`;
+          return data.access_token as string;
+        }
+      } else if (res.status === 401) {
+        // Clear storage only when the refresh endpoint explicitly rejects the refresh token
+        localStorage.removeItem('sm_access_token');
+        localStorage.removeItem('sm_refresh_token');
+        localStorage.removeItem('sm_user_role');
+        localStorage.removeItem('sm_user_data');
+        document.cookie = 'sm_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+        document.cookie = 'sm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+      }
+      return null;
+    } catch (err) {
+      console.warn('[SpeedyMeals API] Automatic token refresh attempt failed:', err);
+      return null;
+    } finally {
+      activeRefreshPromise = null;
+    }
+  })();
+
+  return activeRefreshPromise;
 }
 
 export async function apiClient<T>(
@@ -62,42 +128,15 @@ export async function apiClient<T>(
       headers: requestHeaders,
     });
 
-    // 1. If 401 Unauthorized, automatically attempt refresh with refresh_token
+    // 1. If 401 Unauthorized, automatically attempt refresh using singleton mutex
     if (res.status === 401 && !skipAuth && typeof window !== 'undefined') {
-      const refreshToken = localStorage.getItem('sm_refresh_token');
-      if (refreshToken && !refreshToken.startsWith('mock-')) {
-        try {
-          const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refresh_token: refreshToken }),
-          });
-
-          if (refreshRes.ok) {
-            const data = await refreshRes.json();
-            if (data?.access_token) {
-              localStorage.setItem('sm_access_token', data.access_token);
-              if (data.refresh_token) {
-                localStorage.setItem('sm_refresh_token', data.refresh_token);
-              }
-              document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax`;
-
-              // Retry original request with freshly minted access token
-              requestHeaders['Authorization'] = `Bearer ${data.access_token}`;
-              res = await fetch(url, {
-                ...restOptions,
-                headers: requestHeaders,
-              });
-            }
-          } else if (refreshRes.status === 401) {
-            // Stale or revoked refresh token - clear storage to avoid cyclic 401 calls
-            localStorage.removeItem('sm_access_token');
-            localStorage.removeItem('sm_refresh_token');
-            document.cookie = 'sm_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
-          }
-        } catch (refreshErr) {
-          console.warn('[SpeedyMeals API] Automatic token refresh attempt failed:', refreshErr);
-        }
+      const newAccessToken = await requestTokenRefresh(token);
+      if (newAccessToken) {
+        requestHeaders['Authorization'] = `Bearer ${newAccessToken}`;
+        res = await fetch(url, {
+          ...restOptions,
+          headers: requestHeaders,
+        });
       }
     }
 

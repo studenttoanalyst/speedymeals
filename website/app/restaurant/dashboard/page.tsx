@@ -153,7 +153,7 @@ export default function RestaurantDashboardPage() {
                 e.stopPropagation();
                 handleAdvanceStatus(o.id, o.status);
               }}
-              className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
             >
               Accept (20m)
             </button>
@@ -166,7 +166,7 @@ export default function RestaurantDashboardPage() {
                 e.stopPropagation();
                 handleAdvanceStatus(o.id, o.status);
               }}
-              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1 ml-auto"
+              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1 ml-auto cursor-pointer"
             >
               <Check size={12} weight="bold" />
               {o.status === 'Accepted' ? 'Start Prep' : 'Ready for Pickup'}
@@ -189,7 +189,7 @@ export default function RestaurantDashboardPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Kitchen Dispatch Terminal"
+        title="Restaurant Dashboard"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchData();
@@ -201,12 +201,12 @@ export default function RestaurantDashboardPage() {
               href="/restaurant/orders"
               className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5"
             >
-              <Receipt size={14} weight="bold" className="text-rose-600" />
-              <span>Full Kitchen Board</span>
+              <Receipt size={14} weight="bold" className="text-slate-600" />
+              <span>All Orders</span>
             </Link>
             <Link
               href="/restaurant/menu"
-              className="px-3 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Plus size={14} weight="bold" />
               <span>Add Dish</span>
@@ -224,7 +224,7 @@ export default function RestaurantDashboardPage() {
           </div>
         )}
 
-        {/* LEVEL 1: Headline Operational KPIs per dashboard-designer */}
+        {/* Headline Operational KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Today's Gross Sales"
@@ -241,20 +241,20 @@ export default function RestaurantDashboardPage() {
             subValue="After 10% Platform Commission"
             accent="blue"
             icon={<Receipt size={18} weight="bold" />}
-            targetBenchmark="Weekly Settl: Fri"
+            targetBenchmark="Weekly Payout: Friday"
           />
 
           <StatCard
             label="Active Kitchen Orders"
             value={metrics?.active_orders_count ?? 3}
             subValue="1 Placed · 2 Preparing"
-            accent="red"
+            accent="blue"
             icon={<Clock size={18} weight="bold" />}
             targetBenchmark="Capacity: 8 orders"
           />
 
           <StatCard
-            label="Avg Kitchen Prep SLA"
+            label="Avg Cooking / Prep Time"
             value="16.4 mins"
             change={{ value: '-2.1m', isPositive: true, period: 'faster than target' }}
             accent="amber"
