@@ -20,28 +20,27 @@ export function Topbar({
 }: TopbarProps) {
   const [backendStatus, setBackendStatus] = useState<'connected' | 'checking' | 'fallback'>('checking');
 
-  useEffect(() => {
-    let isMounted = true;
-    const checkHealth = async () => {
-      try {
-        const res = await fetch('/api/health', { method: 'GET' });
-        if (isMounted) {
-          if (res.ok) {
-            const data = await res.json().catch(() => ({}));
-            setBackendStatus(data.status === 'connected' ? 'connected' : 'fallback');
-          } else {
-            setBackendStatus('fallback');
-          }
-        }
-      } catch {
-        if (isMounted) setBackendStatus('fallback');
+  const checkHealth = React.useCallback(async () => {
+    try {
+      const res = await fetch('/api/health', { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setBackendStatus(data.status === 'connected' ? 'connected' : 'fallback');
+      } else {
+        setBackendStatus('fallback');
       }
-    };
-    checkHealth();
-    return () => {
-      isMounted = false;
-    };
+    } catch {
+      setBackendStatus('fallback');
+    }
   }, []);
+
+  useEffect(() => {
+    checkHealth();
+    const interval = setInterval(() => {
+      checkHealth();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [checkHealth]);
 
   return (
     <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between sticky top-0 z-20 shadow-2xs print:hidden">
@@ -53,7 +52,12 @@ export function Topbar({
 
       <div className="flex items-center gap-3 print:hidden">
         {/* Backend API Live Indicator */}
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-[11px] font-medium text-slate-600">
+        <button
+          type="button"
+          onClick={() => checkHealth()}
+          title="Click to recheck server connection"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-medium text-slate-600 transition-colors cursor-pointer"
+        >
           {backendStatus === 'connected' ? (
             <>
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -70,16 +74,28 @@ export function Topbar({
               <span>Offline Mode (Local Data)</span>
             </>
           )}
-        </div>
+        </button>
 
-        {onRefresh && (
+        {onRefresh ? (
           <button
-            onClick={onRefresh}
+            onClick={() => {
+              checkHealth();
+              onRefresh();
+            }}
             disabled={isRefreshing}
             title="Refresh Data"
             className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-40 cursor-pointer"
           >
             <ArrowClockwise size={15} weight="bold" className={isRefreshing ? 'animate-spin text-slate-700' : ''} />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => checkHealth()}
+            title="Recheck Server Connection"
+            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+          >
+            <ArrowClockwise size={15} weight="bold" />
           </button>
         )}
 

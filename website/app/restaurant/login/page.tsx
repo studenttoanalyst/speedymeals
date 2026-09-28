@@ -164,28 +164,19 @@ export default function RestaurantLoginPage() {
               setError(null);
               setSuccessMsg(null);
             }}
-            className={`py-2 rounded-lg transition-all ${
-              tab === 'password'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
+            className="py-2 rounded-lg transition-all bg-white text-slate-900 shadow-2xs font-semibold"
           >
             Email & Password
           </button>
           <button
             type="button"
-            onClick={() => {
-              setTab('otp');
-              setError(null);
-              setSuccessMsg(null);
-            }}
-            className={`py-2 rounded-lg transition-all ${
-              tab === 'otp'
-                ? 'bg-white text-slate-900 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
+            disabled
+            title="Mobile SMS login is temporarily locked pending SMS gateway configuration. Please sign in with your email and password."
+            className="py-2 px-1 rounded-lg text-slate-400 cursor-not-allowed flex items-center justify-center gap-1 opacity-70 select-none"
           >
-            Mobile Code (SMS)
+            <Lock size={12} weight="bold" />
+            <span>Mobile Code</span>
+            <span className="text-[9px] bg-slate-200 text-slate-600 font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Locked</span>
           </button>
         </div>
 
