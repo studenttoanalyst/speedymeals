@@ -105,7 +105,7 @@ export default function RestaurantProfilePage() {
                       <div>
                         <span className="text-ink-soft block text-[10px] font-mono uppercase">Daily Operating Hours</span>
                         <span className="font-mono font-semibold">
-                          {profile.opening_time || '11:00'} — {profile.closing_time || '23:30'}
+                          {profile.opening_time || '11:00'} - {profile.closing_time || '23:30'}
                         </span>
                       </div>
                     </div>

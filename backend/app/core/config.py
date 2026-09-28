@@ -1,5 +1,5 @@
 """
-App configuration — loads values from .env file.
+App configuration - loads values from .env file.
 Never hardcode secrets here. This file only defines WHAT settings exist,
 actual values always come from environment (.env locally, Secrets Manager in production).
 """
@@ -26,17 +26,19 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str
 
-    # AWS S3
+    # Storage (AWS S3 / Supabase Storage)
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: str
     AWS_REGION: str = "us-east-1"
-    S3_BUCKET_NAME: str
+    S3_BUCKET_NAME: str = "speedymeals-docs"
+    S3_ENDPOINT_URL: str | None = None
+    SUPABASE_URL: str | None = None
+    SUPABASE_STORAGE_URL: str | None = None
 
     # Google Maps
     GOOGLE_MAPS_API_KEY: str
     GOOGLE_PLACES_API_KEY: str = ""
     MAPS_DAILY_CALL_BUDGET: int = 300
-
 
     # First Admin Auto-Seed (Phase 2, Step 10 - see ADR-002)
     FIRST_ADMIN_EMAIL: str
@@ -46,9 +48,9 @@ class Settings(BaseSettings):
     CASH_COLLECTION_CAP: float = 5000
 
     model_config = SettingsConfigDict(
-    env_file=ENV_FILE_PATH, env_file_encoding="utf-8", extra="ignore"
-)
+        env_file=ENV_FILE_PATH, env_file_encoding="utf-8", extra="ignore"
+    )
 
 
-# Single shared instance — import this everywhere, don't re-instantiate Settings().
+# Single shared instance - import this everywhere, don't re-instantiate Settings().
 settings = Settings()
