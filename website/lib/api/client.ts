@@ -4,7 +4,16 @@
  * deduplicated token refresh mutex, and seamless fallback to offline fixtures.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+export function getApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('speedymealservices.com')) {
+    return 'https://api.speedymealservices.com';
+  }
+  return 'http://localhost:8000';
+}
+
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
 export interface ApiClientOptions extends RequestInit {
@@ -61,7 +70,8 @@ async function requestTokenRefresh(failedToken?: string | null): Promise<string 
         return null;
       }
 
-      const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh_token: refreshToken }),
@@ -120,7 +130,8 @@ export async function apiClient<T>(
     requestHeaders['Authorization'] = `Bearer ${token}`;
   }
 
-  const url = `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
 
   try {
     let res = await fetch(url, {

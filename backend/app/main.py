@@ -59,6 +59,17 @@ app.include_router(admin_roles_router)
 app.include_router(admin_accounts_router)
 
 
+@app.get("/", tags=["system"])
+def root_status() -> dict[str, str]:
+    """Root endpoint for status check and API discovery."""
+    return {
+        "status": "online",
+        "service": "SpeedyMeals API",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
+
 @app.on_event("startup")
 def seed_first_admin_on_startup() -> None:
     """

@@ -5,7 +5,9 @@ export async function GET() {
     process.env.BACKEND_INTERNAL_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:8000';
+    (process.env.NODE_ENV === 'production'
+      ? 'https://api.speedymealservices.com'
+      : 'http://localhost:8000');
 
   const normalizedUrl = backendUrl.replace(/\/$/, '');
 
