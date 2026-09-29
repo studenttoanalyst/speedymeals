@@ -1,8 +1,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The app is a networked client: every screen talks to the FastAPI
+         backend. INTERNET must be declared here (the debug/profile manifests
+         only add it for `flutter run`), otherwise release builds cannot make
+         a single request. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Rider GPS (PATCH /wallet/location) and "use my current location" when
+         adding a delivery address. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <!-- Phase M5: Rider background location (Android 10+ / API 29+).
+         Required only when tracking rider GPS while the application is in the background
+         during an active delivery.
+         Note: Publishing to Google Play requires completing the Background Location
+         Declaration form demonstrating necessity for logistics/delivery routing. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
     <application
         android:label="Speedy Meals"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,6 +49,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Google Maps Android SDK API Key (injected via manifestPlaceholders) -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -40,6 +64,19 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Google Maps navigation & web handoff schemes (Phase M4) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="google.navigation"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="geo"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
     </queries>
 </manifest>

@@ -1,4 +1,3 @@
-
 ---
 name: Speedy Meals Mobile Design System
 colors:

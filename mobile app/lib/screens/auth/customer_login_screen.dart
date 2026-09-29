@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../services/auth_service.dart';
-import '../../widgets/home_navigation.dart';
 import 'customer_forgot_password_screen.dart';
 import 'customer_signup_screen.dart';
+import 'otp_verification_screen.dart';
 
 /// Customer Login Screen matching Stitch design (`speedy_meals_customer_login`).
 class CustomerLoginScreen extends StatefulWidget {
@@ -15,21 +16,23 @@ class CustomerLoginScreen extends StatefulWidget {
 
 class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailPhoneController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
 
-  bool _isPasswordVisible = false;
   bool _rememberMe = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _emailPhoneController.dispose();
-    _passwordController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  /// Step 1 of the real auth flow: ask the backend for an OTP.
+  ///
+  /// Verification (and the signed-in navigation) belongs to
+  /// [OtpVerificationScreen], which is reached only after the code has actually
+  /// been generated server-side.
+  Future<void> _handleContinue() async {
     if (!_formKey.currentState!.validate()) return;
     if (_isLoading) return;
 
@@ -38,45 +41,26 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
     });
 
     try {
-      await AuthService.instance.login(
-        emailOrPhone: _emailPhoneController.text.trim(),
-        password: _passwordController.text,
+      await AuthService.instance.requestOtp(
+        phoneNumber: _phoneController.text.trim(),
         role: UserRole.customer,
       );
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Welcome back! Logging in...'),
-          backgroundColor: const Color(0xFF10B981),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
-
-      Navigator.pushAndRemoveUntil(
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const HomeNavigation()),
-        (route) => false,
+        MaterialPageRoute(
+          builder: (context) => const OtpVerificationScreen(
+            role: UserRole.customer,
+          ),
+        ),
       );
     } on AuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
-          backgroundColor: const Color(0xFFDC2626),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('An unexpected error occurred. Please try again.'),
           backgroundColor: const Color(0xFFDC2626),
           behavior: SnackBarBehavior.floating,
           shape:
@@ -210,39 +194,11 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
 
                       const SizedBox(height: 28),
 
-                      // Email / Phone Field
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Email or Phone Number',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF334155),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextFormField(
-                            controller: _emailPhoneController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: _inputDecoration(
-                              hint: 'e.g. alex@example.com or +1 234 567',
-                              prefixIcon: Icons.email_outlined,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your email or phone number';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Password Field
+                      // Phone Number Field
+                      //
+                      // Speedy Meals authenticates by phone + OTP — the backend
+                      // has no password column on `users`, so there is nothing
+                      // else to collect here.
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -250,7 +206,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text(
-                                'Password',
+                                'Phone Number',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -268,7 +224,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                                   );
                                 },
                                 child: const Text(
-                                  'Forgot Password?',
+                                  'Trouble signing in?',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -280,32 +236,50 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
-                            controller: _passwordController,
-                            obscureText: !_isPasswordVisible,
-                            decoration: _inputDecoration(
-                              hint: 'Enter your password',
-                              prefixIcon: Icons.lock_outline_rounded,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _isPasswordVisible
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  color: const Color(0xFF94A3B8),
-                                  size: 20,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isPasswordVisible = !_isPasswordVisible;
-                                  });
-                                },
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            autofillHints: const [
+                              AutofillHints.telephoneNumber,
+                            ],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9\s\-()+ ]'),
+                              ),
+                            ],
+                            decoration:
+                                _inputDecoration(
+                              hint: '300 1234567',
+                              prefixIcon: Icons.phone_iphone_rounded,
+                            ).copyWith(
+                              prefixText: '+92 ',
+                              prefixStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF334155),
                               ),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
+                              final digits = (value ?? '')
+                                  .replaceAll(RegExp(r'[^0-9]'), '');
+                              if (digits.isEmpty) {
+                                return 'Please enter your phone number';
+                              }
+                              // 10 digits after the +92 country code is the
+                              // Pakistani mobile format (3XX XXXXXXX).
+                              if (digits.length < 10) {
+                                return 'Enter a complete mobile number';
                               }
                               return null;
                             },
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'We will text you a 6-digit verification code.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF94A3B8),
+                            ),
                           ),
                         ],
                       ),
@@ -380,7 +354,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                         width: double.infinity,
                         height: 52,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleLogin,
+                          onPressed: _isLoading ? null : _handleContinue,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFDC2626),
                             disabledBackgroundColor: const Color(0xFFCBD5E1),
@@ -404,7 +378,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: const [
                                     Text(
-                                      'Login',
+                                      'Send OTP',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700,

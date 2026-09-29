@@ -1,0 +1,175 @@
+# ============================================================
+# GENERAL
+# ============================================================
+
+.DS_Store
+Thumbs.db
+
+# Logs / Temporary files
+*.log
+*.tmp
+*.temp
+
+# ============================================================
+# ENVIRONMENT / SECRETS
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+# Certificates / Private Keys
+*.pem
+*.key
+*.crt
+
+# ============================================================
+# FLUTTER / DART
+# ============================================================
+
+# Flutter generated
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+coverage/
+
+# Symbolication / Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android build artifacts
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS
+**/ios/Flutter/.last_build_id
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+
+# Widget Preview
+.widget_preview/
+
+# Flutter metadata (auto-generated)
+.metadata
+
+# ============================================================
+# ANDROID
+# ============================================================
+
+.gradle/
+kotlinc/
+android/local.properties
+android/**/GeneratedPluginRegistrant.java
+
+# ============================================================
+# IDE / EDITOR
+# ============================================================
+
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+
+# ============================================================
+# PYTHON / FASTAPI (for planned backend)
+# ============================================================
+
+venv/
+.venv/
+**/venv/
+**/.venv/
+**pycache**/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Backend generated
+backend/instance/
+backend/patchfiles/
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================================================
+# NEXT.JS / TYPESCRIPT (for planned admin web)
+# ============================================================
+
+admin_web/node_modules/
+admin_web/.next/
+admin_web/out/
+admin_web/build/
+admin_web/dist/
+admin_web/.turbo/
+admin_web/*.tsbuildinfo
+admin_web/.vercel/
+admin_web/.env
+admin_web/.env.*
+!admin_web/.env.example
+
+# ============================================================
+# DOCKER
+# ============================================================
+
+docker-compose.override.yml
+*.pid
+
+# ============================================================
+# OS / SYSTEM
+# ============================================================
+
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================================
+# LOCAL DEVELOPMENT
+# ============================================================
+
+uploads/
+tmp/
+temp/
+
+# ============================================================
+# FIREBASE
+# ============================================================
+
+serviceAccountKey.json
+google-services.json
+GoogleService-Info.plist
+
+# ============================================================
+# MOBILE APP (if nested)
+# ============================================================
+
+mobile_app/.dart_tool/
+mobile_app/.flutter-plugins
+mobile_app/.flutter-plugins-dependencies
+mobile_app/.packages
+mobile_app/.pub-cache/
+mobile_app/.pub/
+mobile_app/build/
+mobile_app/coverage/
+mobile_app/*.iml
+mobile_app/.idea/
+
+
+mobile_app/backend

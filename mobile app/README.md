@@ -4,322 +4,303 @@
 
 ### Lightning Fast Food Delivery
 
-A cross-platform food delivery mobile application built with Flutter, designed for the Pakistani market.
+A cross-platform food delivery platform: **Flutter** mobile app + **FastAPI** backend, built for the Pakistani market (PKR).
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.13+-02569B?style=flat-square&logo=flutter)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-Latest-0175C2?style=flat-square&logo=dart)](https://dart.dev)
-[![License](https://img.shields.io/badge/License-Private-red?style=flat-square)](#license)
-[![Status](https://img.shields.io/badge/Status-UI%20Prototype-orange?style=flat-square)](#status)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter)](https://flutter.dev)
+[![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis)](https://redis.io)
+[![Status](https://img.shields.io/badge/Status-MVP%20(not%20production)-orange?style=flat-square)](#production-readiness)
 
 </div>
 
 ---
 
-## 📋 Overview
+## 📋 Project Overview
 
-Speedy Meals is a modern food delivery platform enabling customers to browse restaurants, order food, track deliveries in real-time, and manage payments — while delivery riders accept deliveries, track earnings, and manage their availability through a dedicated fleet portal.
+Speedy Meals is a food delivery platform with three sides:
 
-> **Current Status:** This is a **UI/Frontend prototype** with mock data and simulated authentication. The backend is planned but not yet implemented in this repository.
+- **Customers** browse restaurants near a saved address, order food, pay with **COD** or a (stub) **Digital** method, and track the order through its delivery lifecycle.
+- **Riders** verify by phone OTP, are **approved by an admin**, go online, receive auto-assigned jobs, advance an order through pickup → out for delivery → delivered, and accumulate earnings in a wallet.
+- **Restaurants** log in with credentials, manage their menu and accept/prepare orders.
 
----
+There is also an **admin** surface: rider approval, restaurant management, order intervention, settlements, rider payouts, cash discrepancies and reports.
 
-## 🎯 Features
-
-### Customer Experience
-
-| Feature | Description |
-|---------|-------------|
-| 🔐 **Authentication** | Email/phone registration and login with form validation |
-| 🏠 **Home Dashboard** | Restaurant listings, search bar, promotional carousel, and food categories |
-| 🍕 **Restaurant Detail** | Full menu browsing by category with item tags and ratings |
-| 🛒 **Smart Cart** | Multi-item cart with quantity controls and live total calculation |
-| 💳 **Checkout** | Multiple payment methods: Cash on Delivery, Card, EasyPaisa, JazzCash |
-| 📍 **Order Tracking** | 5-stage status progression with driver info and ETA |
-| 🔍 **Search** | Search restaurants and food items |
-| 📱 **Promotions** | Auto-swiping promo banners and coupon code support |
-
-### Rider Experience
-
-| Feature | Description |
-|---------|-------------|
-| 🔐 **Fleet Registration** | Rider signup with vehicle type and city selection |
-| 🏍️ **Fleet Portal** | Dedicated dashboard with online/offline toggle |
-| 📊 **Earnings Dashboard** | Real-time stats: payout, hours, tips, and rating |
-| 📦 **Delivery Management** | Accept/reject delivery requests with route details |
-| 🔄 **Status Flow** | Complete delivery lifecycle management |
-
-### Design System
-
-| Token | Value |
-|-------|-------|
-| **Primary** | `#DC2626` (Speed Red) |
-| **Secondary** | `#1D4ED8` (Royal Blue) |
-| **Tertiary** | `#F59E0B` (Amber) |
-| **Typography** | Plus Jakarta Sans |
-| **Grid** | 8-point spacing system |
-| **Design** | Material 3 with custom brand tokens |
+> **Current Status:** The Flutter app and the FastAPI backend are integrated. The API layer, models, repositories and screens are wired to real endpoints — no fake orders or hardcoded restaurants remain in the customer/rider flow. The project is **MVP-ready** but **not production-ready**: SMS/OTP is console-mode, the payment gateway is a stub, notifications are order-derived rather than push, and the backend test suite could not be executed in this environment (see [Testing](#-testing)).
 
 ---
 
-## 🛠️ Technology Stack
-
-| Layer | Technology | Status |
-|-------|-----------|--------|
-| **Framework** | Flutter SDK ^3.13.2 | ✅ Active |
-| **Language** | Dart | ✅ Active |
-| **UI Design** | Material 3 | ✅ Active |
-| **State Management** | `setState()` | ✅ Active |
-| **Navigation** | Navigator 1.0 | ✅ Active |
-| **Backend** | Python + FastAPI | 🔜 Planned |
-| **Database** | PostgreSQL | 🔜 Planned |
-| **Cache** | Redis | 🔜 Planned |
-| **Storage** | AWS S3 | 🔜 Planned |
-| **Auth** | JWT + OTP | 🔜 Planned |
-| **External API** | Google Maps Distance Matrix | 🔜 Planned |
-
----
-
-## 📁 Project Structure
+## 🏗️ Current Architecture
 
 ```
-speedy_meals/
-├── lib/
-│   ├── main.dart                    # Application entry point
-│   ├── constants/                   # Brand color tokens
-│   │   └── colors.dart
-│   ├── core/
-│   │   ├── constants/
-│   │   │   └── app_constants.dart   # Business rules & enums
-│   │   └── theme/
-│   │       └── app_theme.dart       # Material 3 theme assembly
-│   ├── models/
-│   │   ├── order.dart               # Order data model
-│   │   └── restaurant.dart          # Restaurant & menu models
-│   ├── screens/
-│   │   ├── auth/                    # 8 authentication screens
-│   │   ├── checkout/                # Checkout flow
-│   │   ├── dashboard/               # Customer home
-│   │   ├── menu/                    # Restaurant & menu detail
-│   │   ├── rider/                   # Rider fleet portal
-│   │   └── tracking/                # Order status tracking
-│   ├── services/
-│   │   └── auth_service.dart        # Mock authentication
-│   └── widgets/
-│       └── home_navigation.dart     # Bottom navigation
-├── assets/
-│   ├── images/                      # App logos
-│   └── stitch_speedy_meals_app_ui_design/  # Design references
-├── test/
-│   └── widget_test.dart
-├── android/                         # Android platform
-├── ios/                             # iOS platform
-├── web/                             # Web platform
-├── linux/                           # Linux desktop
-├── macos/                           # macOS desktop
-├── windows/                         # Windows desktop
-├── pubspec.yaml
-├── analysis_options.yaml
-├── Backend_development.md           # Backend development plan
-├── REPORT.md                        # Technical project report
-└── README.md
+Flutter app (lib/)
+   │  screens  →  repositories  →  ApiClient  →  HTTP
+   ▼
+FastAPI (backend/app/)
+   │  routers → services → SQLAlchemy models
+   ▼
+PostgreSQL 15        Redis 7
+(durable state)      (OTP store, rate limit, carts, rider live location)
 ```
+
+**Flutter layer rules**
+
+- `lib/screens/**` never performs HTTP directly.
+- `lib/data/repositories/**` owns endpoint calls and JSON → Dart model mapping.
+- `lib/core/network/api_client.dart` owns base URL, headers, timeout, error mapping.
+- `lib/core/storage/token_storage.dart` owns secure token persistence.
+- `lib/services/**` holds legacy app-level services (cart, auth façade, notifications).
+
+**Backend layer rules**
+
+- `backend/app/platform/**` — cross-cutting: `auth` (OTP + JWT), `users` (profile + addresses), `wallet_payment` (rider wallet, payments, rider profile/assignments/location/documents).
+- `backend/app/modules/**` — `food_delivery` (restaurants, menu, cart, orders, riders) and `admin`.
 
 ---
 
-## 🔄 Application Flow
+## ✅ Features Currently Implemented
 
-### Customer Journey
+Legend: ✅ implemented & verified · ⚠️ partial · ❌ not implemented · 🧪 not fully tested
 
-```
-┌─────────────┐    ┌──────────────┐    ┌────────────────┐
-│   Splash    │───▶│ Register As  │───▶│ Login / Sign Up│
-│  (3 sec)    │    │  (Role Pick) │    │                │
-└─────────────┘    └──────────────┘    └───────┬────────┘
-                                               │
-                    ┌──────────────────────────┘
-                    ▼
-            ┌───────────────┐    ┌────────────────┐
-            │    Home       │───▶│   Restaurant   │
-            │  Dashboard    │    │     Detail     │
-            └───────────────┘    └───────┬────────┘
-                                         │
-                              ┌──────────┘
-                              ▼
-                    ┌────────────────┐    ┌────────────────┐
-                    │  Cart / Basket │───▶│    Checkout    │
-                    └────────────────┘    └───────┬────────┘
-                                                  │
-                                       ┌──────────┘
-                                       ▼
-                              ┌────────────────┐
-                              │ Order Tracking │
-                              │ (5 Stages)     │
-                              └────────────────┘
-```
+### Customer
 
-### Rider Journey
+| Feature | Status | Notes |
+|---|---|---|
+| Phone + OTP login | ✅ | `POST /auth/otp/request`, `POST /auth/otp/verify`; JWT stored in secure storage |
+| Session restore / refresh / logout | ✅ | `GET /auth/me`, `POST /auth/refresh`, `POST /auth/logout`; 401 → session cleared, auth guard on home shell |
+| Profile view / edit | ✅ | `GET /users/me`, `PUT /users/me` |
+| Address book (list / add / edit / delete / default) | ✅ | `GET|POST /users/me/addresses`, `PUT|DELETE /users/me/addresses/{id}` |
+| Address is required for browsing | ✅ | Dashboard requires a real address; sends `address_id` + coordinates |
+| Restaurant browsing | ✅ | `GET /restaurants` (radius search around the selected address) |
+| Restaurant detail + menu | ✅ | `GET /restaurants/{id}`, `GET /restaurants/{id}/menu` |
+| Search / popular items | ✅ | Derived from real fetched restaurants/menus, not mock lists |
+| Cart | ✅ | `GET /restaurants/{id}/cart`, `POST /restaurants/{id}/cart/items`, `PATCH|DELETE /restaurants/{id}/cart/items/{itemId}`, `DELETE /restaurants/{id}/cart` — backend is source of truth; per-restaurant carts |
+| Checkout | ✅ | Address + cart + payment method validated; **totals displayed are the backend's totals** |
+| Payment method selection | ⚠️ | COD works end-to-end; Digital is an accepted value but a **stub** |
+| Checkout preview (backend totals) | ✅ | `GET /restaurants/{id}/cart/checkout-preview` supplies subtotal/fee/total |
+| Order creation | ✅ | `POST /restaurants/{id}/cart/checkout` — real order id returned, no fake ids |
+| Order history | ✅ | `GET /orders` with loading / empty / error states |
+| Order tracking | ✅ | `GET /orders/{id}/track`; polls active orders, stops on terminal state |
+| Cancel order (customer) | ❌ | No customer cancel endpoint exists (only `POST /admin/orders/{id}/cancel`) |
+| Reorder | ⚠️ | `POST /orders/{id}/reorder` implemented in the repository; not surfaced in the UI |
+| Order rating | ⚠️ | `POST /orders/{id}/rating` implemented in the repository; not surfaced in the UI |
 
-```
-┌──────────────┐    ┌────────────────┐    ┌────────────────┐
-│ Register As  │───▶│ Rider Sign Up  │───▶│ Fleet Portal   │
-│  (Rider)     │    │ (Vehicle/City) │    │ (Dashboard)    │
-└──────────────┘    └────────────────┘    └───────┬────────┘
-                                                  │
-                              ┌───────────────────┘
-                              ▼
-                    ┌────────────────┐    ┌────────────────┐
-                    │ View Requests  │───▶│Accept Delivery │
-                    └────────────────┘    └───────┬────────┘
-                                                  │
-                              ┌───────────────────┘
-                              ▼
-                    ┌────────────────┐
-                    │Status Updates  │
-                    │(Accept→Deliver)│
-                    └────────────────┘
-```
+### Rider
 
----
+| Feature | Status | Notes |
+|---|---|---|
+| Rider OTP login | ✅ | `POST /auth/rider/otp/verify` |
+| Approval state | ✅ | `GET /wallet/profile`; banner shown; **backend enforces** approval on delivery endpoints |
+| Dashboard (orders, wallet balance, status) | ✅ | `GET /wallet/assignments`, `GET /wallet/balance` |
+| Online / offline toggle | ✅ | `PATCH /wallet/status`; Rs. 500 minimum shown/enforced from backend |
+| Auto-assigned jobs | ✅ | `GET /wallet/assignments` |
+| Accept / reject | ✅ | `POST /wallet/assignments/{orderId}/respond` |
+| Delivery lifecycle | ✅ | `PATCH /wallet/deliveries/{orderId}/status/{arrived\|picked-up\|on-the-way\|delivered}` wired to UI buttons |
+| Live location push | ✅ | `PATCH /wallet/location` with GPS + periodic refresh; permission/GPS failure handled |
+| Wallet + earnings | ✅ | `GET /wallet/balance`, `GET /wallet/earnings`, `GET /wallet/cod-eligibility`; recharge via `POST /wallet/recharge`, cash deposit via `POST /wallet/cash-deposit` |
+| Document upload | ❌ | Backend `POST /wallet/documents/{doc_type}` exists; **no Flutter upload UI** (no file-picker dependency) — status is displayed read-only |
 
-## 📱 Screens
+### Restaurant
 
-| Screen | File | Description |
-|--------|------|-------------|
-| Splash Screen | `login_screen.dart` | App intro with logo, auto-navigates after 3 seconds |
-| Register As | `register_as_screen.dart` | Role selection between Customer and Delivery Rider |
-| Customer Login | `customer_login_screen.dart` | Email/password login with social auth placeholders |
-| Customer Sign Up | `customer_signup_screen.dart` | Full registration form with validation |
-| Customer Forgot Password | `customer_forgot_password_screen.dart` | Password reset request flow |
-| Rider Login | `rider_login_screen.dart` | Rider-specific login portal |
-| Rider Sign Up | `rider_signup_screen.dart` | Rider registration with vehicle/city selection |
-| Rider Forgot Password | `rider_forgot_password_screen.dart` | Rider password recovery |
-| Home Dashboard | `dashboard_screen.dart` | Restaurant listings, search, promos, categories |
-| Restaurant Detail | `restaurant_detail_screen.dart` | Menu browsing, cart management, promo codes |
-| Menu Screen | `menu_screen.dart` | Category-based menu with quantity controls |
-| Checkout | `checkout_screen.dart` | Order summary, payment selection, place order |
-| Order Tracking | `order_tracking_screen.dart` | 5-stage status tracker with driver info |
-| Rider Dashboard | `rider_dashboard_screen.dart` | Fleet portal with earnings and delivery requests |
+| Feature | Status | Notes |
+|---|---|---|
+| Credential login | ✅ | `POST /auth/restaurant/login` |
+| Menu CRUD + availability + photo | ✅ | Backend complete; **no restaurant Flutter/web UI** in this repo |
+| Accept / prepare / ready-for-pickup | ✅ | Backend complete; **no restaurant UI in this repo** |
 
----
+### Admin
 
-## 🔐 Authentication
+| Feature | Status | Notes |
+|---|---|---|
+| Rider approval / status | ✅ | `GET /admin/riders`, `PATCH /admin/riders/{id}/approval` |
+| Restaurant management, commissions, credential reset | ✅ | Backend complete |
+| Order cancel / reassign | ✅ | Backend complete |
+| Settlements, rider payouts, cash discrepancies, reports | ✅ | Backend complete |
+| Admin dashboard | ✅ | `GET /admin/dashboard` |
+| Admin frontend | ❌ | **No admin UI exists in this repository** (API-only) |
 
-The current implementation uses a **mock authentication service** for UI prototyping:
+### Payments
 
-| Aspect | Implementation |
-|--------|---------------|
-| Pattern | Singleton (`AuthService.instance`) |
-| Delay | Simulated 1.2s login, 1.4s register |
-| Validation | Client-side only |
-| Tokens | Mock (timestamp-based) |
-| Persistence | In-memory (session lost on restart) |
-| Roles | `UserRole.customer`, `UserRole.deliveryRider` |
+| Feature | Status | Notes |
+|---|---|---|
+| COD | ✅ | Full lifecycle incl. rider cash-collection cap and discrepancy reporting |
+| Digital | ⚠️ | Accepted by the API but **stub — NOT PRODUCTION READY** (no gateway integration) |
+| COD eligibility gate | ✅ | `GET /wallet/cod-eligibility` |
+| Money math | ✅ | Delivery fee computed server-side (Google Maps Distance Matrix when configured); Flutter does **not** invent fees or taxes |
 
-> **Note:** This is a prototype. The planned backend will implement OTP verification, JWT tokens, and role-based access control.
+### Notifications
+
+| Feature | Status | Notes |
+|---|---|---|
+| In-app notification feed | ✅ | **Derived from `GET /orders`** — no notification backend exists |
+| Read / dismissed state | ✅ | Persisted locally |
+| Push notifications / FCM | ❌ | No push backend |
+| Real-time (WebSocket) updates | ❌ | Polling is the MVP mechanism |
+
+### Tracking
+
+| Feature | Status | Notes |
+|---|---|---|
+| All backend statuses mapped in Flutter | ✅ | pending, confirmed, preparing, ready_for_pickup, rider_assigned, picked_up, out_for_delivery, delivered, rejected, cancelled (wire values come from the backend) |
+| Polling for active orders | ✅ | Interval-based, stops at terminal states, handles error/timeout |
 
 ---
 
-## 🚀 Getting Started
+## 📱 Flutter
+
+- **Architecture:** screens → repositories → `ApiClient` → FastAPI, with a legacy `lib/services/` layer retained for cart/auth façade and notifications.
+- **API layer:** `lib/core/config/api_config.dart` (single source of base URL), `lib/core/network/api_client.dart` (GET/POST/PUT/PATCH/DELETE, bearer auth, timeouts, error mapping), `lib/core/network/api_exception.dart` (typed errors for 400/401/403/404/409/422/429/500/503/timeout/no-network).
+- **Models:** `lib/data/models/**` with `fromJson`/`toJson`, nullable-safe parsing (no blind casts).
+- **Repositories:** `auth`, `user`, `restaurant`, `cart`, `order`, `rider`.
+- **Auth:** phone + OTP → JWT; token in secure storage (`flutter_secure_storage`); automatic header injection; 401 handling; session restore.
+- **Address:** selected address feeds restaurant browsing and checkout by real `address_id`.
+- **State management:** the project's existing approach (`ChangeNotifier` / `InheritedWidget` / `FutureBuilder`) is preserved — no new state library was introduced.
+- **Key screens:** login/OTP, dashboard (real restaurants + search + popular items), restaurant detail/menu, cart, checkout, tracking, order history, notifications, profile, edit profile, saved addresses, rider dashboard, rider wallet.
+- **Platform config:** Android `INTERNET` + location permissions and a `network_security_config.xml` (cleartext only for local dev hosts); iOS location usage strings + ATS exception for local dev.
+
+---
+
+## 🖥️ Backend
+
+- **Framework:** FastAPI (async) with SQLAlchemy 2.0 models and Pydantic schemas.
+- **Auth:** phone OTP (`console` mode by default) + JWT access/refresh; role separation for customer / rider / restaurant / admin.
+- **Database:** PostgreSQL 15. Models cover users, addresses, restaurants, menu items, orders + order items + status history, riders, rider documents, wallets + transactions, payments, settlements, payouts.
+- **Redis:** OTP store, rate limiting, per-restaurant carts, rider live location.
+- **Modules:** `platform/auth`, `platform/users`, `platform/wallet_payment`, `modules/food_delivery`, `modules/admin`.
+- **Order lifecycle:** pending → confirmed → preparing → ready_for_pickup → rider_assigned → picked_up → out_for_delivery → delivered, plus rejected/cancelled, with side effects (wallet credit, cash accounting) on delivery.
+- **Security:** rider approval enforced on protected delivery endpoints; admin-only routes gated; CORS configurable via `CORS_ORIGINS`; single-use OTPs; secrets via environment.
+- **Tests:** 19 test files with **293 test functions** (auth, cart, checkout, order lifecycle E2E, tracking, status transitions, rider assignment/accept-reject/documents/location, wallet math, admin, restaurants) — see [Testing](#-testing).
+
+---
+
+## 🚀 Setup
 
 ### Prerequisites
 
-- **Flutter SDK** ^3.13.2
-- **Dart SDK** (included with Flutter)
-- **Android Studio** / **Xcode** (for mobile development)
-- **VS Code** with Flutter extension (recommended)
+- Flutter SDK 3.x (Dart 3)
+- Python 3.11
+- Docker (recommended) **or** PostgreSQL 15 + Redis 7 running locally
 
-### Installation
+### 1. Backend
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd speedy_meals
+cd backend
 
-# Install dependencies
+# Fastest path: Postgres + Redis + API
+docker compose up --build
+
+# OR run the API locally against your own Postgres/Redis:
+python -m venv .venv
+# Windows (bash): source .venv/Scripts/activate
+source .venv/bin/activate
+pip install -r app/requirements.txt
+cp app/.env.example app/.env         # then edit values
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+The API serves at `http://localhost:8000` (interactive docs at `/docs`).
+
+### 2. Flutter app
+
+```bash
 flutter pub get
-
-# Run on connected device or emulator
-flutter run
+flutter run            # Android emulator maps the host as 10.0.2.2
 ```
 
-### Build Commands
-
-| Command | Description |
-|---------|-------------|
-| `flutter build apk` | Build Android APK |
-| `flutter build ios` | Build iOS (requires macOS + Xcode) |
-| `flutter build web` | Build for web |
-| `flutter test` | Run tests |
-| `flutter analyze` | Static code analysis |
-
-### Platform Support
-
-| Platform | Command | Notes |
-|----------|---------|-------|
-| Android | `flutter run` | Emulator or device required |
-| iOS | `flutter run` | macOS + Xcode required |
-| Web | `flutter run -d chrome` | Chrome browser required |
-| Windows | `flutter run -d windows` | Windows desktop |
-| Linux | `flutter run -d linux` | Linux desktop |
-| macOS | `flutter run -d macos` | macOS desktop |
+Backend base URL is configured centrally (see [Environment / Configuration](#-environment--configuration)).
 
 ---
 
-## 📚 Documentation
+## 🔧 Environment / Configuration
 
-| Document | Description |
-|----------|-------------|
-| [`README.md`](README.md) | Project overview and setup guide |
-| [`REPORT.md`](REPORT.md) | Detailed technical project report |
-| [`Backend_development.md`](Backend_development.md) | Backend development plan (13 phases) |
+Backend variables (documented in `backend/app/.env.example`, consumed by `backend/app/core/config.py`):
 
----
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | JWT signing secret (never commit a real value) |
+| `JWT_ALGORITHM` | JWT algorithm (HS256) |
+| `JWT_EXPIRE_MINUTES` | Access-token lifetime |
+| `REDIS_URL` | Redis connection (OTP store, rate limit, carts, rider location) |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` / `S3_BUCKET_NAME` | Rider document uploads (S3) |
+| `GOOGLE_MAPS_API_KEY` | Distance Matrix — delivery fee calculation |
+| `SMS_PROVIDER_MODE` | `console` (dev default) or `production` |
+| `SMS_API_KEY` | SMS provider key (empty in dev) |
+| `FIRST_ADMIN_EMAIL` / `FIRST_ADMIN_PASSWORD` | One-time first-admin seed on startup — change after first run |
+| `CORS_ORIGINS` | Comma-separated allowed origins for the API |
 
-## 🗺️ Roadmap
+Flutter: the backend base URL is set in **`lib/core/config/api_config.dart`**. Local development defaults to `http://10.0.2.2:8000` for the Android emulator; use your machine's LAN IP for a physical device, or an override/environment value for production.
 
-### Completed ✅
-
-- [x] Flutter project setup and configuration
-- [x] Material 3 design system with custom brand tokens
-- [x] Complete customer UI (auth, dashboard, menu, cart, checkout, tracking)
-- [x] Complete rider UI (auth, fleet portal, delivery management)
-- [x] Mock authentication service
-- [x] Bottom navigation with 3 tabs
-
-### In Progress 🟡
-
-- [ ] Backend API integration
-- [ ] Real authentication (OTP + JWT)
-- [ ] Database implementation
-- [ ] State management (Provider/Riverpod)
-
-### Planned 🔜
-
-- [ ] Push notifications
-- [ ] Real-time order tracking
-- [ ] Payment gateway integration
-- [ ] Restaurant admin panel
-- [ ] Admin dashboard
-- [ ] CI/CD pipeline
-- [ ] Production deployment
+> ⚠️ Do **not** commit `app/.env`, real JWT secrets, SMS keys, S3 keys or Google Maps keys.
 
 ---
 
-## 🤝 Contributing
+## ▶️ Running
 
-This is a private project. For internal development:
+**Backend**
 
 ```bash
-# Create a feature branch
-git checkout -b feature/your-feature
-
-# Make changes and commit
-git add .
-git commit -m "Add your feature"
-
-# Push to remote
-git push origin feature/your-feature
+cd backend
+python -m uvicorn app.main:app --reload --port 8000
 ```
+
+**Flutter**
+
+```bash
+flutter run                    # debug on a connected device/emulator
+flutter run -d chrome          # web (dev only)
+flutter build apk --debug      # build an Android debug APK
+```
+
+---
+
+## 🧪 Testing
+
+Results from the final audit run in this environment (Windows, no live Postgres/Redis):
+
+| Check | Command | Result |
+|---|---|---|
+| Flutter static analysis | `flutter analyze` | **PASS** — No issues found |
+| Flutter tests | `flutter test` | **PASS** — 7/7 |
+| Flutter Android build | `flutter build apk --debug` | **PASS** — `app-debug.apk` produced |
+| Backend Python syntax | `python -m py_compile` (all modules) | **PASS** |
+| Backend module/schema import validation | import of `app.main`, models, schemas | **PASS** |
+| Backend tests | `pytest` | **NOT RUN** — see below |
+| End-to-end customer flow | — | **NOT RUN** |
+| End-to-end rider flow | — | **NOT RUN** |
+
+**Why the backend tests were not run:** this environment has no backend virtualenv with dependencies installed, no PostgreSQL instance, and no Redis instance. The suite (293 tests) is written against real Postgres + Redis and an `app/.env`; it must be run where those exist:
+
+```bash
+cd backend
+source .venv/bin/activate     # after pip install -r app/requirements.txt
+pytest                        # or: pytest app/tests -v
+```
+
+Flutter tests are widget/flow tests with the platform channels mocked; they verify rendering, navigation and graceful no-backend behaviour — they do not exercise a live API.
+
+---
+
+## ⚠️ Known Limitations
+
+- **OTP is console-mode** (`SMS_PROVIDER_MODE=console`): the code is written to the server log, not sent by SMS. This is a deliberate dev default, not production behaviour.
+- **Digital payment is a stub** — no real gateway is integrated.
+- **No push notifications.** The in-app feed derives entries from the order list; real-time order updates use polling, not WebSockets.
+- **No admin / restaurant frontend in this repository** — those APIs exist but have no UI here.
+- **Rider document upload UI is missing** in Flutter (backend endpoint exists).
+- **Customer order cancellation and order rating** are backend-only; no Flutter UI.
+- **Delivery fee accuracy** depends on `GOOGLE_MAPS_API_KEY`; without it the fallback distance/fee rules apply.
+- Verified only on the checks listed above — the live database/Redis flows are **not yet verified end-to-end** in this environment.
+
+---
+
+## 🏁 Production Readiness
+
+**MVP READY — NOT PRODUCTION READY.**
+
+The customer and rider flows are code-complete against real APIs and the app builds and passes its own tests. Blockers before production: real SMS provider, payment gateway integration, push notifications, deployment/secrets management, and a green run of the backend test suite plus end-to-end verification against live PostgreSQL/Redis.
+
+The detailed, honest gap list lives in **[MISSING.md](MISSING.md)**; the integration summary is in **[INTEGRATION_REPORT.md](INTEGRATION_REPORT.md)**.
 
 ---
 
@@ -327,11 +308,9 @@ git push origin feature/your-feature
 
 This project is private and not published to pub.dev.
 
----
-
 <div align="center">
 
-**Built with ❤️ using Flutter**
+**Built with ❤️ using Flutter + FastAPI**
 
 *Last updated: September 2026*
 
