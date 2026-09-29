@@ -1,6 +1,6 @@
 """
-Menu item request/response shapes — Phase 4, Step 1.
-Photo upload is a separate endpoint (Step 4, multipart) — these schemas
+Menu item request/response shapes - Phase 4, Step 1.
+Photo upload is a separate endpoint (Step 4, multipart) - these schemas
 only carry photo_url as a plain string, set after upload.
 """
 import uuid
@@ -14,23 +14,23 @@ class MenuItemCreateSchema(BaseModel):
     description: str | None = None
     price: float = Field(gt=0)
     category: str | None = None
+    photo_url: str | None = None
     variants: dict | None = None
     is_available: bool = True
 
 
 class MenuItemUpdateSchema(BaseModel):
-    """All fields optional — partial update, same pattern as
-    UserProfileUpdateSchema / AddressUpdateSchema."""
     name: str | None = None
     description: str | None = None
     price: float | None = Field(default=None, gt=0)
     category: str | None = None
+    photo_url: str | None = None
     variants: dict | None = None
     is_available: bool | None = None
 
 
 class MenuItemAvailabilitySchema(BaseModel):
-    """Step 3 — dedicated toggle body, nothing else editable through it."""
+    """Step 3 - dedicated toggle body, nothing else editable through it."""
     is_available: bool
 
 
@@ -70,14 +70,14 @@ class RestaurantOrderDeliveryAddressSchema(BaseModel):
 
 
 class OrderStatusUpdateSchema(BaseModel):
-    """Body for PATCH /restaurants/me/orders/{id}/status — Step 6.
+    """Body for PATCH /restaurants/me/orders/{id}/status - Step 6.
     The requested next status, validated against the order state machine
     in the service layer."""
     status: str
 
 
 class RestaurantOrderSummaryResponseSchema(BaseModel):
-    """One row in GET /restaurants/me/orders — dashboard list view."""
+    """One row in GET /restaurants/me/orders - dashboard list view."""
     id: uuid.UUID
     status: str
     payment_method: str
@@ -89,7 +89,7 @@ class RestaurantOrderSummaryResponseSchema(BaseModel):
 
 
 class RestaurantOrderDetailResponseSchema(BaseModel):
-    """Full view for GET /restaurants/me/orders/{id} — everything a
+    """Full view for GET /restaurants/me/orders/{id} - everything a
     restaurant counter needs to prepare + hand over an order. Payment
     fields are informational only (spec Sec 9 Step 6); no payment
     processing happens here."""
@@ -115,7 +115,7 @@ class RestaurantOrderDetailResponseSchema(BaseModel):
 
 
 class CustomerRestaurantResponseSchema(BaseModel):
-    """One row in GET /restaurants (customer browse). Public fields only —
+    """One row in GET /restaurants (customer browse). Public fields only -
     no email, password_hash, phone_number, commission_rate or status."""
     id: uuid.UUID
     name: str
@@ -132,8 +132,8 @@ class CustomerRestaurantResponseSchema(BaseModel):
 
 
 class CustomerMenuItemSchema(BaseModel):
-    """One dish on the customer menu — customer-facing fields only
-    (no restaurant_id — implicit in the path; no management data).
+    """One dish on the customer menu - customer-facing fields only
+    (no restaurant_id - implicit in the path; no management data).
     Sold-out items are included, flagged via is_available."""
     id: uuid.UUID
     name: str
@@ -146,7 +146,7 @@ class CustomerMenuItemSchema(BaseModel):
 
 
 class CustomerMenuCategorySchema(BaseModel):
-    """One category group in GET /restaurants/{id}/menu — items already
+    """One category group in GET /restaurants/{id}/menu - items already
     sorted within the group."""
     category: str | None
     items: list[CustomerMenuItemSchema]
@@ -165,16 +165,16 @@ class CartItemSchema(BaseModel):
 
 
 class CartSchema(BaseModel):
-    """One restaurant-specific cart (Phase 5 multi-cart model — a customer
+    """One restaurant-specific cart (Phase 5 multi-cart model - a customer
     holds one of these per restaurant simultaneously). Serialized as JSON
     into Redis under `cart:{customer_id}:{restaurant_id}`; never a SQL row
-    (deliberate Phase 1 decision — cart is temporary pre-order state)."""
+    (deliberate Phase 1 decision - cart is temporary pre-order state)."""
     restaurant_id: uuid.UUID
     items: list[CartItemSchema]
 
 
 class CartAddItemSchema(BaseModel):
-    """Body for POST .../cart/items — Step 4. item existence/belonging/
+    """Body for POST .../cart/items - Step 4. item existence/belonging/
     availability are validated against the DB in the service layer; the
     schema only enforces shape."""
     item_id: uuid.UUID
@@ -183,16 +183,16 @@ class CartAddItemSchema(BaseModel):
 
 
 class CartUpdateItemSchema(BaseModel):
-    """Body for PATCH .../cart/items/{item_id} — Step 4 quantity change."""
+    """Body for PATCH .../cart/items/{item_id} - Step 4 quantity change."""
     qty: int = Field(gt=0)
 
 
 class RouteDetailSchema(BaseModel):
-    """Point 3 — one Google Directions route (restaurant -> delivery
+    """Point 3 - one Google Directions route (restaurant -> delivery
     address). eta is an ISO-8601 UTC timestamp (now + duration); polyline is
     the encoded overview_polyline.points for map rendering, None when the
     route came from the Haversine fallback (no real geometry without
-    Google). All fields optional per the Point 3 contract — a totally
+    Google). All fields optional per the Point 3 contract - a totally
     unavailable route is surfaced as a null object."""
     distance_km: float | None = None
     duration_mins: int | None = None
@@ -201,7 +201,7 @@ class RouteDetailSchema(BaseModel):
 
 
 class CheckoutPreviewResponseSchema(BaseModel):
-    """Price breakdown for GET .../cart/checkout-preview — Step 5.
+    """Price breakdown for GET .../cart/checkout-preview - Step 5.
     Calculation only: no order is placed, nothing is cleared. route carries
     the Point 3 route parameters (distance, duration, ETA, polyline)."""
     food_subtotal: float
@@ -212,7 +212,7 @@ class CheckoutPreviewResponseSchema(BaseModel):
 
 
 class OrderTrackingResponseSchema(BaseModel):
-    """Phase 7, Step 1 — poll-based customer tracking. Includes restaurant and
+    """Phase 7, Step 1 - poll-based customer tracking. Includes restaurant and
     customer coordinates, plus optional live rider coordinates.
     restaurant_name is always present (joined from restaurants in the same read),
     rider_name/rider_phone are only populated once a rider is assigned (Step 2).
@@ -234,7 +234,7 @@ class OrderTrackingResponseSchema(BaseModel):
     rider_phone: str | None
     rider_lat: float | None = None
     rider_lng: float | None = None
-    # Point 3 — live route parameters restaurant -> customer, recomputed per
+    # Point 3 - live route parameters restaurant -> customer, recomputed per
     # tracking read. Null when either endpoint lacks coordinates.
     route_distance_km: float | None = None
     duration_mins: int | None = None
@@ -246,10 +246,10 @@ class OrderTrackingResponseSchema(BaseModel):
 
 
 class OrderRiderLocationResponseSchema(BaseModel):
-    """Response for GET /orders/{order_id}/rider-location — live rider GPS
+    """Response for GET /orders/{order_id}/rider-location - live rider GPS
     for an active delivery (same 4-field shape the client contract asks
     for). Nulls while the order is active but no fresh Redis location
-    exists (no rider assigned yet, or the 45-second TTL expired) — stale
+    exists (no rider assigned yet, or the 45-second TTL expired) - stale
     coordinates are never served. Terminal orders never reach this
     payload; the service rejects them with 409 first. updated_at echoes
     the ISO timestamp the existing write path stored."""
@@ -260,7 +260,7 @@ class OrderRiderLocationResponseSchema(BaseModel):
 
 
 class OrderHistoryResponseSchema(BaseModel):
-    """One row in GET /orders — Phase 7, Step 3 customer order history.
+    """One row in GET /orders - Phase 7, Step 3 customer order history.
     Same summary shape as the restaurant dashboard list, but from the
     customer's side (restaurant_name instead of customer_name)."""
     id: uuid.UUID
@@ -273,7 +273,7 @@ class OrderHistoryResponseSchema(BaseModel):
 
 
 class ReorderResponseSchema(BaseModel):
-    """Response for POST /orders/{id}/reorder — Step 3. Returns the
+    """Response for POST /orders/{id}/reorder - Step 3. Returns the
     resulting cart for that order's restaurant (Phase 5 cart shape) plus
     which of the original lines could not be carried over (menu item
     deleted or currently sold out) so the customer isn't silently short
@@ -283,7 +283,7 @@ class ReorderResponseSchema(BaseModel):
 
 
 class RatingCreateSchema(BaseModel):
-    """Body for POST /orders/{id}/rating — Step 4. rider_rating is
+    """Body for POST /orders/{id}/rating - Step 4. rider_rating is
     optional (order may have no assigned rider in edge cases); at least
     one of restaurant_rating/rider_rating must be given, checked in the
     service layer since it's a cross-field rule."""
@@ -301,14 +301,14 @@ class RatingResponseSchema(BaseModel):
 
 
 class PlaceOrderSchema(BaseModel):
-    """Body for POST .../cart/checkout — Step 6. address ownership and
+    """Body for POST .../cart/checkout - Step 6. address ownership and
     payment_method validity are enforced in the service layer."""
     address_id: uuid.UUID
     payment_method: str
 
 
 class PlaceOrderResponseSchema(BaseModel):
-    """The placed order — financial values are the FROZEN snapshot written
+    """The placed order - financial values are the FROZEN snapshot written
     at placement (never recomputed later). route is the Point 3 route
     snapshot captured at placement time."""
     id: uuid.UUID

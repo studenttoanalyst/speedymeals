@@ -5,7 +5,7 @@
 
 import { TokenResponse, AdminTokenResponse, AdminLoginPayload, RestaurantLoginPayload, OTPRequestPayload, OTPVerifyPayload, AuthSessionUser, UserRole, ChangeInitialPasswordPayload } from '@/types/auth';
 
-import { apiClient } from '../api/client';
+import { apiClient, getApiBaseUrl } from '../api/client';
 
 const ACCESS_TOKEN_KEY = 'sm_access_token';
 const REFRESH_TOKEN_KEY = 'sm_refresh_token';
@@ -257,7 +257,7 @@ export async function logout(): Promise<void> {
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
   if (refreshToken && !refreshToken.startsWith('mock-')) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+      const baseUrl = getApiBaseUrl();
       await fetch(`${baseUrl}/auth/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

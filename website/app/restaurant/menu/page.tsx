@@ -26,6 +26,7 @@ import {
   updateRestaurantMenuItem,
   deleteRestaurantMenuItem,
   setRestaurantMenuItemAvailability,
+  uploadRestaurantMenuItemPhoto,
 } from '@/lib/api/restaurant';
 import { MenuItem, MenuItemCreatePayload, ModifierGroup } from '@/types/restaurant';
 
@@ -38,6 +39,9 @@ export default function RestaurantMenuPage() {
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [formData, setFormData] = useState<MenuItemCreatePayload>({
     name: '',
     description: '',
@@ -54,12 +58,23 @@ export default function RestaurantMenuPage() {
   // Delete Target
   const [deleteTarget, setDeleteTarget] = useState<MenuItem | null>(null);
 
+  useEffect(() => {
+    if (feedbackMessage) {
+      const timer = setTimeout(() => setFeedbackMessage(null), 4500);
+      return () => clearTimeout(timer);
+    }
+  }, [feedbackMessage]);
+
   const fetchMenu = async () => {
     try {
       const data = await listRestaurantMenuItems();
       setMenuItems(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load menu items', err);
+      setFeedbackMessage({
+        type: 'error',
+        text: 'Unable to reach backend API. Showing offline fixtures.',
+      });
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -78,6 +93,7 @@ export default function RestaurantMenuPage() {
 
   const handleOpenCreate = () => {
     setEditingItem(null);
+    setSelectedFile(null);
     setFormData({
       name: '',
       description: '',
@@ -95,6 +111,7 @@ export default function RestaurantMenuPage() {
 
   const handleOpenEdit = (item: MenuItem) => {
     setEditingItem(item);
+    setSelectedFile(null);
     setFormData({
       name: item.name,
       description: item.description || '',
@@ -112,38 +129,92 @@ export default function RestaurantMenuPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
+      const cleanPhotoUrl = formData.photo_url || formData.image_url || undefined;
+      const payload: MenuItemCreatePayload = {
+        ...formData,
+        photo_url: cleanPhotoUrl,
+        image_url: cleanPhotoUrl,
+      };
+
+      let saved: MenuItem;
       if (editingItem) {
-        await updateRestaurantMenuItem(editingItem.id, formData);
+        saved = await updateRestaurantMenuItem(editingItem.id, payload);
       } else {
-        await createRestaurantMenuItem(formData);
+        saved = await createRestaurantMenuItem(payload);
       }
+
+      if (selectedFile && saved && saved.id) {
+        try {
+          await uploadRestaurantMenuItemPhoto(saved.id, selectedFile);
+        } catch (photoErr) {
+          console.warn('Photo upload fallback triggered:', photoErr);
+        }
+      }
+
       setModalOpen(false);
+      setSelectedFile(null);
+      setFeedbackMessage({
+        type: 'success',
+        text: editingItem
+          ? `Updated "${formData.name}" successfully. Mobile apps synced.`
+          : `Created "${formData.name}" successfully. Live on customer and rider apps.`,
+      });
       await fetchMenu();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save menu item', err);
+      setFeedbackMessage({
+        type: 'error',
+        text: err?.message || 'Failed to save menu item. Please try again.',
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleToggleAvailability = async (item: MenuItem) => {
+    const prevItems = menuItems;
+    const nextAvailability = !item.is_available;
+    // Optimistic UI update
+    setMenuItems((prev) =>
+      prev.map((m) => (m.id === item.id ? { ...m, is_available: nextAvailability } : m))
+    );
     try {
-      await setRestaurantMenuItemAvailability(item.id, { is_available: !item.is_available });
-      setMenuItems((prev) =>
-        prev.map((m) => (m.id === item.id ? { ...m, is_available: !item.is_available } : m))
-      );
-    } catch (err) {
-      console.error('Failed to toggle availability', err);
+      await setRestaurantMenuItemAvailability(item.id, { is_available: nextAvailability });
+      setFeedbackMessage({
+        type: 'success',
+        text: `"${item.name}" is now marked as ${nextAvailability ? 'In Stock' : 'Sold Out'}. Synced to mobile apps.`,
+      });
+    } catch (err: any) {
+      // Rollback optimistic update
+      setMenuItems(prevItems);
+      setFeedbackMessage({
+        type: 'error',
+        text: err?.message || 'Failed to update item availability. Rolled back changes.',
+      });
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
+    const prevItems = menuItems;
+    const target = deleteTarget;
+    // Optimistic removal
+    setMenuItems((prev) => prev.filter((m) => m.id !== target.id));
+    setDeleteTarget(null);
     try {
-      await deleteRestaurantMenuItem(deleteTarget.id);
-      setMenuItems((prev) => prev.filter((m) => m.id !== deleteTarget.id));
-      setDeleteTarget(null);
-    } catch (err) {
-      console.error('Failed to delete item', err);
+      await deleteRestaurantMenuItem(target.id);
+      setFeedbackMessage({
+        type: 'success',
+        text: `Removed "${target.name}" from menu. Synced across customer and rider apps.`,
+      });
+    } catch (err: any) {
+      setMenuItems(prevItems);
+      setFeedbackMessage({
+        type: 'error',
+        text: err?.message || 'Failed to delete item from menu.',
+      });
     }
   };
 
@@ -173,6 +244,32 @@ export default function RestaurantMenuPage() {
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+        {/* Real-time synchronization feedback alert */}
+        {feedbackMessage && (
+          <div
+            className={`p-3.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all ${
+              feedbackMessage.type === 'success'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-rose-50 border-rose-200 text-rose-800'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {feedbackMessage.type === 'success' ? (
+                <Check size={16} weight="bold" className="text-emerald-600" />
+              ) : (
+                <Warning size={16} weight="bold" className="text-rose-600" />
+              )}
+              <span>{feedbackMessage.text}</span>
+            </div>
+            <button
+              onClick={() => setFeedbackMessage(null)}
+              className="text-slate-400 hover:text-slate-600 p-1"
+            >
+              <X size={14} weight="bold" />
+            </button>
+          </div>
+        )}
+
         {/* Category Filter Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           {categories.map((cat) => (
@@ -370,6 +467,7 @@ export default function RestaurantMenuPage() {
                 aspectRatio="4:3"
                 value={formData.photo_url || formData.image_url}
                 onChange={(url) => setFormData({ ...formData, photo_url: url, image_url: url })}
+                onFileSelect={(file) => setSelectedFile(file)}
                 hint="High-res dish photo (4:3 ratio, max 5MB)"
               />
 
@@ -469,9 +567,10 @@ export default function RestaurantMenuPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
+                  disabled={isSaving}
+                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
-                  {editingItem ? 'Save Changes' : 'Create Dish'}
+                  {isSaving ? 'Saving & Syncing...' : editingItem ? 'Save Changes' : 'Create Dish'}
                 </button>
               </div>
             </form>

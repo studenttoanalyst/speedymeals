@@ -7,6 +7,7 @@ import { UploadSimple, X, Image as ImageIcon, CheckCircle, Warning } from '@phos
 export interface ImageUploadProps {
   value?: string | null;
   onChange: (url: string | null) => void;
+  onFileSelect?: (file: File | null) => void;
   aspectRatio?: '1:1' | '16:9' | '4:3' | '3:1' | 'auto';
   maxSizeMB?: number;
   label?: string;
@@ -18,6 +19,7 @@ export interface ImageUploadProps {
 export function ImageUpload({
   value,
   onChange,
+  onFileSelect,
   aspectRatio = '4:3',
   maxSizeMB = 5,
   label,
@@ -71,6 +73,9 @@ export function ImageUpload({
 
     setIsUploading(true);
 
+    // Notify parent component of the selected raw File
+    onFileSelect?.(file);
+
     // Create local object URL for instant preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -115,6 +120,7 @@ export function ImageUpload({
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange(null);
+    onFileSelect?.(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

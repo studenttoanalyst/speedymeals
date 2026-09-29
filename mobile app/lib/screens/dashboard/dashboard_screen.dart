@@ -79,7 +79,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// Loads the restaurants the backend says can deliver to this customer.
   ///
   /// The endpoint derives location from the customer's own saved address (its
-  /// default, or `?address_id=`) and returns 400 when none exists — a
+  /// default, or `?address_id=`) and returns 400 when none exists - a
   /// delivery app has nothing to show without an address, so that case gets its
   /// own message rather than a generic error.
   Future<void> _loadRestaurants() async {
@@ -234,67 +234,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Search & Active Location Sub-header
-                  _LocationSearchPill(),
-                  const SizedBox(height: 12),
-
-                  // Quick Search Bar
-                  _SearchBar(
-                    controller: _searchController,
-                    onChanged: _onSearchChanged,
-                    onClear: _clearSearch,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          if (isSearching)
+      body: RefreshIndicator(
+        onRefresh: _loadRestaurants,
+        color: const Color(0xFFDC2626),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          slivers: [
             SliverToBoxAdapter(
-              child: _SearchResultsView(
-                query: _query,
-                onClear: _clearSearch,
-                onCategorySelected: _applyQuery,
-                restaurants: _restaurants,
-              ),
-            )
-          else ...[
-            SliverToBoxAdapter(
-              child: _PromoHeroBanner(restaurants: _restaurants),
-            ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search & Active Location Sub-header
+                    _LocationSearchPill(),
+                    const SizedBox(height: 12),
 
-            SliverToBoxAdapter(child: _CategorySection(theme: theme)),
-
-            SliverToBoxAdapter(              child: _LiveOrderSnippet(restaurants: _restaurants)),
-
-            SliverToBoxAdapter(
-              child: _CloudKitchenSection(
-                restaurants: _restaurants,
-                isLoading: _isLoadingRestaurants,
-                error: _restaurantsError,
-                onRetry: _loadRestaurants,
+                    // Quick Search Bar
+                    _SearchBar(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      onClear: _clearSearch,
+                    ),
+                  ],
+                ),
               ),
             ),
 
-            SliverToBoxAdapter(
-              child: _PopularItemsSection(restaurants: _restaurants),
-            ),
+            if (isSearching)
+              SliverToBoxAdapter(
+                child: _SearchResultsView(
+                  query: _query,
+                  onClear: _clearSearch,
+                  onCategorySelected: _applyQuery,
+                  restaurants: _restaurants,
+                ),
+              )
+            else ...[
+              SliverToBoxAdapter(
+                child: _PromoHeroBanner(restaurants: _restaurants),
+              ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverToBoxAdapter(child: _CategorySection(theme: theme)),
 
-            // Sticky cart bar
-            SliverPersistentHeader(pinned: true, delegate: _StickyCartBarDelegate(bottomPadding: bottomInset)),
+              SliverToBoxAdapter(child: _LiveOrderSnippet(restaurants: _restaurants)),
+
+              SliverToBoxAdapter(
+                child: _CloudKitchenSection(
+                  restaurants: _restaurants,
+                  isLoading: _isLoadingRestaurants,
+                  error: _restaurantsError,
+                  onRetry: _loadRestaurants,
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: _PopularItemsSection(restaurants: _restaurants),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+              // Sticky cart bar
+              SliverPersistentHeader(pinned: true, delegate: _StickyCartBarDelegate(bottomPadding: bottomInset)),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -1052,7 +1057,7 @@ class _PromoHeroBannerState extends State<_PromoHeroBanner> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
                             onTap: () {
-                              // NOTE: the promo *copy* is presentational — the
+                              // NOTE: the promo *copy* is presentational - the
                               // backend has no promotions/promo-code system
                               // (spec Sec 14 excludes loyalty/referral). The
                               // button therefore only browses real restaurants.
@@ -1505,7 +1510,7 @@ class _PopularItemsSection extends StatelessWidget {
 
   const _PopularItemsSection({required this.restaurants});
 
-  /// A handful of real dishes to feature — the first available item of the
+  /// A handful of real dishes to feature - the first available item of the
   /// first few restaurants. Nothing here is invented: name, price and image all
   /// come from the restaurant's own menu.
   List<_PopularItem> get _featured {
@@ -1528,7 +1533,7 @@ class _PopularItemsSection extends StatelessWidget {
     final theme = Theme.of(context);
     final featured = _featured;
 
-    // Nothing real to show yet — render nothing rather than a mock rail.
+    // Nothing real to show yet - render nothing rather than a mock rail.
     if (featured.isEmpty) return const SizedBox.shrink();
 
     return Padding(
@@ -1657,7 +1662,7 @@ final List<_Category> _categories = const [
 
 // Removed: the former hardcoded `_popularItems` list (fake dishes, fake ratings,
 // fake review counts, external image URLs). The "popular" rail is now built
-// from each restaurant's real menu — see `_PopularItemsSection._featured`.
+// from each restaurant's real menu - see `_PopularItemsSection._featured`.
 
 // ----------------------------- Card widgets -----------------------------
 

@@ -3,7 +3,7 @@
  * 1:1 mapping with backend `app/modules/food_delivery/routes.py`
  */
 
-import { apiClient } from './client';
+import { apiClient, getApiBaseUrl } from './client';
 import {
   MenuItem,
   MenuItemAvailabilityPayload,
@@ -111,7 +111,7 @@ export async function uploadRestaurantMenuItemPhoto(
   formData.append('file', file);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('sm_access_token') : null;
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+  const API_BASE_URL = getApiBaseUrl();
 
   try {
     const res = await fetch(`${API_BASE_URL}/restaurants/me/menu-items/${itemId}/photo`, {
