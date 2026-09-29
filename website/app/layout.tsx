@@ -4,7 +4,6 @@ import './globals.css';
 
 const archivo = Archivo({
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
   variable: '--font-archivo',
   display: 'swap',
 });
@@ -18,14 +17,12 @@ const archivoBlack = Archivo_Black({
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
   variable: '--font-inter',
   display: 'swap',
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  weight: ['400', '500'],
   variable: '--font-jbmono',
   display: 'swap',
 });
@@ -54,7 +51,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.jpeg" type="image/jpeg" />
       </head>
-      <body>{children}</body>
+      <body className="selection:bg-[#E23A2E] selection:text-white">{children}</body>
     </html>
   );
 }

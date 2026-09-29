@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
 import 'customer_login_screen.dart';
+import 'otp_verification_screen.dart';
 
-/// Customer Forgot Password Screen matching Stitch design principles.
+/// Customer "get a new code" screen, matching Stitch design principles.
+///
+/// Speedy Meals authenticates by phone + one-time code — there is no password
+/// to recover — so this screen keeps its original layout but its job is now to
+/// request a fresh verification code, then hand off to
+/// [OtpVerificationScreen].
 class CustomerForgotPasswordScreen extends StatefulWidget {
   const CustomerForgotPasswordScreen({super.key});
 
@@ -15,18 +21,22 @@ class CustomerForgotPasswordScreen extends StatefulWidget {
 class _CustomerForgotPasswordScreenState
     extends State<CustomerForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailPhoneController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   bool _isLoading = false;
   bool _isSubmitted = false;
 
   @override
   void dispose() {
-    _emailPhoneController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleResetPassword() async {
+  /// Requests a fresh OTP from the backend.
+  ///
+  /// Replaces the old mock `sendPasswordReset`. A 45-second resend cooldown and
+  /// a 5-per-minute cap apply server-side (surfaced as HTTP 429).
+  Future<void> _handleSendCode() async {
     if (!_formKey.currentState!.validate()) return;
     if (_isLoading) return;
 
@@ -35,8 +45,10 @@ class _CustomerForgotPasswordScreenState
     });
 
     try {
-      await AuthService.instance
-          .sendPasswordReset(_emailPhoneController.text.trim());
+      await AuthService.instance.requestOtp(
+        phoneNumber: _phoneController.text.trim(),
+        role: UserRole.customer,
+      );
 
       if (!mounted) return;
 
@@ -124,7 +136,7 @@ class _CustomerForgotPasswordScreenState
                         ),
                         SizedBox(width: 6),
                         Text(
-                          'Password Recovery',
+                          'Code Assistance',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -162,7 +174,7 @@ class _CustomerForgotPasswordScreenState
                                     color: const Color(0xFFFEE2E2), width: 2),
                               ),
                               child: const Icon(
-                                Icons.lock_reset_rounded,
+                                Icons.sms_outlined,
                                 size: 40,
                                 color: Color(0xFFDC2626),
                               ),
@@ -171,7 +183,7 @@ class _CustomerForgotPasswordScreenState
                             const SizedBox(height: 24),
 
                             Text(
-                              'Forgot Password?',
+                              'Need a new code?',
                               style: theme.textTheme.displayLarge?.copyWith(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w800,
@@ -181,7 +193,7 @@ class _CustomerForgotPasswordScreenState
                             ),
                             const SizedBox(height: 8),
                             const Text(
-                              'Enter your registered email address or phone number below to receive password reset instructions.',
+                              'Enter the mobile number on your account and we will text you a fresh 6-digit verification code.',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -197,7 +209,7 @@ class _CustomerForgotPasswordScreenState
                             const Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Email or Phone Number',
+                                'Phone Number',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -207,19 +219,24 @@ class _CustomerForgotPasswordScreenState
                             ),
                             const SizedBox(height: 6),
                             TextFormField(
-                              controller: _emailPhoneController,
-                              keyboardType: TextInputType.emailAddress,
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
                               decoration: InputDecoration(
-                                hintText:
-                                    'e.g. alex@example.com or +1 555 019 2834',
+                                hintText: '300 1234567',
                                 hintStyle: const TextStyle(
                                   fontSize: 13,
                                   color: Color(0xFF94A3B8),
                                 ),
                                 prefixIcon: const Icon(
-                                  Icons.mark_email_read_outlined,
+                                  Icons.phone_iphone_rounded,
                                   color: Color(0xFF94A3B8),
                                   size: 20,
+                                ),
+                                prefixText: '+92 ',
+                                prefixStyle: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF334155),
                                 ),
                                 filled: true,
                                 fillColor: Colors.white,
@@ -242,8 +259,13 @@ class _CustomerForgotPasswordScreenState
                                 ),
                               ),
                               validator: (val) {
-                                if (val == null || val.trim().isEmpty) {
-                                  return 'Please enter your email or phone number';
+                                final digits = (val ?? '')
+                                    .replaceAll(RegExp(r'[^0-9]'), '');
+                                if (digits.isEmpty) {
+                                  return 'Please enter your phone number';
+                                }
+                                if (digits.length < 10) {
+                                  return 'Enter a complete mobile number';
                                 }
                                 return null;
                               },
@@ -256,8 +278,7 @@ class _CustomerForgotPasswordScreenState
                               width: double.infinity,
                               height: 52,
                               child: ElevatedButton(
-                                onPressed:
-                                    _isLoading ? null : _handleResetPassword,
+                                onPressed: _isLoading ? null : _handleSendCode,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFDC2626),
                                   disabledBackgroundColor:
@@ -279,7 +300,7 @@ class _CustomerForgotPasswordScreenState
                                         ),
                                       )
                                     : const Text(
-                                        'Send Reset Code',
+                                        'Send Code',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
@@ -308,7 +329,7 @@ class _CustomerForgotPasswordScreenState
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Remembered your password? ',
+                    'Already have a code? ',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -361,7 +382,7 @@ class _CustomerForgotPasswordScreenState
         ),
         const SizedBox(height: 24),
         const Text(
-          'Reset Link Sent!',
+          'Code Sent!',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -370,7 +391,7 @@ class _CustomerForgotPasswordScreenState
         ),
         const SizedBox(height: 10),
         Text(
-          'We have sent password reset instructions to:\n${_emailPhoneController.text.trim()}',
+          'We have sent a new 6-digit code to:\n+92 ${_phoneController.text.trim()}',
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 14,
@@ -385,10 +406,14 @@ class _CustomerForgotPasswordScreenState
           height: 52,
           child: ElevatedButton(
             onPressed: () {
+              // Straight into the code entry screen, clearing this one so Back
+              // returns to the login screen rather than looping.
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const CustomerLoginScreen(),
+                  builder: (context) => const OtpVerificationScreen(
+                    role: UserRole.customer,
+                  ),
                 ),
               );
             },
@@ -399,7 +424,7 @@ class _CustomerForgotPasswordScreenState
               ),
             ),
             child: const Text(
-              'Return to Login',
+              'Enter the Code',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,

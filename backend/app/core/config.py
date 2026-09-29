@@ -43,17 +43,24 @@ class Settings(BaseSettings):
 
     # CORS (production-ready browser security)
     # Browser origins allowed to call this API cross-origin. Locally the
-    # defaults cover the dev website (3000) and dev mobile web (8080).
-    # Override via env as a JSON list — ALLOWED_ORIGINS=["https://app.example.com"]
-    # — or as a plain comma-separated string for convenience in .env files:
+    # defaults cover the dev website (3000, 3001) and dev mobile web (8080).
+    # Override via env as a JSON list: ALLOWED_ORIGINS=["https://app.example.com"]
+    # or as a plain comma-separated string for convenience in .env files:
     # ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
     # The literal "*" is supported for local development only; main.py
     # pairs it with allow_credentials=False (wildcard + credentials is a
     # browser-rejected combination and must never ship).
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",
-        "http://localhost:8080",
         "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+        "http://localhost:8080",
+        "https://speedymeals.pk",
+        "https://www.speedymeals.pk",
+        "https://speedymealservices.com",
+        "https://www.speedymealservices.com",
+        "https://api.speedymealservices.com",
     ]
 
     @field_validator("ALLOWED_ORIGINS", mode="before")

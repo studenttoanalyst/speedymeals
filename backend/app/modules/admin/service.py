@@ -38,19 +38,19 @@ RIDER_PAYOUT_STATUS_PAID = "Paid"
 
 
 def _today_utc_bounds() -> tuple[datetime, datetime]:
-    """Start/end of "today" as UTC calendar day — every timestamp column
+    """Start/end of "today" as UTC calendar day: every timestamp column
     in this project is stored timezone-aware UTC (base_model.py), so the
     dashboard's "today" is UTC, not the admin's local day."""
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     start = datetime.combine(today, time.min, tzinfo=timezone.utc)
     end = datetime.combine(today, time.max, tzinfo=timezone.utc)
     return start, end
 
 
 def get_dashboard_summary(db: Session) -> dict:
-    """GET /admin/dashboard — Step 1. Gross/net revenue and order count are
+    """GET /admin/dashboard: Step 1. Gross/net revenue and order count are
     scoped to today; wallet/pending-cash/settlement totals are current
-    running balances (not day-scoped — they're standing exposure, not a
+    running balances (not day-scoped: they're standing exposure, not a
     daily flow)."""
     start, end = _today_utc_bounds()
 
@@ -82,7 +82,7 @@ def get_dashboard_summary(db: Session) -> dict:
     )
 
     return {
-        "date": date.today(),
+        "date": datetime.now(timezone.utc).date(),
         "total_orders_today": total_orders_today,
         "gross_revenue_today": gross_revenue_today,
         "net_revenue_today": net_revenue_today,

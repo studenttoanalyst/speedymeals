@@ -26,6 +26,37 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Rider GPS (PATCH /wallet/location) and "use my current location" when
+	     adding a delivery address. Without this key Geolocator fails on iOS. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Speedy Meals uses your location to show nearby restaurants, set your delivery address, and (for riders) to receive nearby delivery orders.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Speedy Meals uses your location to show nearby restaurants and (for riders) to receive delivery orders while online.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Speedy Meals tracks rider location during active deliveries even when the app is in the background.</string>
+	<!-- Phase M5: iOS Background Location Mode for active delivery tracking -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+	<!-- Google Maps Platform: configure via $(GOOGLE_MAPS_API_KEY) build setting -->
+	<key>GoogleMapsAPIKey</key>
+	<string>$(GOOGLE_MAPS_API_KEY)</string>
+	<!-- Google Maps navigation handoff scheme (Phase M4) -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>googlechromes</string>
+		<string>https</string>
+	</array>
+	<!-- Local development: iOS App Transport Security blocks plain HTTP. This
+	     permits cleartext to local hostnames only (the dev backend on
+	     http://localhost:8000); all other traffic stays HTTPS-only. -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

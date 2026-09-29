@@ -11,9 +11,22 @@ export interface TokenResponse {
   token_type: string;
 }
 
+export interface AdminTokenResponse extends TokenResponse {
+  must_change_password?: boolean;
+  permissions?: string[];
+  role_name?: string;
+  admin_id?: string;
+  email?: string;
+}
+
 export interface AdminLoginPayload {
   email: string;
   password: string;
+}
+
+export interface ChangeInitialPasswordPayload {
+  current_password: string;
+  new_password: string;
 }
 
 export interface RestaurantLoginPayload {
@@ -38,6 +51,9 @@ export interface AuthSessionUser {
   phoneNumber?: string;
   role: UserRole;
   name?: string;
+  must_change_password?: boolean;
+  permissions?: string[];
+  role_name?: string;
 }
 
 export interface AuthState {
@@ -47,3 +63,4 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
 }
+

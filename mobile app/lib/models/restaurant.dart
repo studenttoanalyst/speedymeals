@@ -1,4 +1,15 @@
+import '../data/models/catalog_models.dart' as api;
+
 /// Restaurant and Menu Data Models for Speedy Meals.
+///
+/// These are PRESENTATION models — the shape the existing UI was designed
+/// around. They are never populated by hand any more: [Restaurant.fromBackend]
+/// maps the backend's `GET /restaurants` + `GET /restaurants/{id}/menu`
+/// responses onto them so every widget below keeps working unchanged.
+///
+/// Where the backend genuinely has no equivalent field (promo codes, engagement
+/// badges, review counts) the mapper leaves it empty or neutral rather than
+/// inventing a value, and the UI hides the corresponding element.
 class Restaurant {
   final String id;
   final String name;
@@ -44,6 +55,83 @@ class Restaurant {
 
   /// Alias for hero image URL / path.
   String get image => heroAsset;
+
+  /// True when the backend supplied a real cover/logo URL. Widgets use this to
+  /// avoid asking `Image.network` to fetch an empty string.
+  bool get hasHeroImage => heroAsset.trim().isNotEmpty;
+
+  /// Whether this restaurant has a backend photo at all.
+  bool get hasAnyImage =>
+      heroAsset.trim().isNotEmpty || logoAsset.trim().isNotEmpty;
+
+  /// Builds the presentation model from the backend's browse row plus its menu.
+  ///
+  /// Only fields with a real source are filled in:
+  ///  - [name], [id], [heroAsset], [logoAsset], [distance], [rating] and
+  ///    [deliveryTime] come straight from the backend;
+  ///  - [tagline] and [categoryTag] are derived from the restaurant's own menu
+  ///    categories (e.g. "Pizza • Burgers"), which is real menu data;
+  ///  - [categories] is the real menu, grouped exactly as the backend returned
+  ///    it.
+  ///
+  /// Deliberately left neutral: [badges], [promoCode], [promoDiscount],
+  /// [freeDelivery] and [isExpressCloudKitchen] (no backend source — showing
+  /// them would be a fabricated claim) and [reviewCount] (the backend stores an
+  /// average rating but no review count).
+  factory Restaurant.fromBackend(
+    api.RestaurantSummary summary, {
+    List<api.MenuCategory> menu = const [],
+  }) {
+    final categoryNames = <String>[];
+    for (final category in menu) {
+      final name = category.displayName;
+      if (!categoryNames.contains(name)) categoryNames.add(name);
+    }
+
+    return Restaurant(
+      id: summary.id,
+      name: summary.name,
+      tagline: categoryNames.isEmpty
+          ? (summary.address ?? 'Food delivery')
+          : categoryNames.join(' • '),
+      location: summary.address ?? 'Location not provided',
+      distance: summary.distanceLabel,
+      rating: summary.avgRating ?? 0,
+      reviewCount: summary.avgRating == null ? 'New' : '',
+      deliveryTime: summary.etaLabel,
+      // The real, locked fee rule the backend implements.
+      deliveryFeeInfo: 'Rs. ${AppConstantsFee.base} base + Rs. ${AppConstantsFee.perKm}/km',
+      expressTime: summary.hoursLabel ?? '',
+      heroAsset: summary.heroImage,
+      logoAsset: summary.logoUrl ?? '',
+      categoryTag:
+          categoryNames.isNotEmpty ? categoryNames.first : 'Restaurant',
+      badges: const [],
+      freeDelivery: false,
+      isExpressCloudKitchen: false,
+      promoCode: '',
+      promoDiscount: '',
+      categories: [
+        for (final category in menu)
+          RestaurantMenuCategory(
+            id: category.displayName,
+            name: category.displayName,
+            items: [
+              for (final item in category.items)
+                RestaurantMenuItem.fromBackend(item),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+/// Mirrors the backend's fee constants (`food_delivery/service.py`:
+/// `DELIVERY_FEE_BASE = 50`, `DELIVERY_FEE_PER_KM = 20`), used only to render
+/// the fee rule as text.
+class AppConstantsFee {
+  static const int base = 50;
+  static const int perKm = 20;
 }
 
 class RestaurantMenuCategory {
@@ -58,6 +146,17 @@ class RestaurantMenuCategory {
     this.emoji,
     required this.items,
   });
+
+  /// Maps one group from `GET /restaurants/{id}/menu`.
+  factory RestaurantMenuCategory.fromBackend(api.MenuCategory category) =>
+      RestaurantMenuCategory(
+        id: category.displayName,
+        name: category.displayName,
+        items: [
+          for (final item in category.items)
+            RestaurantMenuItem.fromBackend(item),
+        ],
+      );
 }
 
 class RestaurantMenuItem {
@@ -70,6 +169,10 @@ class RestaurantMenuItem {
   final String? tag; // e.g. "MUST TRY", "SPICY FAVORITE", "CHEF'S SIGNATURE"
   final String? tagType; // "must_try", "spicy", "signature"
 
+  /// Mirror of the backend's `is_available`. Sold-out items stay visible in the
+  /// design but cannot be added to the cart.
+  final bool isAvailable;
+
   const RestaurantMenuItem({
     required this.id,
     required this.name,
@@ -79,270 +182,44 @@ class RestaurantMenuItem {
     required this.imageUrl,
     this.tag,
     this.tagType,
+    this.isAvailable = true,
   });
+
+  /// Maps a backend menu item onto this presentation model.
+  ///
+  /// [rating] is 0 because the backend rates restaurants, not individual dishes,
+  /// and [tag]/[tagType] are null because it has no dish badges — the design
+  /// hides both when they are absent.
+  factory RestaurantMenuItem.fromBackend(api.MenuItem item) => RestaurantMenuItem(
+        id: item.id,
+        name: item.name,
+        description: item.description ?? '',
+        price: item.price,
+        rating: 0,
+        imageUrl: item.photoUrl ?? '',
+        isAvailable: item.isAvailable,
+      );
+
+  bool get hasImage => imageUrl.trim().isNotEmpty;
+
+  /// Rebuilds the backend model needed to add this dish to the cart.
+  ///
+  /// The backend cart API takes only `{item_id, qty}`; the rest is carried so
+  /// the cart's optimistic update can render the line before the response
+  /// arrives.
+  api.MenuItem toBackendMenuItem() => api.MenuItem(
+        id: id,
+        name: name,
+        description: description.isEmpty ? null : description,
+        price: price,
+        photoUrl: imageUrl.isEmpty ? null : imageUrl,
+        isAvailable: isAvailable,
+      );
 }
 
-/// Sample restaurant database with full menu data matching Stitch design specs.
-final List<Restaurant> sampleRestaurants = [
-  const Restaurant(
-    id: 'rest_001',
-    name: 'Napoli Crust Co.',
-    tagline: 'Neapolitan Pizza • Garlic Knots • Cannoli',
-    location: 'Sea View Strip',
-    distance: '2.1 km',
-    rating: 4.9,
-    reviewCount: '2.4k+',
-    deliveryTime: '20-25 min',
-    deliveryFeeInfo: 'Free Delivery on Orders > Rs. 800',
-    expressTime: 'Speedy Express: 22 mins',
-    heroAsset:
-        'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80',
-    logoAsset:
-        'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=200&auto=format&fit=crop&q=80',
-    categoryTag: 'Neapolitan Pizzeria',
-    badges: ['Top Rated', 'Cloud Exclusive'],
-    freeDelivery: true,
-    promoCode: 'NAPOLI30',
-    promoDiscount: '30% off on all pizzas',
-    categories: [
-      RestaurantMenuCategory(
-        id: 'cat_pizzas',
-        name: 'Neapolitan Pizzas',
-        items: [
-          RestaurantMenuItem(
-            id: 'item_101',
-            name: 'Pepperoni Feast (S)',
-            description:
-                'Double beef pepperoni, fresh mozzarella, San Marzano tomato sauce, fresh basil on 48h fermented crust.',
-            price: 980,
-            rating: 4.9,
-            imageUrl:
-                'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&auto=format&fit=crop&q=80',
-            tag: 'MUST TRY',
-            tagType: 'must_try',
-          ),
-          RestaurantMenuItem(
-            id: 'item_102',
-            name: 'Margherita Supreme',
-            description:
-                'Fresh buffalo mozzarella, San Marzano tomatoes, extra virgin olive oil, and fresh basil leaves.',
-            price: 850,
-            rating: 4.8,
-            imageUrl:
-                'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&auto=format&fit=crop&q=80',
-            tag: "CHEF'S SIGNATURE",
-            tagType: 'signature',
-          ),
-          RestaurantMenuItem(
-            id: 'item_103',
-            name: 'Quattro Formaggi',
-            description:
-                'Four cheese blend: Mozzarella, Gorgonzola, Parmesan, and Fontina with a honey drizzle.',
-            price: 1150,
-            rating: 4.9,
-            imageUrl:
-                'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=80',
-            tag: 'BESTSELLER',
-            tagType: 'must_try',
-          ),
-        ],
-      ),
-      RestaurantMenuCategory(
-        id: 'cat_starters',
-        name: 'Starters & Sides',
-        items: [
-          RestaurantMenuItem(
-            id: 'item_104',
-            name: 'Garlic Butter Knots',
-            description:
-                'Freshly baked dough knots brushed with garlic herb butter, parmesan & served with marinara dip.',
-            price: 380,
-            rating: 4.8,
-            imageUrl:
-                'https://images.unsplash.com/photo-1541745537411-b8046dc6d66c?w=500&auto=format&fit=crop&q=80',
-            tag: 'POPULAR',
-            tagType: 'spicy',
-          ),
-        ],
-      ),
-    ],
-  ),
-  const Restaurant(
-    id: 'rest_002',
-    name: 'Express Cloud Kitchen',
-    tagline: 'Multi-Brand Culinary Hub • Gourmet Bowls & Wraps',
-    location: 'Gulberg Commercial',
-    distance: '1.5 km',
-    rating: 4.8,
-    reviewCount: '3.1k+',
-    deliveryTime: '15-20 min',
-    deliveryFeeInfo: 'Rs. 40 Flat Delivery',
-    expressTime: 'Speedy Express: 15 mins',
-    heroAsset:
-        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
-    logoAsset:
-        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&auto=format&fit=crop&q=80',
-    categoryTag: 'Express Hub',
-    badges: ['Speedy Express', 'Cloud Exclusive'],
-    freeDelivery: false,
-    isExpressCloudKitchen: true,
-    promoCode: 'EXPRESS50',
-    promoDiscount: '50% off express fee',
-    categories: [
-      RestaurantMenuCategory(
-        id: 'cat_bowls',
-        name: 'Gourmet Rice Bowls',
-        items: [
-          RestaurantMenuItem(
-            id: 'item_201',
-            name: 'Teriyaki Chicken Crunch Bowl',
-            description:
-                'Glazed chicken thigh, jasmine rice, edamame, pickled cucumber, sesame seeds & spicy mayo.',
-            price: 790,
-            rating: 4.9,
-            imageUrl:
-                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80',
-            tag: 'TOP ORDERED',
-            tagType: 'must_try',
-          ),
-          RestaurantMenuItem(
-            id: 'item_202',
-            name: 'BBQ Beef Slider Trio Box',
-            description:
-                '3 mini smashed Angus sliders with melted cheddar, crispy onion rings & house BBQ dip.',
-            price: 920,
-            rating: 4.8,
-            imageUrl:
-                'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80',
-            tag: 'MUST TRY',
-            tagType: 'signature',
-          ),
-        ],
-      ),
-      RestaurantMenuCategory(
-        id: 'cat_wraps',
-        name: 'Cravers Wraps',
-        items: [
-          RestaurantMenuItem(
-            id: 'item_203',
-            name: 'Fiery Crispy Chicken Wrap',
-            description:
-                'Crispy tenders wrapped in toasted tortilla with purple cabbage, spicy ranch & jalapeños.',
-            price: 580,
-            rating: 4.7,
-            imageUrl:
-                'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=500&auto=format&fit=crop&q=80',
-            tag: 'SPICY',
-            tagType: 'spicy',
-          ),
-        ],
-      ),
-    ],
-  ),
-  const Restaurant(
-    id: 'rest_003',
-    name: 'Burger Craze',
-    tagline: 'Artisanal Smashed Patties • Gourmet Brioche',
-    location: 'Clifton Block 4',
-    distance: '1.2 km',
-    rating: 4.9,
-    reviewCount: '1.2k+',
-    deliveryTime: '18-22 min',
-    deliveryFeeInfo: 'Rs. 50 Base + Rs. 20/km',
-    expressTime: 'Speedy Express: 20 mins',
-    heroAsset:
-        'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80',
-    logoAsset:
-        'https://images.unsplash.com/photo-1550547660-d9450f859349?w=200&auto=format&fit=crop&q=80',
-    categoryTag: 'Burger Lab',
-    badges: ['Cloud Exclusive'],
-    freeDelivery: false,
-    promoCode: 'CRAZE20',
-    promoDiscount: 'Rs. 200 discount',
-    categories: [
-      RestaurantMenuCategory(
-        id: 'cat_burgers',
-        name: 'Gourmet Burgers',
-        items: [
-          RestaurantMenuItem(
-            id: 'item_001',
-            name: 'The Mighty Speedy Beef Burger',
-            description:
-                '200g smashed prime beef patty, smoked aged cheese, homemade garlic truffle sauce & caramelized onions on toasted brioche.',
-            price: 890,
-            rating: 4.9,
-            imageUrl:
-                'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=500&auto=format&fit=crop&q=80',
-            tag: 'MUST TRY',
-            tagType: 'must_try',
-          ),
-          RestaurantMenuItem(
-            id: 'item_002',
-            name: 'Fiery Zinger Crunch',
-            description:
-                'Spicy crispy breaded chicken thigh, tossed in hot honey glaze, jalapeño mayo, purple slaw on butter bun.',
-            price: 690,
-            rating: 4.8,
-            imageUrl:
-                'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?w=500&auto=format&fit=crop&q=80',
-            tag: 'SPICY FAVORITE',
-            tagType: 'spicy',
-          ),
-          RestaurantMenuItem(
-            id: 'item_003',
-            name: 'Loaded Animal Fries',
-            description:
-                'Golden skin-on crispy fries smothered in melted Monterey Jack cheddar, sweet caramelized onions & house drizzle.',
-            price: 480,
-            rating: 4.9,
-            imageUrl:
-                'https://images.unsplash.com/photo-1585109649139-366815a0d713?w=500&auto=format&fit=crop&q=80',
-            tag: "CHEF'S SIGNATURE",
-            tagType: 'signature',
-          ),
-        ],
-      ),
-    ],
-  ),
-  const Restaurant(
-    id: 'rest_004',
-    name: 'Midnight Biryani & Karahi',
-    tagline: 'Desi Spice Lab • Slow-cooked Dum Biryani',
-    location: 'Saddar Food Street',
-    distance: '3.0 km',
-    rating: 4.8,
-    reviewCount: '4.5k+',
-    deliveryTime: '25-30 min',
-    deliveryFeeInfo: 'Rs. 60 Flat Delivery',
-    expressTime: 'Speedy Express: 25 mins',
-    heroAsset:
-        'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
-    logoAsset:
-        'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=200&auto=format&fit=crop&q=80',
-    categoryTag: 'Desi Craves',
-    badges: ['Night Crave Special'],
-    freeDelivery: true,
-    promoCode: 'DESISPEEDY',
-    promoDiscount: 'Free Raita + Drink',
-    categories: [
-      RestaurantMenuCategory(
-        id: 'cat_biryani',
-        name: 'Special Biryani',
-        items: [
-          RestaurantMenuItem(
-            id: 'item_301',
-            name: 'Special Chicken Dum Biryani',
-            description:
-                'Long grain basmati rice layered with aromatic spices, marinated chicken & golden potatoes.',
-            price: 490,
-            rating: 4.9,
-            imageUrl:
-                'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=500&auto=format&fit=crop&q=80',
-            tag: 'MUST TRY',
-            tagType: 'must_try',
-          ),
-        ],
-      ),
-    ],
-  ),
-];
+// NOTE: the former hardcoded `sampleRestaurants` list lived here. It was
+// removed during backend integration because it was the app's source of
+// "real" restaurant data (4 fake restaurants, 11 fake dishes, fake review
+// counts and promo codes). Every restaurant, menu, price and image now comes
+// from `GET /restaurants` and `GET /restaurants/{id}/menu`, mapped through
+// [Restaurant.fromBackend].
