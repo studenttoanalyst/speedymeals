@@ -41,7 +41,6 @@ class Settings(BaseSettings):
     GOOGLE_PLACES_API_KEY: str = ""
     MAPS_DAILY_CALL_BUDGET: int = 300
 
-<<<<<<< HEAD
     # CORS (production-ready browser security)
     # Browser origins allowed to call this API cross-origin. Locally the
     # defaults cover the dev website (3000) and dev mobile web (8080).
@@ -71,9 +70,6 @@ class Settings(BaseSettings):
                 return cleaned
         return value
 
-
-=======
->>>>>>> 036a44af1997d708f88b65d0e60574bdfb87c8a2
     # First Admin Auto-Seed (Phase 2, Step 10 - see ADR-002)
     FIRST_ADMIN_EMAIL: str
     FIRST_ADMIN_PASSWORD: str

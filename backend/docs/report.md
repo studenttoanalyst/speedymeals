@@ -13,15 +13,15 @@ SpeedyMeals is a food delivery platform backend supporting four user roles: **Cu
 | Component | Technology |
 |-----------|-----------|
 | Language | Python 3.11 |
-| Framework | FastAPI 0.115.0 |
+| Framework | FastAPI 0.115.0 (incl. WebSocket support) |
 | ORM | SQLAlchemy 2.0.35 |
-| Database | PostgreSQL (psycopg2-binary 2.9.9) |
+| Database | PostgreSQL (psycopg2-binary 2.9.9) — Supabase pooler (port 6543) in production |
 | Migrations | Alembic 1.13.2 |
 | Validation | Pydantic 2.9.2 + pydantic-settings 2.5.2 |
 | Auth | JWT (python-jose 3.3.0), bcrypt (passlib 1.7.4) |
-| Cache/Queue | Redis 5.0.8 |
-| Storage | AWS S3 (boto3 1.35.24) |
-| HTTP Client | httpx 0.27.2 (Google Maps) |
+| Cache/Queue | Redis 5.0.8 (caches, rate limits, Pub/Sub) |
+| Storage | AWS S3 (boto3 1.35.24) / Supabase Storage (S3-compatible) |
+| HTTP Client | httpx 0.27.2 (Google Maps/Places/Geocoding/Directions) |
 | Testing | pytest 8.3.3, pytest-asyncio 0.24.0 |
 
 ### Architecture Summary
@@ -29,11 +29,11 @@ SpeedyMeals is a food delivery platform backend supporting four user roles: **Cu
 ```
 Client → FastAPI Route → Auth/RBAC → Pydantic Validation → Service Layer → PostgreSQL
                                                               ↕
-                                                           Redis (OTP, carts, rate limits, rider location)
+                                                           Redis (OTP, carts, rate limits, rider location, caches, budget counters)
                                                               ↕
-                                                           AWS S3 (menu photos, rider documents)
+                                                           AWS S3 / Supabase Storage (menu photos, rider documents)
                                                               ↕
-                                                           Google Maps API (distance calculation)
+                                                           Google Maps/Places APIs (distance, routes, geocoding, autocomplete)
 ```
 
 ---
@@ -47,7 +47,7 @@ backend/
 │   │   ├── base_model.py        # BaseModel + UpdatedAtMixin
 │   │   ├── config.py            # Settings (env vars via pydantic-settings)
 │   │   ├── database.py          # SQLAlchemy engine + get_db() dependency
-│   │   ├── maps_client.py       # Google Maps Distance Matrix
+│   │   ├── maps_client.py       # Google Maps Distance Matrix, Directions, Geocoding, Places
 │   │   ├── rate_limiter.py      # Redis-based rate limiting
 │   │   ├── redis_client.py      # Shared Redis connection
 │   │   ├── security.py          # bcrypt password hashing
@@ -56,7 +56,7 @@ backend/
 │   │   ├── auth/                # Authentication (OTP, JWT, RBAC)
 │   │   ├── users/               # Customer profile + addresses
 │   │   ├── wallet_payment/      # Rider wallet, cash deposits, delivery status
-│   │   ├── location/            # Placeholder (README only)
+│   │   ├── location/            # Places/Geocoding proxy (auth + per-user rate limits + Redis caching)
 │   │   ├── notification/        # Placeholder (README only)
 │   │   └── payments/            # Placeholder (empty)
 │   ├── modules/                 # Business domain modules
@@ -65,12 +65,15 @@ backend/
 │   │   ├── ride_hailing/        # Placeholder (README only)
 │   │   ├── logistics/           # Placeholder (empty)
 │   │   └── medicine/            # Placeholder (empty)
-│   ├── migrations/              # Alembic migration files
+│   ├── migrations/              # Alembic migration files (single source of truth)
 │   │   └── versions/
 │   │       ├── ea1fe1cee296_create_all_13_tables.py
 │   │       ├── b1c2d3e4f5a6_create_refresh_tokens_table.py
-│   │       └── b3f8a2d1_add_rider_kit_fields.py
-│   ├── tests/                   # 309 tests across 20 test files
+│   │       ├── b3f8a2d1_add_rider_kit_fields.py
+│   │       ├── c4d5e6f7a8b9_add_query_performance_indexes.py
+│   │       ├── d5e6f7a8b9c0_add_rider_kit_item_serials.py
+│   │       └── e7f8a9b0c1d2_add_order_location_snapshots.py
+│   ├── tests/                   # 373 tests across 20 test files
 │   ├── main.py                  # FastAPI app entry point
 │   ├── alembic.ini              # Alembic configuration
 │   ├── .env                     # Environment variables (not in repo)
@@ -118,12 +121,20 @@ All configuration loaded from `backend/app/.env` via `pydantic-settings`. See `b
 | `AWS_SECRET_ACCESS_KEY` | S3 secret key | `.env` | Yes |
 | `AWS_REGION` | S3 region | Default: `us-east-1` | No |
 | `S3_BUCKET_NAME` | S3 bucket for docs/photos | `.env` | Yes |
-| `GOOGLE_MAPS_API_KEY` | Maps Distance Matrix API | `.env` | Yes |
+| `GOOGLE_MAPS_API_KEY` | Maps Distance Matrix / Directions / Geocoding API | `.env` | Yes |
+| `GOOGLE_PLACES_API_KEY` | Places autocomplete/details API (falls back to Maps key) | `.env` | No |
+| `MAPS_DAILY_CALL_BUDGET` | Daily billable Google API call cap (circuit breaker) | Default: `300` | No |
+| `ALLOWED_ORIGINS` | CORS browser-origin allowlist (JSON list or comma-separated; `*` drops credentials) | Default: localhost dev origins | No |
+| `S3_ENDPOINT_URL` | S3-compatible endpoint (Supabase Storage when it contains `supabase.co`) | `.env` | No |
 | `FIRST_ADMIN_EMAIL` | Auto-seeded admin email | `.env` | Yes |
 | `FIRST_ADMIN_PASSWORD` | Auto-seeded admin password | `.env` | Yes |
 | `CASH_COLLECTION_CAP` | COD cap for riders | Default: `5000` | No |
 
 **Security:** Actual secret values are never written to documentation or committed to the repo.
+
+**Production database:** Postgres runs on Supabase via the connection pooler (PgBouncer) on **port 6543** — `DATABASE_URL=postgresql://...@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres` (configured in `.env`, never committed).
+
+**CORS:** `main.py` builds `CORSMiddleware` entirely from `settings.ALLOWED_ORIGINS` (parsed in `core/config.py` from a JSON list or comma-separated string). When the env sets `["*"]` for local dev, `allow_credentials` is force-disabled — wildcard + credentials is a browser-rejected, auth-continuation hazard and can never ship. Methods and headers are explicit allowlists (`GET/POST/PUT/PATCH/DELETE/OPTIONS`; `Authorization, Content-Type, Accept, X-Requested-With`).
 
 ---
 
@@ -174,16 +185,16 @@ On app startup, if no admin row exists, one is created from `FIRST_ADMIN_EMAIL` 
 
 ## 6. Database Architecture
 
-### Tables (16 total)
+### Tables (15 total)
 
 | Table | Purpose | Key Fields |
 |-------|---------|------------|
-| `users` | Customer accounts | phone_number (unique), name, email, wallet_balance, country_code |
+| `users` | Customer accounts | phone_number (unique), name, email, wallet_balance, country_code, is_active |
 | `addresses` | Customer delivery addresses | user_id (FK), latitude, longitude, is_default |
 | `restaurants` | Restaurant accounts | email (unique), phone_number (unique), password_hash, commission_rate, status, lat/lng |
 | `menu_items` | Restaurant menu items | restaurant_id (FK), name, price, category, variants (JSONB), is_available |
 | `riders` | Rider accounts | phone_number (unique), cnic_number (unique), approval_status, wallet_balance, is_online, kit_* fields |
-| `orders` | Customer orders | user_id, restaurant_id, rider_id (nullable), delivery_address_id, status, payment_method, financials |
+| `orders` | Customer orders | user_id, restaurant_id, rider_id (nullable), delivery_address_id, status, payment_method, financials, delivery_distance_km, customer_lat/lng + restaurant_lat/lng (immutable placement snapshots) |
 | `order_items` | Order line items | order_id (FK), menu_item_id (FK), quantity, price_at_order |
 | `ratings` | Order ratings | order_id (FK), user_id (FK), restaurant_rating, rider_rating, comment |
 | `wallet_transactions` | Rider wallet audit | rider_id (FK), order_id (nullable FK), type, amount, balance_after |
@@ -192,6 +203,8 @@ On app startup, if no admin row exists, one is created from `FIRST_ADMIN_EMAIL` 
 | `refresh_tokens` | JWT refresh token tracking | subject_id, role, token_hash, status, expires_at |
 | `settlements` | Restaurant weekly payouts | restaurant_id (FK), period, financials, status |
 | `rider_payouts` | Rider weekly payouts | rider_id (FK), period, total_earning, status |
+
+> Kit serials (`shirt_serial_number(s)`, `box_serial_number`, `helmet_serial_number`) live on `riders`; performance indexes from migration 4 span FKs, status fields, and composite query columns.
 
 ### Relationships
 
@@ -226,15 +239,20 @@ Alembic with PostgreSQL backend. Migrations stored in `backend/app/migrations/ve
 
 ### Migration History
 
+Single source of truth: `backend/app/migrations/` (alembic.ini lives in `app/`; head = `e7f8a9b0c1d2`).
+
 | ID | Description |
 |----|-------------|
 | `ea1fe1cee296` | Creates all 13 initial tables |
 | `b1c2d3e4f5a6` | Creates `refresh_tokens` table |
 | `b3f8a2d1` | Adds rider kit deposit/handover fields (6 columns) |
+| `c4d5e6f7a8b9` | Adds query performance indexes (FKs, status fields, composite columns) |
+| `d5e6f7a8b9c0` | Adds rider kit item serial numbers (shirt/box/helmet) |
+| `e7f8a9b0c1d2` | Adds immutable order location snapshot columns (`customer_lat/lng`, `restaurant_lat/lng`) |
 
 ### Kit Fields Added (Migration 3)
 
-Columns added to `riders` table: `kit_deposit_paid`, `kit_deposit_date`, `kit_shirts_issued`, `kit_box_issued`, `kit_verified_by`, `kit_completed`.
+Columns added to `riders` table: `kit_deposit_paid`, `kit_deposit_date`, `kit_shirts_issued`, `kit_box_issued`, `kit_verified_by`, `kit_completed`. Migration 5 adds serial tracking: `shirt_serial_number`, `shirt_serial_numbers`, `box_serial_number`, `helmet_serial_number`.
 
 ---
 
@@ -255,9 +273,8 @@ Columns added to `riders` table: `kit_deposit_paid`, `kit_deposit_date`, `kit_sh
 ### Restaurant Discovery
 
 - `GET /restaurants` — Browse active restaurants within radius of customer's address
-- Uses Google Maps Distance Matrix for road distance
-- Haversine distance for bounding-box prefilter, exact distance from Maps API
-- Sort by distance or rating
+- Bounding-box SQL prefilter over lat/lng, exact Haversine road distance in Python (no billable Maps call on browse)
+- Name search + distance/rating sort
 
 ### Menu Browsing
 
@@ -359,7 +376,7 @@ Auto-Offline (when balance < Rs. 100)
 
 - Triggered when restaurant marks order as "Ready for Pickup"
 - `_find_nearest_rider()` searches all approved, active, online riders with valid Redis location
-- Eligibility check: `is_online` + `wallet_balance >= 100` + valid Redis location key
+- Eligibility check: `is_online` + `wallet_balance >= 100` + valid Redis location key (via `rider_eligible_for_assignment()`)
 - Nearest rider by haversine distance from restaurant coordinates
 - SELECT FOR UPDATE prevents concurrent assignment
 
@@ -369,13 +386,19 @@ Auto-Offline (when balance < Rs. 100)
 - Accept: "Rider Assigned" → "Accepted by Rider"
 - Reject: "Rider Assigned" → "Rejected" → re-assign to next nearest rider (excluding rejector)
 
+### Rider Location Push
+
+- `PATCH /wallet/location` — GPS coordinates validated (`lat -90..90`, `lng -180..180`) and stored in Redis under `rider_location:{rider_id}` with a 45s TTL; response echoes `rider_id, lat, lng, updated_at` (ISO-8601 UTC)
+- Redis write only — no DB write on the live path
+- While the rider holds an active delivery, the same update is published to Redis Pub/Sub channel `order:location:{order_id}` for WebSocket consumers
+
 ### Delivery Status Flow
 
 ```
 Accepted by Rider → Arrived at Restaurant → Picked Up → On the Way → Delivered
 ```
 
-Each status has a dedicated endpoint:
+Each status has a dedicated endpoint (responses carry the frozen location snapshot: `restaurant_lat/lng`, `customer_lat/lng`, `delivery_address`):
 - `PATCH /wallet/deliveries/{order_id}/status/arrived`
 - `PATCH /wallet/deliveries/{order_id}/status/picked-up`
 - `PATCH /wallet/deliveries/{order_id}/status/on-the-way`
@@ -398,8 +421,8 @@ Each status has a dedicated endpoint:
 
 ### Relevant Code
 
-- **Model:** `Rider` in `platform/wallet_payment/models.py` — 6 kit fields
-- **Service:** `record_kit_completion()` in `platform/wallet_payment/service.py` — auto-computes `kit_completed` from deposit + shirts (≥2) + box
+- **Model:** `Rider` in `platform/wallet_payment/models.py` — 6 kit fields + 4 serial fields
+- **Service:** `record_kit_completion()` in `platform/wallet_payment/service.py` — auto-computes `kit_completed` from deposit + shirts (≥2) + box; records individual serial numbers
 - **Route:** `PATCH /admin/riders/{id}/kit` in `modules/admin/routes.py` — admin-only
 - **Schema:** `RiderKitUpdateSchema`, `RiderKitResponseSchema` in `modules/admin/schemas.py`
 
@@ -482,8 +505,8 @@ Delivery Fee = Rs. 100 + (Distance in KM × Rs. 25)
 - **Precision:** `Decimal` throughout, quantized to 2 decimal places (paisa)
 - **Minimum charge:** Rs. 100 (at 0 km)
 - **Maximum charge:** None
-- **Distance source:** Google Maps Distance Matrix API (`core/maps_client.py`)
-- **Used in:** `_build_checkout_context()` → `place_order()` and `preview_checkout()`
+- **Distance source:** Google Directions API route calculation (`core/maps_client.py` → `get_route_details()`), Haversine×1.3 fallback when Maps is unavailable
+- **Used in:** `_build_checkout_context()` → `place_order()` and `preview_checkout()`; the route is cached per restaurant+address pair in Redis (`checkout_dist:{restaurant_id}:{address_id}`, 600s TTL)
 
 ### Examples
 
@@ -622,17 +645,17 @@ Additional transitions:
 
 ### Order Creation
 
-1. Customer calls `POST /restaurants/{id}/cart/checkout` with `address_id` and `payment_method`
+1. Customer calls `POST /restaurants/{id}/cart/checkout` with `address_id`, `payment_method`, and a required UUID `Idempotency-Key` header
 2. Server re-reads all prices from DB (not Redis)
-3. Delivery fee calculated from Maps distance
+3. Route (distance/duration/ETA/polyline) from Directions API, cached in Redis; delivery fee from locked formula
 4. Commission calculated from restaurant's rate
-5. Order + OrderItems created atomically
-6. Redis cart cleared after successful commit
+5. Order + OrderItems created atomically, with immutable coordinate snapshots (`customer_lat/lng`, `restaurant_lat/lng`) frozen at placement
+6. Redis cart cleared after successful commit; idempotency response cached 24h under `idempotency:{user_id}:{key}`
 7. Digital payment processed before DB write (failure = no order)
 
 ### Order Fields
 
-All financial values frozen at placement: `food_subtotal`, `delivery_fee`, `total_amount`, `commission_amount`, `restaurant_payable`, `rider_earning`.
+All financial values frozen at placement: `food_subtotal`, `delivery_fee`, `total_amount`, `commission_amount`, `restaurant_payable`, `rider_earning`, `delivery_distance_km` — plus location snapshots `customer_lat/lng` and `restaurant_lat/lng` (Point 4, migration `e7f8a9b0c1d2`), so tracking never shifts if the address is edited or the restaurant relocates after ordering. Read paths fall back to live joins only for legacy rows with null snapshots.
 
 ---
 
@@ -700,9 +723,16 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 |-------------|---------|-----|
 | `otp:{phone}` | OTP storage | 5 minutes |
 | `otp:cooldown:{phone}` | Resend cooldown | 45 seconds |
-| `rate_limit:{action}:{id}` | Rate limiting | 60 seconds |
+| `rate_limit:{action}:{id}` | Rate limiting (incl. per-user geocoding/places limits) | 60 seconds |
 | `cart:{customer_id}:{restaurant_id}` | Shopping cart | 7 days |
-| `rider_location:{rider_id}` | Rider GPS location | 45 seconds |
+| `rider_location:{rider_id}` | Rider GPS location (lat/lng/updated_at JSON) | 45 seconds |
+| `maps:daily_usage:{YYYY-MM-DD}` | Google API daily budget counter | 24 hours |
+| `checkout_dist:{restaurant_id}:{address_id}` | Checkout route/distance cache | 600 seconds |
+| `geocode:{lat}:{lng}` | Reverse geocode response cache | 24 hours |
+| `places:autocomplete:{query}` | Places autocomplete cache (normalized query) | 1 hour |
+| `places:details:{place_id}` | Place details cache | 24 hours |
+| `idempotency:{user_id}:{key}` | Checkout duplicate-submit protection | 24 hours |
+| `order:location:{order_id}` | Pub/Sub channel for live rider location frames | n/a |
 
 ---
 
@@ -711,21 +741,26 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | Service | Purpose | Location | Status |
 |---------|---------|----------|--------|
 | Google Maps Distance Matrix | Delivery distance calculation | `core/maps_client.py` | Implemented |
-| AWS S3 | Menu photos (public) + rider docs (private) | `core/storage.py` | Implemented |
-| Redis | OTP, rate limiting, carts, rider location | `core/redis_client.py` | Implemented |
+| Google Directions API | Full route: distance, duration, ETA, polyline | `core/maps_client.py` (`get_route_details()`) | Implemented |
+| Google Geocoding API | Reverse geocoding (lat/lng → address) | `core/maps_client.py` (`reverse_geocode()`) | Implemented |
+| Google Places API | Autocomplete + place details (address search) | `core/maps_client.py` + `platform/location/` | Implemented |
+| AWS S3 / Supabase Storage | Menu photos (public) + rider docs (private) | `core/storage.py` | Implemented |
+| Redis | OTP, rate limiting, carts, rider location, caches, budget | `core/redis_client.py` | Implemented |
 | SMS Provider | OTP delivery | `platform/auth/service.py` | Console stub only |
 
 ### Maps Integration
 
-- Uses Distance Matrix API for road distance (driving mode)
-- 10-second timeout
-- Raises `MapsError` on failure; service layer returns 503
+- `core/maps_client.py` is the only Maps-touching module (same isolation as `storage.py` for S3)
+- Distance Matrix API for road distance (driving mode); Directions API for full route (distance, duration, ETA, encoded polyline)
+- 10-second timeout; `MapsError` on failure — service layer maps to 503 (Distance Matrix/Directions degrade to Haversine×1.3 fallback with avg urban speed 25 km/h for duration)
 - Distance converted from meters to km
+- **Daily budget circuit breaker:** `_enforce_daily_budget()` gates every billable call (Distance Matrix, Directions, Geocoding, Places autocomplete/details) against `maps:daily_usage:{date}` with `MAPS_DAILY_CALL_BUDGET` (default 300); `MapsBudgetExceededError` raised before any network I/O
 
 ### S3 Storage
 
 - Menu photos: `menu-items/{restaurant_id}/{menu_item_id}.{ext}` — public-read
 - Rider docs: `rider-docs/{rider_id}/{doc_type}.{ext}` — private (no public ACL)
+- Supabase Storage detected via `S3_ENDPOINT_URL` containing `supabase` (S3-compatible API); public URLs derived from `SUPABASE_URL` or the endpoint's project base
 
 ---
 
@@ -775,8 +810,8 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | DELETE | `/restaurants/{id}/cart` | Clear cart |
 | GET | `/restaurants/{id}/cart/checkout-preview` | Preview checkout |
 | POST | `/restaurants/{id}/cart/checkout` | Place order |
-| GET | `/orders/{id}/track` | Track order |
-| GET | `/orders/{id}/rider-location` | Live rider GPS (read from Redis) |
+| GET | `/orders/{id}/track` | Track order (restaurant/customer/rider coordinates + live route) |
+| GET | `/orders/{id}/rider-location` | Live rider GPS (read from Redis, 45s TTL) |
 | GET | `/orders` | Order history |
 | POST | `/orders/{id}/reorder` | Reorder |
 | POST | `/orders/{id}/rating` | Rate order |
@@ -831,6 +866,7 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | PATCH | `/admin/riders/{id}/approval` | Approve/reject rider |
 | PATCH | `/admin/riders/{id}/status` | Activate/deactivate rider |
 | PATCH | `/admin/riders/{id}/kit` | Record kit completion |
+| GET | `/admin/riders/{id}/kit` | Read kit status |
 | GET | `/admin/orders` | List all orders |
 | GET | `/admin/orders/{id}` | Order detail |
 | POST | `/admin/orders/{id}/cancel` | Cancel order |
@@ -842,6 +878,11 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | GET | `/admin/rider-payouts` | List rider payouts |
 | POST | `/admin/rider-payouts/{id}/mark-paid` | Mark paid |
 | GET | `/admin/cash-discrepancies` | Cash discrepancy flags |
+| GET | `/admin/customers` | List all customers |
+| PATCH | `/admin/customers/{id}/status` | Block/unblock customer |
+| GET | `/admin/promotions` | List promotional codes/banners |
+| POST | `/admin/promotions` | Create promotion |
+| PATCH | `/admin/promotions/{id}/status` | Toggle promotion status |
 | GET | `/admin/reports` | Period reports |
 
 ### Health Check
@@ -849,6 +890,18 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/health` | API health check |
+
+### Location / Places Endpoints (`/api/v1/location`, any authenticated role)
+
+All three proxy billable Google calls: they require a valid access token (`get_current_user`) and are per-user rate limited via `core/rate_limiter.py` (429 on excess).
+
+| Method | Path | Rate Limit | Purpose |
+|--------|------|-----------|---------|
+| GET | `/api/v1/location/reverse-geocode` | 20 req/min per user | lat/lng → formatted address, place_id, components (24h Redis cache) |
+| GET | `/api/v1/location/places/autocomplete` | 30 req/min per user | Address search predictions (1h Redis cache, session-token support) |
+| GET | `/api/v1/location/places/details` | 20 req/min per user | place_id → lat/lng + address components (24h Redis cache) |
+
+**Places security summary:** auth required on every endpoint; per-user Redis rate limits (not per-IP); Redis response caching so repeated queries never re-bill Google; session tokens supported for autocomplete billing grouping; all calls counted against the `MAPS_DAILY_CALL_BUDGET` circuit breaker.
 
 ---
 
@@ -915,9 +968,10 @@ All three side effects (status update, wallet deduction, COD update) happen in a
 | 403 | Forbidden (valid token, wrong role) |
 | 404 | Not found (or ownership check failed) |
 | 402 | Payment required (digital payment declined) |
+| 409 | Conflict (terminal order has no live rider location) |
 | 413 | File too large |
 | 415 | Unsupported media type |
-| 429 | Rate limited |
+| 429 | Rate limited (auth attempts, per-user geocode/places limits) |
 | 500 | Internal error (S3 upload failure) |
 | 503 | Service unavailable (Maps API failure) |
 
@@ -955,24 +1009,26 @@ Every protected resource query includes the authenticated user's ID in the WHERE
 
 | Test File | Tests | Focus |
 |-----------|-------|-------|
-| `test_wallet_payment.py` | 17 | Recharge, go-online, deduction, auto-offline, COD cap |
+| `test_wallet_payment.py` | 30 | Recharge, go-online, deduction, auto-offline, COD cap |
 | `test_wallet_money_math.py` | 11 | Cash deposit, discrepancy, earnings summary |
 | `test_delivered_side_effects.py` | 11 | Digital/COD deduction, duplicate prevention |
-| `test_checkout.py` | 36 | Checkout flow, cart, payment, delivery fee formula |
-| `test_admin.py` | 48 | Admin dashboard, restaurant/rider/order management, settlements |
-| `test_auth.py` | 14 | OTP, login, rate limiting |
-| `test_auth_refresh.py` | 3 | Refresh token rotation |
-| `test_cart.py` | 12 | Cart CRUD |
-| `test_food_delivery.py` | 12 | Menu CRUD, order status transitions |
+| `test_checkout.py` | 42 | Checkout flow, cart, payment, delivery fee formula, idempotency replay |
+| `test_admin.py` | 50 | Admin dashboard, restaurant/rider/customer/promotion management, settlements |
+| `test_auth.py` | 18 | OTP, login, rate limiting |
+| `test_auth_refresh.py` | 6 | Refresh token rotation |
+| `test_cart.py` | 24 | Cart CRUD |
+| `test_food_delivery.py` | 18 | Menu CRUD, order status transitions |
 | `test_order_lifecycle_e2e.py` | 2 | Full COD and Digital order lifecycle |
-| `test_order_tracking.py` | 7 | Customer order tracking |
-| `test_order_history_rating.py` | 5 | Order history, ratings, reorder |
-| `test_restaurant_browse.py` | 7 | Restaurant discovery, distance/rating sort |
-| `test_rider_assignment.py` | 13 | Nearest rider selection, eligibility |
-| `test_rider_accept_reject.py` | 8 | Rider accept/reject flow |
-| `test_rider_location.py` | 12 | GPS location, Redis TTL, eligibility |
-| `test_rider_documents.py` | 7 | Document upload validation |
-| `test_delivery_status.py` | 10 | Delivery status transitions |
+| `test_order_tracking.py` | 23 | Customer order tracking, rider-location read path |
+| `test_order_history_rating.py` | 11 | Order history, ratings, reorder |
+| `test_restaurant_browse.py` | 21 | Restaurant discovery, distance/rating sort |
+| `test_rider_assignment.py` | 12 | Nearest rider selection, eligibility |
+| `test_rider_accept_reject.py` | 14 | Rider accept/reject flow |
+| `test_rider_location.py` | 26 | GPS location, Redis TTL, eligibility, Pub/Sub |
+| `test_rider_documents.py` | 10 | Document upload validation |
+| `test_delivery_status.py` | 17 | Delivery status transitions, location snapshot fields |
+| `test_location.py` | 22 | Geocoding/places proxy: auth, rate limits, caching |
+| `test_cors.py` | 5 | CORS middleware wiring, wildcard guard |
 
 ### Test Infrastructure
 
@@ -986,12 +1042,18 @@ Every protected resource query includes the authenticated user's ID in the WHERE
 ## 29. Current Test Status
 
 ```
-Total tests: 351
-Passed: 351
+Total tests: 373
+Passed: 373
 Failed: 0
 Skipped: 0
 Errors: 0
+
+Collected: 373 tests in 1.60s
+Executed: 373 passed in 41.91s (local Docker Postgres 15 + Redis 7)
+Command: python -m pytest app/tests -v
 ```
+
+> Infrastructure note: the suite requires a reachable PostgreSQL (UUID columns are Postgres-only) and Redis. Against the remote Supabase pooler (port 6543) with local Redis down, the run degrades with connection errors; execute against local infrastructure (`docker compose up -d db redis`) for the numbers above.
 
 ---
 
@@ -1002,13 +1064,12 @@ Errors: 0
 - **SMS provider:** OTP sent to console log only (not real SMS)
 - **Push notifications:** No notification infrastructure (reminder threshold defined but not wired)
 - **Payment gateway:** Digital payment is a stub returning fake reference
-- **Real-time tracking:** Implemented via WebSocket Pub/Sub with fallback polling
 - **Automated settlements:** Admin manually triggers generation and marks paid
 
 ### Partially Implemented
 
 - **Notification system:** `platform/notification/` has only a README
-- **Location platform:** `platform/location/` has only a README
+- **Location platform:** `platform/location/` is implemented as a Places/Geocoding proxy (routes + service + schemas + tests); it is not a standalone location-tracking module
 - **Payments platform:** `platform/payments/` is empty
 - **Ride hailing module:** `modules/ride_hailing/` has only a README
 - **Logistics module:** `modules/logistics/` is empty
@@ -1018,6 +1079,7 @@ Errors: 0
 
 | Item | Status | Implementation |
 |------|--------|----------------|
+| Committed git merge-conflict markers in `core/config.py` | **[RESOLVED IN AUDIT]** | `<<<<<<< HEAD` / `=======` / `>>>>>>>` markers around the CORS block made the module syntactically invalid (app could not import Settings). Resolved during this audit by keeping the HEAD (CORS/ALLOWED_ORIGINS) side; this was the only code change made. |
 | Dynamic delivery fee calculation in test helpers | **[RESOLVED]** | Replaced hardcoded `delivery_fee=110` values in `_make_order` test helpers with dynamic `calculate_delivery_fee()` formula calls. |
 | Idempotency key middleware & Redis caching on `POST /orders` | **[RESOLVED]** | Integrated idempotency key header middleware and Redis caching on `POST /orders` to cache order responses and block duplicate submissions. |
 | Database indexing on FKs, status, and composite columns | **[RESOLVED]** | Applied migration adding database indexes across foreign keys, status fields, and composite query columns for performance optimization. |
@@ -1030,6 +1092,10 @@ Errors: 0
 | Rider wallet read endpoints (`GET /wallet/profile`, `GET /wallet/assignments`) | **[COMPLETED]** | Available on the `wallet_payment` router (`/wallet` prefix) in `platform/wallet_payment/routes.py`; responses via `RiderWalletProfileResponseSchema` and `RiderAssignmentsResponseSchema` |
 | Order tracking payload (`restaurant_name`) | **[COMPLETED]** | `restaurant_name` is included in `get_order_tracking()` (joined from `restaurants` in the same read) and `OrderTrackingResponseSchema` |
 | Rider live location read path (`GET /orders/{id}/rider-location`) | **[COMPLETED]** | Customer-facing endpoint on the `food_delivery` router reads rider GPS coordinates from Redis (`rider_location:{rider_id}`, 45s TTL); nulls when no fresh location exists, 409 on terminal orders |
+| Order location snapshots (`customer_lat/lng`, `restaurant_lat/lng` on `orders`) | **[COMPLETED]** | Migration `e7f8a9b0c1d2` + `Order` model columns; frozen in `place_order()` from the checkout context, served in tracking/delivery responses with live-join fallback for legacy rows |
+| Google Directions route calculation (distance, duration, ETA, polyline) | **[COMPLETED]** | `get_route_details()` in `core/maps_client.py` (Directions API, Point 3); consumed by checkout preview/place and order tracking; Haversine fallback (polyline=None) on budget exhaustion or outage |
+| Google Places/Geocoding proxy security | **[COMPLETED]** | `platform/location/` routes require JWT auth + per-user rate limits (20/30/20 req/min) with Redis response caching; all billable calls gated by the daily budget circuit breaker in `core/maps_client.py` |
+| WebSocket live tracking (`WS /orders/{id}/track`) | **[COMPLETED]** | JWT query-token auth, order-ownership check, Redis Pub/Sub `order:location:{order_id}` streaming, close 1000 on terminal status, close 4003 on auth/authorization failure |
 
 ---
 
@@ -1038,10 +1104,10 @@ Errors: 0
 ### Prerequisites
 
 - Python 3.11
-- PostgreSQL
-- Redis
-- AWS S3 bucket
-- Google Maps API key
+- PostgreSQL (local via Docker, or remote Supabase pooler on port 6543)
+- Redis (local via Docker for tests/dev)
+- AWS S3 bucket or Supabase Storage
+- Google Maps + Places API keys
 
 ### Setup
 
@@ -1114,23 +1180,24 @@ All secrets configured through environment variables. No hardcoded values in sou
 | Admin-only operations | Protected | All admin routes require admin role |
 | Rate limiting | Implemented | Redis-based, 5/min per endpoint |
 | File upload validation | Implemented | Size limit, type check, magic bytes |
+| CORS | Implemented | Env-driven origin allowlist; wildcard forces credentials off |
+| Billable API spend control | Implemented | Redis daily budget circuit breaker on all Google Maps/Places calls |
+| Places proxy auth | Implemented | JWT required + per-user rate limits on `/api/v1/location/*` |
 
 ---
 
 ## 33. Google Maps Platform Cost Optimization Matrix (Phase B0-B5)
 
 ### Phase B0 – Key Hygiene & Circuit Breaker
-- Isolation of Google Maps API calls in `backend/app/core/maps_client.py`.
-- Daily call budget enforced via Redis key `maps:daily_usage:{YYYY-MM-DD}` with `MAPS_DAILY_CALL_BUDGET=300`.
-- Haversine fallback formula with driving multiplier 1.3 used when budget exceeded.
+- Isolation of Google Maps API calls in `backend/app/core/maps_client.py` (key from settings, never hardcoded).
+- Daily call budget enforced via Redis key `maps:daily_usage:{YYYY-MM-DD}` with `MAPS_DAILY_CALL_BUDGET=300`; enforced before any network I/O on Distance Matrix, Directions, Geocoding, and Places calls.
+- Haversine fallback formula with driving multiplier 1.3 used when budget exceeded; Directions fallback also estimates duration at 25 km/h and returns `polyline=None`.
 
 ### Phase B1 – Checkout Single-Call Optimization
-- `_build_checkout_context()` caches distance in Redis key `checkout_dist:{restaurant_id}:{address_id}` with 600‑second TTL, preventing duplicate Distance Matrix calls between `preview_checkout` and `place_order`.
-
-### Phase B2 – Geocoding Proxy & Rate Limiting
-- Reverse geocoding endpoint `GET /api/v1/location/reverse-geocode` caches results for 24 h under `geocode:{lat}:{lng}`.
+- `_build_checkout_context()` caches distance in Redis key `checkout_dist:{restaurant_id}:{address_id}` with 600‑second TTL, preventing duplicate Distance Matrix calls between `preview_checkout` and `place_order`.### Phase B2 – Geocoding Proxy & Rate Limiting
+- Reverse geocoding endpoint `GET /api/v1/location/reverse-geocode` caches results for 24 h under `geocode:{lat}:{lng}` (lat/lng rounded to 5 dp ≈ 1.1 m precision).
 - Addresses persisted in PostgreSQL `addresses` table; subsequent order placements reuse stored coordinates.
-- Rate limiting applied via `core/rate_limiter.py` – 20 requests/min per IP, returns 429 on excess.
+- Rate limiting applied via `core/rate_limiter.py` – per-user (JWT identity), not per-IP: 20 req/min reverse geocode, 30 req/min autocomplete, 20 req/min place details; returns 429 on excess. All three endpoints require a valid access token (any role).
 
 ### Phase B3 – WebSocket Real-Time Rider Tracking
 - WebSocket `WS /api/v1/orders/{order_id}/track` authenticates via JWT query token, validates order ownership, streams JSON location frames from Redis Pub/Sub channel `order:location:{order_id}`.
@@ -1142,7 +1209,7 @@ All secrets configured through environment variables. No hardcoded values in sou
 - `AdminOrderDetailResponseSchema` includes `delivery_distance_km`, `delivery_fee`, `commission_amount`, `restaurant_payable`, `rider_earning`.
 
 ### Phase B5 – Automated Test Suite & Regression Safeguards
-- Comprehensive tests covering all above features; total 351 tests passing.
+- Comprehensive tests covering all above features; total 373 tests passing (see Sections 28–29).
 
 ---
 
@@ -1187,6 +1254,12 @@ All secrets configured through environment variables. No hardcoded values in sou
 | `CART_TTL_SECONDS` | 604800 | Cart TTL (7 days) | `food_delivery/service.py` |
 | `MAX_MENU_PHOTO_SIZE_BYTES` | 5242880 | Menu photo limit (5MB) | `food_delivery/service.py` |
 | `MAX_RIDER_DOC_SIZE_BYTES` | 5242880 | Rider doc limit (5MB) | `wallet_payment/service.py` |
+| `MAPS_DAILY_CALL_BUDGET` | 300 | Daily Google API call cap | `core/config.py` |
+| `REQUEST_TIMEOUT_SECONDS` | 10 | Maps HTTP timeout | `core/maps_client.py` |
+| `DRIVING_ROAD_FACTOR` | 1.3 | Haversine fallback road multiplier | `core/maps_client.py` |
+| `FALLBACK_AVG_SPEED_KMH` | 25 | Fallback route duration speed | `core/maps_client.py` |
+| `CACHE_TTL_SECONDS` (geocode) | 86400 | Reverse geocode cache TTL | `platform/location/service.py` |
+| `AUTOCOMPLETE_CACHE_TTL_SECONDS` | 3600 | Autocomplete cache TTL | `platform/location/service.py` |
 
 ---
 
@@ -1202,8 +1275,8 @@ Customer Registration (OTP)
     → Menu Browsing
     → Cart Management
     → Checkout Preview (distance + fee)
-    → Order Placement (COD or Digital)
-    → Order Tracking (poll-based)
+    → Order Placement (COD or Digital, Idempotency-Key)
+    → Order Tracking (poll-based + WebSocket; live rider GPS)
     → Order History + Reorder
     → Rating
 ```
