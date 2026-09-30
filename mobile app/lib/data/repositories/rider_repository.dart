@@ -23,16 +23,11 @@ class RiderRepository {
 
   /// `GET /wallet/assignments`
   ///
-  /// Also added for this integration — the backend auto-assigns the nearest
-  /// eligible rider and had no way for that rider to discover the job. Returns
-  /// jobs needing a response first, then in-progress jobs, then recent
-  /// deliveries.
-  Future<List<RiderAssignment>> assignments() async {
-    final list = await _client.getJsonList('/wallet/assignments');
-    return list
-        .whereType<Map>()
-        .map((entry) => RiderAssignment.fromJson(Map<String, dynamic>.from(entry)))
-        .toList(growable: false);
+  /// The backend returns an object `{active: [...], past: [...]}`, not a list:
+  /// `active` are still-in-flight jobs, `past` are completed (Delivered) ones.
+  Future<RiderAssignments> assignments() async {
+    final json = await _client.getJson('/wallet/assignments');
+    return RiderAssignments.fromJson(json);
   }
 
   /// `POST /wallet/assignments/{order_id}/respond`

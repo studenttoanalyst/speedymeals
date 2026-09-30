@@ -55,7 +55,13 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   late final RiderRepository _repository;
 
   RiderProfile? _profile;
-  List<RiderAssignment> _assignments = const [];
+
+  /// Still-in-flight jobs from the backend's `active` list.
+  List<RiderAssignment> _activeAssignments = const [];
+
+  /// Completed (Delivered) jobs from the backend's `past` list.
+  List<RiderAssignment> _pastAssignments = const [];
+
   RiderWallet? _wallet;
   LatLng? _currentRiderLocation;
 
@@ -137,7 +143,8 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
       if (!mounted) return;
       setState(() {
         _profile = profile;
-        _assignments = assignments;
+        _activeAssignments = assignments.active;
+        _pastAssignments = assignments.past;
         _wallet = wallet;
         _isLoading = false;
       });
@@ -175,7 +182,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   /// Returns true when the rider has at least one assignment that is currently
   /// in progress (accepted, at restaurant, picked up, on the way).
   bool get _hasActiveDelivery =>
-      _assignments.any((a) => a.isInProgress);
+      _activeAssignments.any((a) => a.isInProgress);
 
   /// Starts the continuous GPS publisher when the rider has an active delivery,
   /// stops it when they do not.
@@ -585,6 +592,15 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
             ),
             const SizedBox(height: 12),
             ..._buildAssignmentList(profile),
+            if (_pastAssignments.isNotEmpty) ...[
+              const SizedBox(height: 28),
+              const Text(
+                'Past Deliveries',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              ..._buildHistoryList(),
+            ],
           ],
         ),
       ),
@@ -767,7 +783,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   Widget _buildMetrics() {
     final wallet = _wallet;
-    final completed = _assignments.where((a) => a.isCompleted).length;
+    final completed = _pastAssignments.length;
 
     return Column(
       children: [
@@ -831,7 +847,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   }
 
   List<Widget> _buildAssignmentList(RiderProfile? profile) {
-    if (_assignments.isEmpty) {
+    if (_activeAssignments.isEmpty) {
       return [
         Container(
           width: double.infinity,
@@ -863,7 +879,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     }
 
     return [
-      for (final assignment in _assignments)
+      for (final assignment in _activeAssignments)
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: _AssignmentCard(
@@ -879,6 +895,52 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
             onAdvance: (action) => _advance(assignment, action),
             riderLocation: _currentRiderLocation,
             navigationService: widget.navigationService,
+          ),
+        ),
+    ];
+  }
+
+  /// A compact history of completed deliveries from the backend's `past` list.
+  List<Widget> _buildHistoryList() {
+    return [
+      for (final assignment in _pastAssignments)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: _card,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _border),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: _green, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '#${assignment.shortId}',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        assignment.displayRestaurantName,
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  assignment.riderEarningLabel,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: _green),
+                ),
+              ],
+            ),
           ),
         ),
     ];
@@ -987,8 +1049,6 @@ class _AssignmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final address = assignment.deliveryAddress;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1051,7 +1111,7 @@ class _AssignmentCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  assignment.restaurantName,
+                  assignment.displayRestaurantName,
                   style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1066,7 +1126,7 @@ class _AssignmentCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  address?.displaySubtitle ?? 'Customer address',
+                  assignment.deliveryAddressLabel,
                   style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFFCBD5E1)),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -1118,17 +1178,16 @@ class _AssignmentCard extends StatelessWidget {
   }
 
   Widget _buildMapPreview() {
-    final address = assignment.deliveryAddress;
     final restaurantLat = assignment.restaurantLatitude;
     final restaurantLng = assignment.restaurantLongitude;
-    final customerLat = address?.latitude;
-    final customerLng = address?.longitude;
+    final customerLat = assignment.customerLatitude;
+    final customerLng = assignment.customerLongitude;
 
-    // Only real coordinates are ever drawn. `GET /wallet/assignments` does not
-    // currently return restaurant coordinates or a delivery address, so these
-    // are null in practice and no pin is shown — instead of inventing an offset
-    // that would look like a real destination. The rider's own marker comes
-    // from validated device GPS.
+    // Only real coordinates are ever drawn. `GET /wallet/assignments` returns
+    // the restaurant/customer snapshots, but either may be null for legacy
+    // orders, so a pin is only shown when the coordinate passes the bounds
+    // check — never an invented offset that would look like a real
+    // destination. The rider's own marker comes from validated device GPS.
     final hasRestaurant = _isValidCoordinate(restaurantLat, restaurantLng);
     final hasCustomer = _isValidCoordinate(customerLat, customerLng);
     final hasRider = riderLocation != null;
@@ -1138,14 +1197,14 @@ class _AssignmentCard extends StatelessWidget {
         MapMarkers.restaurant(
           id: assignment.id,
           position: LatLng(restaurantLat!, restaurantLng!),
-          name: assignment.restaurantName,
+          name: assignment.displayRestaurantName,
         ),
       if (hasCustomer)
         MapMarkers.customer(
           id: assignment.id,
           position: LatLng(customerLat!, customerLng!),
           title: 'Customer',
-          address: address?.displayTitle,
+          address: assignment.deliveryAddress,
         ),
       if (hasRider)
         MapMarkers.rider(

@@ -17,6 +17,13 @@
          Declaration form demonstrating necessity for logistics/delivery routing. -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
 
+    <!-- Phase 5: the geolocator plugin keeps delivering rider GPS from a
+         foreground service during an active delivery. Android 14+ (API 34+)
+         requires the service to run with type "location", which in turn needs
+         these two permissions. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+
     <application
         android:label="Speedy Meals"
         android:name="${applicationName}"
@@ -54,6 +61,17 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
+
+        <!-- Geolocator's foreground service (declared by the plugin as
+             com.baseflow.geolocator.GeolocatorLocationService). Re-declared
+             here to explicitly pin android:foregroundServiceType="location",
+             which Android 14+ requires; the manifest merger combines this with
+             the plugin's own declaration. -->
+        <service
+            android:name="com.baseflow.geolocator.GeolocatorLocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

@@ -85,7 +85,8 @@ void main() {
   });
 
   group('Phase M2 Address Widgets Widget Tests', () {
-    testWidgets('AddressSearchField displays placeholder when key is empty', (tester) async {
+    testWidgets('AddressSearchField renders search input (no client key needed)',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -96,7 +97,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Map services are not configured yet.'), findsOneWidget);
+      // Autocomplete now goes through the backend proxy, so the field is
+      // always interactive — no client-side Places key gate.
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Search for an address…'), findsOneWidget);
     });
 
     testWidgets('LocationPickerScreen mounts without throwing', (tester) async {

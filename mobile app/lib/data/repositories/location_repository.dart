@@ -13,9 +13,10 @@ import '../models/location_models.dart';
 /// reverse-geocode results for 24 h in Redis, so routing through it also avoids
 /// duplicate Google calls.
 ///
-/// These three endpoints are unauthenticated on the backend, so requests are
-/// sent without a bearer token (`authenticated: false`). No secret is ever
-/// attached to them.
+/// All three endpoints require a valid Bearer access token on the backend
+/// (`get_current_user`, any role) and are per-user rate limited, so requests
+/// are sent with `authenticated: true`. The server's Google key is never
+/// exposed to the client either way.
 class LocationRepository {
   LocationRepository({ApiClient? client})
       : _client = client ?? ApiClient.instance;
@@ -33,7 +34,7 @@ class LocationRepository {
     final list = await _client.getJsonList(
       '/api/v1/location/places/autocomplete',
       query: params,
-      authenticated: false,
+      authenticated: true,
     );
     return list
         .whereType<Map>()
@@ -58,7 +59,7 @@ class LocationRepository {
       final json = await _client.getJson(
         '/api/v1/location/places/details',
         query: params,
-        authenticated: false,
+        authenticated: true,
       );
       return PlaceDetails.fromJson(json);
     } on ApiException {
@@ -79,7 +80,7 @@ class LocationRepository {
     final json = await _client.getJson(
       '/api/v1/location/reverse-geocode',
       query: {'lat': latitude, 'lng': longitude},
-      authenticated: false,
+      authenticated: true,
     );
     return ReverseGeocodeResult.fromJson(json);
   }

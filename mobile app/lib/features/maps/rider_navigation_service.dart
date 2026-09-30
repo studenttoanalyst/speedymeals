@@ -106,9 +106,10 @@ class RiderNavigationService {
         }
         return null;
       case NavigationDestinationType.customer:
-        final addr = assignment.deliveryAddress;
-        if (addr != null && isValidCoordinate(addr.latitude, addr.longitude)) {
-          return LatLng(addr.latitude, addr.longitude);
+        final lat = assignment.customerLatitude;
+        final lng = assignment.customerLongitude;
+        if (isValidCoordinate(lat, lng)) {
+          return LatLng(lat!, lng!);
         }
         return null;
     }

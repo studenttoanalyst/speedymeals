@@ -70,6 +70,7 @@ class ApiClient {
     String path, {
     Object? body,
     Map<String, dynamic>? query,
+    Map<String, String>? headers,
     bool authenticated = true,
     bool allowRefresh = true,
     Duration? timeoutOverride,
@@ -81,6 +82,7 @@ class ApiClient {
         method,
         uri,
         body: body,
+        headers: headers,
         authenticated: authenticated,
         timeoutOverride: timeoutOverride,
       );
@@ -98,6 +100,7 @@ class ApiClient {
             path,
             body: body,
             query: query,
+            headers: headers,
             authenticated: authenticated,
             allowRefresh: false,
             timeoutOverride: timeoutOverride,
@@ -131,9 +134,10 @@ class ApiClient {
   Future<Map<String, dynamic>> getJson(
     String path, {
     Map<String, dynamic>? query,
+    Map<String, String>? headers,
     bool authenticated = true,
   }) async {
-    final body = await request('GET', path, query: query, authenticated: authenticated);
+    final body = await request('GET', path, query: query, headers: headers, authenticated: authenticated);
     return _asObject(body);
   }
 
@@ -141,9 +145,10 @@ class ApiClient {
   Future<List<dynamic>> getJsonList(
     String path, {
     Map<String, dynamic>? query,
+    Map<String, String>? headers,
     bool authenticated = true,
   }) async {
-    final body = await request('GET', path, query: query, authenticated: authenticated);
+    final body = await request('GET', path, query: query, headers: headers, authenticated: authenticated);
     if (body is List) return body;
     throw ApiException(
       kind: ApiErrorKind.unknown,
@@ -156,27 +161,30 @@ class ApiClient {
     String path, {
     Object? body,
     Map<String, dynamic>? query,
+    Map<String, String>? headers,
     bool authenticated = true,
   }) async {
-    final response = await request('POST', path, body: body, query: query, authenticated: authenticated);
+    final response = await request('POST', path, body: body, query: query, headers: headers, authenticated: authenticated);
     return _asObjectOrEmpty(response);
   }
 
   Future<Map<String, dynamic>> putJson(
     String path, {
     Object? body,
+    Map<String, String>? headers,
     bool authenticated = true,
   }) async {
-    final response = await request('PUT', path, body: body, authenticated: authenticated);
+    final response = await request('PUT', path, body: body, headers: headers, authenticated: authenticated);
     return _asObjectOrEmpty(response);
   }
 
   Future<Map<String, dynamic>> patchJson(
     String path, {
     Object? body,
+    Map<String, String>? headers,
     bool authenticated = true,
   }) async {
-    final response = await request('PATCH', path, body: body, authenticated: authenticated);
+    final response = await request('PATCH', path, body: body, headers: headers, authenticated: authenticated);
     return _asObjectOrEmpty(response);
   }
 
@@ -184,9 +192,10 @@ class ApiClient {
   Future<void> delete(
     String path, {
     Object? body,
+    Map<String, String>? headers,
     bool authenticated = true,
   }) async {
-    await request('DELETE', path, body: body, authenticated: authenticated);
+    await request('DELETE', path, body: body, headers: headers, authenticated: authenticated);
   }
 
   // ------------------------------------------------------------------ upload
@@ -270,18 +279,21 @@ class ApiClient {
     String method,
     Uri uri, {
     Object? body,
+    Map<String, String>? headers,
     required bool authenticated,
     Duration? timeoutOverride,
   }) {
-    final headers = <String, String>{
+    // Per-request headers are merged over the defaults and may override them.
+    final requestHeaders = <String, String>{
       'Accept': 'application/json',
       if (body != null) 'Content-Type': 'application/json',
+      ...?headers,
     };
 
     if (authenticated) {
       final token = _tokens.accessToken;
       if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
+        requestHeaders['Authorization'] = 'Bearer $token';
       }
     }
 
@@ -290,15 +302,15 @@ class ApiClient {
 
     switch (method) {
       case 'GET':
-        return _http.get(uri, headers: headers).timeout(budget);
+        return _http.get(uri, headers: requestHeaders).timeout(budget);
       case 'POST':
-        return _http.post(uri, headers: headers, body: encoded).timeout(budget);
+        return _http.post(uri, headers: requestHeaders, body: encoded).timeout(budget);
       case 'PUT':
-        return _http.put(uri, headers: headers, body: encoded).timeout(budget);
+        return _http.put(uri, headers: requestHeaders, body: encoded).timeout(budget);
       case 'PATCH':
-        return _http.patch(uri, headers: headers, body: encoded).timeout(budget);
+        return _http.patch(uri, headers: requestHeaders, body: encoded).timeout(budget);
       case 'DELETE':
-        return _http.delete(uri, headers: headers, body: encoded).timeout(budget);
+        return _http.delete(uri, headers: requestHeaders, body: encoded).timeout(budget);
       default:
         throw ArgumentError.value(method, 'method', 'Unsupported HTTP method');
     }

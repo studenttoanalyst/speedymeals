@@ -389,6 +389,9 @@ void main() {
 
   group('B. Customer rider location (GET /orders/{id}/rider-location)', () {
     test('B1. parses the live location on 200', () async {
+      // Relative to now, so the fixture never drifts into "stale" as the
+      // calendar advances.
+      final updatedAt = DateTime.now().toUtc();
       final client = MockClient((request) async {
         expect(request.method, equals('GET'));
         expect(request.url.path, equals('/orders/ord-1/rider-location'));
@@ -396,7 +399,7 @@ void main() {
           'order_id': 'ord-1',
           'latitude': 33.7011,
           'longitude': 73.0622,
-          'updated_at': '2026-09-28T10:00:00Z',
+          'updated_at': updatedAt.toIso8601String(),
         }, 200);
       });
 
@@ -804,7 +807,8 @@ void main() {
   // ───────────────────────────────────────────────────────────────────────────
 
   group('D. Backend location proxy (places + reverse geocode)', () {
-    test('D1. reverse-geocodes through the backend, unauthenticated', () async {
+    test('D1. reverse-geocodes through the backend with the bearer token',
+        () async {
       http.Request? captured;
       final client = MockClient((request) async {
         captured = request;
@@ -829,8 +833,9 @@ void main() {
       expect(captured!.url.path, equals('/api/v1/location/reverse-geocode'));
       expect(captured!.url.queryParameters['lat'], equals('33.7215'));
       expect(captured!.url.queryParameters['lng'], equals('73.0546'));
-      // Public backend endpoint — no bearer token, no secret.
-      expect(captured!.headers.containsKey('Authorization'), isFalse);
+      // All /api/v1/location/* endpoints require auth (get_current_user).
+      expect(captured!.headers['Authorization'],
+          equals('Bearer $_accessToken'));
 
       expect(result.formattedAddress, equals('F-7 Markaz, Islamabad, Pakistan'));
       expect(result.components.city, equals('Islamabad'));

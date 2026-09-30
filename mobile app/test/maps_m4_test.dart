@@ -37,12 +37,8 @@ RiderAssignment createTestAssignment({
   String restaurantName = 'Speedy Burger',
   double? restaurantLatitude = 33.6844,
   double? restaurantLongitude = 73.0479,
-  AssignmentAddress? deliveryAddress = const AssignmentAddress(
-    label: 'Customer Residence',
-    fullAddress: 'Street 4, Sector F-7, Islamabad',
-    latitude: 33.7294,
-    longitude: 73.0372,
-  ),
+  double? customerLatitude = 33.7294,
+  double? customerLongitude = 73.0372,
   double deliveryDistanceKm = 3.5,
   double totalAmount = 1500,
   double riderEarning = 200,
@@ -54,7 +50,9 @@ RiderAssignment createTestAssignment({
     restaurantName: restaurantName,
     restaurantLatitude: restaurantLatitude,
     restaurantLongitude: restaurantLongitude,
-    deliveryAddress: deliveryAddress,
+    customerLatitude: customerLatitude,
+    customerLongitude: customerLongitude,
+    deliveryAddress: 'Street 4, Sector F-7, Islamabad',
     deliveryDistanceKm: deliveryDistanceKm,
     totalAmount: totalAmount,
     riderEarning: riderEarning,
@@ -81,10 +79,8 @@ void main() {
 
     test('2. Valid customer destination coordinates resolved properly', () {
       final assignment = createTestAssignment(
-        deliveryAddress: const AssignmentAddress(
-          latitude: 33.7294,
-          longitude: 73.0372,
-        ),
+        customerLatitude: 33.7294,
+        customerLongitude: 73.0372,
       );
 
       final coords = RiderNavigationService.getDestinationCoordinates(
@@ -111,7 +107,8 @@ void main() {
       );
 
       final missingCustomer = createTestAssignment(
-        deliveryAddress: null,
+        customerLatitude: null,
+        customerLongitude: null,
       );
       expect(
         RiderNavigationService.getDestinationCoordinates(
@@ -296,10 +293,8 @@ void main() {
 
       final assignment = createTestAssignment(
         status: OrderStatus.pickedUp,
-        deliveryAddress: const AssignmentAddress(
-          latitude: 33.7294,
-          longitude: 73.0372,
-        ),
+        customerLatitude: 33.7294,
+        customerLongitude: 73.0372,
       );
 
       await tester.pumpWidget(
@@ -335,10 +330,8 @@ void main() {
         status: OrderStatus.acceptedByRider,
         restaurantLatitude: 33.6844,
         restaurantLongitude: 73.0479,
-        deliveryAddress: const AssignmentAddress(
-          latitude: 33.7294,
-          longitude: 73.0372,
-        ),
+        customerLatitude: 33.7294,
+        customerLongitude: 73.0372,
       );
 
       await tester.pumpWidget(

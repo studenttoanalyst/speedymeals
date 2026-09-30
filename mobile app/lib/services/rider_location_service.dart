@@ -285,6 +285,13 @@ class RiderLocationService {
         accuracy: LocationAccuracy.high,
         distanceFilter: distanceFilterMetres,
         intervalDuration: const Duration(milliseconds: intervalMilliseconds),
+        // Keeps GPS flowing from a foreground service while the rider is in an
+        // active delivery and the app is backgrounded. The service is declared
+        // with foregroundServiceType="location" in AndroidManifest.xml.
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationTitle: 'Speedy Meals',
+          notificationText: 'Delivery in progress',
+        ),
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       return AppleSettings(

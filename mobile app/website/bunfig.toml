@@ -1,8 +1,0 @@
-# SpeedyMeals Website — Bun Infrastructure Configuration
-
-[install]
-production = false
-frozenLockfile = false
-
-[test]
-root = "."

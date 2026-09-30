@@ -178,63 +178,96 @@ class RiderAssignment {
   final String id;
   final OrderStatus status;
   final PaymentMethod paymentMethod;
-  final String restaurantName;
+
+  /// Optional descriptive fields — the backend's `GET /wallet/assignments`
+  /// snapshot may not include these yet, so they are nullable and never crash
+  /// the UI (use [displayRestaurantName] / [deliveryAddressLabel] for display).
+  final String? restaurantName;
   final String? restaurantAddress;
+  final String? customerName;
+
+  /// Restaurant coordinate snapshot — backend keys `restaurant_lat` /
+  /// `restaurant_lng` (not `*_latitude` / `*_longitude`).
   final double? restaurantLatitude;
   final double? restaurantLongitude;
-  final AssignmentAddress? deliveryAddress;
+
+  /// Customer delivery coordinates — backend keys `customer_lat` /
+  /// `customer_lng`.
+  final double? customerLatitude;
+  final double? customerLongitude;
+
+  /// Plain-text delivery address (`delivery_address: str`), not a nested object.
+  final String? deliveryAddress;
+
   final double deliveryDistanceKm;
   final double deliveryFee;
   final double totalAmount;
   final double riderEarning;
-  final String? customerName;
   final DateTime? placedAt;
-  final List<OrderLineItem> items;
+  final List<OrderLineItem>? items;
 
   const RiderAssignment({
     required this.id,
     required this.status,
     required this.paymentMethod,
-    required this.restaurantName,
+    this.restaurantName,
     this.restaurantAddress,
+    this.customerName,
     this.restaurantLatitude,
     this.restaurantLongitude,
+    this.customerLatitude,
+    this.customerLongitude,
     this.deliveryAddress,
     this.deliveryDistanceKm = 0,
     this.deliveryFee = 0,
     this.totalAmount = 0,
     this.riderEarning = 0,
-    this.customerName,
     this.placedAt,
-    this.items = const [],
+    this.items,
   });
 
   factory RiderAssignment.fromJson(Map<String, dynamic> json) => RiderAssignment(
         id: Json.asString(json['id']),
         status: OrderStatus.fromWire(Json.asStringOrNull(json['status'])),
         paymentMethod: PaymentMethod.fromWire(Json.asStringOrNull(json['payment_method'])),
-        restaurantName: Json.asString(json['restaurant_name'], fallback: 'Restaurant'),
+        restaurantName: Json.asStringOrNull(json['restaurant_name']),
         restaurantAddress: Json.asStringOrNull(json['restaurant_address']),
-        restaurantLatitude: Json.asDoubleOrNull(json['restaurant_latitude']),
-        restaurantLongitude: Json.asDoubleOrNull(json['restaurant_longitude']),
-        deliveryAddress: Json.asMapOrNull(json['delivery_address']) == null
-            ? null
-            : AssignmentAddress.fromJson(
-                Json.asMapOrNull(json['delivery_address'])!),
+        restaurantLatitude: Json.asDoubleOrNull(json['restaurant_lat']),
+        restaurantLongitude: Json.asDoubleOrNull(json['restaurant_lng']),
+        customerLatitude: Json.asDoubleOrNull(json['customer_lat']),
+        customerLongitude: Json.asDoubleOrNull(json['customer_lng']),
+        deliveryAddress: Json.asStringOrNull(json['delivery_address']),
         deliveryDistanceKm: Json.asDouble(json['delivery_distance_km']),
         deliveryFee: Json.asDouble(json['delivery_fee']),
         totalAmount: Json.asDouble(json['total_amount']),
         riderEarning: Json.asDouble(json['rider_earning']),
         customerName: Json.asStringOrNull(json['customer_name']),
         placedAt: Json.asDateTimeOrNull(json['placed_at']),
-        items: Json.asList(json['items'], OrderLineItem.fromJson),
+        items: json['items'] == null
+            ? null
+            : Json.asList(json['items'], OrderLineItem.fromJson),
       );
 
   String get shortId => shortOrderId(id);
   String get totalLabel => formatPkr(totalAmount);
   String get riderEarningLabel => formatPkr(riderEarning);
   String get distanceLabel => '${deliveryDistanceKm.toStringAsFixed(1)} km';
-  int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
+  int get itemCount =>
+      items == null ? 0 : items!.fold(0, (sum, item) => sum + item.quantity);
+
+  /// Restaurant name for display, falling back when the backend omits it.
+  String get displayRestaurantName {
+    final name = restaurantName?.trim();
+    return (name != null && name.isNotEmpty) ? name : 'Restaurant';
+  }
+
+  /// Delivery address for display, falling back when the backend omits it.
+  String get deliveryAddressLabel {
+    final address = deliveryAddress?.trim();
+    return (address != null && address.isNotEmpty)
+        ? address
+        : 'Customer address';
+  }
 
   /// True when this job is waiting for an accept/reject decision — the only
   /// status the backend's `POST /wallet/assignments/{id}/respond` accepts.
@@ -268,6 +301,32 @@ class RiderAssignment {
         return null;
     }
   }
+}
+
+/// Result of `GET /wallet/assignments`.
+///
+/// The backend returns an object — `{"active": [...], "past": [...]}` — not a
+/// bare list. `active` holds every still-in-flight job (awaiting response or in
+/// progress); `past` holds completed (Delivered) jobs, newest first within each.
+class RiderAssignments {
+  final List<RiderAssignment> active;
+  final List<RiderAssignment> past;
+
+  const RiderAssignments({
+    this.active = const [],
+    this.past = const [],
+  });
+
+  factory RiderAssignments.fromJson(Map<String, dynamic> json) =>
+      RiderAssignments(
+        active: Json.asList(json['active'], RiderAssignment.fromJson),
+        past: Json.asList(json['past'], RiderAssignment.fromJson),
+      );
+
+  /// Every assignment, active first then past.
+  List<RiderAssignment> get all => [...active, ...past];
+
+  bool get isEmpty => active.isEmpty && past.isEmpty;
 }
 
 /// The rider's own delivery status transitions, matching the backend's

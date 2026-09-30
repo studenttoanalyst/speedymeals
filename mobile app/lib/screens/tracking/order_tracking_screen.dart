@@ -46,6 +46,16 @@ class TrackingView {
   final DateTime? deliveredAt;
   final List<OrderLineItem> items;
 
+  // ── Real tracking geometry (from `GET /orders/{id}/track`) ────────────────
+  final double? restaurantLatitude;
+  final double? restaurantLongitude;
+  final double? customerLatitude;
+  final double? customerLongitude;
+  final double? routeDistanceKm;
+  final int? durationMins;
+  final DateTime? eta;
+  final String? polyline;
+
   const TrackingView({
     required this.orderId,
     required this.rawOrderId,
@@ -60,6 +70,14 @@ class TrackingView {
     this.placedAt,
     this.deliveredAt,
     this.items = const [],
+    this.restaurantLatitude,
+    this.restaurantLongitude,
+    this.customerLatitude,
+    this.customerLongitude,
+    this.routeDistanceKm,
+    this.durationMins,
+    this.eta,
+    this.polyline,
   });
 
   factory TrackingView.from(OrderTracking tracking) => TrackingView(
@@ -76,6 +94,14 @@ class TrackingView {
         placedAt: tracking.placedAt,
         deliveredAt: tracking.deliveredAt,
         items: tracking.items,
+        restaurantLatitude: tracking.restaurantLatitude,
+        restaurantLongitude: tracking.restaurantLongitude,
+        customerLatitude: tracking.customerLatitude,
+        customerLongitude: tracking.customerLongitude,
+        routeDistanceKm: tracking.routeDistanceKm,
+        durationMins: tracking.durationMins,
+        eta: tracking.eta,
+        polyline: tracking.polyline,
       );
 
   /// True once a rider has actually been attached to this order.
@@ -84,25 +110,48 @@ class TrackingView {
   bool get isDelivered => status == OrderStatus.delivered;
   bool get isCancelled => status == OrderStatus.cancelled;
 
-  /// Estimated minutes remaining.
+  /// True when the remaining-time figure comes from the backend (`eta` or
+  /// `duration_mins`) rather than the local distance-based fallback.
+  bool get hasBackendEta => eta != null || durationMins != null;
+
+  /// Minutes remaining.
   ///
-  /// The backend returns a real road distance but no ETA, so this is derived
-  /// from that distance with the app's documented estimate rule — and labelled
-  /// as an estimate in the UI rather than presented as a promise.
+  /// Prefers the backend's `eta` timestamp, then its `duration_mins`, and only
+  /// falls back to the app's documented distance-and-speed estimate when the
+  /// backend supplied neither. The UI labels the fallback as an estimate.
   int get etaMinutes {
     if (status.isTerminal) return 0;
+
+    final backendEta = eta;
+    if (backendEta != null) {
+      final remaining = backendEta.difference(DateTime.now()).inMinutes;
+      return remaining < 1 ? 1 : remaining;
+    }
+
+    final backendDuration = durationMins;
+    if (backendDuration != null) {
+      return backendDuration < 1 ? 1 : backendDuration;
+    }
+
     final estimate = (AppConstants.baseEtaMinutes +
             deliveryDistanceKm * AppConstants.etaPerKmFactor)
         .round();
     return estimate < 1 ? 1 : estimate;
   }
 
-  /// Clock time the estimate lands at, e.g. `1:42 PM`.
+  /// Clock time the delivery lands at, e.g. `1:42 PM`.
+  ///
+  /// Uses the backend `eta` verbatim when present; otherwise the local estimate.
   String get etaTimeLabel {
-    final arrival = DateTime.now().add(Duration(minutes: etaMinutes));
-    final hour = arrival.hour % 12 == 0 ? 12 : arrival.hour % 12;
-    final minute = arrival.minute.toString().padLeft(2, '0');
-    return '$hour:$minute ${arrival.hour >= 12 ? 'PM' : 'AM'}';
+    final backendEta = eta;
+    if (backendEta != null) return _clockLabel(backendEta);
+    return _clockLabel(DateTime.now().add(Duration(minutes: etaMinutes)));
+  }
+
+  static String _clockLabel(DateTime time) {
+    final hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute ${time.hour >= 12 ? 'PM' : 'AM'}';
   }
 
   String get totalLabel => formatPkr(totalAmount);
@@ -670,9 +719,11 @@ class _EtaBar extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        // Clearly an estimate: the backend returns a real
-                        // distance but no ETA of its own.
-                        text: view.status.isTerminal ? '' : '  estimated',
+                        // Only label the local distance fallback as an estimate;
+                        // a backend `eta`/`duration_mins` is authoritative.
+                        text: view.status.isTerminal || view.hasBackendEta
+                            ? ''
+                            : '  estimated',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -734,13 +785,23 @@ class _MapView extends StatelessWidget {
     this.isLocationUnavailable = false,
   });
 
+  /// Rejects null/NaN/Infinite/out-of-bounds coordinates so a bad value is
+  /// never rendered as if it were a real pin.
+  static bool _isValidCoordinate(double? lat, double? lng) {
+    if (lat == null || lng == null) return false;
+    if (lat.isNaN || lng.isNaN || lat.isInfinite || lng.isInfinite) return false;
+    return lat >= -90.0 && lat <= 90.0 && lng >= -180.0 && lng <= 180.0;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final restaurantPos = MapView.defaultCoordinates;
-    final customerPos = LatLng(
-      restaurantPos.latitude + (view.deliveryDistanceKm > 0 ? (view.deliveryDistanceKm * 0.005) : 0.012),
-      restaurantPos.longitude + (view.deliveryDistanceKm > 0 ? (view.deliveryDistanceKm * 0.005) : 0.012),
-    );
+    final restaurantLat = view.restaurantLatitude;
+    final restaurantLng = view.restaurantLongitude;
+    final customerLat = view.customerLatitude;
+    final customerLng = view.customerLongitude;
+
+    final hasRestaurant = _isValidCoordinate(restaurantLat, restaurantLng);
+    final hasCustomer = _isValidCoordinate(customerLat, customerLng);
 
     // The rider marker is drawn ONLY from a real coordinate delivered by the
     // backend (REST `GET /orders/{id}/rider-location` or the live WebSocket).
@@ -748,19 +809,23 @@ class _MapView extends StatelessWidget {
     // position must never be rendered as if it were a real one. Until a fresh
     // coordinate arrives the banner explains that tracking is pending.
     final rider = riderLocation;
+    final hasRiderFix = rider != null &&
+        _isValidCoordinate(rider.latitude, rider.longitude);
 
     final markers = <Marker>{
-      MapMarkers.restaurant(
-        id: view.orderId,
-        position: restaurantPos,
-        name: view.restaurantName,
-      ),
-      MapMarkers.customer(
-        id: view.orderId,
-        position: customerPos,
-        title: 'Delivery Address',
-      ),
-      if (view.hasRider && rider != null)
+      if (hasRestaurant)
+        MapMarkers.restaurant(
+          id: view.orderId,
+          position: LatLng(restaurantLat!, restaurantLng!),
+          name: view.restaurantName,
+        ),
+      if (hasCustomer)
+        MapMarkers.customer(
+          id: view.orderId,
+          position: LatLng(customerLat!, customerLng!),
+          title: 'Delivery Address',
+        ),
+      if (view.hasRider && hasRiderFix)
         MapMarkers.rider(
           id: view.orderId,
           position: LatLng(rider.latitude, rider.longitude),
@@ -768,54 +833,68 @@ class _MapView extends StatelessWidget {
         ),
     };
 
+    // Route geometry is decoded from the backend polyline; an empty list means
+    // no route line is drawn (never a fabricated bezier path).
+    final routePoints = PolylineDecoder.decode(view.polyline);
+    final polylines = <Polyline>{
+      if (routePoints.length >= 2)
+        Polyline(
+          polylineId: PolylineId('route_${view.orderId}'),
+          points: routePoints,
+          color: const Color(0xFF1D4ED8),
+          width: 5,
+        ),
+    };
+
+    // Camera target prefers a real endpoint, then the live rider fix. When
+    // nothing real is known `initialPosition` is null and MapView falls back
+    // to its documented default centre — no marker is fabricated from it.
+    final initialTarget = hasRestaurant
+        ? LatLng(restaurantLat!, restaurantLng!)
+        : hasCustomer
+            ? LatLng(customerLat!, customerLng!)
+            : hasRiderFix
+                ? LatLng(rider.latitude, rider.longitude)
+                : null;
+
+    final hasRealLocation = hasRestaurant || hasCustomer || hasRiderFix;
+
     return SizedBox(
       height: 288,
       child: Stack(
         children: [
-          // Google Map base layer (Phase M1/M3 rendering)
+          // Google Map base layer — only real coordinates are drawn. When the
+          // backend has sent no location at all, an explicit unavailable state
+          // replaces the map rather than a fabricated default centre.
           Positioned.fill(
-            child: MapView(
-              initialPosition: restaurantPos,
-              initialZoom: 14.0,
-              markers: markers,
-              fitBoundsOnMarkers: false,
-              fallbackBuilder: (context, error) {
-                return Container(
-                  width: double.infinity,
-                  height: 288,
-                  color: const Color(0xFFE2E7FF),
-                  child: CustomPaint(painter: _MapGridPainter()),
-                );
-              },
+            child: hasRealLocation
+                ? MapView(
+                    initialPosition: initialTarget,
+                    initialZoom: 14.0,
+                    markers: markers,
+                    polylines: polylines,
+                    fitBoundsOnMarkers: false,
+                    fallbackBuilder: (context, error) {
+                      return Container(
+                        width: double.infinity,
+                        height: 288,
+                        color: const Color(0xFFE2E7FF),
+                        child: CustomPaint(painter: _MapGridPainter()),
+                      );
+                    },
+                  )
+                : const _LocationUnavailable(),
+          ),
+
+          // Frosted overlay (only over a real map)
+          if (hasRealLocation)
+            Container(
+              color: const Color(0xFFFAF8FF).withValues(alpha: 0.18),
             ),
-          ),
 
-          // Frosted overlay
-          Container(
-            color: const Color(0xFFFAF8FF).withValues(alpha: 0.18),
-          ),
-
-          // Route SVG-equivalent: drawn in CustomPaint
-          CustomPaint(
-            size: const Size(double.infinity, 288),
-            painter: _RoutePainter(),
-          ),
-
-          // Restaurant pin — top-left
-          Positioned(
-            top: 36,
-            left: 24,
-            child: _MapPin(
-              label: view.restaurantName,
-              icon: Icons.restaurant_rounded,
-              iconColor: Colors.white,
-              pinColor: const Color(0xFFDC2626),
-              labelIconColor: const Color(0xFFDC2626),
-            ),
-          ),
-
-          // Rider mascot pin — centre (only shown when rider is assigned)
-          if (view.hasRider)
+          // Rider mascot pin — only while a real rider fix exists (the live
+          // marker on the map is the authoritative position).
+          if (view.hasRider && hasRiderFix)
             Positioned(
               top: 100,
               left: 150,
@@ -980,20 +1059,6 @@ class _MapView extends StatelessWidget {
               ),
             ),
 
-          // Home/destination pin — bottom-right
-          Positioned(
-            bottom: 28,
-            right: 28,
-            child: _MapPin(
-              label: 'Home',
-              icon: Icons.pin_drop_rounded,
-              iconColor: Colors.white,
-              pinColor: const Color(0xFF1D4ED8),
-              labelIconColor: const Color(0xFF1D4ED8),
-              labelIcon: Icons.home_rounded,
-            ),
-          ),
-
           // Map control buttons — right side
           Positioned(
             right: 12,
@@ -1054,139 +1119,42 @@ class _MapGridPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Route painter (two-segment path: restaurant→rider in red, rider→home dashed blue)
-class _RoutePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Red solid path: restaurant → rider
-    final redPaint = Paint()
-      ..color = const Color(0xFFDC2626)
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    final redPath = Path()
-      ..moveTo(48, 60)
-      ..quadraticBezierTo(100, 100, 174, 124);
-    canvas.drawPath(redPath, redPaint);
-
-    // Blue dashed path: rider → home
-    final bluePaint = Paint()
-      ..color = const Color(0xFF1D4ED8)
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    _drawDashedPath(
-      canvas,
-      bluePaint,
-      Path()
-        ..moveTo(174, 124)
-        ..quadraticBezierTo(240, 160, size.width - 40, size.height - 60),
-      dashLength: 10,
-      gapLength: 7,
-    );
-  }
-
-  void _drawDashedPath(
-    Canvas canvas,
-    Paint paint,
-    Path path, {
-    double dashLength = 8,
-    double gapLength = 6,
-  }) {
-    final metrics = path.computeMetrics();
-    for (final metric in metrics) {
-      double distance = 0;
-      bool draw = true;
-      while (distance < metric.length) {
-        final len = draw ? dashLength : gapLength;
-        if (draw) {
-          canvas.drawPath(
-            metric.extractPath(distance, distance + len),
-            paint,
-          );
-        }
-        distance += len;
-        draw = !draw;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _MapPin extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color iconColor;
-  final Color pinColor;
-  final Color labelIconColor;
-  final IconData? labelIcon;
-
-  const _MapPin({
-    required this.label,
-    required this.icon,
-    required this.iconColor,
-    required this.pinColor,
-    required this.labelIconColor,
-    this.labelIcon,
-  });
+/// Shown in place of the map when the backend has sent no usable location.
+///
+/// Rendered instead of fabricated pins: until a real restaurant, customer or
+/// rider coordinate exists there is nothing truthful to draw.
+class _LocationUnavailable extends StatelessWidget {
+  const _LocationUnavailable();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(999),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+    return Container(
+      width: double.infinity,
+      height: 288,
+      color: const Color(0xFFE2E7FF),
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.location_off_rounded,
+                size: 36, color: Color(0xFFB45309)),
+            SizedBox(height: 8),
+            Text(
+              'Location unavailable',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF92400E),
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(labelIcon ?? Icons.storefront_rounded,
-                  size: 13, color: labelIconColor),
-              const SizedBox(width: 3),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF131B2E),
-                ),
-              ),
-            ],
-          ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Waiting for the restaurant and delivery location.',
+              style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: pinColor,
-            boxShadow: [
-              BoxShadow(
-                color: pinColor.withValues(alpha: 0.4),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Icon(icon, color: iconColor, size: 15),
-        ),
-      ],
+      ),
     );
   }
 }

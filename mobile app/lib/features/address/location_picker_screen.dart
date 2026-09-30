@@ -29,9 +29,9 @@ import 'selected_location.dart';
 /// Returns `null` if the user pops the screen without confirming.
 ///
 /// ## API key note
-/// Map rendering uses [MAPS_API_KEY] (native layer, configured in M1).
-/// Places autocomplete uses [PLACES_API_KEY] (Dart, `--dart-define`).
-/// These are separate keys — see `maps-status.md`.
+/// Map rendering uses the Maps SDK key (native layer, configured in M1).
+/// Places autocomplete goes through the **backend** proxy
+/// (`/api/v1/location/places/*`), so the app needs no client-side Places key.
 ///
 /// ## Reverse geocoding
 /// Pin-drop and current-location results are resolved to a human-readable

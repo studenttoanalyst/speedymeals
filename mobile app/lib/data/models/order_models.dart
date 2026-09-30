@@ -111,6 +111,36 @@ class OrderTracking {
   final String? riderName;
   final String? riderPhone;
 
+  // ── Real tracking geometry (Phase 7, Point 3) ──────────────────────────
+  //
+  // Every coordinate is nullable: the backend omits a point it does not know
+  // rather than sending a placeholder, so the UI must never invent one.
+
+  /// Restaurant location snapshot (`restaurant_lat`/`restaurant_lng`).
+  final double? restaurantLatitude;
+  final double? restaurantLongitude;
+
+  /// Customer delivery location (`customer_lat`/`customer_lng`).
+  final double? customerLatitude;
+  final double? customerLongitude;
+
+  /// Live rider location (`rider_lat`/`rider_lng`); null until a fix exists.
+  final double? riderLatitude;
+  final double? riderLongitude;
+
+  /// Road distance for the restaurant → customer route (`route_distance_km`).
+  final double? routeDistanceKm;
+
+  /// Backend duration estimate in minutes (`duration_mins`).
+  final int? durationMins;
+
+  /// Backend-computed arrival timestamp (`eta`).
+  final DateTime? eta;
+
+  /// Google-encoded route polyline (`overview_polyline.points`), null when the
+  /// route came from the distance fallback and has no geometry.
+  final String? polyline;
+
   final DateTime? placedAt;
   final DateTime? deliveredAt;
   final List<OrderLineItem> items;
@@ -126,6 +156,16 @@ class OrderTracking {
     this.totalAmount = 0,
     this.riderName,
     this.riderPhone,
+    this.restaurantLatitude,
+    this.restaurantLongitude,
+    this.customerLatitude,
+    this.customerLongitude,
+    this.riderLatitude,
+    this.riderLongitude,
+    this.routeDistanceKm,
+    this.durationMins,
+    this.eta,
+    this.polyline,
     this.placedAt,
     this.deliveredAt,
     this.items = const [],
@@ -143,6 +183,16 @@ class OrderTracking {
         totalAmount: Json.asDouble(json['total_amount']),
         riderName: Json.asStringOrNull(json['rider_name']),
         riderPhone: Json.asStringOrNull(json['rider_phone']),
+        restaurantLatitude: Json.asDoubleOrNull(json['restaurant_lat']),
+        restaurantLongitude: Json.asDoubleOrNull(json['restaurant_lng']),
+        customerLatitude: Json.asDoubleOrNull(json['customer_lat']),
+        customerLongitude: Json.asDoubleOrNull(json['customer_lng']),
+        riderLatitude: Json.asDoubleOrNull(json['rider_lat']),
+        riderLongitude: Json.asDoubleOrNull(json['rider_lng']),
+        routeDistanceKm: Json.asDoubleOrNull(json['route_distance_km']),
+        durationMins: Json.asIntOrNull(json['duration_mins']),
+        eta: Json.asDateTimeOrNull(json['eta']),
+        polyline: Json.asStringOrNull(json['polyline']),
         placedAt: Json.asDateTimeOrNull(json['placed_at']),
         deliveredAt: Json.asDateTimeOrNull(json['delivered_at']),
         items: Json.asList(json['items'], OrderLineItem.fromJson),
@@ -161,6 +211,32 @@ class OrderTracking {
   bool get shouldKeepPolling => status.isActive;
 }
 
+/// One Google Directions route (`RouteDetailSchema`, Point 3).
+///
+/// `eta` is an ISO-8601 timestamp and `polyline` is the encoded
+/// `overview_polyline.points`; both are null when the route came from the
+/// Haversine fallback (no real geometry without Google). All fields optional.
+class RouteDetail {
+  final double? distanceKm;
+  final int? durationMins;
+  final DateTime? eta;
+  final String? polyline;
+
+  const RouteDetail({
+    this.distanceKm,
+    this.durationMins,
+    this.eta,
+    this.polyline,
+  });
+
+  factory RouteDetail.fromJson(Map<String, dynamic> json) => RouteDetail(
+        distanceKm: Json.asDoubleOrNull(json['distance_km']),
+        durationMins: Json.asIntOrNull(json['duration_mins']),
+        eta: Json.asDateTimeOrNull(json['eta']),
+        polyline: Json.asStringOrNull(json['polyline']),
+      );
+}
+
 /// Response of `GET /restaurants/{id}/cart/checkout-preview`
 /// (backend: `CheckoutPreviewResponseSchema`).
 ///
@@ -174,11 +250,16 @@ class CheckoutPreview {
   final double deliveryFee;
   final double total;
 
+  /// Point 3 route parameters (distance, duration, ETA, polyline); null when
+  /// the backend could not compute a route.
+  final RouteDetail? route;
+
   const CheckoutPreview({
     required this.foodSubtotal,
     required this.deliveryDistanceKm,
     required this.deliveryFee,
     required this.total,
+    this.route,
   });
 
   factory CheckoutPreview.fromJson(Map<String, dynamic> json) => CheckoutPreview(
@@ -186,6 +267,7 @@ class CheckoutPreview {
         deliveryDistanceKm: Json.asDouble(json['delivery_distance_km']),
         deliveryFee: Json.asDouble(json['delivery_fee']),
         total: Json.asDouble(json['total']),
+        route: _routeOrNull(json['route']),
       );
 
   String get foodSubtotalLabel => formatPkr(foodSubtotal);
@@ -214,6 +296,10 @@ class PlacedOrder {
   final double commissionAmount;
   final double restaurantPayable;
   final double riderEarning;
+
+  /// Route snapshot captured at placement (Point 3); null when unavailable.
+  final RouteDetail? route;
+
   final DateTime? placedAt;
   final List<OrderLineItem> items;
 
@@ -229,6 +315,7 @@ class PlacedOrder {
     this.commissionAmount = 0,
     this.restaurantPayable = 0,
     this.riderEarning = 0,
+    this.route,
     this.placedAt,
     this.items = const [],
   });
@@ -245,12 +332,19 @@ class PlacedOrder {
         commissionAmount: Json.asDouble(json['commission_amount']),
         restaurantPayable: Json.asDouble(json['restaurant_payable']),
         riderEarning: Json.asDouble(json['rider_earning']),
+        route: _routeOrNull(json['route']),
         placedAt: Json.asDateTimeOrNull(json['placed_at']),
         items: Json.asList(json['items'], OrderLineItem.fromJson),
       );
 
   String get shortId => shortOrderId(id);
   String get totalLabel => formatPkr(totalAmount);
+}
+
+/// Parses a nested `route` object, tolerating a missing/null/non-object value.
+RouteDetail? _routeOrNull(Object? value) {
+  final map = Json.asMapOrNull(value);
+  return map == null ? null : RouteDetail.fromJson(map);
 }
 
 /// Body of `POST /restaurants/{id}/cart/checkout`

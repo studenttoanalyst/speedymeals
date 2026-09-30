@@ -51,7 +51,8 @@ class FakeRiderRepository extends RiderRepository {
   Future<RiderProfile> profile() async => stubbedProfile;
 
   @override
-  Future<List<RiderAssignment>> assignments() async => stubbedAssignments;
+  Future<RiderAssignments> assignments() async =>
+      RiderAssignments(active: stubbedAssignments);
 
   @override
   Future<RiderWallet> earnings() async => stubbedWallet;
@@ -89,12 +90,9 @@ RiderAssignment createTestAssignment({
     restaurantName: 'Speedy Grill',
     restaurantLatitude: restaurantLat,
     restaurantLongitude: restaurantLng,
-    deliveryAddress: AssignmentAddress(
-      latitude: customerLat,
-      longitude: customerLng,
-      label: 'Home',
-      fullAddress: 'Street 1, F-7, Islamabad',
-    ),
+    customerLatitude: customerLat,
+    customerLongitude: customerLng,
+    deliveryAddress: 'Street 1, F-7, Islamabad',
   );
 }
 

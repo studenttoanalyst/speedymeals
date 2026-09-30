@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 import '../../core/network/api_client.dart';
 import '../models/cart_models.dart';
 import '../models/order_models.dart';
@@ -11,6 +13,20 @@ class OrderRepository {
   OrderRepository({ApiClient? client}) : _client = client ?? ApiClient.instance;
 
   final ApiClient _client;
+
+  static const _uuid = Uuid();
+
+  /// Idempotency key for the checkout attempt currently in flight (or one that
+  /// failed and can still be retried). The backend caches a successful
+  /// placement for 24h keyed by this UUID, so a retry after a timeout or
+  /// network error must reuse it — otherwise a duplicate order could be placed.
+  /// A genuinely new attempt (different restaurant/address/payment) or a
+  /// successful placement gets a fresh key.
+  String? _checkoutKey;
+
+  /// Identifies the checkout attempt [_checkoutKey] belongs to. When this
+  /// changes, the next [placeOrder] starts a new attempt with a new key.
+  String? _checkoutAttempt;
 
   /// `GET /restaurants/{id}/cart/checkout-preview?address_id=…`
   ///
@@ -38,10 +54,25 @@ class OrderRepository {
     required String restaurantId,
     required PlaceOrderRequest request,
   }) async {
+    // Same attempt -> reuse the key across retries (timeout / network error);
+    // a different checkout -> mint a new one.
+    final attempt =
+        '$restaurantId|${request.addressId}|${request.paymentMethod.wireValue}';
+    if (_checkoutKey == null || _checkoutAttempt != attempt) {
+      _checkoutKey = _uuid.v4();
+      _checkoutAttempt = attempt;
+    }
+
     final json = await _client.postJson(
       '/restaurants/$restaurantId/cart/checkout',
       body: request.toJson(),
+      headers: {'Idempotency-Key': _checkoutKey!},
     );
+
+    // Placement succeeded: the next checkout is a new attempt and needs a new
+    // key so it cannot replay this order's cached response.
+    _checkoutKey = null;
+    _checkoutAttempt = null;
     return PlacedOrder.fromJson(json);
   }
 

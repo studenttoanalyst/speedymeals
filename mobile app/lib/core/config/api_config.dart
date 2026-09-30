@@ -6,9 +6,10 @@ import 'package:flutter/foundation.dart';
 /// request goes through [ApiClient], which reads [ApiConfig.baseUrl].
 ///
 /// Resolution order:
-///   1. `--dart-define=API_BASE_URL=...`  (wins everywhere, used for staging,
-///      CI and physical devices on a LAN)
-///   2. release build              -> [_productionUrl]
+///   1. `--dart-define=API_BASE_URL=...`  (wins everywhere; required for
+///      release builds, also used for staging, CI and LAN devices)
+///   2. release build without an override -> [baseUrl] throws; no production
+///      domain is hardcoded or guessed
 ///   3. debug + Android emulator   -> `10.0.2.2` (the emulator's alias for the
 ///      host machine's loopback, since `localhost` inside the emulator is the
 ///      emulator itself)
@@ -16,13 +17,14 @@ import 'package:flutter/foundation.dart';
 ///
 /// Physical Android device over USB/Wi-Fi: pass your machine's LAN IP, e.g.
 ///   flutter run --dart-define=API_BASE_URL=http://192.168.1.20:8000
+///
+/// Release builds: the backend origin must be supplied, e.g.
+///   flutter build apk --dart-define=API_BASE_URL=https://api.example.com
 class ApiConfig {
   ApiConfig._();
 
   /// Compile-time override. Empty when not supplied.
   static const String _override = String.fromEnvironment('API_BASE_URL');
-
-  static const String _productionUrl = 'https://api.speedymeals';
 
   /// Bare host:port the FastAPI app is listening on in local development.
   static const String devPort = '8000';
@@ -36,7 +38,18 @@ class ApiConfig {
   static String get baseUrl {
     final override = _override.trim();
     if (override.isNotEmpty) return _stripTrailingSlash(override);
-    if (isProductionBuild) return _productionUrl;
+
+    if (isProductionBuild) {
+      // Deliberately no hardcoded production host: the real backend origin is
+      // deployment-specific and a guessed domain would fail as an opaque
+      // network error. Fail loudly at configuration time instead.
+      throw StateError(
+        'API_BASE_URL is required for release builds. Re-run the build with '
+        '--dart-define=API_BASE_URL=https://<your-backend-host> '
+        '(for example: flutter build apk --dart-define=API_BASE_URL=...) .',
+      );
+    }
+
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:$devPort';
     }
