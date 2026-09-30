@@ -18,12 +18,66 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
+class InMemoryPubSub:
+    """In-memory pubsub listener for local development and testing."""
+
+    def __init__(self, in_memory_redis: "InMemoryRedis"):
+        self._redis = in_memory_redis
+        self._channels: set[str] = set()
+        self._queue: list[dict] = []
+
+    def subscribe(self, *channels):
+        for c in channels:
+            self._channels.add(str(c))
+
+    def unsubscribe(self, *channels):
+        for c in channels:
+            self._channels.discard(str(c))
+
+    def get_message(self, ignore_subscribe_messages: bool = True, timeout: float = 0.0):
+        if self._queue:
+            return self._queue.pop(0)
+        return None
+
+    def close(self):
+        self._channels.clear()
+        self._queue.clear()
+        self._redis._remove_pubsub(self)
+
+
+class InMemoryPipeline:
+    """Buffered pipeline simulation for in-memory Redis."""
+
+    def __init__(self, in_memory_redis: "InMemoryRedis"):
+        self._redis = in_memory_redis
+        self._commands: list[tuple[str, tuple, dict]] = []
+
+    def __getattr__(self, name: str):
+        def _enqueue(*args, **kwargs):
+            self._commands.append((name, args, kwargs))
+            return self
+        return _enqueue
+
+    def execute(self):
+        results = []
+        for name, args, kwargs in self._commands:
+            method = getattr(self._redis, name)
+            results.append(method(*args, **kwargs))
+        self._commands.clear()
+        return results
+
+
 class InMemoryRedis:
     """Thread-safe, TTL-aware in-memory Redis substitute for local development."""
 
     def __init__(self):
         self._data: dict[str, str] = {}
         self._expiry: dict[str, float] = {}
+        self._pubsubs: list[InMemoryPubSub] = []
+
+    def _remove_pubsub(self, pubsub: InMemoryPubSub):
+        if pubsub in self._pubsubs:
+            self._pubsubs.remove(pubsub)
 
     def _is_expired(self, key: str) -> bool:
         if key in self._expiry:
@@ -115,6 +169,59 @@ class InMemoryRedis:
     def ping(self):
         return True
 
+    def publish(self, channel: str, message: str) -> int:
+        count = 0
+        channel_str = str(channel)
+        for ps in list(self._pubsubs):
+            if channel_str in ps._channels:
+                ps._queue.append({
+                    "type": "message",
+                    "channel": channel_str,
+                    "data": message,
+                })
+                count += 1
+        return count
+
+    def pubsub(self):
+        ps = InMemoryPubSub(self)
+        self._pubsubs.append(ps)
+        return ps
+
+    def pipeline(self, transaction: bool = True, shard_hint=None):
+        return InMemoryPipeline(self)
+
+
+class ResilientPipeline:
+    """Wrapper that tries executing a real pipeline, but falls back cleanly to in-memory store."""
+
+    def __init__(self, real_pipe, fallback_pipe: InMemoryPipeline, resilient_client: "ResilientRedisClient"):
+        self._real_pipe = real_pipe
+        self._fallback_pipe = fallback_pipe
+        self._client = resilient_client
+        self._use_fallback = not resilient_client._should_use_real()
+
+    def __getattr__(self, name: str):
+        def _call(*args, **kwargs):
+            if not self._use_fallback:
+                try:
+                    getattr(self._real_pipe, name)(*args, **kwargs)
+                except Exception:
+                    self._use_fallback = True
+            getattr(self._fallback_pipe, name)(*args, **kwargs)
+            return self
+        return _call
+
+    def execute(self):
+        if not self._use_fallback:
+            try:
+                return self._real_pipe.execute()
+            except (RedisError, ConnectionError, TimeoutError, OSError) as e:
+                self._client._last_probe = time.time()
+                self._client._is_online = False
+                logger.info("Local Redis pipeline unavailable (%s). Executing on in-memory store.", e)
+                return self._fallback_pipe.execute()
+        return self._fallback_pipe.execute()
+
 
 class ResilientRedisClient:
     """Wrapper that prefers real Redis, but seamlessly switches to in-memory store if offline."""
@@ -161,6 +268,34 @@ class ResilientRedisClient:
     def flushdb(self, *args, **kwargs): return self._call("flushdb", *args, **kwargs)
     def flushall(self, *args, **kwargs): return self._call("flushall", *args, **kwargs)
     def ping(self, *args, **kwargs): return self._call("ping", *args, **kwargs)
+    def publish(self, *args, **kwargs): return self._call("publish", *args, **kwargs)
+
+    def pubsub(self, *args, **kwargs):
+        if self._should_use_real():
+            try:
+                res = self._real.pubsub(*args, **kwargs)
+                if self._is_online is not True:
+                    self._is_online = True
+                return res
+            except (RedisError, ConnectionError, TimeoutError, OSError) as e:
+                self._last_probe = time.time()
+                if self._is_online is not False:
+                    self._is_online = False
+                    logger.info("Local Redis pubsub unavailable (%s). Using resilient in-memory store.", e)
+        return self._fallback.pubsub(*args, **kwargs)
+
+    def pipeline(self, *args, **kwargs):
+        fallback_pipe = self._fallback.pipeline(*args, **kwargs)
+        if self._should_use_real():
+            try:
+                real_pipe = self._real.pipeline(*args, **kwargs)
+                return ResilientPipeline(real_pipe, fallback_pipe, self)
+            except (RedisError, ConnectionError, TimeoutError, OSError) as e:
+                self._last_probe = time.time()
+                if self._is_online is not False:
+                    self._is_online = False
+                    logger.info("Local Redis pipeline unavailable (%s). Using resilient in-memory store.", e)
+        return fallback_pipe
 
 
 _raw_client = redis.from_url(

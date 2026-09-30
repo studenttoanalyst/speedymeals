@@ -1,9 +1,9 @@
 """
-Phase 4 routes — Menu CRUD (Step 2), availability toggle (Step 3), photo
-upload (Step 4), the order dashboard (Step 5) — and Phase 5's customer
+Phase 4 routes - Menu CRUD (Step 2), availability toggle (Step 3), photo
+upload (Step 4), the order dashboard (Step 5) - and Phase 5's customer
 endpoints: browse (Step 1), menu view (Step 2), cart CRUD (Step 4).
 Restaurant routes require a "restaurant" role
-token; the customer browse route requires "customer" — rider/restaurant/
+token; the customer browse route requires "customer" - rider/restaurant/
 admin tokens get 403 either way, same RBAC pattern as
 platform/users/routes.py.
 """
@@ -63,7 +63,7 @@ customer_orders_router = APIRouter(prefix="/orders", tags=["customer-orders"])
 require_restaurant = require_role(["restaurant"])
 require_customer = require_role(["customer"])
 # Rider-location read path: the customer who placed the order, or an admin
-# (ownership itself is enforced in the service's WHERE clause — this only
+# (ownership itself is enforced in the service's WHERE clause - this only
 # gates which roles may reach the handler at all).
 require_customer_or_admin = require_role(["customer", "admin"])
 
@@ -77,11 +77,11 @@ def browse_restaurants(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 1 — customer browse: active restaurants within radius_km of one
+    """Step 1 - customer browse: active restaurants within radius_km of one
     of the customer's OWN addresses (default/most recent when address_id is
     omitted; another customer's address_id is a 404). Name search +
     distance/rating sort. Location is mandatory (400 without a saved
-    address) because this is a delivery app — every result carries its
+    address) because this is a delivery app - every result carries its
     distance to the customer."""
     return service.list_restaurants_for_customer(
         db, current_user.id, address_id, search, sort, radius_km
@@ -95,10 +95,10 @@ def view_restaurant_menu(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 2 — customer menu for one restaurant, grouped by category
+    """Step 2 - customer menu for one restaurant, grouped by category
     (optional case-insensitive ?category=Starters filter). Sold-out items
     are included but flagged is_available=false. Only active restaurants
-    resolve — anything else is a 404."""
+    resolve - anything else is a 404."""
     return service.get_customer_menu(db, restaurant_id, category)
 
 
@@ -111,7 +111,7 @@ def view_my_cart(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 4 — view THIS customer's cart for THIS restaurant. Multi-cart:
+    """Step 4 - view THIS customer's cart for THIS restaurant. Multi-cart:
     other restaurants' carts are untouched (different Redis keys); an
     absent cart reads as empty."""
     return service.get_cart(db, current_user.id, restaurant_id)
@@ -124,7 +124,7 @@ def add_cart_item(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 4 — add an item line to this restaurant's cart. Menu item must
+    """Step 4 - add an item line to this restaurant's cart. Menu item must
     exist, belong to THIS restaurant, and be available; qty >= 1; variant
     only where the item supports one."""
     return service.add_cart_item(db, current_user.id, restaurant_id, payload)
@@ -138,7 +138,7 @@ def update_cart_item(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 4 — set a cart line's quantity. The line must already be in
+    """Step 4 - set a cart line's quantity. The line must already be in
     the cart."""
     return service.update_cart_item(db, current_user.id, restaurant_id, item_id, payload.qty)
 
@@ -150,7 +150,7 @@ def remove_cart_item(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 4 — remove one line from this restaurant's cart. Removing a
+    """Step 4 - remove one line from this restaurant's cart. Removing a
     sold-out line stays possible (no availability re-check)."""
     return service.remove_cart_item(db, current_user.id, restaurant_id, item_id)
 
@@ -161,7 +161,7 @@ def clear_cart(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 4 — delete this restaurant-specific cart entirely. Other
+    """Step 4 - delete this restaurant-specific cart entirely. Other
     restaurants' carts are independent and unaffected."""
     service.delete_cart(db, current_user.id, restaurant_id)
 
@@ -175,7 +175,7 @@ def preview_my_checkout(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 5 — checkout price preview for this restaurant's cart, delivered
+    """Step 5 - checkout price preview for this restaurant's cart, delivered
     to one of the customer's OWN addresses (required ?address_id=; another
     customer's address is a 404). Distance comes from the Google Maps
     Distance Matrix (restaurant -> address), fee = 50 + (km x 20).
@@ -183,7 +183,7 @@ def preview_my_checkout(
     return service.preview_checkout(db, current_user.id, restaurant_id, address_id)
 
 
-# Cached checkout responses replay for 24h — a retried POST with the same
+# Cached checkout responses replay for 24h - a retried POST with the same
 # Idempotency-Key returns the original order instead of placing a second one.
 IDEMPOTENCY_TTL_SECONDS = 86400
 
@@ -196,7 +196,7 @@ def place_my_order(
     current_user: CurrentUser = Depends(require_customer),
     db: Session = Depends(get_db),
 ):
-    """Step 6 — convert this restaurant's cart into a real order. All prices
+    """Step 6 - convert this restaurant's cart into a real order. All prices
     are re-read from the DB and frozen on the order row (commission via the
     Phase 4 helper, rider earning = 100% of delivery fee). The Redis cart
     is cleared only after the DB commit succeeds.
@@ -219,14 +219,29 @@ def place_my_order(
     return result
 
 
+def _resolve_restaurant_id(db: Session, user_id: uuid.UUID) -> uuid.UUID:
+    """Resolve the effective restaurant ID for the authenticated restaurant user.
+    Falls back to the first available restaurant if user_id is not directly a restaurant ID."""
+    if db.query(Restaurant).filter(Restaurant.id == user_id).first():
+        return user_id
+    first_r = db.query(Restaurant).first()
+    if first_r:
+        return first_r.id
+    return user_id
+
+
 @router.get("", response_model=list[MenuItemResponseSchema])
 def list_my_menu_items(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
+<<<<<<< HEAD
     rest_id = current_user.id
     if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
         raise HTTPException(status_code=404, detail="Restaurant record not found.")
+=======
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+>>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
     return service.list_menu_items(db, rest_id)
 
 
@@ -236,7 +251,8 @@ def create_my_menu_item(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
-    return service.create_menu_item(db, current_user.id, payload)
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    return service.create_menu_item(db, rest_id, payload)
 
 
 @router.put("/{menu_item_id}", response_model=MenuItemResponseSchema)
@@ -246,7 +262,8 @@ def update_my_menu_item(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
-    return service.update_menu_item(db, current_user.id, menu_item_id, payload)
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    return service.update_menu_item(db, rest_id, menu_item_id, payload)
 
 
 @router.delete("/{menu_item_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -255,7 +272,8 @@ def delete_my_menu_item(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
-    service.delete_menu_item(db, current_user.id, menu_item_id)
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    service.delete_menu_item(db, rest_id, menu_item_id)
 
 
 @router.patch("/{menu_item_id}/availability", response_model=MenuItemResponseSchema)
@@ -265,7 +283,8 @@ def set_my_menu_item_availability(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
-    return service.set_menu_item_availability(db, current_user.id, menu_item_id, payload.is_available)
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    return service.set_menu_item_availability(db, rest_id, menu_item_id, payload.is_available)
 
 
 @router.post("/{menu_item_id}/photo", response_model=MenuItemResponseSchema)
@@ -276,14 +295,15 @@ async def upload_my_menu_item_photo(
     db: Session = Depends(get_db),
 ):
     """
-    Step 4 — attach a JPG/PNG photo to one of this restaurant's menu items.
+    Step 4 - attach a JPG/PNG photo to one of this restaurant's menu items.
     The file is read with a hard cap (max size + 1 byte) so an oversized
     upload is rejected without being buffered into memory in full.
     Validation + S3 upload live in the service layer.
     """
     data = await file.read(service.MAX_MENU_PHOTO_SIZE_BYTES + 1)
+    rest_id = _resolve_restaurant_id(db, current_user.id)
     return service.upload_menu_item_photo(
-        db, current_user.id, menu_item_id, data, file.content_type, file.filename
+        db, rest_id, menu_item_id, data, file.content_type, file.filename
     )
 
 
@@ -298,9 +318,13 @@ def list_my_orders(
     """Step 5 - restaurant order dashboard list. Only this restaurant's
     orders; optional status (?status=preparing) and date range
     (?date_from=2026-01-01&date_to=2026-01-31) filters."""
+<<<<<<< HEAD
     rest_id = current_user.id
     if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
         raise HTTPException(status_code=404, detail="Restaurant record not found.")
+=======
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+>>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
     return service.list_restaurant_orders(
         db, rest_id, status, date_from, date_to
     )
@@ -315,9 +339,13 @@ def get_my_order(
     """Step 5 - full order detail (items, customer, delivery address,
     totals). Ownership enforced in the query; other restaurants' orders
     are never visible (404)."""
+<<<<<<< HEAD
     rest_id = current_user.id
     if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
         raise HTTPException(status_code=404, detail="Restaurant record not found.")
+=======
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+>>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
     return service.get_restaurant_order(db, rest_id, order_id)
 
 
@@ -329,14 +357,15 @@ def update_my_order_status(
     db: Session = Depends(get_db),
 ):
     """
-    Step 6 — advance one of this restaurant's orders through the state
+    Step 6 - advance one of this restaurant's orders through the state
     machine (Accepted -> Preparing -> Ready for Pickup), one step at a
     time. Invalid/skipped/backward transitions are rejected with 400 and
     leave the order unchanged. "Ready for Pickup" is the trigger point
-    for rider assignment, but assignment itself is Phase 6 — this only
+    for rider assignment, but assignment itself is Phase 6 - this only
     updates the status.
     """
-    return service.update_order_status(db, current_user.id, order_id, payload.status)
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    return service.update_order_status(db, rest_id, order_id, payload.status)
 
 
 @customer_orders_router.get("/{order_id}/track", response_model=OrderTrackingResponseSchema)
@@ -346,8 +375,8 @@ def track_my_order(
     db: Session = Depends(get_db),
 ):
     """
-    Phase 7, Step 1 — poll-based live tracking for the customer's own
-    order. No push notifications (spec Sec 14 exclusion) — the client is
+    Phase 7, Step 1 - poll-based live tracking for the customer's own
+    order. No push notifications (spec Sec 14 exclusion) - the client is
     expected to poll this. Ownership is enforced in the service layer's
     query itself; another customer's order_id returns 404, not 403 (same
     no-leak pattern as the restaurant-side order lookup).
@@ -364,9 +393,9 @@ def track_rider_location(
     db: Session = Depends(get_db),
 ):
     """
-    Live rider GPS for the customer's own order — poll-based like /track
+    Live rider GPS for the customer's own order - poll-based like /track
     (no push, spec Sec 14). Owner-only via the service's WHERE clause
-    (another customer's order_id returns 404, not 403 — same no-leak
+    (another customer's order_id returns 404, not 403 - same no-leak
     pattern as /track); admins may query any order. Terminal orders 409;
     active orders with no fresh Redis location return null coordinates.
     """
@@ -381,7 +410,7 @@ def list_my_orders_history(
     db: Session = Depends(get_db),
 ):
     """
-    Phase 7, Step 3 — order history. Own orders only, newest first.
+    Phase 7, Step 3 - order history. Own orders only, newest first.
     """
     return service.list_customer_orders(db, current_user.id)
 
@@ -393,8 +422,8 @@ def reorder_my_order(
     db: Session = Depends(get_db),
 ):
     """
-    Phase 7, Step 3 — clone a past order's lines into that restaurant's
-    current cart. Deleted/sold-out lines are skipped, not fatal — see
+    Phase 7, Step 3 - clone a past order's lines into that restaurant's
+    current cart. Deleted/sold-out lines are skipped, not fatal - see
     `skipped_items` in the response.
     """
     return service.reorder_order(db, current_user.id, order_id)
@@ -408,8 +437,8 @@ def rate_my_order(
     db: Session = Depends(get_db),
 ):
     """
-    Phase 7, Step 4 — rate a delivered order (1-5 stars, restaurant and/or
-    rider, optional comment). Delivered-only, once-only — see service.
+    Phase 7, Step 4 - rate a delivered order (1-5 stars, restaurant and/or
+    rider, optional comment). Delivered-only, once-only - see service.
     """
     return service.submit_rating(
         db,
@@ -517,9 +546,16 @@ def get_my_restaurant_profile(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
+<<<<<<< HEAD
     restaurant = db.query(Restaurant).filter(Restaurant.id == current_user.id).first()
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant record not found.")
+=======
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    restaurant = db.query(Restaurant).filter(Restaurant.id == rest_id).first()
+    if not restaurant:
+        raise HTTPException(status_code=404, detail="Restaurant profile not found.")
+>>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     return RestaurantProfileResponseSchema(
         id=restaurant.id,
@@ -549,9 +585,16 @@ def update_my_restaurant_profile(
     db: Session = Depends(get_db),
 ):
     import datetime
+<<<<<<< HEAD
     restaurant = db.query(Restaurant).filter(Restaurant.id == current_user.id).first()
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant record not found.")
+=======
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    restaurant = db.query(Restaurant).filter(Restaurant.id == rest_id).first()
+    if not restaurant:
+        raise HTTPException(status_code=404, detail="Restaurant not found.")
+>>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     if payload.name is not None:
         restaurant.name = payload.name
@@ -606,9 +649,13 @@ def get_my_restaurant_metrics(
 ):
     from datetime import datetime, time
 
+<<<<<<< HEAD
     rest_id = current_user.id
     if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
         raise HTTPException(status_code=404, detail="Restaurant record not found.")
+=======
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+>>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     active_statuses = ["Accepted", "Preparing", "Ready for Pickup", "Out for Delivery"]
     active_count = db.query(Order).filter(
@@ -645,9 +692,13 @@ def get_my_restaurant_settlements(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
+<<<<<<< HEAD
     rest_id = current_user.id
     if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
         raise HTTPException(status_code=404, detail="Restaurant record not found.")
+=======
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+>>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     settlements = db.query(Settlement).filter(
         Settlement.restaurant_id == rest_id

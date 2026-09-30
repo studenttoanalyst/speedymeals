@@ -70,7 +70,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   /// Loads this restaurant's real menu.
   ///
   /// The screen is always given a restaurant id, so the menu it shows is always
-  /// the one belonging to the restaurant the customer tapped — never a shared
+  /// the one belonging to the restaurant the customer tapped - never a shared
   /// or hardcoded list.
   Future<void> _loadMenu() async {
     final restaurantId = widget.restaurant.id;
@@ -279,30 +279,35 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: _cartCount > 0 ? 90 : 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Hero Image Section
-                _buildHeroBanner(restaurant),
+          RefreshIndicator(
+            onRefresh: _loadMenu,
+            color: const Color(0xFFDC2626),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.only(bottom: _cartCount > 0 ? 90 : 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Hero Image Section
+                  _buildHeroBanner(restaurant),
 
-                // 2. Overlapping Restaurant Card
-                _buildRestaurantHeaderCard(context, restaurant),
+                  // 2. Overlapping Restaurant Card
+                  _buildRestaurantHeaderCard(context, restaurant),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // 3. Category Tabs (Horizontal Sticky Pill List)
-                if (categories.isNotEmpty) _buildCategoryTabs(categories),
+                  // 3. Category Tabs (Horizontal Sticky Pill List)
+                  if (categories.isNotEmpty) _buildCategoryTabs(categories),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // 4. Menu Items Section
-                if (currentCategory != null)
-                  _buildMenuSection(context, currentCategory)
-                else if (categories.isEmpty)
-                  _buildEmptyMenuPlaceholder(theme),
-              ],
+                  // 4. Menu Items Section
+                  if (currentCategory != null)
+                    _buildMenuSection(context, currentCategory)
+                  else if (categories.isEmpty)
+                    _buildEmptyMenuPlaceholder(theme),
+                ],
+              ),
             ),
           ),
 
@@ -669,7 +674,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                             ),
                           ),
                           // Omitted when the backend has a rating but no
-                          // review count — the app does not invent one.
+                          // review count - the app does not invent one.
                           if (restaurant.reviewCount.isNotEmpty) ...[
                             const SizedBox(width: 2),
                             Text(

@@ -12,7 +12,7 @@ from app.platform.auth.jwt_utils import create_access_token
 
 client = TestClient(app)
 
-# Point 5 — every location endpoint now requires a valid access token.
+# Point 5 - every location endpoint now requires a valid access token.
 # get_current_user() does no DB lookup (role is embedded in the JWT), so a
 # synthetic uuid works as the caller identity.
 _USER_ID = uuid.uuid4()
@@ -200,7 +200,7 @@ def test_get_route_details_duration_rounds_up_to_at_least_one_minute(mock_redis,
 
 @patch("app.core.maps_client.redis_client")
 def test_get_route_details_budget_exhausted_falls_back_to_haversine(mock_redis):
-    """Budget breaker trip: no Google call at all — Haversine estimate with
+    """Budget breaker trip: no Google call at all - Haversine estimate with
     a derived duration/ETA and a None polyline."""
     from app.core import maps_client
 
@@ -276,7 +276,7 @@ def test_reverse_geocode_rate_limiting_exceeded(mock_rate_limit):
 
 
 def test_location_endpoints_reject_anonymous_calls():
-    """Point 5 — no Google-adjacent endpoint may be reachable without a
+    """Point 5 - no Google-adjacent endpoint may be reachable without a
     valid access token: anonymous traffic gets 401/403 from the bearer
     scheme before any service code (and therefore any billable call) runs."""
     paths = [
@@ -291,7 +291,7 @@ def test_location_endpoints_reject_anonymous_calls():
 
 @patch("app.platform.location.routes.enforce_rate_limit")
 def test_autocomplete_rate_limiting_exceeded(mock_rate_limit):
-    """Point 5 — autocomplete is rate limited per user (30/min); the 429
+    """Point 5 - autocomplete is rate limited per user (30/min); the 429
     comes from the shared limiter before the Google proxy is touched."""
     mock_rate_limit.side_effect = HTTPException(status_code=429, detail="Too many attempts. Please try again in 30 seconds.")
 
@@ -301,7 +301,7 @@ def test_autocomplete_rate_limiting_exceeded(mock_rate_limit):
 
 @patch("app.platform.location.routes.enforce_rate_limit")
 def test_place_details_rate_limiting_exceeded(mock_rate_limit):
-    """Point 5 — place details is rate limited per user (20/min)."""
+    """Point 5 - place details is rate limited per user (20/min)."""
     mock_rate_limit.side_effect = HTTPException(status_code=429, detail="Too many attempts. Please try again in 30 seconds.")
 
     response = client.get("/api/v1/location/places/details?place_id=ChIJ2eUgeAK6j4ARbn5w_nE990E", headers=AUTH)
@@ -310,7 +310,7 @@ def test_place_details_rate_limiting_exceeded(mock_rate_limit):
 
 @patch("app.core.maps_client.redis_client")
 def test_budget_exhausted_blocks_google_calls(mock_redis, monkeypatch):
-    """Point 5 — with the daily budget exhausted, the previously unguarded
+    """Point 5 - with the daily budget exhausted, the previously unguarded
     Places/Geocoding client functions raise MapsBudgetExceededError BEFORE
     any network I/O (httpx never called), so no uncapped spend is possible.
     Distance/Directions keep their Haversine fallback (no raise) by design."""
@@ -323,7 +323,7 @@ def test_budget_exhausted_blocks_google_calls(mock_redis, monkeypatch):
 
     monkeypatch.setattr(maps_client.httpx, "get", _no_http)
 
-    # The gated client functions are async — drive them with asyncio.run.
+    # The gated client functions are async - drive them with asyncio.run.
     import asyncio
 
     with pytest.raises(maps_client.MapsBudgetExceededError):
@@ -336,7 +336,7 @@ def test_budget_exhausted_blocks_google_calls(mock_redis, monkeypatch):
 
 @patch("app.core.maps_client.redis_client")
 def test_budget_exhausted_surfaces_as_503_on_routes(mock_redis):
-    """Point 5 — route-level behavior: budget exhaustion (a MapsError
+    """Point 5 - route-level behavior: budget exhaustion (a MapsError
     subclass) maps to a clean 503 with a retry-friendly message, never a
     crash, and never a silent uncapped Google call."""
     mock_redis.get.return_value = "300"
@@ -354,7 +354,7 @@ def test_budget_exhausted_surfaces_as_503_on_routes(mock_redis):
 @patch("app.core.maps_client.autocomplete_places")
 @patch("app.platform.location.service.redis_client")
 def test_autocomplete_cache_hit_avoids_google_call(mock_redis, mock_maps_autocomplete):
-    """Point 5 — a cached autocomplete response (1h TTL) is served from
+    """Point 5 - a cached autocomplete response (1h TTL) is served from
     Redis; the Google proxy function is never invoked."""
     cached_payload = [{"place_id": "cached_1", "description": "Cached Cafe, Lahore"}]
     mock_redis.get.return_value = json.dumps(cached_payload)
@@ -369,7 +369,7 @@ def test_autocomplete_cache_hit_avoids_google_call(mock_redis, mock_maps_autocom
 @patch("app.core.maps_client.autocomplete_places")
 @patch("app.platform.location.service.redis_client")
 def test_autocomplete_cache_miss_calls_google_and_stores(mock_redis, mock_maps_autocomplete):
-    """Point 5 — on a miss, the Google result is cached with a 3600s TTL;
+    """Point 5 - on a miss, the Google result is cached with a 3600s TTL;
     repeated identical queries are normalized into one cache entry."""
     mock_redis.get.return_value = None
     mock_maps_autocomplete.return_value = [{"place_id": "p1", "description": "Fresh Cafe"}]
@@ -387,7 +387,7 @@ def test_autocomplete_cache_miss_calls_google_and_stores(mock_redis, mock_maps_a
 @patch("app.core.maps_client.get_place_details")
 @patch("app.platform.location.service.redis_client")
 def test_place_details_cache_hit_avoids_google_call(mock_redis, mock_maps_details):
-    """Point 5 — a cached place-details response (24h TTL) bypasses Google."""
+    """Point 5 - a cached place-details response (24h TTL) bypasses Google."""
     cached_payload = {
         "place_id": "ChIJcached", "formatted_address": "Cached St", "lat": 1.0, "lng": 2.0,
         "components": {"street": "Cached St", "neighborhood": "", "city": "Lahore"},
@@ -404,7 +404,7 @@ def test_place_details_cache_hit_avoids_google_call(mock_redis, mock_maps_detail
 @patch("app.core.maps_client.autocomplete_places")
 @patch("app.platform.location.service.redis_client")
 def test_autocomplete_cache_failure_falls_through_to_google(mock_redis, mock_maps_autocomplete):
-    """Point 5 fail-safe — a Redis outage on read must never break the
+    """Point 5 fail-safe - a Redis outage on read must never break the
     request: the call falls through to the live Google proxy."""
     mock_redis.get.side_effect = RuntimeError("redis down")
     mock_maps_autocomplete.return_value = [{"place_id": "p9", "description": "Fallback Cafe"}]
@@ -414,6 +414,77 @@ def test_autocomplete_cache_failure_falls_through_to_google(mock_redis, mock_map
     assert response.status_code == 200
     assert response.json() == [{"place_id": "p9", "description": "Fallback Cafe"}]
     mock_maps_autocomplete.assert_called_once()
+
+
+def test_check_budget_and_increment_alias():
+    """Verify _check_budget_and_increment alias matches _check_and_increment_daily_budget."""
+    from app.core import maps_client
+
+    assert callable(maps_client._check_budget_and_increment)
+    assert maps_client._check_budget_and_increment == maps_client._check_and_increment_daily_budget
+
+
+@patch("app.core.maps_client.redis_client")
+def test_distance_matrix_multi_origin_fallback(mock_redis, monkeypatch):
+    """Verify get_distance_matrix handles multi-origin/destination matrix routing."""
+    from app.core import maps_client
+
+    mock_redis.get.return_value = None
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "rows": [
+                    {
+                        "elements": [
+                            {"status": "OK", "distance": {"value": 2500}},
+                            {"status": "OK", "distance": {"value": 5000}},
+                        ]
+                    }
+                ]
+            }
+
+    class FakeHttpx:
+        @staticmethod
+        def get(*args, **kwargs):
+            return FakeResponse()
+
+    monkeypatch.setattr(maps_client.httpx, "get", FakeHttpx.get)
+
+    matrix = maps_client.get_distance_matrix([(31.5, 74.3)], [(31.6, 74.4), (31.7, 74.5)])
+    assert len(matrix) == 1
+    assert len(matrix[0]) == 2
+    assert matrix[0][0] == 2.5
+    assert matrix[0][1] == 5.0
+
+
+@patch("app.core.maps_client.redis_client")
+def test_missing_api_keys_safe_fallback(mock_redis, monkeypatch):
+    """Verify missing API key produces graceful fallbacks without unhandled exceptions."""
+    import asyncio
+    from app.core import maps_client
+
+    mock_redis.get.return_value = None
+    monkeypatch.setattr(maps_client.settings, "GOOGLE_MAPS_API_KEY", "")
+    monkeypatch.setattr(maps_client.settings, "GOOGLE_PLACES_API_KEY", "")
+
+    # Autocomplete returns empty list
+    places = asyncio.run(maps_client.autocomplete_places("test"))
+    assert places == []
+
+    # Place details returns structured fallback
+    details = asyncio.run(maps_client.get_place_details("ChIJtest"))
+    assert details["place_id"] == "ChIJtest"
+    assert "formatted_address" in details
+
+    # Reverse geocode returns structured fallback
+    geo = asyncio.run(maps_client.reverse_geocode(31.5, 74.3))
+    assert "formatted_address" in geo
+    assert "components" in geo
+
 
 
 
