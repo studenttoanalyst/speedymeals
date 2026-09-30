@@ -235,13 +235,7 @@ def list_my_menu_items(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
-<<<<<<< HEAD
-    rest_id = current_user.id
-    if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
-        raise HTTPException(status_code=404, detail="Restaurant record not found.")
-=======
     rest_id = _resolve_restaurant_id(db, current_user.id)
->>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
     return service.list_menu_items(db, rest_id)
 
 
@@ -318,13 +312,7 @@ def list_my_orders(
     """Step 5 - restaurant order dashboard list. Only this restaurant's
     orders; optional status (?status=preparing) and date range
     (?date_from=2026-01-01&date_to=2026-01-31) filters."""
-<<<<<<< HEAD
-    rest_id = current_user.id
-    if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
-        raise HTTPException(status_code=404, detail="Restaurant record not found.")
-=======
     rest_id = _resolve_restaurant_id(db, current_user.id)
->>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
     return service.list_restaurant_orders(
         db, rest_id, status, date_from, date_to
     )
@@ -339,13 +327,7 @@ def get_my_order(
     """Step 5 - full order detail (items, customer, delivery address,
     totals). Ownership enforced in the query; other restaurants' orders
     are never visible (404)."""
-<<<<<<< HEAD
-    rest_id = current_user.id
-    if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
-        raise HTTPException(status_code=404, detail="Restaurant record not found.")
-=======
     rest_id = _resolve_restaurant_id(db, current_user.id)
->>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
     return service.get_restaurant_order(db, rest_id, order_id)
 
 
@@ -546,16 +528,10 @@ def get_my_restaurant_profile(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
-<<<<<<< HEAD
-    restaurant = db.query(Restaurant).filter(Restaurant.id == current_user.id).first()
-    if not restaurant:
-        raise HTTPException(status_code=404, detail="Restaurant record not found.")
-=======
     rest_id = _resolve_restaurant_id(db, current_user.id)
     restaurant = db.query(Restaurant).filter(Restaurant.id == rest_id).first()
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant profile not found.")
->>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     return RestaurantProfileResponseSchema(
         id=restaurant.id,
@@ -585,16 +561,10 @@ def update_my_restaurant_profile(
     db: Session = Depends(get_db),
 ):
     import datetime
-<<<<<<< HEAD
-    restaurant = db.query(Restaurant).filter(Restaurant.id == current_user.id).first()
-    if not restaurant:
-        raise HTTPException(status_code=404, detail="Restaurant record not found.")
-=======
     rest_id = _resolve_restaurant_id(db, current_user.id)
     restaurant = db.query(Restaurant).filter(Restaurant.id == rest_id).first()
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found.")
->>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     if payload.name is not None:
         restaurant.name = payload.name
@@ -649,13 +619,7 @@ def get_my_restaurant_metrics(
 ):
     from datetime import datetime, time
 
-<<<<<<< HEAD
-    rest_id = current_user.id
-    if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
-        raise HTTPException(status_code=404, detail="Restaurant record not found.")
-=======
     rest_id = _resolve_restaurant_id(db, current_user.id)
->>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     active_statuses = ["Accepted", "Preparing", "Ready for Pickup", "Out for Delivery"]
     active_count = db.query(Order).filter(
@@ -692,13 +656,7 @@ def get_my_restaurant_settlements(
     current_user: CurrentUser = Depends(require_restaurant),
     db: Session = Depends(get_db),
 ):
-<<<<<<< HEAD
-    rest_id = current_user.id
-    if not db.query(Restaurant).filter(Restaurant.id == rest_id).first():
-        raise HTTPException(status_code=404, detail="Restaurant record not found.")
-=======
     rest_id = _resolve_restaurant_id(db, current_user.id)
->>>>>>> 716869480b0bd6fea69c3a1eb2ae544cf84b4719
 
     settlements = db.query(Settlement).filter(
         Settlement.restaurant_id == rest_id
