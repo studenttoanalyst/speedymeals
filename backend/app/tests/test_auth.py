@@ -233,7 +233,7 @@ def test_get_me_returns_identity_for_valid_token(db_session, auth_client):
 
 def test_get_me_rejects_missing_token(auth_client):
     response = auth_client.get("/auth/me")
-    assert response.status_code in (401, 403)
+    assert response.status_code == 401
 
 
 def test_get_me_rejects_garbage_token(auth_client):

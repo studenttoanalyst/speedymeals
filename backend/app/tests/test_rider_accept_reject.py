@@ -366,7 +366,7 @@ def test_route_missing_token_rejected(db_session):
         f"/wallet/assignments/{uuid.uuid4()}/respond",
         json={"action": "accept"},
     )
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_route_wrong_role_rejected(db_session):

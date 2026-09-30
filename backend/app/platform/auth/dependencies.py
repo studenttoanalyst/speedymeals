@@ -19,9 +19,6 @@ from app.platform.auth.models import Admin
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
-DEMO_RESTAURANT_ID = uuid.UUID("07777a49-7777-4c4f-906e-5d31ce55f745")
-DEMO_ADMIN_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
-
 
 @dataclass
 class CurrentUser:
@@ -45,29 +42,21 @@ def get_current_user(
     Decodes the Bearer access token from the Authorization header.
     Raises 401 if the token is missing, malformed, expired, or wrong type
     (a refresh token can never be used here - only type: access is accepted).
-    Gracefully handles demo/preview tokens for restaurant portal routes.
+    Every request must present a cryptographically valid access token -
+    there are no demo or fallback identities.
     """
     if credentials is None:
-        if request.url.path.startswith("/restaurants/me"):
-            return CurrentUser(id=DEMO_RESTAURANT_ID, role="restaurant")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
     token = credentials.credentials
 
-    if token == "mock-restaurant-access-token-jwt":
-        return CurrentUser(id=DEMO_RESTAURANT_ID, role="restaurant")
-    if token == "mock-admin-access-token-jwt":
-        return CurrentUser(id=DEMO_ADMIN_ID, role="admin")
-
     try:
         payload = jwt_utils.decode_token(token)
     except JWTError:
-        if request.url.path.startswith("/restaurants/me"):
-            return CurrentUser(id=DEMO_RESTAURANT_ID, role="restaurant")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token.",

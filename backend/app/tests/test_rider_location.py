@@ -178,7 +178,7 @@ def test_route_missing_token_rejected(location_client):
         "/wallet/location",
         json={"latitude": 24.8607, "longitude": 67.0011},
     )
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_route_wrong_role_rejected(location_client, db_session):

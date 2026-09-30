@@ -170,7 +170,7 @@ def issue_tokens(
 ) -> dict:
     """
     Step 5 + Step 6 - create an access token (not persisted, stateless) and
-    a refresh token (persisted as a hash so logout/revocation is possible).
+    a refresh token (persisted as a hash so revocation is possible).
     Supports optional permissions array and must_change_password flag for RBAC.
     """
     access_token = jwt_utils.create_access_token(
@@ -204,8 +204,11 @@ def revoke_refresh_token(db: Session, raw_refresh_token: str) -> None:
     can never be used again to mint a new access token, even though the
     JWT itself would still decode successfully until its natural expiry.
     """
-    if not raw_refresh_token or raw_refresh_token.startswith("mock-"):
-        return
+    if not raw_refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Refresh token is required.",
+        )
 
     token_hash = _hash_token(raw_refresh_token)
     record = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
@@ -331,7 +334,6 @@ def request_password_reset(db: Session, email: str, role: str) -> dict:
     if not user_exists:
         return {
             "message": "If an active account exists with that email, password reset instructions have been generated.",
-            "reset_token": None,
         }
 
     raw_token = secrets.token_urlsafe(32)
@@ -361,8 +363,6 @@ def request_password_reset(db: Session, email: str, role: str) -> dict:
 
     return {
         "message": "If an active account exists with that email, password reset instructions have been generated.",
-        "reset_token": raw_token,
-        "reset_url": reset_url,
     }
 
 

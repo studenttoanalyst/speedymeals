@@ -340,11 +340,11 @@ def cart_client(db_session):
 
 def test_cart_routes_missing_token_rejected(cart_client):
     rid = uuid.uuid4()
-    assert cart_client.get(f"/restaurants/{rid}/cart").status_code == 403
-    assert cart_client.post(f"/restaurants/{rid}/cart/items", json={}).status_code == 403
-    assert cart_client.patch(f"/restaurants/{rid}/cart/items/{uuid.uuid4()}", json={}).status_code == 403
-    assert cart_client.delete(f"/restaurants/{rid}/cart/items/{uuid.uuid4()}").status_code == 403
-    assert cart_client.delete(f"/restaurants/{rid}/cart").status_code == 403
+    assert cart_client.get(f"/restaurants/{rid}/cart").status_code == 401
+    assert cart_client.post(f"/restaurants/{rid}/cart/items", json={}).status_code == 401
+    assert cart_client.patch(f"/restaurants/{rid}/cart/items/{uuid.uuid4()}", json={}).status_code == 401
+    assert cart_client.delete(f"/restaurants/{rid}/cart/items/{uuid.uuid4()}").status_code == 401
+    assert cart_client.delete(f"/restaurants/{rid}/cart").status_code == 401
 
 
 def test_cart_routes_wrong_role_rejected_403(cart_client, db_session):

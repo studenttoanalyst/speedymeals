@@ -223,7 +223,7 @@ def test_tracking_route_returns_200_for_owner(tracking_client, db_session, custo
 
 def test_tracking_route_missing_token_rejected(tracking_client):
     response = tracking_client.get(f"/orders/{uuid.uuid4()}/track")
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_tracking_route_wrong_role_rejected(tracking_client, db_session, customer, address, restaurant):
@@ -373,7 +373,7 @@ def test_rider_location_route_returns_200_for_owner(
 
 def test_rider_location_route_missing_token_rejected(tracking_client):
     response = tracking_client.get(f"/orders/{uuid.uuid4()}/rider-location")
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_rider_location_route_wrong_role_rejected(

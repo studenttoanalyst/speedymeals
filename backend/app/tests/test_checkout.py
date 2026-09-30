@@ -451,7 +451,7 @@ def test_checkout_route_missing_token_rejected(checkout_client):
     response = checkout_client.get(
         f"/restaurants/{uuid.uuid4()}/cart/checkout-preview", params={"address_id": str(uuid.uuid4())}
     )
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_checkout_route_wrong_role_rejected_403(checkout_client, db_session):
@@ -761,7 +761,7 @@ def test_place_order_route_end_to_end(db_session, customer, address, track_carts
     assert service.get_cart(db_session, customer.id, restaurant.id)["items"] == []
 
     # Missing token / wrong role on the same route.
-    assert client.post(f"/restaurants/{restaurant.id}/cart/checkout", json={}).status_code == 403
+    assert client.post(f"/restaurants/{restaurant.id}/cart/checkout", json={}).status_code == 401
     wrong_role = create_access_token(restaurant.id, "restaurant")
     assert client.post(
         f"/restaurants/{restaurant.id}/cart/checkout",
@@ -883,7 +883,7 @@ def test_place_order_unauthorized_request_still_blocked_for_digital(checkout_cli
         f"/restaurants/{uuid.uuid4()}/cart/checkout",
         json={"address_id": str(uuid.uuid4()), "payment_method": "Digital"},
     )
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 # --- Idempotency-Key on checkout (duplicate-click protection) ---

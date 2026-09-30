@@ -356,7 +356,7 @@ def test_profile_route_returns_200_for_rider(wallet_read_client, db_session, rid
 
 
 def test_profile_route_missing_token_rejected(wallet_read_client):
-    assert wallet_read_client.get("/wallet/profile").status_code == 403
+    assert wallet_read_client.get("/wallet/profile").status_code == 401
 
 
 def test_profile_route_invalid_token_401(wallet_read_client):
@@ -390,7 +390,7 @@ def test_assignments_route_returns_riders_orders(wallet_read_client, db_session,
 
 
 def test_assignments_route_missing_token_rejected(wallet_read_client):
-    assert wallet_read_client.get("/wallet/assignments").status_code == 403
+    assert wallet_read_client.get("/wallet/assignments").status_code == 401
 
 
 def test_assignments_route_wrong_role_rejected(wallet_read_client):

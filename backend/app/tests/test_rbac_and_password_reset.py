@@ -2,6 +2,7 @@
 Integration and unit tests for Admin RBAC, Staff Provisioning, and Forgot Password Flows.
 Zero em-dash compliant.
 """
+import re
 import uuid
 import pytest
 from fastapi.testclient import TestClient
@@ -45,7 +46,16 @@ def superadmin_headers(client, db_session):
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_admin_forgot_and_reset_password(client, db_session):
+def _reset_token_from_logs(capsys, email: str) -> str:
+    """The raw reset token is NEVER in the HTTP response - dev/test delivery
+    is the [AUTH-RESET] server log line printed by request_password_reset."""
+    out = capsys.readouterr().out
+    match = re.search(rf"\[AUTH-RESET\] Password reset link for \w+ <{re.escape(email)}>: \S+token=(\S+)", out)
+    assert match, f"Reset link log line not found for {email}"
+    return match.group(1)
+
+
+def test_admin_forgot_and_reset_password(client, db_session, capsys):
     """Test full forgot-password and reset-password cycle for admin account."""
     email = f"admin-reset-{uuid.uuid4().hex[:6]}@speedymeals.pk"
     admin = Admin(
@@ -57,12 +67,13 @@ def test_admin_forgot_and_reset_password(client, db_session):
     db_session.add(admin)
     db_session.commit()
 
-    # 1. Request reset
+    # 1. Request reset - generic message only, token never in the payload.
     req_res = client.post("/auth/admin/forgot-password", json={"email": email})
     assert req_res.status_code == 200
-    data = req_res.json()
-    assert data["reset_token"] is not None
-    token = data["reset_token"]
+    body = req_res.json()
+    assert "message" in body
+    assert "reset_token" not in body and "reset_url" not in body
+    token = _reset_token_from_logs(capsys, email)
 
     # 2. Reset password
     reset_res = client.post("/auth/admin/reset-password", json={"token": token, "new_password": "NewSecretPassword@999"})
@@ -79,7 +90,7 @@ def test_admin_forgot_and_reset_password(client, db_session):
     assert "access_token" in ok_res.json()
 
 
-def test_restaurant_forgot_and_reset_password(client, db_session):
+def test_restaurant_forgot_and_reset_password(client, db_session, capsys):
     """Test full forgot-password and reset-password cycle for restaurant account."""
     unique = uuid.uuid4().hex[:8]
     email = f"rest-reset-{unique}@speedymeals.pk"
@@ -98,11 +109,13 @@ def test_restaurant_forgot_and_reset_password(client, db_session):
     db_session.add(restaurant)
     db_session.commit()
 
-    # 1. Request reset
+    # 1. Request reset - generic message only, token never in the payload.
     req_res = client.post("/auth/restaurant/forgot-password", json={"email": email})
     assert req_res.status_code == 200
-    token = req_res.json()["reset_token"]
-    assert token is not None
+    body = req_res.json()
+    assert "message" in body
+    assert "reset_token" not in body and "reset_url" not in body
+    token = _reset_token_from_logs(capsys, email)
 
     # 2. Reset password
     reset_res = client.post("/auth/restaurant/reset-password", json={"token": token, "new_password": "RestNewPassword@456"})

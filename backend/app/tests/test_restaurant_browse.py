@@ -254,9 +254,8 @@ def test_route_customer_token_lists_restaurants(client, db_session, customer, cu
 
 
 def test_route_missing_token_rejected(client):
-    # HTTPBearer (existing shared scheme) rejects a missing token with 403 —
-    # same behavior on every existing protected endpoint.
-    assert client.get("/restaurants").status_code == 403
+    # A missing token is rejected with a strict 401 — no demo fallback exists.
+    assert client.get("/restaurants").status_code == 401
 
 
 def test_route_invalid_token_rejected_401(client):
@@ -387,8 +386,8 @@ def test_menu_route_full_flow_and_no_internal_leak(client, db_session, customer,
 
 
 def test_menu_route_missing_token_rejected(client):
-    # HTTPBearer's existing behavior on every protected endpoint (403).
-    assert client.get(f"/restaurants/{uuid.uuid4()}/menu").status_code == 403
+    # A missing token is rejected with a strict 401.
+    assert client.get(f"/restaurants/{uuid.uuid4()}/menu").status_code == 401
 
 
 def test_menu_route_wrong_role_rejected_403(client, db_session):
