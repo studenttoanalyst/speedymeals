@@ -66,6 +66,10 @@ kotlinc/
 android/local.properties
 android/**/GeneratedPluginRegistrant.java
 
+# Android release signing — never commit the keystore or its passwords
+key.properties
+*.jks
+
 # ============================================================
 # IDE / EDITOR
 # ============================================================
@@ -171,5 +175,8 @@ mobile_app/coverage/
 mobile_app/*.iml
 mobile_app/.idea/
 
+mobile_app/backend/
 
-mobile_app/backend
+
+**/ephemeral/
+android/local.properties
