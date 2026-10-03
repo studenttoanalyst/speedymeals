@@ -4,7 +4,7 @@ logout, token refresh, restaurant/admin logins, password resets, and
 mandatory initial password change.
 Zero em-dash compliant.
 """
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db

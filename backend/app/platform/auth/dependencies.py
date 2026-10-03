@@ -70,13 +70,21 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return CurrentUser(
+    user = CurrentUser(
         id=uuid.UUID(payload["sub"]),
         role=payload.get("role", "customer"),
         permissions=payload.get("permissions", []),
         must_change_password=payload.get("must_change_password", False),
         scope=payload.get("scope", "full_access"),
     )
+
+    if user.must_change_password and not request.url.path.endswith("/auth/admin/change-initial-password"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Temporary password in use. Mandatory password rotation required before accessing this endpoint.",
+        )
+
+    return user
 
 
 def require_role(allowed_roles: list[str]):

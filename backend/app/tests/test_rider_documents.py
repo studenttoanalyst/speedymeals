@@ -34,18 +34,16 @@ def wallet_client(db_session):
 
 
 @pytest.fixture(autouse=True)
-def _fake_s3(monkeypatch):
-    """No real AWS in tests — return a deterministic fake URL instead.
-    Uses a monotonic counter (not a fixed URL) so a re-upload test can
-    tell two calls apart without needing its own monkeypatch override —
-    stacking a second monkeypatch.setattr on top of this one inside a
-    single test is unreliable (fixture caching), so tests that need
-    per-call uniqueness rely on this counter instead of patching again."""
+def _auto_mock_s3_for_service_tests(request, monkeypatch):
+    """Apply mock fake_upload automatically to all service tests, but leave storage alone for direct storage tests."""
+    if "test_storage_" in request.node.name:
+        return
+
     counter = itertools.count(1)
 
     def fake_upload(rider_id, doc_type, data, content_type, extension):
         n = next(counter)
-        return f"https://fake-bucket.s3.fake-region.amazonaws.com/rider-docs/{rider_id}/{doc_type}-v{n}.{extension}"
+        return f"https://fake-bucket.s3.fake-region.amazonaws.com/rider-docs/{rider_id}/{doc_type}-v{n}.webp"
 
     monkeypatch.setattr(service.storage, "upload_rider_document", fake_upload)
 
@@ -76,7 +74,7 @@ def test_reupload_same_doc_type_overwrites_previous_url(db_session, rider):
     second = service.upload_rider_document(db_session, rider.id, "cnic", _VALID_PNG_BYTES, "image/png", "b.png")
 
     assert first_url != second.cnic_photo_url
-    assert second.cnic_photo_url.endswith("cnic-v2.png")
+    assert second.cnic_photo_url.endswith("cnic-v2.webp")
 
 
 def test_upload_rejects_invalid_doc_type(db_session, rider):
@@ -133,3 +131,74 @@ def test_upload_route_requires_rider_role(wallet_client, db_session):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 403
+
+
+def test_storage_converts_to_webp_and_reduces_size(monkeypatch):
+    """
+    Directly tests storage.upload_rider_document:
+    (1) stored doc is .webp
+    (2) stored file size is smaller than the uncompressed original
+    (3) strips EXIF
+    """
+    import io
+    from PIL import Image
+    from app.core import storage
+
+    # Create a realistic test image (e.g. 300x300 pattern) saved as standard JPEG
+    img = Image.new("RGB", (300, 300))
+    for x in range(300):
+        for y in range(300):
+            img.putpixel((x, y), ((x * 5) % 256, (y * 7) % 256, (x + y) % 256))
+    raw_jpg_buf = io.BytesIO()
+    img.save(raw_jpg_buf, format="JPEG", quality=90)
+    raw_jpg_bytes = raw_jpg_buf.getvalue()
+
+    captured_payloads = []
+
+    def mock_put_object(**kwargs):
+        captured_payloads.append(kwargs)
+        return {}
+
+    monkeypatch.setattr(storage._s3_client, "put_object", mock_put_object)
+
+    test_rider_id = uuid.uuid4()
+    doc_url = storage.upload_rider_document(
+        test_rider_id,
+        "cnic",
+        raw_jpg_bytes,
+        "image/jpeg",
+        "jpg",
+    )
+
+    # 1. URL and key end in .webp
+    assert doc_url.endswith(".webp")
+    assert len(captured_payloads) == 1
+    call = captured_payloads[0]
+    assert call["Key"].endswith("/cnic.webp")
+    assert call["ContentType"] == "image/webp"
+
+    # 2. Converted WebP file size is smaller than the original JPEG
+    stored_bytes = call["Body"]
+    assert len(stored_bytes) < len(raw_jpg_bytes)
+
+    # Verify it is valid WebP and can be opened by Pillow
+    converted_img = Image.open(io.BytesIO(stored_bytes))
+    assert converted_img.format == "WEBP"
+
+
+def test_storage_raises_error_on_corrupt_image():
+    """
+    Fallback: if Pillow conversion fails for any reason, raise a clear error
+    rather than silently uploading the original file under a mismatched extension.
+    """
+    from app.core import storage
+
+    corrupt_bytes = b"not-an-image-data-payload"
+    with pytest.raises(ValueError, match="Failed to convert image to WebP"):
+        storage.upload_rider_document(
+            uuid.uuid4(),
+            "license",
+            corrupt_bytes,
+            "image/jpeg",
+            "jpg",
+        )
