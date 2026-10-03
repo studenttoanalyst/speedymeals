@@ -214,17 +214,11 @@ export default function RestaurantLoginPage() {
               </div>
             </div>
 
-            <div>
+            <div className="relative">
               <div className="flex items-center justify-between mb-1">
                 <label className="block font-semibold text-slate-700">
                   Password
                 </label>
-                <Link
-                  href="/restaurant/forgot-password"
-                  className="text-slate-400 hover:text-rose-600 transition-colors font-medium text-[11px]"
-                >
-                  Forgot password?
-                </Link>
               </div>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -245,6 +239,12 @@ export default function RestaurantLoginPage() {
                   {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              <Link
+                href="/restaurant/forgot-password"
+                className="absolute right-0 top-0 text-slate-400 hover:text-rose-600 transition-colors font-medium text-[11px]"
+              >
+                Forgot password?
+              </Link>
             </div>
 
             <button
