@@ -397,7 +397,7 @@ export default function RestaurantMenuPage() {
 
                   {/* Card Actions Footer */}
                   <div className="p-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                    {/* Instant 86-ing Switch */}
+                    {/* Instant Availability (In Stock / NA) Switch */}
                     <button
                       type="button"
                       onClick={() => handleToggleAvailability(dish)}
@@ -412,7 +412,7 @@ export default function RestaurantMenuPage() {
                       ) : (
                         <ToggleLeft size={22} weight="fill" className="text-slate-400" />
                       )}
-                      <span>{dish.is_available ? 'In Stock' : 'Sold Out'}</span>
+                      <span>{dish.is_available ? 'In Stock' : 'NA (Not Available)'}</span>
                     </button>
 
                     <div className="flex items-center gap-1">

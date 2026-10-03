@@ -388,7 +388,7 @@ export const mockMenuItems: MenuItem[] = [
     category: 'BBQ & Grills',
     photo_url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
     image_url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
-    is_available: false, // 86'd / Sold out
+    is_available: false, // NA (Not Available) / Out of stock
     is_popular: false,
     dietary_type: 'non-veg',
   },
