@@ -142,13 +142,13 @@ def test_otp_verify_second_time_same_phone_logs_in_existing_customer(db_session,
 # --- rider OTP signup/login ---
 
 
-def test_rider_otp_verify_first_time_creates_pending_rider(auth_client):
+def test_rider_register_creates_pending_rider(auth_client):
     phone = _unique_phone(prefix="+92312")
     auth_client.post("/auth/otp/request", json={"phone_number": phone, "country_code": "+92"})
     otp_code = _otp_for(phone)
 
     response = auth_client.post(
-        "/auth/rider/otp/verify",
+        "/auth/rider/register",
         json={
             "phone_number": phone, "country_code": "+92", "otp_code": otp_code,
             "name": "Test Rider", "cnic_number": f"cnic-{uuid.uuid4().hex[:8]}",
@@ -159,7 +159,7 @@ def test_rider_otp_verify_first_time_creates_pending_rider(auth_client):
     assert "access_token" in response.json()
 
 
-def test_rider_otp_verify_existing_phone_ignores_signup_fields(db_session, auth_client):
+def test_rider_login_existing_phone_succeeds(db_session, auth_client):
     phone = _unique_phone(prefix="+92313")
     existing = Rider(
         phone_number=phone, name="Original Name", cnic_number=f"cnic-{uuid.uuid4().hex[:8]}",
@@ -171,18 +171,40 @@ def test_rider_otp_verify_existing_phone_ignores_signup_fields(db_session, auth_
 
     service.generate_and_send_otp(phone)
     otp_code = _otp_for(phone)
+    
+    # Login works
     response = auth_client.post(
-        "/auth/rider/otp/verify",
+        "/auth/rider/login/otp-verify",
         json={
             "phone_number": phone, "country_code": "+92", "otp_code": otp_code,
-            "name": "Different Name", "cnic_number": "different-cnic",
-            "vehicle_type": "car", "vehicle_registration": "XYZ-999",
         },
     )
     assert response.status_code == 200
 
-    db_session.refresh(existing)
-    assert existing.name == "Original Name"  # signup fields NOT overwritten on login
+    # Registration fails
+    redis_client.delete(service._cooldown_key(phone))
+    service.generate_and_send_otp(phone)
+    otp_code = _otp_for(phone)
+    reg_response = auth_client.post(
+        "/auth/rider/register",
+        json={
+            "phone_number": phone, "country_code": "+92", "otp_code": otp_code,
+            "name": "Different Name", "cnic_number": "different-cnic",
+        },
+    )
+    assert reg_response.status_code == 400
+
+
+def test_rider_login_unregistered_phone_is_404(auth_client):
+    phone = _unique_phone(prefix="+92319")
+    auth_client.post("/auth/otp/request", json={"phone_number": phone, "country_code": "+92"})
+    otp_code = _otp_for(phone)
+
+    response = auth_client.post(
+        "/auth/rider/login/otp-verify",
+        json={"phone_number": phone, "country_code": "+92", "otp_code": otp_code},
+    )
+    assert response.status_code == 404
 
 
 # --- logout ---

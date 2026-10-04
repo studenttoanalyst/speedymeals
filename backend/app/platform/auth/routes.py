@@ -4,7 +4,7 @@ logout, token refresh, restaurant/admin logins, password resets, and
 mandatory initial password change.
 Zero em-dash compliant.
 """
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -21,7 +21,8 @@ from app.platform.auth.schemas import (
     RestaurantLoginSchema,
     RestaurantOTPVerifySchema,
     AdminLoginSchema,
-    RiderSignupOTPVerifySchema,
+    RiderLoginOTPVerifySchema,
+    RiderRegisterSchema,
     ForgotPasswordRequestSchema,
     ResetPasswordRequestSchema,
     ChangeInitialPasswordSchema,
@@ -102,18 +103,30 @@ def get_me(current_user: CurrentUser = Depends(get_current_user)):
     }
 
 
-@router.post("/rider/otp/verify", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
-def rider_otp_verify(payload: RiderSignupOTPVerifySchema, db: Session = Depends(get_db)):
+@router.post("/rider/login/otp-verify", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def rider_login_otp_verify(payload: RiderLoginOTPVerifySchema, db: Session = Depends(get_db)):
     """
-    Rider phone+OTP verify + signup in one call.
-    First-time phone -> creates Rider row (approval_status="pending").
-    Existing phone -> plain login, signup fields ignored.
+    Rider phone+OTP login. Looks up existing Rider row.
     """
     full_number = _build_full_number(payload.country_code, payload.phone_number)
     enforce_rate_limit(full_number, action="rider_otp_verify")
     service.verify_otp(full_number, payload.otp_code)
 
-    rider = service.get_or_create_rider(
+    rider = service.authenticate_rider(db, full_number)
+    tokens = service.issue_tokens(db, rider.id, role="rider")
+    return TokenResponseSchema(**tokens)
+
+
+@router.post("/rider/register", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+def rider_register(payload: RiderRegisterSchema, db: Session = Depends(get_db)):
+    """
+    Rider phone+OTP verify for new registration.
+    """
+    full_number = _build_full_number(payload.country_code, payload.phone_number)
+    enforce_rate_limit(full_number, action="rider_register")
+    service.verify_otp(full_number, payload.otp_code)
+
+    rider = service.register_rider(
         db,
         full_number,
         payload.country_code,

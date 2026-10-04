@@ -59,11 +59,16 @@ class AdminLoginSchema(BaseModel):
     password: str
 
 
-class RiderSignupOTPVerifySchema(BaseModel):
+class RiderLoginOTPVerifySchema(BaseModel):
+    """Rider phone+OTP login."""
+    phone_number: str
+    country_code: str = "+92"
+    otp_code: str = Field(..., min_length=6, max_length=6)
+
+
+class RiderRegisterSchema(BaseModel):
     """
-    Rider phone+OTP verify, combined with signup details in one call.
-    First-time phone -> creates a new Rider row (approval_status="pending").
-    Existing phone -> plain login, signup fields are ignored.
+    Rider phone+OTP verify for new registration.
     """
     phone_number: str
     country_code: str = "+92"

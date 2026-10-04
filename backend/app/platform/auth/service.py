@@ -121,7 +121,21 @@ def get_or_create_customer(db: Session, phone_number: str, country_code: str) ->
     return user
 
 
-def get_or_create_rider(
+def authenticate_rider(db: Session, phone_number: str) -> Rider:
+    """
+    Rider login. Looks up existing Rider row.
+    If not found, raises 404 so they can be redirected to registration.
+    """
+    rider = db.query(Rider).filter(Rider.phone_number == phone_number).first()
+    if rider is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Rider account not found. Please register first.",
+        )
+    return rider
+
+
+def register_rider(
     db: Session,
     phone_number: str,
     country_code: str,
@@ -131,16 +145,14 @@ def get_or_create_rider(
     vehicle_registration: str | None,
 ) -> Rider:
     """
-    Phase 3 Step 0 (prerequisite) - mirrors get_or_create_customer, but for
-    riders. First-time phone -> create Rider row, approval_status="pending"
-    (Admin approval, spec Sec 8 Step 2, is a separate later step - not
-    enforced here, this only handles account creation + login).
-    Existing phone -> plain login, signup fields in the request are ignored
-    (rider is already on file, no re-submit / no overwrite on every login).
+    Phase 3 Step 0 (prerequisite) - for riders. First-time phone -> create Rider row, approval_status="pending".
+    Ensures phone and CNIC are unique.
     """
-    rider = db.query(Rider).filter(Rider.phone_number == phone_number).first()
-    if rider is not None:
-        return rider
+    if db.query(Rider).filter(Rider.phone_number == phone_number).first():
+        raise HTTPException(status_code=400, detail="Phone number already registered.")
+    
+    if db.query(Rider).filter(Rider.cnic_number == cnic_number).first():
+        raise HTTPException(status_code=400, detail="CNIC already registered.")
 
     rider = Rider(
         phone_number=phone_number,
