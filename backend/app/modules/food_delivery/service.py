@@ -808,6 +808,7 @@ def rider_advance_delivery_status(
     order = (
         db.query(Order)
         .filter(Order.id == order_id, Order.rider_id == rider_id)
+        .with_for_update()
         .first()
     )
     if order is None:
@@ -837,9 +838,10 @@ def rider_advance_delivery_status(
         # COD: add frozen order.total_amount to pending_cash_owed.
         # Digital: no change.
         if order.payment_method == "COD":
-            rider = db.query(Rider).filter(Rider.id == rider_id).first()
-            rider.pending_cash_owed = float(rider.pending_cash_owed) + float(order.total_amount)
-            db.add(rider)
+            rider = db.query(Rider).filter(Rider.id == rider_id).with_for_update().first()
+            if rider:
+                rider.pending_cash_owed = float(Decimal(str(rider.pending_cash_owed)) + Decimal(str(order.total_amount)))
+                db.add(rider)
 
     db.commit()
     db.refresh(order)

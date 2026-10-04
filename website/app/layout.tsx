@@ -28,8 +28,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SpeedyMeals',
-  description: 'Order fast. Track live. Pay easy.',
+  title: 'SpeedyMeals — Zero-Markup Real-Time Food Delivery',
+  description: 'Order from your favorite local restaurants with transparent menu prices, live GPS rider tracking, and zero hidden markups.',
   icons: {
     icon: '/favicon.jpeg',
     shortcut: '/favicon.jpeg',

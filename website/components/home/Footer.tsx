@@ -278,7 +278,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               </a>
 
               <a
-                href="#tiktok"
+                href="https://www.tiktok.com/@speedy.meals4"
                 aria-label="TikTok"
                 title="Follow us on TikTok"
                 className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#000000] hover:border-[#EE1D52] hover:text-[#00F2FE] transition-colors duration-150"

@@ -84,17 +84,19 @@ async function requestTokenRefresh(failedToken?: string | null): Promise<string 
           if (data.refresh_token) {
             localStorage.setItem('sm_refresh_token', data.refresh_token);
           }
-          document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax`;
+          const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+          document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
           return data.access_token as string;
         }
       } else if (res.status === 401) {
         // Clear storage only when the refresh endpoint explicitly rejects the refresh token
+        const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
         localStorage.removeItem('sm_access_token');
         localStorage.removeItem('sm_refresh_token');
         localStorage.removeItem('sm_user_role');
         localStorage.removeItem('sm_user_data');
-        document.cookie = 'sm_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
-        document.cookie = 'sm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+        document.cookie = `sm_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+        document.cookie = `sm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${isSecure ? '; Secure' : ''}`;
       }
       return null;
     } catch (err) {

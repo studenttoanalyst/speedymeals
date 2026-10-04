@@ -487,7 +487,12 @@ def seed_demo_restaurant(db: Session) -> None:
     """
     Auto-seed default demo restaurant on app startup if not present,
     matching the restaurant login portal credentials.
+    Only seeds in development environment.
     """
+    from app.core.config import settings
+    if settings.ENVIRONMENT != "development":
+        return
+
     import datetime
     from app.modules.food_delivery.models import MenuItem
 

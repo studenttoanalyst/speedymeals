@@ -23,6 +23,7 @@ ever run out of strict chronological order.
 import json
 import uuid
 from datetime import datetime, timezone
+from decimal import Decimal
 
 from fastapi import HTTPException, status
 from sqlalchemy import func
@@ -69,8 +70,11 @@ def _rider_location_key(rider_id: uuid.UUID) -> str:
     return f"rider_location:{rider_id}"
 
 
-def _get_rider_or_404(db: Session, rider_id: uuid.UUID) -> Rider:
-    rider = db.query(Rider).filter(Rider.id == rider_id).first()
+def _get_rider_or_404(db: Session, rider_id: uuid.UUID, for_update: bool = False) -> Rider:
+    query = db.query(Rider).filter(Rider.id == rider_id)
+    if for_update:
+        query = query.with_for_update()
+    rider = query.first()
     if rider is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -94,7 +98,7 @@ def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str
             detail=f"Invalid recharge method. Must be one of: {sorted(VALID_RECHARGE_METHODS)}.",
         )
 
-    rider = _get_rider_or_404(db, rider_id)
+    rider = _get_rider_or_404(db, rider_id, for_update=True)
 
     existing_recharges = db.query(WalletTransaction).filter(
         WalletTransaction.rider_id == rider_id,
@@ -107,7 +111,8 @@ def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str
             detail=f"First wallet recharge must be exactly Rs. {INITIAL_WALLET_RECHARGE}.",
         )
 
-    rider.wallet_balance = float(rider.wallet_balance) + amount
+    new_balance = Decimal(str(rider.wallet_balance)) + Decimal(str(amount))
+    rider.wallet_balance = float(new_balance)
     db.add(rider)
 
     txn = WalletTransaction(
@@ -164,12 +169,14 @@ def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -
 
     Does NOT commit — caller controls the transaction.
     """
-    rider = _get_rider_or_404(db, rider_id)
+    rider = _get_rider_or_404(db, rider_id, for_update=True)
 
-    if float(rider.wallet_balance) < DELIVERY_WALLET_DEDUCTION:
+    current_balance = Decimal(str(rider.wallet_balance))
+    fee = Decimal(str(DELIVERY_WALLET_DEDUCTION))
+    if current_balance < fee:
         return None
 
-    rider.wallet_balance = float(rider.wallet_balance) - DELIVERY_WALLET_DEDUCTION
+    rider.wallet_balance = float(current_balance - fee)
     _force_offline_if_below_min(rider)
     db.add(rider)
 
@@ -227,11 +234,14 @@ def create_cash_deposit(
             detail=f"Invalid submission method. Must be one of: {sorted(VALID_DEPOSIT_METHODS)}.",
         )
 
-    rider = _get_rider_or_404(db, rider_id)
+    rider = _get_rider_or_404(db, rider_id, for_update=True)
     expected_amount = _compute_expected_cash(db, rider_id)
     discrepancy = amount_submitted - expected_amount
 
-    rider.pending_cash_owed = max(float(rider.pending_cash_owed) - amount_submitted, 0)
+    current_owed = Decimal(str(rider.pending_cash_owed))
+    sub_amount = Decimal(str(amount_submitted))
+    new_owed = max(current_owed - sub_amount, Decimal("0"))
+    rider.pending_cash_owed = float(new_owed)
     db.add(rider)
 
     deposit = CashDeposit(

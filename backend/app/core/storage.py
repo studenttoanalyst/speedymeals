@@ -9,8 +9,10 @@ Prefix and bucket strategy:
 - `restaurant-assets` (public): Storefront cover banners and logos.
 - `rider-docs` (private): Sensitive documents (CNIC, license, vehicle registration).
 """
+import io
 import uuid
 import boto3
+from PIL import Image
 
 from app.core.config import settings
 
@@ -113,6 +115,27 @@ def upload_restaurant_asset(
         return f"https://{bucket}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
 
 
+def _convert_rider_doc_to_webp(file_bytes: bytes, quality: int = 80) -> bytes:
+    """
+    Convert validated image to WebP format with quality=80.
+    Strips EXIF metadata automatically (Pillow does not preserve EXIF unless exif param is given).
+    Raises ValueError if conversion fails for any reason.
+    """
+    try:
+        image = Image.open(io.BytesIO(file_bytes))
+        # WebP supports RGBA (transparency), but palettes or unusual modes should be normalized
+        if image.mode in ("RGBA", "LA") or (image.mode == "P" and "transparency" in image.info):
+            image = image.convert("RGBA")
+        elif image.mode != "RGB":
+            image = image.convert("RGB")
+
+        out_buf = io.BytesIO()
+        image.save(out_buf, format="WEBP", quality=quality)
+        return out_buf.getvalue()
+    except Exception as exc:
+        raise ValueError(f"Failed to convert image to WebP: {exc}") from exc
+
+
 def upload_rider_document(
     rider_id: uuid.UUID,
     doc_type: str,
@@ -123,26 +146,32 @@ def upload_rider_document(
     """
     Upload sensitive rider documents (CNIC, driving license, vehicle registration).
     Stored in private bucket without public access.
+    Converts image to WebP (quality=80, EXIF stripped) before upload.
+    S3/storage key always uses .webp extension.
     """
+    webp_bytes = _convert_rider_doc_to_webp(file_bytes, quality=80)
+    webp_content_type = "image/webp"
+    doc_extension = "webp"
+
     if _is_supabase():
         bucket = RIDER_BUCKET
-        key = f"{rider_id}/{doc_type}.{extension}"
+        key = f"{rider_id}/{doc_type}.{doc_extension}"
         _s3_client.put_object(
             Bucket=bucket,
             Key=key,
-            Body=file_bytes,
-            ContentType=content_type,
+            Body=webp_bytes,
+            ContentType=webp_content_type,
         )
         base_url = _get_supabase_base_url()
         return f"{base_url}/storage/v1/object/authenticated/{bucket}/{key}"
     else:
         bucket = settings.S3_BUCKET_NAME
-        key = f"{RIDER_BUCKET}/{rider_id}/{doc_type}.{extension}"
+        key = f"{RIDER_BUCKET}/{rider_id}/{doc_type}.{doc_extension}"
         _s3_client.put_object(
             Bucket=bucket,
             Key=key,
-            Body=file_bytes,
-            ContentType=content_type,
+            Body=webp_bytes,
+            ContentType=webp_content_type,
         )
         return f"https://{bucket}.s3.{settings.AWS_REGION}.amazonaws.com/{key}"
 

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
-import { validatePhoneForRegion } from '@/lib/validation/phone';
-import { sanitizeTextInput, isReservedIdentifier, isReservedEmail } from '@/lib/security/sanitization';
-import { containsPromptInjection } from '@/lib/security/promptGuard';
+import { validateRegistrationPayload } from '@/lib/validation/registration';
 
 // Use service role key if available on server (bypasses RLS), otherwise fallback to standard client
 const getDbClient = () => {
@@ -15,7 +13,7 @@ const getDbClient = () => {
   return supabase;
 };
 
-// Simple sliding window in-memory rate limiter
+// Sliding window in-memory rate limiter
 const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_REQUESTS_PER_WINDOW = 5;
@@ -23,39 +21,16 @@ const MAX_REQUESTS_PER_WINDOW = 5;
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const windowStart = now - RATE_LIMIT_WINDOW_MS;
-  const timestamps = rateLimitMap.get(ip) || [];
+  const timestamps = (rateLimitMap.get(ip) || []).filter((t) => t > windowStart);
 
-  // Prune expired timestamps
-  const validTimestamps = timestamps.filter((t) => t > windowStart);
-
-  if (validTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
-    rateLimitMap.set(ip, validTimestamps);
+  if (timestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    rateLimitMap.set(ip, timestamps);
     return true;
   }
 
-  validTimestamps.push(now);
-  rateLimitMap.set(ip, validTimestamps);
+  timestamps.push(now);
+  rateLimitMap.set(ip, timestamps);
   return false;
-}
-
-/**
- * Generate letter-coded 8-digit unique ID:
- * - C-######## : Customer
- * - P-######## : Partner (Restaurant)
- * - R-######## : Rider
- */
-export function generateReferenceCode(persona: string): string {
-  const digits = Math.floor(10000000 + Math.random() * 90000000).toString();
-  switch (persona) {
-    case 'customer':
-      return `C-${digits}`;
-    case 'restaurant':
-      return `P-${digits}`;
-    case 'rider':
-      return `R-${digits}`;
-    default:
-      return `C-${digits}`;
-  }
 }
 
 export async function POST(request: Request) {
@@ -68,327 +43,107 @@ export async function POST(request: Request) {
 
     if (isRateLimited(clientIp)) {
       return NextResponse.json(
-        {
-          error:
-            'Too many registration attempts from this network. Please wait 10 minutes before trying again.',
-        },
+        { error: 'Too many registration attempts from this network. Please wait 10 minutes before trying again.' },
         { status: 429 }
       );
     }
 
     const body = await request.json();
-    const {
-      persona,
-      fullName,
-      name,
-      email,
-      phone,
-      phoneNumber,
-      countryCode = '+92',
-      city,
-      customCity,
-      area,
-      address,
-      vehicleType,
-      businessName,
-      cuisineType,
-      devicePlatform,
-      serviceInterest,
-      agreed = false,
-      // Anti-bot security parameters
-      website_url,
-      honeypot,
-      company_fax,
-      formLoadedAt,
-    } = body;
 
-    // 2. Anti-Bot: Honeypot trap validation
-    // Automated bots inspect the DOM and blindly populate hidden input fields.
-    const botTrap = website_url || honeypot || company_fax;
-    if (botTrap) {
-      console.warn(`[Anti-Bot Alert] Honeypot triggered by IP ${clientIp}:`, botTrap);
-      return NextResponse.json(
-        { error: 'Security verification failed. Automated submission detected.' },
-        { status: 400 }
-      );
+    // 2. Pure Functional Validation Pipeline
+    const validationResult = validateRegistrationPayload(body, clientIp);
+    if (!validationResult.success) {
+      const { message, field, status = 400 } = validationResult.error;
+      return NextResponse.json({ error: message, field }, { status });
     }
 
-    // 3. Anti-Bot: Minimum submission duration check
-    // Real humans take at least 1.5 seconds to fill or review the form.
-    if (formLoadedAt) {
-      const durationMs = Date.now() - Number(formLoadedAt);
-      if (durationMs > 0 && durationMs < 1200) {
-        console.warn(`[Anti-Bot Alert] Inhuman submission speed (${durationMs}ms) by IP ${clientIp}`);
-        return NextResponse.json(
-          { error: 'Submission submitted too quickly. Please review your details and submit again.' },
-          { status: 400 }
-        );
-      }
-    }
+    const data = validationResult.value;
 
-    // 4. Input sanitization & Unicode normalization (NFKC)
-    const personName = sanitizeTextInput(fullName || name, { maxLength: 80 });
-    const contactPhone = (phone || phoneNumber || '').trim();
-    const rawEmail = typeof email === 'string' ? email.trim() : '';
-    const contactEmail = rawEmail ? sanitizeTextInput(rawEmail, { maxLength: 254 }).toLowerCase() : null;
-
-    // Resolve city: Strictly save the actual user-typed city name and NEVER "Other" or "Others"
-    const rawCityStr = typeof city === 'string' ? city.trim() : '';
-    const rawCustomCityStr = typeof customCity === 'string' ? customCity.trim() : '';
-
-    const isOtherChoice =
-      rawCityStr.toLowerCase() === 'other' ||
-      rawCityStr.toLowerCase() === 'others' ||
-      rawCityStr.toLowerCase().startsWith('other');
-
-    let resolvedCity = rawCityStr;
-
-    if (isOtherChoice) {
-      if (!rawCustomCityStr || rawCustomCityStr.toLowerCase() === 'other' || rawCustomCityStr.toLowerCase() === 'others') {
-        return NextResponse.json(
-          {
-            error: 'Please specify your actual city or district name.',
-            field: 'city',
-          },
-          { status: 400 }
-        );
-      }
-      resolvedCity = rawCustomCityStr;
-    } else if (rawCustomCityStr && rawCustomCityStr.toLowerCase() !== 'other' && rawCustomCityStr.toLowerCase() !== 'others') {
-      resolvedCity = rawCustomCityStr;
-    }
-
-    // Safety defense: if resolvedCity still ends up being "other" or "others", reject it
-    if (resolvedCity.toLowerCase() === 'other' || resolvedCity.toLowerCase() === 'others') {
-      return NextResponse.json(
-        {
-          error: 'Please specify your actual city or district name.',
-          field: 'city',
-        },
-        { status: 400 }
-      );
-    }
-
-    const sanitizedCity = sanitizeTextInput(resolvedCity, { maxLength: 50 });
-    const rawAreaStr = typeof area === 'string' ? area.trim() : '';
-    const rawAddressStr = typeof address === 'string' ? address.trim() : '';
-    const sanitizedArea = rawAreaStr ? sanitizeTextInput(rawAreaStr, { maxLength: 100 }) : '';
-    const sanitizedAddress = rawAddressStr ? sanitizeTextInput(rawAddressStr, { maxLength: 200 }) : null;
-
-    const sanitizedBusinessName = businessName ? sanitizeTextInput(businessName, { maxLength: 100 }) : null;
-    const sanitizedCuisineType = cuisineType ? sanitizeTextInput(cuisineType, { maxLength: 50 }) : null;
-    const sanitizedVehicleType = vehicleType ? sanitizeTextInput(vehicleType, { maxLength: 50 }) : null;
-    const sanitizedDevicePlatform = devicePlatform ? sanitizeTextInput(devicePlatform, { maxLength: 50 }) : null;
-    const sanitizedServiceInterest = serviceInterest ? sanitizeTextInput(serviceInterest, { maxLength: 100 }) : null;
-
-    // 5. Basic field presence & minimum length validation
-    if (!personName || personName.length < 2 || !contactPhone || !persona) {
-      return NextResponse.json(
-        { error: 'Missing or invalid required fields: name, phone, and persona are required.' },
-        { status: 400 }
-      );
-    }
-
-    // City and Area validation:
-    // Restaurants: compulsory City and Area with specific blocks/localities
-    // Riders and Customers: choose preferred city ONLY (no area, no address)
-    if (persona === 'restaurant') {
-      if (!sanitizedCity || sanitizedCity.length < 2) {
-        return NextResponse.json(
-          { error: 'City is compulsory for restaurant onboarding. Please enter or select your operating city.', field: 'city' },
-          { status: 400 }
-        );
-      }
-
-      if (!sanitizedArea || sanitizedArea.length < 2) {
-        return NextResponse.json(
-          { error: 'Area is compulsory for restaurant onboarding. Please select or enter your specific operating area/locality.', field: 'area' },
-          { status: 400 }
-        );
-      }
-    } else {
-      if (!sanitizedCity || sanitizedCity.length < 2) {
-        return NextResponse.json(
-          { error: 'Please select or enter your city.', field: 'city' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // 6. Security: Prohibit Prompt Injection and SQL drop patterns
-    if (
-      containsPromptInjection(personName) ||
-      containsPromptInjection(sanitizedBusinessName || '') ||
-      containsPromptInjection(sanitizedCuisineType || '') ||
-      containsPromptInjection(sanitizedCity || '') ||
-      containsPromptInjection(sanitizedArea || '') ||
-      containsPromptInjection(sanitizedAddress || '')
-    ) {
-      console.warn(`[Security Alert] Prompt injection / SQL attack pattern detected from IP ${clientIp}`);
-      return NextResponse.json(
-        { error: 'Security validation failed. Prohibited commands or instruction patterns detected in input.' },
-        { status: 400 }
-      );
-    }
-
-    // 7. Security: Block Reserved Identifiers (Prevent "root admin" privilege escalation/impersonation)
-    if (isReservedIdentifier(personName)) {
-      return NextResponse.json(
-        {
-          error: 'The name or handle provided is reserved for platform administration. Please enter your real name.',
-          field: 'name',
-        },
-        { status: 400 }
-      );
-    }
-
-    // 8. Email format check (RFC 5322 compliant standard check) - Only if email is provided
-    if (contactEmail) {
-      if (isReservedEmail(contactEmail)) {
-        return NextResponse.json(
-          {
-            error: 'Administrative email aliases cannot be used for registration.',
-            field: 'email',
-          },
-          { status: 400 }
-        );
-      }
-
-      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-      if (!emailRegex.test(contactEmail)) {
-        return NextResponse.json(
-          { error: 'Please provide a valid email address.', field: 'email' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // 9. Regional phone format verification
-    const phoneValidation = validatePhoneForRegion(contactPhone, countryCode);
-    if (!phoneValidation.isValid) {
-      return NextResponse.json(
-        {
-          error: phoneValidation.error || 'Invalid phone number format for the selected region.',
-          field: 'phone',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!agreed) {
-      return NextResponse.json(
-        { error: 'You must review and accept the agreement terms to proceed.' },
-        { status: 400 }
-      );
-    }
-
-    if (!['rider', 'restaurant', 'customer'].includes(persona)) {
-      return NextResponse.json(
-        { error: 'Invalid persona type. Expected rider, restaurant, or customer.' },
-        { status: 400 }
-      );
-    }
-
-    // Check if Supabase credentials are populated
+    // 3. Check Supabase environment configuration
     const isConfigured =
       Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
       (Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) || Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY));
 
     if (!isConfigured) {
       return NextResponse.json(
-        {
-          error:
-            'Supabase credentials missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.',
-        },
+        { error: 'Supabase credentials missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.' },
         { status: 500 }
       );
     }
 
     const db = getDbClient();
 
-    // 10. Uniqueness Enforcement: Check if Email already exists (only if email was provided)
-    if (contactEmail) {
-      const { data: existingEmail, error: emailCheckError } = await db
+    // 4. Duplicate checks (Email & Phone)
+    if (data.email) {
+      const { data: existingEmail, error: emailErr } = await db
         .from('partner_registrations')
         .select('id, email')
-        .ilike('email', contactEmail)
+        .ilike('email', data.email)
         .limit(1)
         .maybeSingle();
 
-      if (emailCheckError && emailCheckError.code !== 'PGRST116') {
-        console.warn('[Supabase Email Check Warning]:', emailCheckError.message);
+      if (emailErr && emailErr.code !== 'PGRST116') {
+        console.warn('[Supabase Email Check Warning]:', emailErr.message);
       }
 
       if (existingEmail) {
         return NextResponse.json(
-          {
-            error: 'This email address is already registered. Please use another email or sign in.',
-            field: 'email',
-          },
+          { error: 'This email address is already registered. Please use another email or sign in.', field: 'email' },
           { status: 409 }
         );
       }
     }
 
-    // 11. Uniqueness Enforcement: Check if Phone already exists for this country code
-    // Using parameterized .in('phone', [...]) to prevent filter injection
-    const phoneLookupValues = [phoneValidation.formatted, phoneValidation.cleanedDigits].filter(Boolean);
-    const { data: existingPhone, error: phoneCheckError } = await db
+    const { data: existingPhone, error: phoneErr } = await db
       .from('partner_registrations')
       .select('id, phone, country_code')
-      .eq('country_code', countryCode)
-      .in('phone', phoneLookupValues)
+      .eq('country_code', data.countryCode)
+      .eq('phone', data.phone)
       .limit(1)
       .maybeSingle();
 
-    if (phoneCheckError && phoneCheckError.code !== 'PGRST116') {
-      console.warn('[Supabase Phone Check Warning]:', phoneCheckError.message);
+    if (phoneErr && phoneErr.code !== 'PGRST116') {
+      console.warn('[Supabase Phone Check Warning]:', phoneErr.message);
     }
 
     if (existingPhone) {
       return NextResponse.json(
-        {
-          error: `This phone number is already registered for ${countryCode}. Each account requires a unique mobile number.`,
-          field: 'phone',
-        },
+        { error: `This phone number is already registered for ${data.countryCode}. Each account requires a unique mobile number.`, field: 'phone' },
         { status: 409 }
       );
     }
 
-    // 12. Insert new registration record with strict allowlisted payload (Mass Assignment defense)
-    const referenceCode = generateReferenceCode(persona);
-
+    // 5. Database Insert
     const insertPayload = {
-      reference_code: referenceCode,
-      persona_type: persona,
-      full_name: personName,
-      email: contactEmail || null,
-      phone: phoneValidation.formatted,
-      country_code: countryCode,
-      city: sanitizedCity,
-      area: persona === 'restaurant' ? sanitizedArea : null,
-      address: persona === 'restaurant' ? (sanitizedAddress || null) : null,
-      vehicle_type: persona === 'rider' ? sanitizedVehicleType : null,
-      business_name: persona === 'restaurant' ? sanitizedBusinessName : null,
-      cuisine_type: persona === 'restaurant' ? sanitizedCuisineType : null,
-      device_platform: persona === 'customer' ? sanitizedDevicePlatform : null,
-      service_interest: persona === 'customer' ? sanitizedServiceInterest : null,
-      agreed: Boolean(agreed),
+      reference_code: data.referenceCode,
+      persona_type: data.persona,
+      full_name: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      country_code: data.countryCode,
+      city: data.city,
+      area: data.area,
+      address: data.address,
+      vehicle_type: data.vehicleType,
+      business_name: data.businessName,
+      cuisine_type: data.cuisineType,
+      device_platform: data.devicePlatform,
+      service_interest: data.serviceInterest,
+      agreed: data.agreed,
       status: 'pending',
     };
 
-    const { data, error } = await db
+    const { data: inserted, error: insertErr } = await db
       .from('partner_registrations')
       .insert([insertPayload])
       .select('reference_code')
       .single();
 
-    if (error) {
-      console.error('[Supabase Register Error]:', error);
+    if (insertErr) {
+      console.error('[Supabase Register Error]:', insertErr);
 
-      // Handle PostgreSQL 23505 Unique Constraint Violation (race condition fallback)
-      if (error.code === '23505') {
-        const detail = (error.details || error.message || '').toLowerCase();
+      if (insertErr.code === '23505') {
+        const detail = (insertErr.details || insertErr.message || '').toLowerCase();
         const isEmailConflict = detail.includes('email');
         const isPhoneConflict = detail.includes('phone');
 
@@ -406,14 +161,14 @@ export async function POST(request: Request) {
       }
 
       return NextResponse.json(
-        { error: error.message || 'Database error while saving registration.' },
+        { error: insertErr.message || 'Database error while saving registration.' },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      referenceCode: data?.reference_code || referenceCode,
+      referenceCode: inserted?.reference_code || data.referenceCode,
     });
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Unknown server error';
@@ -421,3 +176,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }
+
