@@ -30,6 +30,7 @@ from app.modules.admin.schemas import (
     RestaurantStatusUpdateSchema,
     RiderAdminResponseSchema,
     RiderApprovalUpdateSchema,
+    RiderCommissionUpdateSchema,
     RiderKitResponseSchema,
     RiderKitUpdateSchema,
     RiderPayoutPeriodSchema,
@@ -39,11 +40,12 @@ from app.modules.admin.schemas import (
     SettlementPeriodSchema,
     SettlementResponseSchema,
 )
-from app.platform.auth.dependencies import CurrentUser, require_role
+from app.platform.auth.dependencies import CurrentUser, require_role, require_permission
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 require_admin = require_role(["admin"])
+require_rider_commission_perm = require_permission("riders.commission.edit")
 
 
 @router.get("/dashboard", response_model=DashboardSummaryResponseSchema)
@@ -165,6 +167,19 @@ def set_rider_status(
 ):
     """Step 3 — deactivate/reactivate a rider (e.g. fraud, violations)."""
     return service.set_rider_status(db, rider_id, payload.is_active)
+
+
+@router.patch("/riders/{rider_id}/commission", response_model=RiderAdminResponseSchema)
+def update_rider_commission(
+    rider_id: uuid.UUID,
+    payload: RiderCommissionUpdateSchema,
+    current_user: CurrentUser = Depends(require_rider_commission_perm),
+    db: Session = Depends(get_db),
+):
+    """Step 3 — modify driver delivery commission percentage.
+    Classified as 'critical' risk level; restricted to superadmin.
+    """
+    return service.update_rider_commission(db, rider_id, payload.commission_rate)
 
 
 @router.get("/riders/{rider_id}/kit", response_model=RiderKitResponseSchema)

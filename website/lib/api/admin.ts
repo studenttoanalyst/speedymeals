@@ -27,6 +27,7 @@ import {
 import {
   RiderAdmin,
   RiderApprovalUpdatePayload,
+  RiderCommissionUpdatePayload,
   RiderPayout,
   RiderStatusUpdatePayload,
 } from '@/types/rider';
@@ -202,6 +203,24 @@ export async function updateAdminRiderStatus(
     fallbackData: fallback,
   });
 }
+
+export async function updateAdminRiderCommission(
+  riderId: string,
+  payload: RiderCommissionUpdatePayload
+): Promise<RiderAdmin> {
+  const base = mockRiders.find((r) => r.id === riderId) ?? mockRiders[0];
+  const fallback: RiderAdmin = {
+    ...base,
+    commission_rate: payload.commission_rate,
+  };
+
+  return apiClient<RiderAdmin>(`/admin/riders/${riderId}/commission`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+    fallbackData: fallback,
+  });
+}
+
 
 /**
  * Step 4 — Global Orders Management

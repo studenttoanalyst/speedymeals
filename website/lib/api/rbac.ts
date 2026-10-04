@@ -92,6 +92,7 @@ const FALLBACK_PERMISSIONS: Permission[] = [
   { id: '13', key: 'riders.kit.manage', label: 'Issue Uniform & Bag', domain: 'riders', description: 'Give delivery shirts and food box to rider, and record Rs. 5,000 security deposit.', risk_level: 'medium' },
   { id: '14', key: 'riders.live_fleet.view', label: 'Live Rider Map', domain: 'riders', description: 'See live GPS map of where riders are driving and who is currently available.', risk_level: 'low' },
   { id: '15', key: 'riders.documents.view_private', label: 'View Rider ID & License', domain: 'riders', description: 'View private photos of rider CNIC card and driving license documents.', risk_level: 'high' },
+  { id: '15b', key: 'riders.commission.edit', label: 'Change Courier Commission Rate', domain: 'riders', description: 'Configure delivery fee commission percentage charged to riders (e.g. 0% promotional launch vs 10% operating phase).', risk_level: 'critical' },
 
   { id: '16', key: 'orders.view', label: 'View Customer Orders', domain: 'orders', description: 'See all customer food orders, food items ordered, and delivery addresses.', risk_level: 'low' },
   { id: '17', key: 'orders.cancel', label: 'Cancel Customer Order', domain: 'orders', description: 'Cancel an ongoing order and return payment to the customer.', risk_level: 'high' },

@@ -163,16 +163,40 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
 
 
 def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -> WalletTransaction | None:
-    """Deduct Rs. 10 from rider wallet on order Delivered. Returns the
-    WalletTransaction, or None if balance was insufficient (delivery still
-    completes, deduction skipped to prevent negative balance).
+    """Deduct platform delivery commission from rider wallet on order Delivered.
+    If rider.commission_rate is set:
+      - 0.0%: Promotional launch period (no commission deducted).
+      - > 0.0%: Percentage of the customer delivery fee (e.g. 10%).
+    If order is not found or has 0 delivery fee, falls back to DELIVERY_WALLET_DEDUCTION.
+    Returns the WalletTransaction, or None if balance was insufficient or fee is 0.
 
     Does NOT commit — caller controls the transaction.
     """
     rider = _get_rider_or_404(db, rider_id, for_update=True)
 
+    order = db.query(Order).filter(Order.id == order_id).first() if order_id else None
+    
+    # Calculate fee based on rider commission rate
+    commission_rate_val = getattr(rider, "commission_rate", None)
+    if order is not None:
+        if commission_rate_val is not None:
+            rider_commission_pct = Decimal(str(commission_rate_val))
+            if rider_commission_pct == Decimal("0.00"):
+                # 0% launch promotional mode: no commission deducted
+                fee = Decimal("0.00")
+            else:
+                base_fee = Decimal(str(order.delivery_fee)) if order.delivery_fee else Decimal(str(DELIVERY_WALLET_DEDUCTION))
+                fee = (base_fee * rider_commission_pct / Decimal("100")).quantize(Decimal("0.01"))
+        else:
+            fee = Decimal(str(DELIVERY_WALLET_DEDUCTION))
+    else:
+        # Direct call without order (e.g. unit tests or manual fee deduction)
+        fee = Decimal(str(DELIVERY_WALLET_DEDUCTION))
+
+    if fee <= Decimal("0.00"):
+        return None
+
     current_balance = Decimal(str(rider.wallet_balance))
-    fee = Decimal(str(DELIVERY_WALLET_DEDUCTION))
     if current_balance < fee:
         return None
 
@@ -184,7 +208,7 @@ def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -
         rider_id=rider.id,
         order_id=order_id,
         type="deduction",
-        amount=DELIVERY_WALLET_DEDUCTION,
+        amount=float(fee),
         balance_after=rider.wallet_balance,
     )
     db.add(txn)

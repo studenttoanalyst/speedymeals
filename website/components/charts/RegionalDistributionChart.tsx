@@ -21,11 +21,11 @@ const DEFAULT_ZONES: RegionalZoneData[] = [
   {
     id: 'clifton',
     name: 'Clifton & Defence',
-    sharePct: 31.5,
-    orderCount: 58,
-    avgSlaMins: 18.2,
-    activeCouriers: 7,
-    activeRestaurants: 14,
+    sharePct: 0,
+    orderCount: 0,
+    avgSlaMins: 0,
+    activeCouriers: 0,
+    activeRestaurants: 0,
     color: '#E23A2E',
     bgLight: 'bg-rose-50',
     borderColor: 'border-rose-200',
@@ -33,11 +33,11 @@ const DEFAULT_ZONES: RegionalZoneData[] = [
   {
     id: 'dha',
     name: 'DHA Phases 1–8',
-    sharePct: 25.0,
-    orderCount: 46,
-    avgSlaMins: 21.4,
-    activeCouriers: 5,
-    activeRestaurants: 11,
+    sharePct: 0,
+    orderCount: 0,
+    avgSlaMins: 0,
+    activeCouriers: 0,
+    activeRestaurants: 0,
     color: '#2563EB',
     bgLight: 'bg-blue-50',
     borderColor: 'border-blue-200',
@@ -45,11 +45,11 @@ const DEFAULT_ZONES: RegionalZoneData[] = [
   {
     id: 'gulshan',
     name: 'Gulshan-e-Iqbal',
-    sharePct: 23.9,
-    orderCount: 44,
-    avgSlaMins: 25.6,
-    activeCouriers: 5,
-    activeRestaurants: 12,
+    sharePct: 0,
+    orderCount: 0,
+    avgSlaMins: 0,
+    activeCouriers: 0,
+    activeRestaurants: 0,
     color: '#059669',
     bgLight: 'bg-emerald-50',
     borderColor: 'border-emerald-200',
@@ -57,11 +57,11 @@ const DEFAULT_ZONES: RegionalZoneData[] = [
   {
     id: 'johar',
     name: 'Gulistan-e-Johar',
-    sharePct: 19.6,
-    orderCount: 36,
-    avgSlaMins: 28.1,
-    activeCouriers: 4,
-    activeRestaurants: 8,
+    sharePct: 0,
+    orderCount: 0,
+    avgSlaMins: 0,
+    activeCouriers: 0,
+    activeRestaurants: 0,
     color: '#D97706',
     bgLight: 'bg-amber-50',
     borderColor: 'border-amber-200',
@@ -105,33 +105,39 @@ export function RegionalDistributionChart({
         <div className="space-y-2 mt-2">
           <div className="flex items-center justify-between text-xs font-mono text-slate-500">
             <span>Zone Share (%)</span>
-            <span>100.0% Allocation</span>
+            <span>{totalOrders > 0 ? '100.0% Allocation' : '0.0% Allocation (No orders today)'}</span>
           </div>
 
           <div className="h-4 w-full rounded-full bg-slate-100 overflow-hidden flex p-0.5 gap-0.5 border border-slate-200/80">
-            {zones.map((z) => {
-              const isSelected = selectedZone === z.id;
-              return (
-                <motion.div
-                  key={z.id}
-                  style={{
-                    width: `${z.sharePct}%`,
-                    backgroundColor: z.color,
-                  }}
-                  whileHover={{ scaleY: 1.25 }}
-                  onClick={() => setSelectedZone(selectedZone === z.id ? null : z.id)}
-                  className={`h-full rounded-full transition-all cursor-pointer relative group ${
-                    selectedZone && !isSelected ? 'opacity-35' : 'opacity-100'
-                  }`}
-                  title={`${z.name}: ${z.sharePct}% (${z.orderCount} orders)`}
-                >
-                  {/* Subtle shine effect on top zones */}
-                  {z.sharePct > 20 && (
-                    <div className="w-full h-full bg-white/20 rounded-full" />
-                  )}
-                </motion.div>
-              );
-            })}
+            {totalOrders === 0 ? (
+              <div className="w-full h-full bg-slate-200/50 rounded-full flex items-center justify-center text-[10px] text-slate-400 font-mono">
+                No orders dispatched today
+              </div>
+            ) : (
+              zones.map((z) => {
+                if (z.sharePct <= 0) return null;
+                const isSelected = selectedZone === z.id;
+                return (
+                  <motion.div
+                    key={z.id}
+                    style={{
+                      width: `${z.sharePct}%`,
+                      backgroundColor: z.color,
+                    }}
+                    whileHover={{ scaleY: 1.25 }}
+                    onClick={() => setSelectedZone(selectedZone === z.id ? null : z.id)}
+                    className={`h-full rounded-full transition-all cursor-pointer relative group ${
+                      selectedZone && !isSelected ? 'opacity-35' : 'opacity-100'
+                    }`}
+                    title={`${z.name}: ${z.sharePct}% (${z.orderCount} orders)`}
+                  >
+                    {z.sharePct > 20 && (
+                      <div className="w-full h-full bg-white/20 rounded-full" />
+                    )}
+                  </motion.div>
+                );
+              })
+            )}
           </div>
 
           {/* Quick Legend Tags */}

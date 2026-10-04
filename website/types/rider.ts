@@ -19,6 +19,7 @@ export interface RiderAdmin {
   max_cash_float_limit: number; // e.g. 15,000 PKR threshold
   is_online: boolean;
   is_active: boolean;
+  commission_rate?: number; // Delivery commission percentage (e.g. 0% launch promo vs 10%)
   cnic_front_url?: string | null;
   cnic_back_url?: string | null;
   license_url?: string | null;
@@ -34,6 +35,10 @@ export interface RiderApprovalUpdatePayload {
 
 export interface RiderStatusUpdatePayload {
   is_active: boolean;
+}
+
+export interface RiderCommissionUpdatePayload {
+  commission_rate: number;
 }
 
 export interface RiderCashLimitUpdatePayload {

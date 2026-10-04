@@ -28,16 +28,16 @@ import {
 
 export const mockAdminDashboard: AdminDashboardSummary = {
   date: new Date().toISOString().split('T')[0],
-  total_orders_today: 184,
-  gross_revenue_today: 248500.0,
-  net_revenue_today: 24850.0, // Flat 10% platform commission
-  pending_restaurant_settlements: 432100.0,
-  total_rider_wallet_balance: 78500.0,
-  total_pending_cod_cash: 62400.0,
-  active_deliveries_count: 42,
-  riders_exceeding_float_count: 3, // Over PKR 15,000 threshold
-  pending_restaurant_kyc_count: 2,
-  pending_rider_kyc_count: 4,
+  total_orders_today: 0,
+  gross_revenue_today: 0.0,
+  net_revenue_today: 0.0,
+  pending_restaurant_settlements: 0.0,
+  total_rider_wallet_balance: 0.0,
+  total_pending_cod_cash: 0.0,
+  active_deliveries_count: 0,
+  riders_exceeding_float_count: 0,
+  pending_restaurant_kyc_count: 0,
+  pending_rider_kyc_count: 0,
 };
 
 export const mockRestaurants: RestaurantAdmin[] = [

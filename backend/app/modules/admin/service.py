@@ -253,6 +253,17 @@ def set_rider_status(db: Session, rider_id: uuid.UUID, is_active: bool) -> Rider
     return rider
 
 
+def update_rider_commission(db: Session, rider_id: uuid.UUID, commission_rate: float) -> Rider:
+    """PATCH /admin/riders/{id}/commission — per-rider commission rate override.
+    Supports promotional 0% commission vs standard 10% operating phase.
+    """
+    rider = _get_rider_or_404(db, rider_id)
+    rider.commission_rate = commission_rate
+    db.commit()
+    db.refresh(rider)
+    return rider
+
+
 def update_rider_kit(
     db: Session, rider_id: uuid.UUID, admin_id: uuid.UUID,
     kit_deposit_paid: bool, kit_shirts_issued: int, kit_box_issued: bool,

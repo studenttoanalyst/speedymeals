@@ -5,12 +5,31 @@ import { motion } from 'framer-motion';
 import { Coins, ShieldWarning, CheckCircle, Warning, ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 
-export function CashFloatRiskChart() {
+import { RiderAdmin } from '@/types/rider';
+
+interface CashFloatRiskChartProps {
+  riders?: RiderAdmin[];
+}
+
+export function CashFloatRiskChart({ riders = [] }: CashFloatRiskChartProps) {
+  const safeRiders = riders.filter((r) => (r.pending_cash_owed || 0) < 10000);
+  const warningRiders = riders.filter(
+    (r) => (r.pending_cash_owed || 0) >= 10000 && (r.pending_cash_owed || 0) <= (r.max_cash_float_limit || 15000)
+  );
+  const breachedRiders = riders.filter(
+    (r) => (r.pending_cash_owed || 0) > (r.max_cash_float_limit || 15000)
+  );
+
+  const safeCash = safeRiders.reduce((acc, r) => acc + (r.pending_cash_owed || 0), 0);
+  const warningCash = warningRiders.reduce((acc, r) => acc + (r.pending_cash_owed || 0), 0);
+  const breachedCash = breachedRiders.reduce((acc, r) => acc + (r.pending_cash_owed || 0), 0);
+  const totalCashInTransit = safeCash + warningCash + breachedCash;
+
   const floatTiers = [
     {
       tier: 'Safe Holding (< PKR 10k)',
-      courierCount: 14,
-      totalCash: 62400,
+      courierCount: safeRiders.length,
+      totalCash: safeCash,
       color: 'bg-emerald-500',
       textColor: 'text-emerald-700',
       bgLight: 'bg-emerald-50',
@@ -18,8 +37,8 @@ export function CashFloatRiskChart() {
     },
     {
       tier: 'Warning Window (PKR 10k–15k)',
-      courierCount: 3,
-      totalCash: 37800,
+      courierCount: warningRiders.length,
+      totalCash: warningCash,
       color: 'bg-amber-500',
       textColor: 'text-amber-700',
       bgLight: 'bg-amber-50',
@@ -27,16 +46,15 @@ export function CashFloatRiskChart() {
     },
     {
       tier: 'Limit Breached (> PKR 15k)',
-      courierCount: 1,
-      totalCash: 18450,
+      courierCount: breachedRiders.length,
+      totalCash: breachedCash,
       color: 'bg-rose-600',
       textColor: 'text-rose-700',
       bgLight: 'bg-rose-50',
-      status: 'Action Required',
+      status: breachedRiders.length > 0 ? 'Action Required' : 'Zero Breaches',
     },
   ];
 
-  const totalCashInTransit = 118650;
   const maxSafePlatformCap = 250000;
   const floatConsumptionPct = Math.round((totalCashInTransit / maxSafePlatformCap) * 100);
 
@@ -120,11 +138,22 @@ export function CashFloatRiskChart() {
 
       {/* Critical Alert Banner if Breached */}
       <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5 text-rose-700">
-          <ShieldWarning size={15} weight="bold" />
-          <span className="font-semibold">1 Courier (Kashif Ali) has reached PKR 18,450 float</span>
-        </div>
-        <span className="text-[11px] font-mono text-slate-400">Deposit Locked</span>
+        {breachedRiders.length > 0 ? (
+          <div className="flex items-center gap-1.5 text-rose-700">
+            <ShieldWarning size={15} weight="bold" />
+            <span className="font-semibold">
+              {breachedRiders.length} Courier{breachedRiders.length > 1 ? 's' : ''} ({breachedRiders[0].name}) exceeded PKR 15,000 float cap
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-emerald-700">
+            <CheckCircle size={15} weight="bold" />
+            <span className="font-semibold">All fleet COD cash within safe threshold limits</span>
+          </div>
+        )}
+        <span className="text-[11px] font-mono text-slate-400">
+          {breachedRiders.length > 0 ? 'Deposit Locked' : 'Reconciliation Clear'}
+        </span>
       </div>
     </div>
   );

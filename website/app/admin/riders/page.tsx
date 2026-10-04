@@ -15,6 +15,10 @@ import {
   Check,
   Warning,
   UserCheck,
+  Percent,
+  Sliders,
+  Sparkle,
+  LockKey,
 } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { DataTable, Column } from '@/components/dashboard/DataTable';
@@ -24,13 +28,18 @@ import {
   listAdminRiders,
   updateAdminRiderApproval,
   updateAdminRiderStatus,
+  updateAdminRiderCommission,
 } from '@/lib/api/admin';
 import { RiderAdmin } from '@/types/rider';
+import { getStoredUser } from '@/lib/auth';
 
 export default function AdminRidersPage() {
   const [riders, setRiders] = useState<RiderAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Current logged in admin permissions check
+  const [canEditCommission, setCanEditCommission] = useState(false);
 
   // Review Drawer State
   const [activeRider, setActiveRider] = useState<RiderAdmin | null>(null);
@@ -40,6 +49,23 @@ export default function AdminRidersPage() {
     rider: RiderAdmin;
     action: 'approve' | 'reject' | 'toggle_active';
   } | null>(null);
+
+  // Commission Modal State
+  const [commissionTarget, setCommissionTarget] = useState<RiderAdmin | null>(null);
+  const [commissionValue, setCommissionValue] = useState<number>(0);
+  const [isUpdatingCommission, setIsUpdatingCommission] = useState(false);
+  const [commissionSuccessMsg, setCommissionSuccessMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (user) {
+      const isSuperAdmin =
+        user.role_name?.toLowerCase().includes('super') ||
+        user.permissions?.includes('*') ||
+        user.permissions?.includes('riders.commission.edit');
+      setCanEditCommission(Boolean(isSuperAdmin));
+    }
+  }, []);
 
   const fetchRiders = async () => {
     try {
@@ -74,6 +100,30 @@ export default function AdminRidersPage() {
       await fetchRiders();
     } catch (err) {
       console.error('Failed to execute rider action', err);
+    }
+  };
+
+  const handleOpenCommissionModal = (rider: RiderAdmin) => {
+    setCommissionTarget(rider);
+    setCommissionValue(rider.commission_rate ?? 0);
+  };
+
+  const handleSaveCommission = async () => {
+    if (!commissionTarget) return;
+    try {
+      setIsUpdatingCommission(true);
+      await updateAdminRiderCommission(commissionTarget.id, {
+        commission_rate: Number(commissionValue),
+      });
+      setCommissionSuccessMsg(`Commission rate for ${commissionTarget.name} updated to ${commissionValue}%.`);
+      setTimeout(() => setCommissionSuccessMsg(null), 4000);
+      setCommissionTarget(null);
+      await fetchRiders();
+    } catch (err) {
+      console.error('Failed to update rider commission', err);
+      alert('Failed to update commission rate. Please ensure you have superadmin privileges.');
+    } finally {
+      setIsUpdatingCommission(false);
     }
   };
 
@@ -119,6 +169,45 @@ export default function AdminRidersPage() {
           </div>
         </div>
       ),
+    },
+    {
+      key: 'commission_rate',
+      title: 'Company Commission',
+      align: 'center',
+      sortable: true,
+      render: (r) => {
+        const rate = r.commission_rate ?? 0;
+        const isPromo = rate === 0;
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-tight border ${
+                isPromo
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-amber-50 text-amber-700 border-amber-200'
+              }`}
+            >
+              {isPromo && <Sparkle size={12} weight="fill" className="text-emerald-500" />}
+              {rate}% {isPromo ? 'Launch Promo' : 'Commission'}
+            </span>
+            {canEditCommission ? (
+              <button
+                onClick={() => handleOpenCommissionModal(r)}
+                className="text-[10px] text-indigo-600 hover:text-indigo-800 font-medium underline inline-flex items-center gap-0.5 transition-colors"
+                title="Change driver commission percentage (Critical Permission)"
+              >
+                <Sliders size={10} weight="bold" />
+                <span>Adjust</span>
+              </button>
+            ) : (
+              <span className="text-[10px] text-slate-400 flex items-center gap-0.5" title="Only Superadmin can modify commission">
+                <LockKey size={9} weight="bold" />
+                <span>Superadmin</span>
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'pending_cash_owed',
@@ -200,6 +289,47 @@ export default function AdminRidersPage() {
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+        {/* SUCCESS NOTIFICATION */}
+        {commissionSuccessMsg && (
+          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2 animate-in fade-in duration-200">
+            <CheckCircle size={18} weight="fill" className="text-emerald-600 shrink-0" />
+            <span>{commissionSuccessMsg}</span>
+          </div>
+        )}
+
+        {/* COMMISSION STRATEGY BANNER */}
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-5 text-white shadow-sm border border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <Sparkle size={11} weight="fill" />
+                Launch Strategy Active
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                <LockKey size={11} weight="bold" />
+                Critical Permission: Superadmin Only
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-white tracking-tight">
+              Courier Delivery Commission Policy
+            </h2>
+            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+              Attract delivery partners during initial launch with <strong>0% platform commission</strong> (riders retain 100% of customer delivery fees). After 1 month of operations, switch couriers to the standard <strong>10% platform commission</strong> per completed order.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400">Promotional Tier</div>
+              <div className="text-sm font-extrabold text-emerald-400">0% Commission</div>
+            </div>
+            <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400">Month 2+ Standard</div>
+              <div className="text-sm font-extrabold text-amber-400">10% Platform Cut</div>
+            </div>
+          </div>
+        </div>
+
         <DataTable<RiderAdmin>
           data={riders}
           columns={columns}
@@ -241,6 +371,135 @@ export default function AdminRidersPage() {
         onConfirm={handleExecuteAction}
         onCancel={() => setActionTarget(null)}
       />
+
+      {/* COMMISSION RATE ADJUSTMENT MODAL */}
+      {commissionTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                  <Percent size={18} weight="bold" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Courier Commission Rate</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">{commissionTarget.name} ({commissionTarget.phone_number})</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCommissionTarget(null)}
+                className="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} weight="bold" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {/* CRITICAL RISK LEVEL NOTICE */}
+              <div className="p-3 bg-rose-50 border border-rose-200/80 rounded-xl flex items-start gap-2.5">
+                <ShieldWarning size={20} weight="fill" className="text-rose-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-rose-900">
+                  <span className="font-bold uppercase tracking-wider text-[10px] bg-rose-200/80 text-rose-800 px-1.5 py-0.5 rounded mr-1">
+                    Critical Risk Scale
+                  </span>
+                  Modifying delivery commissions directly impacts courier wallet auto-deductions on delivered orders. Restricted to Superadmin.
+                </div>
+              </div>
+
+              {/* QUICK PRESET TOGGLES */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
+                  Commission Strategy Preset
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setCommissionValue(0)}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      commissionValue === 0
+                        ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-500/20'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-slate-900">0% Promotional</span>
+                      {commissionValue === 0 && <Check size={14} weight="bold" className="text-emerald-600" />}
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      No commission taken. Attract riders during launch phase.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCommissionValue(10)}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      commissionValue === 10
+                        ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-500/20'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-slate-900">10% Standard</span>
+                      {commissionValue === 10 && <Check size={14} weight="bold" className="text-amber-600" />}
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      10% per delivery fee. Operating post-1 month phase.
+                    </p>
+                  </button>
+                </div>
+              </div>
+
+              {/* CUSTOM PERCENTAGE INPUT */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Custom Percentage (%)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={commissionValue}
+                    onChange={(e) => setCommissionValue(Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-hidden focus:border-indigo-500 focus:bg-white pr-8"
+                  />
+                  <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-bold">%</span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Value must be between 0.0% and 100.0%. E.g., at 10%, a Rs. 100 delivery fee deducts Rs. 10 from rider wallet.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setCommissionTarget(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveCommission}
+                disabled={isUpdatingCommission}
+                className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isUpdatingCommission ? (
+                  <span>Updating...</span>
+                ) : (
+                  <>
+                    <Check size={14} weight="bold" />
+                    <span>Apply Commission</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
