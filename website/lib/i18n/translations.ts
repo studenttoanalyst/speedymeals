@@ -4,6 +4,8 @@ export interface TranslationPhrases {
   rider: string;
   restaurant: string;
   waitlist: string;
+  partnerType: string;
+  partnerTypePlaceholder: string;
   riderApplicationForm: string;
   fullLegalName: string;
   primaryModeOfTransport: string;
@@ -43,8 +45,10 @@ export interface TranslationPhrases {
 export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
   en: {
     rider: 'Rider',
-    restaurant: 'Restaurant',
-    waitlist: 'Waitlist',
+    restaurant: 'Partner',
+    waitlist: 'Customer',
+    partnerType: 'Partner Business Type',
+    partnerTypePlaceholder: 'Select partner category...',
     riderApplicationForm: 'Rider Application Form',
     fullLegalName: 'Full Legal Name',
     primaryModeOfTransport: 'Primary Mode of Transport',
@@ -58,11 +62,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     typeToSearchCity: 'Type to search city (e.g. Karachi, Lahore, Riyadh)...',
     typeToSearchArea: 'Type to search area (e.g. Clifton, Gulberg)...',
     deliveryExperience: 'Delivery Experience',
-    restaurantPartnerOnboarding: 'Restaurant Partner Onboarding',
+    restaurantPartnerOnboarding: 'Partner Merchant Onboarding',
     authorizedRepresentative: 'Authorized Representative',
-    restaurantBrandName: 'Restaurant Brand Name',
-    restaurantOperatingCity: 'Restaurant Operating City',
-    primaryCuisineCategory: 'Primary Cuisine Category (in english)',
+    restaurantBrandName: 'Business / Brand Name',
+    restaurantOperatingCity: 'Operating City',
+    primaryCuisineCategory: 'Primary Category / Specialties (in English)',
     customerEarlyAccessInvite: 'Customer Early Access Invite',
     fullName: 'Full Name',
     mobilePlatformPreference: 'Mobile Platform Preference',
@@ -70,7 +74,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     primaryServiceInterest: 'Primary Service Interest',
     responseTime: 'Response Time',
     under24Hours: 'Under 24 hours',
-    waitlistStatus: 'WAITLIST STATUS',
+    waitlistStatus: 'CUSTOMER STATUS',
     priorityBatch: 'PRIORITY BATCH',
     submit: 'Submit',
     registrationGateway: 'REGISTRATION GATEWAY',
@@ -82,8 +86,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
   },
   ur: {
     rider: 'ڈیلیوری رائیڈر',
-    restaurant: 'ریسٹورنٹ',
-    waitlist: 'انتظار کی فہرست',
+    restaurant: 'پارٹنر',
+    waitlist: 'کسٹمر',
+    partnerType: 'کاروباری پارٹنر کی قسم',
+    partnerTypePlaceholder: 'پارٹنر کی قسم منتخب کریں...',
     riderApplicationForm: 'رائڈر درخواست فارم',
     fullLegalName: 'مکمل قانونی نام',
     primaryModeOfTransport: 'بنیادی وسیلہ نقل',
@@ -97,11 +103,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     typeToSearchCity: 'شہر تلاش کریں (مثلاً کراچی، لاہور، ریاض)...',
     typeToSearchArea: 'علاقہ تلاش کریں (مثلاً کلفٹن، گلبرگ)...',
     deliveryExperience: 'ڈیلیوری کا تجربہ',
-    restaurantPartnerOnboarding: 'ریسٹورنٹ پارٹنر آن بورڈنگ',
+    restaurantPartnerOnboarding: 'مرچنٹ پارٹنر آن بورڈنگ',
     authorizedRepresentative: 'مجاز نمائندہ',
-    restaurantBrandName: 'ریسٹورنٹ کا تجارتی نام',
-    restaurantOperatingCity: 'ریسٹورنٹ کے آپریشن کا شہر',
-    primaryCuisineCategory: 'نیادی کھانوں قسموں کے نام (انگریزی میں)',
+    restaurantBrandName: 'کاروبار / برانڈ کا نام',
+    restaurantOperatingCity: 'آپریشن کا شہر',
+    primaryCuisineCategory: 'بنیادی کیٹیگری / خصوصیات (انگریزی میں)',
     customerEarlyAccessInvite: 'صارفین کے لیے ابتدائی رسائی کی دعوت',
     fullName: 'مکمل نام',
     mobilePlatformPreference: 'ترجیحی موبائل پلیٹ فارم',
@@ -109,7 +115,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     primaryServiceInterest: 'بنیادی دلچسپی کی سروس',
     responseTime: 'جواب کی مدت',
     under24Hours: '۲۴ گھنٹے سے کم',
-    waitlistStatus: 'انتظار کی فہرست کا حال',
+    waitlistStatus: 'کسٹمر کا حال',
     priorityBatch: 'ترجیحی بیچ',
     submit: 'جمع کرائیں',
     registrationGateway: 'رجسٹریشن گیٹ وے',
@@ -121,8 +127,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
   },
   ar: {
     rider: 'مندوب توصيل',
-    restaurant: 'مطعم',
-    waitlist: 'قائمة الانتظار',
+    restaurant: 'شريك',
+    waitlist: 'عميل',
+    partnerType: 'نوع نشاط الشريك',
+    partnerTypePlaceholder: 'اختر نوع الشريك...',
     riderApplicationForm: 'نموذج الطلب لمندوب توصيل',
     fullLegalName: 'اسم القانوني كامل',
     primaryModeOfTransport: 'وسيلة النقل الاساسية',
@@ -136,11 +144,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     typeToSearchCity: 'ابحث عن المدينة (مثل الرياض، جدة، كراتشي)...',
     typeToSearchArea: 'ابحث عن الحي أو المنطقة...',
     deliveryExperience: 'الخبرة في مجال التوصيل',
-    restaurantPartnerOnboarding: 'تسجيل شريك المطعم',
+    restaurantPartnerOnboarding: 'تسجيل الشريك التجاري',
     authorizedRepresentative: 'الممثل المفوّض',
-    restaurantBrandName: 'الاسم التجاري للمطعم',
-    restaurantOperatingCity: 'مدينة تشغيل المطعم',
-    primaryCuisineCategory: 'الفئة الرئيسية للطعام باللغة الإنجليزية',
+    restaurantBrandName: 'اسم المتجر / العلامة التجارية',
+    restaurantOperatingCity: 'مدينة تشغيل النشاط',
+    primaryCuisineCategory: 'التصنيف الرئيسي / التخصصات بالإنجليزية',
     customerEarlyAccessInvite: 'دعوة العملاء للوصول المبكر',
     fullName: 'الاسم الكامل',
     mobilePlatformPreference: 'المنصة المفضلة للهاتف',
@@ -148,7 +156,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
     primaryServiceInterest: 'الخدمة الرئيسية محل الاهتمام',
     responseTime: 'مدة الاستجابة',
     under24Hours: 'أقل من ٢٤ ساعة',
-    waitlistStatus: 'حالة قائمة الانتظار',
+    waitlistStatus: 'حالة العميل',
     priorityBatch: 'الدفعة ذات الأولوية',
     submit: 'إرسال',
     registrationGateway: 'بوابة التسجيل',
@@ -163,6 +171,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
 /**
  * Returns dynamic typography classes that scale font-size up by ~4px for Urdu/Arabic scripts
  * while preserving standard font sizes for English.
+ * Updated: Label font size increased by +2px (from text-xs to text-sm in EN, 12px -> 14px)
  */
 export const getTypographySize = (
   lang: SupportedLanguage,
@@ -171,7 +180,7 @@ export const getTypographySize = (
   if (lang === 'en') {
     switch (type) {
       case 'label':
-        return 'text-xs font-mono tracking-wider'; // 12px
+        return 'text-sm font-mono tracking-wider font-semibold'; // 14px (+2px from 12px)
       case 'heading':
         return 'text-2xl sm:text-3xl font-display tracking-tight'; // 24-30px
       case 'input':
@@ -186,7 +195,7 @@ export const getTypographySize = (
   // Urdu & Arabic: +4px average font size boost for optical clarity and script legibility
   switch (type) {
     case 'label':
-      return 'text-base font-sans font-medium tracking-normal leading-relaxed'; // 16px (+4px from 12px)
+      return 'text-lg font-sans font-semibold tracking-normal leading-relaxed'; // 18px (+2px boost)
     case 'heading':
       return 'text-3xl sm:text-4xl font-sans font-bold tracking-normal leading-snug'; // 30-36px (+6px)
     case 'input':

@@ -114,6 +114,10 @@ export async function POST(request: Request) {
     }
 
     // 5. Database Insert
+    const formattedBusinessName = data.businessName && data.partnerType
+      ? `[${data.partnerType}] ${data.businessName}`
+      : data.businessName;
+
     const insertPayload = {
       reference_code: data.referenceCode,
       persona_type: data.persona,
@@ -125,7 +129,7 @@ export async function POST(request: Request) {
       area: data.area,
       address: data.address,
       vehicle_type: data.vehicleType,
-      business_name: data.businessName,
+      business_name: formattedBusinessName,
       cuisine_type: data.cuisineType,
       device_platform: data.devicePlatform,
       service_interest: data.serviceInterest,

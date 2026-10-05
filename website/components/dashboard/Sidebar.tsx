@@ -65,7 +65,7 @@ export function Sidebar({ role }: SidebarProps) {
       title: 'Platform Management',
       items: [
         { label: 'Restaurants', href: '/admin/restaurants', icon: Storefront },
-        { label: 'Riders & Couriers', href: '/admin/riders', icon: Bicycle },
+        { label: 'Riders', href: '/admin/riders', icon: Bicycle },
         { label: 'Customers', href: '/admin/customers', icon: Users },
       ],
     },

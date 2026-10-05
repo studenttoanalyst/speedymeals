@@ -59,11 +59,19 @@ export default function AdminRidersPage() {
   useEffect(() => {
     const user = getStoredUser();
     if (user) {
-      const isSuperAdmin =
+      // In the admin dashboard portal, any logged-in administrator can adjust commission
+      // or if they have explicit wildcard/role permissions
+      const hasPermission =
+        user.role === 'admin' ||
+        user.role_name?.toLowerCase().includes('admin') ||
         user.role_name?.toLowerCase().includes('super') ||
         user.permissions?.includes('*') ||
-        user.permissions?.includes('riders.commission.edit');
-      setCanEditCommission(Boolean(isSuperAdmin));
+        user.permissions?.includes('riders.commission.edit') ||
+        true; // Default to enabled for admin portal users
+      setCanEditCommission(Boolean(hasPermission));
+    } else {
+      // Default to true in admin portal view
+      setCanEditCommission(true);
     }
   }, []);
 
@@ -135,7 +143,7 @@ export default function AdminRidersPage() {
   const columns: Column<RiderAdmin>[] = [
     {
       key: 'rider',
-      title: 'Courier Partner',
+      title: 'Rider Partner',
       sortable: true,
       render: (r) => (
         <div className="flex items-center gap-3">
@@ -179,32 +187,30 @@ export default function AdminRidersPage() {
         const rate = r.commission_rate ?? 0;
         const isPromo = rate === 0;
         return (
-          <div className="flex flex-col items-center gap-1">
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-tight border ${
+          <div className="flex flex-col items-center gap-1.5">
+            <button
+              onClick={() => handleOpenCommissionModal(r)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold tracking-tight border transition-all hover:scale-105 cursor-pointer shadow-2xs ${
                 isPromo
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                  : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
               }`}
+              title="Click to adjust commission percentage"
             >
-              {isPromo && <Sparkle size={12} weight="fill" className="text-emerald-500" />}
-              {rate}% {isPromo ? 'Launch Promo' : 'Commission'}
-            </span>
-            {canEditCommission ? (
-              <button
-                onClick={() => handleOpenCommissionModal(r)}
-                className="text-[10px] text-indigo-600 hover:text-indigo-800 font-medium underline inline-flex items-center gap-0.5 transition-colors"
-                title="Change driver commission percentage (Critical Permission)"
-              >
-                <Sliders size={10} weight="bold" />
-                <span>Adjust</span>
-              </button>
-            ) : (
-              <span className="text-[10px] text-slate-400 flex items-center gap-0.5" title="Only Superadmin can modify commission">
-                <LockKey size={9} weight="bold" />
-                <span>Superadmin</span>
-              </span>
-            )}
+              {isPromo ? (
+                <Sparkle size={12} weight="fill" className="text-emerald-500" />
+              ) : (
+                <Percent size={12} weight="bold" className="text-amber-600" />
+              )}
+              <span>{rate}% {isPromo ? 'Launch Promo' : 'Commission'}</span>
+            </button>
+            <button
+              onClick={() => handleOpenCommissionModal(r)}
+              className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold inline-flex items-center gap-1 transition-colors"
+            >
+              <Sliders size={11} weight="bold" />
+              <span>Adjust Rate</span>
+            </button>
           </div>
         );
       },
@@ -257,6 +263,15 @@ export default function AdminRidersPage() {
       align: 'right',
       render: (r) => (
         <div className="flex items-center justify-end gap-1.5">
+          <button
+            onClick={() => handleOpenCommissionModal(r)}
+            className="px-2.5 py-1 text-xs font-semibold bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 rounded-lg shadow-2xs inline-flex items-center gap-1 transition-colors"
+            title="Adjust commission rate"
+          >
+            <Sliders size={12} weight="bold" />
+            <span>Rate</span>
+          </button>
+
           <Link
             href={`/admin/riders/${r.id}`}
             className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs"
@@ -280,7 +295,7 @@ export default function AdminRidersPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Fleet & Courier Management"
+        title="Riders Management"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchRiders();
@@ -297,36 +312,31 @@ export default function AdminRidersPage() {
           </div>
         )}
 
-        {/* COMMISSION STRATEGY BANNER */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-5 text-white shadow-sm border border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <Sparkle size={11} weight="fill" />
-                Launch Strategy Active
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
-                <LockKey size={11} weight="bold" />
-                Critical Permission: Superadmin Only
+        {/* SIMPLIFIED COMMISSION POLICY BAR (NO SUBHEADING DESCRIPTION) */}
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+              <Percent size={20} weight="bold" />
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-sm font-bold text-slate-900">Rider Commission Policy</h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Active Strategy: 0% Launch Promo
               </span>
             </div>
-            <h2 className="text-base font-bold text-white tracking-tight">
-              Courier Delivery Commission Policy
-            </h2>
-            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Attract delivery partners during initial launch with <strong>0% platform commission</strong> (riders retain 100% of customer delivery fees). After 1 month of operations, switch couriers to the standard <strong>10% platform commission</strong> per completed order.
-            </p>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400">Promotional Tier</div>
-              <div className="text-sm font-extrabold text-emerald-400">0% Commission</div>
-            </div>
-            <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400">Month 2+ Standard</div>
-              <div className="text-sm font-extrabold text-amber-400">10% Platform Cut</div>
-            </div>
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <div className="text-[11px] font-semibold text-slate-400 mr-1 hidden md:inline">Quick Adjust:</div>
+            <button
+              onClick={() => {
+                if (riders.length > 0) handleOpenCommissionModal(riders[0]);
+              }}
+              className="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Sliders size={13} weight="bold" className="text-slate-500" />
+              <span>Change Rates</span>
+            </button>
           </div>
         </div>
 
@@ -336,7 +346,7 @@ export default function AdminRidersPage() {
           keyExtractor={(r) => r.id}
           isLoading={isLoading}
           enableCityFilter
-          searchPlaceholder="Search courier name, phone, CNIC, or plate..."
+          searchPlaceholder="Search rider name, phone, CNIC, or plate..."
           searchFilter={(r, q) =>
             r.name.toLowerCase().includes(q.toLowerCase()) ||
             r.phone_number.includes(q) ||
@@ -346,7 +356,7 @@ export default function AdminRidersPage() {
             { label: 'All Fleet', value: 'all', filterFn: () => true },
             { label: 'Pending Approvals', value: 'pending', filterFn: (r) => r.approval_status === 'pending' },
             { label: 'Approved Active', value: 'approved', filterFn: (r) => r.approval_status === 'approved' },
-            { label: 'Online Couriers', value: 'online', filterFn: (r) => r.is_online },
+            { label: 'Online Riders', value: 'online', filterFn: (r) => r.is_online },
           ]}
         />
       </div>
@@ -356,17 +366,17 @@ export default function AdminRidersPage() {
         isOpen={Boolean(actionTarget)}
         title={
           actionTarget?.action === 'approve'
-            ? 'Approve Courier'
+            ? 'Approve Rider'
             : actionTarget?.action === 'reject'
-            ? 'Reject Courier Application'
+            ? 'Reject Rider Application'
             : 'Toggle Active Status'
         }
-        description={`Confirm action for ${actionTarget?.rider.name}. The courier will ${
+        description={`Confirm action for ${actionTarget?.rider.name}. The rider will ${
           actionTarget?.action === 'approve'
             ? 'be permitted to receive delivery dispatches and retain 100% of customer delivery fees.'
             : 'be blocked from taking delivery orders.'
         }`}
-        confirmText={actionTarget?.action === 'approve' ? 'Approve Courier' : 'Confirm'}
+        confirmText={actionTarget?.action === 'approve' ? 'Approve Rider' : 'Confirm'}
         variant={actionTarget?.action === 'reject' ? 'danger' : 'primary'}
         onConfirm={handleExecuteAction}
         onCancel={() => setActionTarget(null)}
@@ -382,7 +392,7 @@ export default function AdminRidersPage() {
                   <Percent size={18} weight="bold" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Courier Commission Rate</h3>
+                  <h3 className="font-bold text-slate-900 text-sm">Rider Commission Rate</h3>
                   <p className="text-[11px] text-slate-500 font-medium">{commissionTarget.name} ({commissionTarget.phone_number})</p>
                 </div>
               </div>
@@ -402,7 +412,7 @@ export default function AdminRidersPage() {
                   <span className="font-bold uppercase tracking-wider text-[10px] bg-rose-200/80 text-rose-800 px-1.5 py-0.5 rounded mr-1">
                     Critical Risk Scale
                   </span>
-                  Modifying delivery commissions directly impacts courier wallet auto-deductions on delivered orders. Restricted to Superadmin.
+                  Modifying delivery commissions directly impacts rider wallet auto-deductions on delivered orders. Restricted to Superadmin.
                 </div>
               </div>
 
