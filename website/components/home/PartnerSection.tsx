@@ -47,7 +47,9 @@ interface PersonaFormData {
   customCity?: string;
   area: string;
   address?: string;
+  partnerType?: string;
   vehicleType: string;
+  deliveryExperience?: string;
   businessName: string;
   cuisineType: string;
   branches: string;
@@ -72,7 +74,9 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     customCity: '',
     area: '',
     address: '',
+    partnerType: '',
     vehicleType: 'Motorcycle',
+    deliveryExperience: 'Over 1 Year (Active courier)',
     businessName: '',
     cuisineType: '',
     branches: '1-3',
@@ -90,6 +94,7 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     customCity: '',
     area: '',
     address: '',
+    partnerType: 'Restaurant',
     vehicleType: '',
     businessName: '',
     cuisineType: '',
@@ -572,7 +577,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             </div>
           </div>
 
-          {/* Column 2: RESTAURANT (Cobalt Blue accent) */}
+          {/* Column 2: PARTNER (Cobalt Blue accent) */}
           <div
             id="persona-col-restaurant"
             className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-blue transition-all duration-150 ${activePersona === 'restaurant'
@@ -590,11 +595,11 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 </span>
               </div>
               <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
-                Restaurant
+                Partner
               </h3>
               <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
-                Flat 10% commission. No onboarding penalty, no mandatory sponsored placements to
-                stay visible, and complete menu control.
+                For Restaurants, Home Kitchens, Marts, Groceries & Pharmacies. Flat 10% commission,
+                zero onboarding penalty, and instant direct orders.
               </p>
             </div>
 
@@ -612,7 +617,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   : 'bg-transparent text-blue border-blue hover:bg-blue hover:text-white'
                   }`}
               >
-                <span>{activePersona === 'restaurant' ? 'ACTIVE FORM' : 'PARTNER RESTAURANT'}</span>
+                <span>{activePersona === 'restaurant' ? 'ACTIVE FORM' : 'BECOME A PARTNER'}</span>
                 <ArrowRight size={13} weight="bold" />
               </button>
 
@@ -669,7 +674,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   : 'bg-transparent text-ink border-line hover:border-tan hover:text-[#A8874E]'
                   }`}
               >
-                <span>{activePersona === 'customer' ? 'ACTIVE FORM' : 'JOIN WAITLIST'}</span>
+                <span>{activePersona === 'customer' ? 'ACTIVE FORM' : 'JOIN AS CUSTOMER'}</span>
                 <ArrowRight size={13} weight="bold" />
               </button>
             </div>
@@ -878,12 +883,20 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       }}
                     >
                       {activePersona === 'customer'
-                        ? 'Consumer Waitlist'
+                        ? 'Customer'
                         : activePersona === 'restaurant'
-                          ? 'Restaurant Merchant'
+                          ? `Partner Merchant (${submittedData.partnerType || 'Restaurant'})`
                           : 'Delivery Courier Rider'}
                     </span>
                   </div>
+                  {activePersona === 'restaurant' && (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
+                      <span className="text-[#8C9099] shrink-0">PARTNER TYPE:</span>
+                      <span className="text-white font-bold uppercase text-left sm:text-right">
+                        {submittedData.partnerType || 'Restaurant'}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
                     <span className="text-[#8C9099] shrink-0">CONTACT EMAIL:</span>
                     <span className="text-white break-all text-left sm:text-right">{submittedData.email || 'Not provided'}</span>
@@ -922,7 +935,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   )}
                   {activePersona === 'restaurant' && (
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                      <span className="text-[#8C9099] shrink-0">BRAND NAME:</span>
+                      <span className="text-[#8C9099] shrink-0">BUSINESS / BRAND NAME:</span>
                       <span className="text-white break-words text-left sm:text-right">{submittedData.businessName}</span>
                     </div>
                   )}
@@ -982,7 +995,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Full Name */}
+                  {/* Field 1 (Col 1): Full Legal Name / Authorized Rep */}
                   <div className="space-y-2">
                     <label
                       htmlFor="form-full-name"
@@ -993,7 +1006,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         : activePersona === 'customer'
                           ? t.fullName
                           : t.fullLegalName}{' '}
-                      *
+                      <span className="text-[#E23A2E]">*</span>
                     </label>
                     <input
                       id="form-full-name"
@@ -1012,24 +1025,27 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     />
                   </div>
 
-                  {/* Persona-specific secondary field */}
+                  {/* Field 2 (Col 2): Partner Type (for Partner) or Platform/Transport */}
                   {activePersona === 'restaurant' ? (
                     <div className="space-y-2">
                       <label
-                        htmlFor="form-business-name"
+                        htmlFor="form-partner-type"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.restaurantBrandName} *
+                        {t.partnerType} <span className="text-[#E23A2E]">*</span>
                       </label>
-                      <input
-                        id="form-business-name"
-                        type="text"
-                        required
-                        value={formData.businessName}
-                        onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                        placeholder="e.g. Damascus Charcoal Grill"
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
-                      />
+                      <select
+                        id="form-partner-type"
+                        value={formData.partnerType || 'Restaurant'}
+                        onChange={(e) => setFormData({ ...formData, partnerType: e.target.value })}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none ${personaTheme.focusBorder} transition-colors cursor-pointer`}
+                      >
+                        <option value="Restaurant">Restaurant</option>
+                        <option value="Home Kitchen">Home Kitchen</option>
+                        <option value="Mart">Mart</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Pharmacy">Pharmacy</option>
+                      </select>
                     </div>
                   ) : activePersona === 'customer' ? (
                     <div className="space-y-2">
@@ -1037,7 +1053,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         htmlFor="form-platform"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.mobilePlatformPreference} *
+                        {t.mobilePlatformPreference} <span className="text-[#E23A2E]">*</span>
                       </label>
                       <select
                         id="form-platform"
@@ -1056,7 +1072,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         htmlFor="form-vehicle"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.primaryModeOfTransport} *
+                        {t.primaryModeOfTransport} <span className="text-[#E23A2E]">*</span>
                       </label>
                       <select
                         id="form-vehicle"
@@ -1070,6 +1086,70 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         <option value="Sedan Car">Car / Sedan</option>
                       </select>
                     </div>
+                  )}
+
+                  {/* Partner Specific: Row 2 (Business Name & Primary Category) */}
+                  {activePersona === 'restaurant' && (
+                    <>
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="form-business-name"
+                          className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                        >
+                          {t.restaurantBrandName} <span className="text-[#E23A2E]">*</span>
+                        </label>
+                        <input
+                          id="form-business-name"
+                          type="text"
+                          required
+                          value={formData.businessName}
+                          onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                          placeholder={
+                            formData.partnerType === 'Home Kitchen'
+                              ? 'e.g. Ammi’s Special Biryani & Kitchen'
+                              : formData.partnerType === 'Mart'
+                              ? 'e.g. QuickStop 24/7 Mart'
+                              : formData.partnerType === 'Groceries'
+                              ? 'e.g. Fresh Valley Organic Groceries'
+                              : formData.partnerType === 'Pharmacy'
+                              ? 'e.g. HealthCare Plus Pharmacy'
+                              : 'e.g. Damascus Charcoal Grill'
+                          }
+                          className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="form-cuisine"
+                          className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                        >
+                          {formData.partnerType === 'Mart' || formData.partnerType === 'Groceries'
+                            ? 'Product Categories / Items'
+                            : formData.partnerType === 'Pharmacy'
+                            ? 'Medicines & Health Scope'
+                            : t.primaryCuisineCategory}
+                        </label>
+                        <input
+                          id="form-cuisine"
+                          type="text"
+                          value={formData.cuisineType || ''}
+                          onChange={(e) => setFormData({ ...formData, cuisineType: e.target.value })}
+                          placeholder={
+                            formData.partnerType === 'Home Kitchen'
+                              ? 'e.g. Daily Lunch Boxes, Homemade Desserts, Frozen Meals'
+                              : formData.partnerType === 'Mart'
+                              ? 'e.g. Snacks, Beverages, Household Goods'
+                              : formData.partnerType === 'Groceries'
+                              ? 'e.g. Fresh Dairy, Fruits & Vegetables, Bakery'
+                              : formData.partnerType === 'Pharmacy'
+                              ? 'e.g. Prescription Drugs, Supplements, Personal Care'
+                              : 'e.g. Biryani & Kebabs, Cafe, Pizza'
+                          }
+                          className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
+                        />
+                      </div>
+                    </>
                   )}
 
                   {/* Anti-Bot Honeypot Trap (Hidden from users) */}
@@ -1125,7 +1205,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         htmlFor="form-phone"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.phoneNumber} *
+                        {t.phoneNumber} <span className="text-[#E23A2E]">*</span>
                       </label>
                       <span className="font-mono text-[11px] text-[#8C9099]">
                         {currentRegion.flag} {currentRegion.country}
@@ -1303,151 +1383,11 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     )}
                   </div>
 
-                  {/* Restaurant-Specific Location Fields: Area & Street Address (Compulsory Area, Optional Address) */}
-                  {activePersona === 'restaurant' && (
-                    <>
-                      {/* Area Selection with Regex-based Autocomplete (Compulsory, Dependent on City) */}
-                      <div className="space-y-2 relative" ref={areaWrapperRef}>
-                        <label
-                          htmlFor="form-area-input"
-                          className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                        >
-                          {t.areaNeighborhood} <span className="text-[#E23A2E]">*</span>
-                        </label>
-                        <div className="relative">
-                          <input
-                            id="form-area-input"
-                            type="text"
-                            autoComplete="off"
-                            disabled={!formData.city?.trim()}
-                            value={formData.area}
-                            onKeyDown={handleAreaKeyDown}
-                            onFocus={() => {
-                              if (formData.city?.trim() && formData.area?.trim().length >= 1) {
-                                setAreaDropdownOpen(true);
-                              }
-                            }}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setFormData(prev => ({ ...prev, area: val }));
-                              if (val.trim().length >= 1) {
-                                setAreaDropdownOpen(true);
-                              } else {
-                                setAreaDropdownOpen(false);
-                              }
-                              if (fieldErrors.area) {
-                                setFieldErrors(prev => ({ ...prev, area: undefined }));
-                              }
-                            }}
-                            placeholder={!formData.city?.trim() ? t.selectCityFirst : t.typeToSearchArea}
-                            className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors ${
-                              !formData.city?.trim()
-                                ? 'opacity-60 cursor-not-allowed border-[#2C313C]'
-                                : fieldErrors.area
-                                  ? 'border-[#E23A2E]'
-                                  : `border-[#373C46] ${personaTheme.focusBorder}`
-                            }`}
-                          />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8C9099] pointer-events-none flex items-center">
-                            <MapPin size={18} />
-                          </div>
-                        </div>
-                        {fieldErrors.area && (
-                          <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
-                            {fieldErrors.area}
-                          </div>
-                        )}
-
-                        {/* Area Autocomplete Dropdown - only displays when >= 1 character entered */}
-                        {areaDropdownOpen && formData.city?.trim() && formData.area?.trim().length >= 1 && (
-                          <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-[#1A1D23] border border-[#373C46] shadow-2xl divide-y divide-[#2B303B]">
-                            {matchingAreas.length > 0 ? (
-                              matchingAreas.map((areaName, index) => {
-                                const isHighlighted = index === highlightedAreaIndex;
-                                return (
-                                  <button
-                                    key={`${areaName}-${index}`}
-                                    type="button"
-                                    onMouseEnter={() => setHighlightedAreaIndex(index)}
-                                    onClick={() => handleAreaSelect(areaName)}
-                                    className={`w-full text-left px-4 py-2.5 transition-colors flex items-center justify-between cursor-pointer border-l-4 ${
-                                      isHighlighted
-                                        ? `bg-[#2E3542] text-white ${personaTheme.borderL}`
-                                        : 'bg-transparent text-[#D1D5DB] border-transparent hover:bg-[#252A33]'
-                                    }`}
-                                  >
-                                    <span className={`text-sm ${isHighlighted ? 'text-white font-semibold' : 'text-[#E2E8F0]'}`}>
-                                      {areaName}
-                                    </span>
-                                    <div className="flex items-center space-x-2">
-                                      <span className="text-[10px] font-mono text-[#8C9099] uppercase">{formData.city}</span>
-                                      {isHighlighted && (
-                                        <span className={`text-[10px] font-mono px-1.5 py-0.5 uppercase tracking-wider font-bold border ${personaTheme.badge}`}>
-                                          PRESS ↵
-                                        </span>
-                                      )}
-                                    </div>
-                                  </button>
-                                );
-                              })
-                            ) : (
-                              <div className="p-3 text-xs font-mono text-[#8C9099]">
-                                No predefined area matches &ldquo;{formData.area}&rdquo; in {formData.city}
-                              </div>
-                            )}
-                            {formData.area.trim() && !matchingAreas.some(a => a.toLowerCase() === formData.area.trim().toLowerCase()) && (
-                              <button
-                                type="button"
-                                onClick={() => handleAreaSelect(formData.area.trim())}
-                                className={`w-full text-left px-4 py-3 bg-[#222731] hover:bg-[#2B313E] transition-colors flex items-center justify-between cursor-pointer text-xs font-mono border-l-4 border-transparent ${personaTheme.customText}`}
-                              >
-                                <span>Use custom area: &ldquo;{formData.area.trim()}&rdquo;</span>
-                                <ArrowRight size={13} weight="bold" />
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Street Address / Building (Optional) */}
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="form-address-input"
-                          className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                        >
-                          {t.streetAddressOptional}
-                        </label>
-                        <input
-                          id="form-address-input"
-                          type="text"
-                          value={formData.address || ''}
-                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                          placeholder="e.g. Building 4B, Street 12, Floor 2"
-                          className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {/* Additional Persona-Specific Question */}
-                  {activePersona === 'restaurant' ? (
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="form-cuisine"
-                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                      >
-                        {t.primaryCuisineCategory}
-                      </label>
-                      <input
-                        id="form-cuisine"
-                        type="text"
-                        value={formData.cuisineType || ''}
-                        onChange={(e) => setFormData({ ...formData, cuisineType: e.target.value })}
-                        placeholder="e.g. Biryani & Kebabs, Cafe, Pizza"
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
-                      />
-                    </div>
-                  ) : activePersona === 'customer' ? (
+                  {/* Second column next to City / Dispatch Zone:
+                      - Customer: Primary Service Interest
+                      - Rider: Delivery Experience
+                      - Restaurant: Area / Locality */}
+                  {activePersona === 'customer' ? (
                     <div className="space-y-2">
                       <label
                         htmlFor="form-interest"
@@ -1467,7 +1407,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         <option value="All Speedy Services">All Speedy Services</option>
                       </select>
                     </div>
-                  ) : (
+                  ) : activePersona === 'rider' ? (
                     <div className="space-y-2">
                       <label
                         htmlFor="form-experience"
@@ -1477,12 +1417,137 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       </label>
                       <select
                         id="form-experience"
+                        value={formData.deliveryExperience || 'Over 1 Year (Active courier)'}
+                        onChange={(e) => setFormData({ ...formData, deliveryExperience: e.target.value })}
                         className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none ${personaTheme.focusBorder} transition-colors cursor-pointer`}
                       >
-                        <option>Over 1 Year (Active courier)</option>
-                        <option>6 - 12 Months</option>
-                        <option>New Courier (Needs onboarding)</option>
+                        <option value="Over 1 Year (Active courier)">Over 1 Year (Active courier)</option>
+                        <option value="6 - 12 Months">6 - 12 Months</option>
+                        <option value="New Courier (Needs onboarding)">New Courier (Needs onboarding)</option>
                       </select>
+                    </div>
+                  ) : (
+                    /* Restaurant: Area Selection (Compulsory, Dependent on City) */
+                    <div className="space-y-2 relative" ref={areaWrapperRef}>
+                      <label
+                        htmlFor="form-area-input"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.areaNeighborhood} <span className="text-[#E23A2E]">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="form-area-input"
+                          type="text"
+                          autoComplete="off"
+                          disabled={!formData.city?.trim()}
+                          value={formData.area}
+                          onKeyDown={handleAreaKeyDown}
+                          onFocus={() => {
+                            if (formData.city?.trim() && formData.area?.trim().length >= 1) {
+                              setAreaDropdownOpen(true);
+                            }
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormData(prev => ({ ...prev, area: val }));
+                            if (val.trim().length >= 1) {
+                              setAreaDropdownOpen(true);
+                            } else {
+                              setAreaDropdownOpen(false);
+                            }
+                            if (fieldErrors.area) {
+                              setFieldErrors(prev => ({ ...prev, area: undefined }));
+                            }
+                          }}
+                          placeholder={!formData.city?.trim() ? t.selectCityFirst : t.typeToSearchArea}
+                          className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors ${
+                            !formData.city?.trim()
+                              ? 'opacity-60 cursor-not-allowed border-[#2C313C]'
+                              : fieldErrors.area
+                                ? 'border-[#E23A2E]'
+                                : `border-[#373C46] ${personaTheme.focusBorder}`
+                          }`}
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8C9099] pointer-events-none flex items-center">
+                          <MapPin size={18} />
+                        </div>
+                      </div>
+                      {fieldErrors.area && (
+                        <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
+                          {fieldErrors.area}
+                        </div>
+                      )}
+
+                      {/* Area Autocomplete Dropdown - only displays when >= 1 character entered */}
+                      {areaDropdownOpen && formData.city?.trim() && formData.area?.trim().length >= 1 && (
+                        <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-[#1A1D23] border border-[#373C46] shadow-2xl divide-y divide-[#2B303B]">
+                          {matchingAreas.length > 0 ? (
+                            matchingAreas.map((areaName, index) => {
+                              const isHighlighted = index === highlightedAreaIndex;
+                              return (
+                                <button
+                                  key={`${areaName}-${index}`}
+                                  type="button"
+                                  onMouseEnter={() => setHighlightedAreaIndex(index)}
+                                  onClick={() => handleAreaSelect(areaName)}
+                                  className={`w-full text-left px-4 py-2.5 transition-colors flex items-center justify-between cursor-pointer border-l-4 ${
+                                    isHighlighted
+                                      ? `bg-[#2E3542] text-white ${personaTheme.borderL}`
+                                      : 'bg-transparent text-[#D1D5DB] border-transparent hover:bg-[#252A33]'
+                                  }`}
+                                >
+                                  <span className={`text-sm ${isHighlighted ? 'text-white font-semibold' : 'text-[#E2E8F0]'}`}>
+                                    {areaName}
+                                  </span>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-[10px] font-mono text-[#8C9099] uppercase">{formData.city}</span>
+                                    {isHighlighted && (
+                                      <span className={`text-[10px] font-mono px-1.5 py-0.5 uppercase tracking-wider font-bold border ${personaTheme.badge}`}>
+                                        PRESS ↵
+                                      </span>
+                                    )}
+                                  </div>
+                                </button>
+                              );
+                            })
+                          ) : (
+                            <div className="p-3 text-xs font-mono text-[#8C9099]">
+                              No predefined area matches &ldquo;{formData.area}&rdquo; in {formData.city}
+                            </div>
+                          )}
+                          {formData.area.trim() && !matchingAreas.some(a => a.toLowerCase() === formData.area.trim().toLowerCase()) && (
+                            <button
+                              type="button"
+                              onClick={() => handleAreaSelect(formData.area.trim())}
+                              className={`w-full text-left px-4 py-3 bg-[#222731] hover:bg-[#2B313E] transition-colors flex items-center justify-between cursor-pointer text-xs font-mono border-l-4 border-transparent ${personaTheme.customText}`}
+                            >
+                              <span>Use custom area: &ldquo;{formData.area.trim()}&rdquo;</span>
+                              <ArrowRight size={13} weight="bold" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Street Address / Building (Optional) - spans both columns for Restaurant */}
+                  {activePersona === 'restaurant' && (
+                    <div className="space-y-2 col-span-1 md:col-span-2">
+                      <label
+                        htmlFor="form-address-input"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.streetAddressOptional}
+                      </label>
+                      <input
+                        id="form-address-input"
+                        type="text"
+                        value={formData.address || ''}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        placeholder="e.g. Building 4B, Street 12, Floor 2"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
+                      />
                     </div>
                   )}
                 </div>

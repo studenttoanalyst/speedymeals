@@ -91,6 +91,7 @@ class RiderAdminResponseSchema(BaseModel):
     pending_cash_owed: float
     is_online: bool
     is_active: bool
+    commission_rate: float = 0.0
     created_at: datetime
 
 
@@ -102,6 +103,11 @@ class RiderApprovalUpdateSchema(BaseModel):
 class RiderStatusUpdateSchema(BaseModel):
     """Body for PATCH /admin/riders/{id}/status — Step 3 deactivate toggle."""
     is_active: bool
+
+
+class RiderCommissionUpdateSchema(BaseModel):
+    """Body for PATCH /admin/riders/{id}/commission — adjust rider commission percentage."""
+    commission_rate: float = Field(ge=0.0, le=100.0)
 
 
 class RiderKitUpdateSchema(BaseModel):

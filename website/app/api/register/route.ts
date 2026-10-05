@@ -73,47 +73,59 @@ export async function POST(request: Request) {
 
     const db = getDbClient();
 
-    // 4. Duplicate checks (Email & Phone)
+    // 4. Duplicate checks (Email & Phone) - gracefully handled if client lacks SELECT permission
     if (data.email) {
-      const { data: existingEmail, error: emailErr } = await db
+      try {
+        const { data: existingEmail, error: emailErr } = await db
+          .from('partner_registrations')
+          .select('id, email')
+          .ilike('email', data.email)
+          .limit(1)
+          .maybeSingle();
+
+        if (emailErr && emailErr.code !== 'PGRST116' && emailErr.code !== '42501') {
+          console.warn('[Supabase Email Check Warning]:', emailErr.message);
+        }
+
+        if (existingEmail) {
+          return NextResponse.json(
+            { error: 'This email address is already registered. Please use another email or sign in.', field: 'email' },
+            { status: 409 }
+          );
+        }
+      } catch (err) {
+        console.warn('[Supabase Email Check Skipped]:', err);
+      }
+    }
+
+    try {
+      const { data: existingPhone, error: phoneErr } = await db
         .from('partner_registrations')
-        .select('id, email')
-        .ilike('email', data.email)
+        .select('id, phone, country_code')
+        .eq('country_code', data.countryCode)
+        .eq('phone', data.phone)
         .limit(1)
         .maybeSingle();
 
-      if (emailErr && emailErr.code !== 'PGRST116') {
-        console.warn('[Supabase Email Check Warning]:', emailErr.message);
+      if (phoneErr && phoneErr.code !== 'PGRST116' && phoneErr.code !== '42501') {
+        console.warn('[Supabase Phone Check Warning]:', phoneErr.message);
       }
 
-      if (existingEmail) {
+      if (existingPhone) {
         return NextResponse.json(
-          { error: 'This email address is already registered. Please use another email or sign in.', field: 'email' },
+          { error: `This phone number is already registered for ${data.countryCode}. Each account requires a unique mobile number.`, field: 'phone' },
           { status: 409 }
         );
       }
-    }
-
-    const { data: existingPhone, error: phoneErr } = await db
-      .from('partner_registrations')
-      .select('id, phone, country_code')
-      .eq('country_code', data.countryCode)
-      .eq('phone', data.phone)
-      .limit(1)
-      .maybeSingle();
-
-    if (phoneErr && phoneErr.code !== 'PGRST116') {
-      console.warn('[Supabase Phone Check Warning]:', phoneErr.message);
-    }
-
-    if (existingPhone) {
-      return NextResponse.json(
-        { error: `This phone number is already registered for ${data.countryCode}. Each account requires a unique mobile number.`, field: 'phone' },
-        { status: 409 }
-      );
+    } catch (err) {
+      console.warn('[Supabase Phone Check Skipped]:', err);
     }
 
     // 5. Database Insert
+    const formattedBusinessName = data.businessName && data.partnerType
+      ? `[${data.partnerType}] ${data.businessName}`
+      : data.businessName;
+
     const insertPayload = {
       reference_code: data.referenceCode,
       persona_type: data.persona,
@@ -125,7 +137,7 @@ export async function POST(request: Request) {
       area: data.area,
       address: data.address,
       vehicle_type: data.vehicleType,
-      business_name: data.businessName,
+      business_name: formattedBusinessName,
       cuisine_type: data.cuisineType,
       device_platform: data.devicePlatform,
       service_interest: data.serviceInterest,
@@ -133,11 +145,35 @@ export async function POST(request: Request) {
       status: 'pending',
     };
 
-    const { data: inserted, error: insertErr } = await db
-      .from('partner_registrations')
-      .insert([insertPayload])
-      .select('reference_code')
-      .single();
+    let insertErr: { code?: string; message?: string; details?: string } | null = null;
+    let insertedRef = data.referenceCode;
+
+    const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+    if (hasServiceRole) {
+      // With service role key, RLS is bypassed and SELECT RETURNING is fully permitted
+      const resWithSelect = await db
+        .from('partner_registrations')
+        .insert([insertPayload])
+        .select('reference_code')
+        .maybeSingle();
+
+      if (resWithSelect.error) {
+        insertErr = resWithSelect.error;
+      } else if (resWithSelect.data?.reference_code) {
+        insertedRef = resWithSelect.data.reference_code;
+      }
+    } else {
+      // When using anon key, anon only has INSERT privilege (SELECT is protected for PII privacy).
+      // Plain insert avoids the "new row violates row-level security policy" / 42501 error from RETURNING clause.
+      const plainRes = await db
+        .from('partner_registrations')
+        .insert([insertPayload]);
+
+      if (plainRes.error) {
+        insertErr = plainRes.error;
+      }
+    }
 
     if (insertErr) {
       console.error('[Supabase Register Error]:', insertErr);
@@ -168,7 +204,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      referenceCode: inserted?.reference_code || data.referenceCode,
+      referenceCode: insertedRef,
     });
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Unknown server error';

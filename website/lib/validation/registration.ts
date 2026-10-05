@@ -33,6 +33,7 @@ export interface RawRegistrationInput {
   customCity?: unknown;
   area?: unknown;
   address?: unknown;
+  partnerType?: unknown;
   vehicleType?: unknown;
   businessName?: unknown;
   cuisineType?: unknown;
@@ -55,6 +56,7 @@ export interface ValidatedRegistrationData {
   city: string;
   area: string | null;
   address: string | null;
+  partnerType: string | null;
   vehicleType: string | null;
   businessName: string | null;
   cuisineType: string | null;
@@ -172,6 +174,9 @@ export function validateRegistrationPayload(
   const businessName = typeof body.businessName === 'string' && body.businessName.trim()
     ? sanitizeTextInput(body.businessName, { maxLength: 100 })
     : null;
+  const partnerType = typeof body.partnerType === 'string' && body.partnerType.trim()
+    ? sanitizeTextInput(body.partnerType, { maxLength: 50 })
+    : 'Restaurant';
   const cuisineType = typeof body.cuisineType === 'string' && body.cuisineType.trim()
     ? sanitizeTextInput(body.cuisineType, { maxLength: 50 })
     : null;
@@ -186,7 +191,7 @@ export function validateRegistrationPayload(
     : null;
 
   // 7. Security: Prompt injection and SQL patterns
-  const textFieldsToCheck = [fullName, businessName || '', cuisineType || '', city, area, address || ''];
+  const textFieldsToCheck = [fullName, businessName || '', partnerType || '', cuisineType || '', city, area, address || ''];
   if (textFieldsToCheck.some(containsPromptInjection)) {
     console.warn(`[Security Alert] Prompt injection / SQL attack pattern detected from IP ${clientIp}`);
     return err({ message: 'Security validation failed. Prohibited commands or instruction patterns detected in input.', status: 400 });
@@ -229,6 +234,7 @@ export function validateRegistrationPayload(
     city,
     area: persona === 'restaurant' ? area : null,
     address: persona === 'restaurant' ? address : null,
+    partnerType: persona === 'restaurant' ? partnerType : null,
     vehicleType: persona === 'rider' ? vehicleType : null,
     businessName: persona === 'restaurant' ? businessName : null,
     cuisineType: persona === 'restaurant' ? cuisineType : null,

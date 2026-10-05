@@ -20,15 +20,15 @@ interface FlowingVelocityChartProps {
 }
 
 const DEFAULT_DATA: VelocityDataPoint[] = [
-  { time: '08:00', orders: 6, gmv: 8400, prepTimeMinutes: 12, slaPercent: 100 },
-  { time: '10:00', orders: 14, gmv: 19600, prepTimeMinutes: 14, slaPercent: 99.1 },
-  { time: '12:00', orders: 38, gmv: 53200, peak: true, prepTimeMinutes: 16, slaPercent: 98.5 },
-  { time: '14:00', orders: 45, gmv: 63000, peak: true, prepTimeMinutes: 18, slaPercent: 97.9 },
-  { time: '16:00', orders: 18, gmv: 25200, prepTimeMinutes: 13, slaPercent: 99.4 },
-  { time: '18:00', orders: 25, gmv: 35000, prepTimeMinutes: 15, slaPercent: 98.8 },
-  { time: '20:00', orders: 54, gmv: 75600, peak: true, prepTimeMinutes: 19, slaPercent: 98.4 },
-  { time: '22:00', orders: 42, gmv: 58800, peak: true, prepTimeMinutes: 17, slaPercent: 98.1 },
-  { time: '00:00', orders: 12, gmv: 16800, prepTimeMinutes: 11, slaPercent: 100 },
+  { time: '08:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '10:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '12:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '14:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '16:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '18:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '20:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '22:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
+  { time: '00:00', orders: 0, gmv: 0, prepTimeMinutes: 0, slaPercent: 100 },
 ];
 
 export function FlowingVelocityChart({
@@ -418,10 +418,13 @@ export function FlowingVelocityChart({
 
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <span className="text-slate-600">
-            Peak Hour: <strong className="text-slate-900">{peakPoint.orders} orders/hr</strong> ({peakPoint.time})
+            Peak Hour:{' '}
+            <strong className="text-slate-900">
+              {totalOrders > 0 ? `${peakPoint.orders} orders/hr (${peakPoint.time})` : '0 orders/hr (Idle)'}
+            </strong>
           </span>
           <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-semibold">
-            All-Day On-Time: 98.4%
+            All-Day On-Time: {totalOrders > 0 ? '98.4%' : '100% (No Incidents)'}
           </span>
         </div>
       </div>

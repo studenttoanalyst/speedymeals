@@ -38,6 +38,7 @@ class Rider(BaseModel, UpdatedAtMixin):
     current_longitude: Mapped[float | None] = mapped_column(Numeric, nullable=True)
     country_code: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    commission_rate: Mapped[float | None] = mapped_column(Numeric, default=None, nullable=True)
     # Kit deposit & handover tracking
     kit_deposit_paid: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     kit_deposit_date: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
