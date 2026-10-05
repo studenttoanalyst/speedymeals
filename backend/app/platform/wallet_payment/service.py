@@ -625,6 +625,10 @@ def get_rider_wallet_profile(db: Session, rider_id: uuid.UUID) -> dict:
     - pending_payouts: sum of generated RiderPayout rows still Pending
       (admin marks them Paid, admin/service.py Step 6).
     - is_online: the wallet-gated online status from PATCH /wallet/status.
+    - rider profile fields (name, phone, country_code, approval_status,
+      is_active, vehicle details, cnic_number) plus derived `has_*_photo`
+      booleans, so the app can track document-upload progress without a
+      second endpoint.
 
     Raises 404 if the rider row doesn't exist (same ownership helper as
     every other wallet read).
@@ -651,6 +655,18 @@ def get_rider_wallet_profile(db: Session, rider_id: uuid.UUID) -> dict:
         "current_balance": float(rider.wallet_balance),
         "pending_payouts": float(pending_payouts),
         "is_online": rider.is_online,
+        "id": rider.id,
+        "name": rider.name,
+        "phone_number": rider.phone_number,
+        "country_code": rider.country_code,
+        "approval_status": rider.approval_status,
+        "is_active": rider.is_active,
+        "vehicle_type": rider.vehicle_type,
+        "vehicle_registration": rider.vehicle_registration,
+        "cnic_number": rider.cnic_number,
+        "has_cnic_photo": rider.cnic_photo_url is not None,
+        "has_license_photo": rider.license_photo_url is not None,
+        "has_vehicle_photo": rider.vehicle_photo_url is not None,
     }
 
 

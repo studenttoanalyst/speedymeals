@@ -163,11 +163,30 @@ class RiderWalletProfileResponseSchema(BaseModel):
     """Response for GET /wallet/profile — one combined rider wallet view:
     total earnings (all-time, Delivered orders), current wallet balance,
     pending payouts (generated RiderPayout rows not yet Paid), and the
-    wallet-gated online status toggled by PATCH /wallet/status."""
+    wallet-gated online status toggled by PATCH /wallet/status.
+
+    Also exposes the rider's own profile details plus derived document-
+    upload flags, so the app can show upload progress without a second
+    endpoint. `has_*_photo` are computed from whether the corresponding
+    URL column is populated, never stored."""
     total_earnings: float
     current_balance: float
     pending_payouts: float
     is_online: bool
+    # Rider profile details
+    id: uuid.UUID
+    name: str
+    phone_number: str
+    country_code: str
+    approval_status: str
+    is_active: bool
+    vehicle_type: str | None = None
+    vehicle_registration: str | None = None
+    cnic_number: str
+    # Derived document-upload flags
+    has_cnic_photo: bool
+    has_license_photo: bool
+    has_vehicle_photo: bool
 
 
 class RiderAssignmentItemSchema(BaseModel):

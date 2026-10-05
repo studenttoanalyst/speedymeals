@@ -281,6 +281,18 @@ def test_profile_route_returns_200_for_rider(wallet_read_client, db_session, rid
         "current_balance": 500.0,
         "pending_payouts": 0.0,
         "is_online": True,
+        "id": str(rider.id),
+        "name": "Test Rider",
+        "phone_number": rider.phone_number,
+        "country_code": "+92",
+        "approval_status": "pending",
+        "is_active": True,
+        "vehicle_type": None,
+        "vehicle_registration": None,
+        "cnic_number": rider.cnic_number,
+        "has_cnic_photo": False,
+        "has_license_photo": False,
+        "has_vehicle_photo": False,
     }
 
 
