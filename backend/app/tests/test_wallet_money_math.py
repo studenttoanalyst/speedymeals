@@ -139,14 +139,46 @@ def test_cash_deposit_discrepancy_negative_when_shortfall(db_session, rider, sce
     assert deposit.discrepancy == -100  # submitted less than expected
 
 
-def test_cash_deposit_reduces_pending_cash_owed_floored_at_zero(db_session, rider):
+def test_cash_deposit_clears_owed_only_after_admin_approval(db_session, rider):
+    """Post-paid model: submitting cash records an unverified deposit and
+    leaves pending_cash_owed untouched; only admin approval clears it."""
     rider.pending_cash_owed = 300
     db_session.add(rider)
     db_session.commit()
 
-    service.create_cash_deposit(db_session, rider.id, 1000, "bank_transfer")  # over-deposit
+    deposit = service.create_cash_deposit(db_session, rider.id, 1000, "bank_transfer")
+    db_session.refresh(rider)
+    assert float(rider.pending_cash_owed) == 300  # untouched until approved
+    assert deposit.verified_by_admin is False
+
+    service.approve_cash_deposit(db_session, deposit.id)
     db_session.refresh(rider)
     assert float(rider.pending_cash_owed) == 0  # never goes negative
+    db_session.refresh(deposit)
+    assert deposit.verified_by_admin is True
+
+
+def test_approve_cash_deposit_rejects_double_approval(db_session, rider):
+    rider.pending_cash_owed = 300
+    db_session.add(rider)
+    db_session.commit()
+    deposit = service.create_cash_deposit(db_session, rider.id, 100, "bank_transfer")
+
+    service.approve_cash_deposit(db_session, deposit.id)
+    db_session.refresh(rider)
+    assert float(rider.pending_cash_owed) == 200
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.approve_cash_deposit(db_session, deposit.id)
+    assert exc_info.value.status_code == 400
+    db_session.refresh(rider)
+    assert float(rider.pending_cash_owed) == 200  # unchanged by the second approve
+
+
+def test_approve_unknown_cash_deposit_404(db_session):
+    with pytest.raises(HTTPException) as exc_info:
+        service.approve_cash_deposit(db_session, uuid.uuid4())
+    assert exc_info.value.status_code == 404
 
 
 def test_cash_deposit_invalid_method_rejected(db_session, rider):

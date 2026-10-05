@@ -24,7 +24,11 @@ from app.core.security import hash_password
 from app.modules.food_delivery.models import Order, Restaurant
 from app.platform.users.models import User
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, Settlement
-from app.platform.wallet_payment.service import DELIVERED_STATUS, DELIVERY_WALLET_DEDUCTION
+from app.platform.wallet_payment.service import (
+    DELIVERED_STATUS,
+    DELIVERY_COMMISSION_RATE,
+    approve_cash_deposit as wallet_approve_cash_deposit,
+)
 
 ACTIVE_RESTAURANT_STATUS = "active"
 INACTIVE_RESTAURANT_STATUS = "inactive"
@@ -63,11 +67,14 @@ def get_dashboard_summary(db: Session) -> dict:
     gross_revenue_today = sum(float(o.total_amount) for o in todays_orders)
     commission_today = sum(float(o.commission_amount) for o in todays_orders)
 
-    delivered_today_count = sum(
-        1 for o in todays_orders if o.status == DELIVERED_STATUS
+    # Post-paid model: the platform's delivery-fee cut is 10% of the fee on
+    # every delivered order (replaces the old flat Rs. 10 wallet deduction).
+    delivery_commission_today = sum(
+        float(o.delivery_fee) * float(DELIVERY_COMMISSION_RATE)
+        for o in todays_orders
+        if o.status == DELIVERED_STATUS
     )
-    wallet_deductions_today = delivered_today_count * DELIVERY_WALLET_DEDUCTION
-    net_revenue_today = commission_today + wallet_deductions_today
+    net_revenue_today = commission_today + delivery_commission_today
 
     pending_restaurant_settlements = (
         db.query(func.coalesce(func.sum(Settlement.net_payable), 0))
@@ -637,6 +644,25 @@ def mark_rider_payout_paid(db: Session, payout_id: uuid.UUID) -> dict:
     payout.paid_at = datetime.now(timezone.utc)
     db.commit()
     return _payouts_with_names(db, [payout])[0]
+
+
+def approve_cash_deposit(db: Session, deposit_id: uuid.UUID) -> dict:
+    """POST /admin/cash-deposits/{id}/approve — Step 6. Verifying a rider's
+    cash submission is what actually reduces `pending_cash_owed` (post-paid
+    model), restoring the rider's COD eligibility and letting them come
+    back online. Idempotent guard lives in the wallet service (400 on a
+    second approval)."""
+    deposit = wallet_approve_cash_deposit(db, deposit_id)
+    rider = db.query(Rider).filter(Rider.id == deposit.rider_id).first()
+    return {
+        "id": deposit.id,
+        "rider_id": deposit.rider_id,
+        "rider_name": rider.name if rider else "",
+        "amount_submitted": float(deposit.amount_submitted),
+        "expected_amount": float(deposit.expected_amount),
+        "discrepancy": float(deposit.discrepancy),
+        "verified_by_admin": deposit.verified_by_admin,
+    }
 
 
 def list_cash_discrepancies(db: Session, unresolved_only: bool = True) -> list[dict]:

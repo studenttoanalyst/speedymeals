@@ -24,10 +24,12 @@ from app.platform.wallet_payment.models import Rider
 from app.platform.users.models import Address
 from app.platform.wallet_payment.service import (
     DELIVERED_STATUS,
-    DELIVERY_WALLET_DEDUCTION,
+    RIDER_DELIVERY_SHARE,
     WALLET_REMINDER_THRESHOLD,
     _rider_location_key,
-    deduct_delivery_fee,
+    apply_delivery_commission,
+    can_assign_cod,
+    enforce_cod_cash_cap,
     rider_eligible_for_assignment,
 )
 from app.modules.food_delivery.schemas import (
@@ -463,6 +465,7 @@ def get_order_tracking(db: Session, viewer_id: uuid.UUID, order_id: uuid.UUID) -
         "food_subtotal": order.food_subtotal,
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
+        "platform_fee": PLATFORM_FEE,
         "total_amount": order.total_amount,
         "restaurant_name": restaurant.name if restaurant else None,
         "restaurant_lat": restaurant_lat,
@@ -515,6 +518,7 @@ def get_restaurant_order(db: Session, restaurant_id: uuid.UUID, order_id: uuid.U
         "food_subtotal": order.food_subtotal,
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
+        "platform_fee": PLATFORM_FEE,
         "total_amount": order.total_amount,
         "commission_amount": order.commission_amount,
         "restaurant_payable": order.restaurant_payable,
@@ -586,6 +590,7 @@ def _find_nearest_rider(
     restaurant_lat: float,
     restaurant_lng: float,
     exclude_rider_ids: set[uuid.UUID] | None = None,
+    payment_method: str | None = None,
 ) -> Rider | None:
     """
     Phase 6 Step 3 — find the nearest eligible rider to the restaurant.
@@ -597,6 +602,10 @@ def _find_nearest_rider(
 
     exclude_rider_ids: Step 4 uses this to skip a rider who just rejected
     the order, preventing immediate re-assignment to the same rider.
+
+    payment_method: for COD orders, riders whose `pending_cash_owed` has
+    reached the cash cap are skipped — they cannot accept new COD work
+    until an admin approves their cash submission.
 
     Concurrency: this runs inside the same DB transaction as the order
     status update. SELECT FOR UPDATE on the order row (in the caller)
@@ -621,6 +630,10 @@ def _find_nearest_rider(
             continue
 
         if not rider_eligible_for_assignment(db, rider.id):
+            continue
+
+        # COD cap: riders at/over the cash cap are blocked from new COD work.
+        if payment_method == "COD" and not can_assign_cod(db, rider.id):
             continue
 
         raw = redis_client.get(_rider_location_key(rider.id))
@@ -683,7 +696,12 @@ def update_order_status(
                 text("SELECT 1 FROM orders WHERE id = :id FOR UPDATE"),
                 {"id": str(order.id)},
             )
-            nearest = _find_nearest_rider(db, float(restaurant.latitude), float(restaurant.longitude))
+            nearest = _find_nearest_rider(
+                db,
+                float(restaurant.latitude),
+                float(restaurant.longitude),
+                payment_method=order.payment_method,
+            )
             if nearest is not None:
                 order.rider_id = nearest.id
                 order.status = "Rider Assigned"
@@ -759,6 +777,7 @@ def rider_respond_to_assignment(
                 float(restaurant.latitude),
                 float(restaurant.longitude),
                 exclude_rider_ids={rider_id},
+                payment_method=order.payment_method,
             )
             if nearest is not None:
                 order.rider_id = nearest.id
@@ -795,15 +814,17 @@ def rider_advance_delivery_status(
         On the Way -> Delivered
 
     On "Delivered" (Step 6), the following side effects fire atomically:
-      - Reuse Phase 3 deduct_delivery_fee(): Rs. 10 wallet deduction
-      - COD: pending_cash_owed += order.total_amount (frozen snapshot)
+      - Delivery-fee commission split: platform keeps 10%, rider earns 90%
+        (COD debits the 10% from the wallet; Digital credits the 90% share)
+      - COD: pending_cash_owed += food_subtotal + delivery_fee; the rider is
+        forced offline once that reaches the COD cash cap
       - Digital: pending_cash_owed unchanged
 
     Exactly-once guarantee: the ORDER_STATUS_TRANSITIONS state machine
     rejects the transition if the order is already Delivered, so the
     side effects can only fire once.
 
-    Reuses: ORDER_STATUS_TRANSITIONS, deduct_delivery_fee, DELIVERED_STATUS.
+    Reuses: ORDER_STATUS_TRANSITIONS, apply_delivery_commission, DELIVERED_STATUS.
     """
     order = (
         db.query(Order)
@@ -832,15 +853,25 @@ def rider_advance_delivery_status(
     if new_status == DELIVERED_STATUS:
         order.delivered_at = datetime.now(timezone.utc)
 
-        # Reuse Phase 3 wallet deduction: Rs. 10 flat per delivery.
-        deduct_delivery_fee(db, rider_id, order.id)
+        # Delivery-fee commission split: platform keeps 10%, rider earns 90%.
+        # COD debits the platform's 10% from the rider wallet (the rider is
+        # already holding the cash); Digital credits the rider's 90% share.
+        apply_delivery_commission(db, rider_id, order)
 
-        # COD: add frozen order.total_amount to pending_cash_owed.
-        # Digital: no change.
+        # COD: the rider collects food + delivery fee in cash (the Rs.15
+        # platform fee is not collected by the rider), tracked under
+        # pending_cash_owed. Digital: no cash changes hands.
         if order.payment_method == "COD":
             rider = db.query(Rider).filter(Rider.id == rider_id).with_for_update().first()
             if rider:
-                rider.pending_cash_owed = float(Decimal(str(rider.pending_cash_owed)) + Decimal(str(order.total_amount)))
+                rider.pending_cash_owed = float(
+                    Decimal(str(rider.pending_cash_owed))
+                    + Decimal(str(order.food_subtotal))
+                    + Decimal(str(order.delivery_fee))
+                )
+                # At/over the cap -> force offline until an admin approves the
+                # rider's cash submission (approve_cash_deposit).
+                enforce_cod_cash_cap(rider)
                 db.add(rider)
 
     db.commit()
@@ -1262,6 +1293,12 @@ def remove_cart_item(
 DELIVERY_FEE_BASE = Decimal("100")
 DELIVERY_FEE_PER_KM = Decimal("25")
 
+# Rs. 15 flat platform/service fee added to every order total (SpeedyMeals
+# business model). Deliberately NOT stored on the order row — it is a
+# constant, so any read path can recompute it; `orders.total_amount`
+# already includes it and is the frozen snapshot of what the customer owed.
+PLATFORM_FEE = Decimal("15.00")
+
 
 def calculate_delivery_fee(delivery_distance_km: Decimal | int | float) -> Decimal:
     """Locked fee formula: fee = 100 + (km x 25). Decimal in,
@@ -1366,7 +1403,7 @@ def _build_checkout_context(
 
     delivery_distance_km = Decimal(str(round(route["distance_km"], 2)))
     delivery_fee = calculate_delivery_fee(delivery_distance_km)
-    total = (food_subtotal + delivery_fee).quantize(Decimal("0.01"))
+    total = (food_subtotal + delivery_fee + PLATFORM_FEE).quantize(Decimal("0.01"))
 
 
     return {
@@ -1377,6 +1414,7 @@ def _build_checkout_context(
         "food_subtotal": food_subtotal,
         "delivery_distance_km": delivery_distance_km,
         "delivery_fee": delivery_fee,
+        "platform_fee": PLATFORM_FEE,
         "total": total,
         "route": route,
     }
@@ -1395,6 +1433,7 @@ def preview_checkout(
         "food_subtotal": ctx["food_subtotal"],
         "delivery_distance_km": ctx["delivery_distance_km"],
         "delivery_fee": ctx["delivery_fee"],
+        "platform_fee": ctx["platform_fee"],
         "total": ctx["total"],
         "route": ctx["route"],
     }
@@ -1487,7 +1526,10 @@ def place_order(
             ) from exc
 
     commission = calculate_commission(ctx["food_subtotal"], restaurant.commission_rate)
-    rider_earning = ctx["delivery_fee"]
+    # Rider earns 90% of the delivery fee; the platform keeps the other 10%
+    # (settled on delivery by apply_delivery_commission). Frozen here so the
+    # payout snapshot can never be rewritten later.
+    rider_earning = (ctx["delivery_fee"] * RIDER_DELIVERY_SHARE).quantize(Decimal("0.01"))
 
     order = Order(
         user_id=customer_id,
@@ -1545,6 +1587,7 @@ def place_order(
         "food_subtotal": order.food_subtotal,
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
+        "platform_fee": PLATFORM_FEE,
         "total_amount": order.total_amount,
         "route": ctx["route"],
         "commission_amount": order.commission_amount,

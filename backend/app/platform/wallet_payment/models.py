@@ -58,7 +58,8 @@ class WalletTransaction(BaseModel):
     order_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("orders.id"), nullable=True
     )  # nullable: a wallet recharge has no order, only a per-delivery deduction does
-    type: Mapped[str] = mapped_column(String, nullable=False)  # "recharge" or "deduction"
+    # "recharge", "deduction" (COD delivery commission) or "earning" (Digital rider share)
+    type: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[float] = mapped_column(Numeric, nullable=False)
     balance_after: Mapped[float] = mapped_column(Numeric, nullable=False)
 

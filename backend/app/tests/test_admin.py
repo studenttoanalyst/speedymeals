@@ -53,14 +53,19 @@ def test_dashboard_counts_todays_orders_and_revenue(db_session):
     customer = _make_customer(db_session)
     restaurant = _make_restaurant(db_session)
     address = _make_address(db_session, customer)
+
+    # Measure the DELTA rather than an absolute count so pre-existing rows in
+    # the shared dev DB (placed earlier "today") can't make this flake.
+    before = service.get_dashboard_summary(db_session)
     _make_order(db_session, customer, restaurant, address, order_status="Delivered")
 
     result = service.get_dashboard_summary(db_session)
 
-    assert result["total_orders_today"] == 1
-    assert result["gross_revenue_today"] == 1175
-    # commission (100) + one Rs.10 wallet deduction for the Delivered order
-    assert result["net_revenue_today"] == 110
+    assert result["total_orders_today"] == before["total_orders_today"] + 1
+    assert result["gross_revenue_today"] == before["gross_revenue_today"] + 1175
+    # commission (100) + 10% delivery commission on the Delivered order
+    # (10% of the 175.00 fee) = 117.50
+    assert result["net_revenue_today"] == before["net_revenue_today"] + 117.50
 
 
 def test_dashboard_includes_rider_wallet_and_cod_totals(db_session):

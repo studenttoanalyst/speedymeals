@@ -99,6 +99,7 @@ class RestaurantOrderDetailResponseSchema(BaseModel):
     food_subtotal: float
     delivery_distance_km: float
     delivery_fee: float
+    platform_fee: float
     total_amount: float
     commission_amount: float
     restaurant_payable: float
@@ -207,6 +208,7 @@ class CheckoutPreviewResponseSchema(BaseModel):
     food_subtotal: float
     delivery_distance_km: float
     delivery_fee: float
+    platform_fee: float
     total: float
     route: RouteDetailSchema | None = None
 
@@ -224,6 +226,7 @@ class OrderTrackingResponseSchema(BaseModel):
     food_subtotal: float
     delivery_distance_km: float
     delivery_fee: float
+    platform_fee: float
     total_amount: float
     restaurant_name: str
     restaurant_lat: float | None = None
@@ -318,6 +321,7 @@ class PlaceOrderResponseSchema(BaseModel):
     food_subtotal: float
     delivery_distance_km: float
     delivery_fee: float
+    platform_fee: float
     total_amount: float
     route: RouteDetailSchema | None = None
     commission_amount: float

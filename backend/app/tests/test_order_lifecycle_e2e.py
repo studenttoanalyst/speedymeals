@@ -138,10 +138,11 @@ def _run_full_lifecycle(db_session, monkeypatch, payment_method: str):
         # Sec 11 exact numbers hold at placement time regardless of payment method.
         assert placed["food_subtotal"] == 1000
         assert placed["delivery_fee"] == 175
+        assert placed["platform_fee"] == 15
         assert placed["commission_amount"] == 100
         assert placed["restaurant_payable"] == 900
-        assert placed["rider_earning"] == 175
-        assert placed["total_amount"] == 1175
+        assert placed["rider_earning"] == 157.5  # 90% of the delivery fee
+        assert placed["total_amount"] == 1190
 
         food_service.update_order_status(db_session, restaurant.id, order_id, "Preparing")
 
@@ -178,10 +179,10 @@ def test_full_lifecycle_cod(db_session, monkeypatch):
     assert order.status == "Delivered"
     assert order.delivered_at is not None
 
-    # Rs. 10 flat deduction, exactly once (spec Sec 3.1).
-    assert float(rider.wallet_balance) == 990  # started at 1000
+    # COD: platform's 10% delivery commission debited once (10% of 175).
+    assert float(rider.wallet_balance) == 982.50  # started at 1000
 
-    # COD: full order total added to pending_cash_owed (spec Sec 3.4).
+    # COD: food + delivery fee added to pending_cash_owed (1000 + 175).
     assert float(rider.pending_cash_owed) == 1175
 
 
@@ -194,8 +195,8 @@ def test_full_lifecycle_digital(db_session, monkeypatch):
     assert order.status == "Delivered"
     assert order.delivered_at is not None
 
-    # Same Rs. 10 deduction regardless of payment method (spec Sec 3.1/11).
-    assert float(rider.wallet_balance) == 990
+    # Digital: the rider's 90% delivery share is credited (90% of 175).
+    assert float(rider.wallet_balance) == 1157.50
 
     # Digital: no cash exchanged, pending_cash_owed untouched.
     assert float(rider.pending_cash_owed) == 0

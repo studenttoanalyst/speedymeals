@@ -106,82 +106,11 @@ def test_set_online_offline_always_allowed(db_session, rider):
     assert updated.is_online is False
 
 
-# --- Delivery deduction ---
-
-
-def test_deduct_delivery_fee_correct_amount(db_session):
-    rider = _make_active_rider(db_session, wallet=1000)
-    txn = service.deduct_delivery_fee(db_session, rider.id, None)
-
-    assert txn.type == "deduction"
-    assert float(txn.amount) == service.DELIVERY_WALLET_DEDUCTION
-    assert float(txn.balance_after) == 990
-
-    db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 990
-
-
-def test_deduct_delivery_fee_no_negative_balance(db_session):
-    rider = _make_active_rider(db_session, wallet=5)
-    txn = service.deduct_delivery_fee(db_session, rider.id, None)
-
-    assert txn is None  # deduction skipped
-    db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 5  # unchanged
-
-
-def test_deduct_delivery_fee_does_not_force_offline_at_490(db_session):
-    """Balance 500 -> deduction -> 490: rider stays online (offline only at <100)."""
-    rider = _make_active_rider(db_session, wallet=500)
-    service.set_online_status(db_session, rider.id, True)
-
-    service.deduct_delivery_fee(db_session, rider.id, None)
-    db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 490
-    assert rider.is_online is True  # still online
-
-
-def test_deduct_delivery_fee_triggers_reminder_at_100(db_session):
-    """Balance 110 -> deduction -> 100: crosses reminder threshold."""
-    rider = _make_active_rider(db_session, wallet=500)
-    service.set_online_status(db_session, rider.id, True)
-    rider.wallet_balance = 110
-    db_session.commit()
-
-    txn = service.deduct_delivery_fee(db_session, rider.id, None)
-    assert txn is not None
-    assert float(txn.balance_after) == 100
-    db_session.refresh(rider)
-    assert rider.is_online is True  # still online at exactly 100
-
-
-def test_deduct_delivery_fee_forces_offline_below_100(db_session):
-    """Balance 100 -> deduction -> 90: auto-offline."""
-    rider = _make_active_rider(db_session, wallet=500)
-    service.set_online_status(db_session, rider.id, True)
-    rider.wallet_balance = 100
-    db_session.commit()
-    db_session.refresh(rider)
-    assert rider.is_online is True
-
-    service.deduct_delivery_fee(db_session, rider.id, None)
-    db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 90
-    assert rider.is_online is False
-
-
-def test_deduct_delivery_fee_still_online_at_100(db_session):
-    """Balance 120 -> two deductions -> 100: still online."""
-    rider = _make_active_rider(db_session, wallet=500)
-    service.set_online_status(db_session, rider.id, True)
-    rider.wallet_balance = 120
-    db_session.commit()
-
-    service.deduct_delivery_fee(db_session, rider.id, None)
-    service.deduct_delivery_fee(db_session, rider.id, None)
-    db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 100
-    assert rider.is_online is True
+# --- Delivery commission split ---
+# The old flat Rs.10 `deduct_delivery_fee()` helper was replaced by the
+# 10% / 90% delivery-fee split (`apply_delivery_commission`). Its coverage
+# now lives in test_delivery_payouts.py (split math + wallet threshold
+# behavior) and test_delivered_side_effects.py (per-delivery side effects).
 
 
 # --- COD cap ---

@@ -252,6 +252,19 @@ class CashDiscrepancyResponseSchema(BaseModel):
     created_at: datetime
 
 
+class CashDepositApprovalResponseSchema(BaseModel):
+    """Response for POST /admin/cash-deposits/{id}/approve — Step 6.
+    Confirms the deposit was verified and its amount applied to the rider's
+    pending COD cash debt."""
+    id: uuid.UUID
+    rider_id: uuid.UUID
+    rider_name: str
+    amount_submitted: float
+    expected_amount: float
+    discrepancy: float
+    verified_by_admin: bool
+
+
 # --- Step 7: reports ---
 
 

@@ -2,12 +2,16 @@
 Wallet business logic.
 Step 2: recharge + balance read.
 Step 3/4: go-online toggle with min-balance check + auto-force-offline.
-Step 5: delivery-fee deduction (standalone function, NOT an endpoint —
-real trigger is order "Delivered" status change, Phase 6's job. Phase 6
-will call `deduct_delivery_fee()` directly; nothing here needs to change
-when that wiring happens).
+Step 5: delivery-fee commission split — platform keeps 10%, rider earns 90%.
+Settled by `apply_delivery_commission()` from the order "Delivered" flow:
+COD debits the platform's 10% from the rider wallet (the rider holds the
+cash), Digital credits the rider's 90% share.
 Step 6: cash deposit tracking (expected vs actual, discrepancy flag).
-Step 7: cash collection cap check (reusable, called by Phase 6 assignment).
+Submitting cash only records an unverified deposit; `approve_cash_deposit()`
+(admin) is what reduces `pending_cash_owed`.
+Step 7: cash collection cap check (`can_assign_cod`), reused by rider
+assignment and the go-online gate; a capped rider is forced offline until
+their deposit is approved.
 Step 8: rider earnings summary read.
 
 Step 6/7/8 note (flagged, not silently assumed): `orders` table (Phase 1,
@@ -40,9 +44,13 @@ from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, 
 MIN_WALLET_BALANCE_TO_GO_ONLINE = 500
 WALLET_REMINDER_THRESHOLD = 100
 WALLET_AUTO_OFFLINE_THRESHOLD = 100
-DELIVERY_WALLET_DEDUCTION = 10
 INITIAL_WALLET_RECHARGE = 500
 KIT_DEPOSIT_AMOUNT = 5000
+
+# Delivery-fee commission split (SpeedyMeals business model): the platform
+# keeps 10% of every delivery fee, the rider earns the remaining 90%.
+DELIVERY_COMMISSION_RATE = Decimal("0.10")
+RIDER_DELIVERY_SHARE = Decimal("0.90")
 
 VALID_RECHARGE_METHODS = {"bank_transfer", "jazzcash", "easypaisa", "card"}
 VALID_DEPOSIT_METHODS = {"bank_transfer", "mobile_wallet", "hub"}
@@ -154,6 +162,15 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
                     f"Current balance: Rs. {rider.wallet_balance}. Please recharge."
                 ),
             )
+        if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"COD cash cap of Rs. {settings.CASH_COLLECTION_CAP} reached "
+                    f"(pending cash owed: Rs. {rider.pending_cash_owed}). Submit cash and wait "
+                    "for admin approval before going online again."
+                ),
+            )
 
     rider.is_online = is_online
     db.add(rider)
@@ -162,35 +179,65 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
     return rider
 
 
-def deduct_delivery_fee(db: Session, rider_id: uuid.UUID, order_id: uuid.UUID) -> WalletTransaction | None:
-    """Deduct Rs. 10 from rider wallet on order Delivered. Returns the
-    WalletTransaction, or None if balance was insufficient (delivery still
-    completes, deduction skipped to prevent negative balance).
+def apply_delivery_commission(db: Session, rider_id: uuid.UUID, order) -> WalletTransaction:
+    """Settle the delivery-fee commission split when an order is Delivered.
 
-    Does NOT commit — caller controls the transaction.
+    Platform commission = 10% of the delivery fee, rider earning = 90%.
+    The money movement depends on how the customer paid:
+      - COD: the rider already collected the cash, so the platform's 10%
+        cut is DEBITED from the rider's wallet balance.
+      - Digital: the platform received the money, so the rider's 90%
+        share is CREDITED to their wallet balance.
+
+    Does NOT commit — caller controls the transaction (same contract the
+    previous flat-fee helper had), so the status change and every wallet
+    movement still commit atomically.
     """
     rider = _get_rider_or_404(db, rider_id, for_update=True)
 
-    current_balance = Decimal(str(rider.wallet_balance))
-    fee = Decimal(str(DELIVERY_WALLET_DEDUCTION))
-    if current_balance < fee:
-        return None
+    delivery_fee = Decimal(str(order.delivery_fee))
+    platform_commission = (delivery_fee * DELIVERY_COMMISSION_RATE).quantize(Decimal("0.01"))
+    rider_share = (delivery_fee * RIDER_DELIVERY_SHARE).quantize(Decimal("0.01"))
 
-    rider.wallet_balance = float(current_balance - fee)
-    _force_offline_if_below_min(rider)
+    if order.payment_method == "COD":
+        rider.wallet_balance = float(
+            Decimal(str(rider.wallet_balance)) - platform_commission
+        )
+        _force_offline_if_below_min(rider)
+        txn_type = "deduction"
+        txn_amount = platform_commission
+    else:
+        rider.wallet_balance = float(
+            Decimal(str(rider.wallet_balance)) + rider_share
+        )
+        txn_type = "earning"
+        txn_amount = rider_share
+
     db.add(rider)
 
     txn = WalletTransaction(
         rider_id=rider.id,
-        order_id=order_id,
-        type="deduction",
-        amount=DELIVERY_WALLET_DEDUCTION,
+        order_id=order.id,
+        type=txn_type,
+        amount=float(txn_amount),
         balance_after=rider.wallet_balance,
     )
     db.add(txn)
     db.flush()
     db.refresh(txn)
     return txn
+
+
+def enforce_cod_cash_cap(rider: Rider) -> bool:
+    """Enforce the COD cash cap on a rider: once `pending_cash_owed`
+    reaches the cap the rider is switched offline and cannot accept new
+    COD orders until an admin approves a cash deposit. Returns True when
+    the rider was capped. Does NOT commit — caller controls the transaction.
+    """
+    if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
+        rider.is_online = False
+        return True
+    return False
 
 
 def _compute_expected_cash(db: Session, rider_id: uuid.UUID) -> float:
@@ -223,10 +270,13 @@ def create_cash_deposit(
     """
     Step 6 — rider submits daily COD cash. `expected_amount` is computed
     server-side (never trusted from the rider), `discrepancy` = submitted -
-    expected, flagged for Admin review if non-zero (Admin review UI itself
-    is Phase 8, not here — this just records the number).
-    On a successful deposit, `pending_cash_owed` is reduced by the amount
-    submitted (floored at 0 — can't go negative from a deposit).
+    expected, flagged for Admin review if non-zero.
+
+    Post-paid model: submitting cash does NOT immediately clear
+    `pending_cash_owed`. The deposit is recorded as unverified and an admin
+    must approve it (approve_cash_deposit) before the rider's COD debt —
+    and therefore their COD eligibility — is restored. This closes the
+    fraud window where a rider could clear the cap with a fake deposit.
     """
     if submission_method not in VALID_DEPOSIT_METHODS:
         raise HTTPException(
@@ -238,12 +288,6 @@ def create_cash_deposit(
     expected_amount = _compute_expected_cash(db, rider_id)
     discrepancy = amount_submitted - expected_amount
 
-    current_owed = Decimal(str(rider.pending_cash_owed))
-    sub_amount = Decimal(str(amount_submitted))
-    new_owed = max(current_owed - sub_amount, Decimal("0"))
-    rider.pending_cash_owed = float(new_owed)
-    db.add(rider)
-
     deposit = CashDeposit(
         rider_id=rider.id,
         amount_submitted=amount_submitted,
@@ -253,6 +297,42 @@ def create_cash_deposit(
         verified_by_admin=False,
     )
     db.add(deposit)
+    db.commit()
+    db.refresh(deposit)
+    return deposit
+
+
+def approve_cash_deposit(db: Session, deposit_id: uuid.UUID) -> CashDeposit:
+    """Admin approves a rider's cash submission. Only now is
+    `pending_cash_owed` reduced (floored at 0), which is what restores the
+    rider's COD eligibility / lets them come back online.
+
+    Idempotency: approving an already-verified deposit raises 400, so a
+    double-click can never clear the debt twice.
+    """
+    deposit = (
+        db.query(CashDeposit)
+        .filter(CashDeposit.id == deposit_id)
+        .with_for_update()
+        .first()
+    )
+    if deposit is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Cash deposit not found."
+        )
+    if deposit.verified_by_admin:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Cash deposit already verified."
+        )
+
+    rider = _get_rider_or_404(db, deposit.rider_id, for_update=True)
+    new_owed = max(
+        Decimal(str(rider.pending_cash_owed)) - Decimal(str(deposit.amount_submitted)),
+        Decimal("0"),
+    )
+    rider.pending_cash_owed = float(new_owed)
+    deposit.verified_by_admin = True
+    db.add_all([rider, deposit])
     db.commit()
     db.refresh(deposit)
     return deposit

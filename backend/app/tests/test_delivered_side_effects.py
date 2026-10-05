@@ -106,8 +106,8 @@ def _make_rider(db, wallet=1000):
 # --- Digital payment tests ---
 
 
-def test_delivered_digital_deducts_wallet(db_session):
-    """Digital: wallet - Rs.10, pending_cash_owed unchanged."""
+def test_delivered_digital_credits_rider_share(db_session):
+    """Digital: wallet + 90% of the delivery fee, pending_cash_owed unchanged."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -120,12 +120,13 @@ def test_delivered_digital_deducts_wallet(db_session):
 
     assert result["status"] == "Delivered"
     db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 990  # 1000 - 10
+    # 90% of the 175.00 delivery fee -> +157.50
+    assert float(rider.wallet_balance) == 1157.50
     assert float(rider.pending_cash_owed) == 0  # unchanged for Digital
 
 
 def test_delivered_digital_creates_wallet_transaction(db_session):
-    """Digital: a WalletTransaction row is created for the deduction."""
+    """Digital: a WalletTransaction row is created for the rider's 90% share."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -137,18 +138,18 @@ def test_delivered_digital_creates_wallet_transaction(db_session):
     txn = db_session.query(WalletTransaction).filter(
         WalletTransaction.rider_id == rider.id,
         WalletTransaction.order_id == order.id,
-        WalletTransaction.type == "deduction",
+        WalletTransaction.type == "earning",
     ).first()
     assert txn is not None
-    assert float(txn.amount) == wallet_service.DELIVERY_WALLET_DEDUCTION
-    assert float(txn.balance_after) == 990
+    assert float(txn.amount) == 157.50  # 90% of the 175.00 delivery fee
+    assert float(txn.balance_after) == 1157.50
 
 
 # --- COD payment tests ---
 
 
 def test_delivered_cod_deducts_wallet_and_increases_cash_owed(db_session):
-    """COD: wallet - Rs.10, pending_cash_owed + order.total_amount."""
+    """COD: wallet - 10% delivery commission, pending_cash_owed + food+delivery."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -161,12 +162,13 @@ def test_delivered_cod_deducts_wallet_and_increases_cash_owed(db_session):
 
     assert result["status"] == "Delivered"
     db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 990  # 1000 - 10
-    assert float(rider.pending_cash_owed) == 675  # 0 + order.total_amount
+    # 10% of the 175.00 delivery fee -> -17.50
+    assert float(rider.wallet_balance) == 982.50
+    assert float(rider.pending_cash_owed) == 675  # food (500) + delivery (175)
 
 
 def test_delivered_cod_cash_owed_uses_frozen_total(db_session):
-    """COD: pending_cash_owed uses the frozen order.total_amount, not a recalculation."""
+    """COD: pending_cash_owed accrues food_subtotal + delivery_fee (frozen)."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -176,7 +178,8 @@ def test_delivered_cod_cash_owed_uses_frozen_total(db_session):
     service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
 
     db_session.refresh(rider)
-    assert float(rider.pending_cash_owed) == float(order.total_amount)
+    expected = float(order.food_subtotal) + float(order.delivery_fee)
+    assert float(rider.pending_cash_owed) == expected
 
 
 def test_delivered_cod_accumulates_cash_owed(db_session):
@@ -194,7 +197,7 @@ def test_delivered_cod_accumulates_cash_owed(db_session):
 
     db_session.refresh(rider)
     assert float(rider.pending_cash_owed) == 1350  # 675 + 675
-    assert float(rider.wallet_balance) == 980  # 1000 - 10 - 10
+    assert float(rider.wallet_balance) == 965  # 1000 - 17.50 - 17.50
 
 
 # --- Exactly-once / duplicate delivery tests ---
@@ -235,7 +238,6 @@ def test_duplicate_delivered_creates_only_one_transaction(db_session):
     txns = db_session.query(WalletTransaction).filter(
         WalletTransaction.rider_id == rider.id,
         WalletTransaction.order_id == order.id,
-        WalletTransaction.type == "deduction",
     ).all()
     assert len(txns) == 1
 
@@ -261,18 +263,6 @@ def test_delivered_sets_delivered_at_timestamp(db_session):
 # --- Regression: Phase 3 wallet deduction still works ---
 
 
-def test_phase3_deduct_delivery_fee_still_works(db_session):
-    """Phase 3's deduct_delivery_fee is still callable independently."""
-    rider = _make_rider(db_session, wallet=1000)
-    txn = wallet_service.deduct_delivery_fee(db_session, rider.id, None)
-
-    assert txn.type == "deduction"
-    assert float(txn.amount) == 10
-    assert float(txn.balance_after) == 990
-    db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 990
-
-
 # --- Cancelled order: no deduction ---
 
 
@@ -296,16 +286,17 @@ def test_cancelled_order_no_wallet_deduction(db_session):
     assert float(rider.pending_cash_owed) == 0
 
 
-# --- Insufficient balance: deduction skipped ---
+# --- Low balance: COD commission is still owed (may push wallet negative) ---
 
 
-def test_delivered_insufficient_balance_deduction_skipped(db_session):
-    """When wallet balance < Rs.10, deduction is skipped but delivery completes."""
+def test_delivered_cod_commission_applies_on_low_balance(db_session):
+    """COD: the platform's 10% cut is a debt — it is debited even when the
+    wallet is below the commission, and the rider is forced offline."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
     rider = _make_rider(db_session, wallet=5)
-    order = _make_order(db_session, restaurant, customer, address, "Digital", rider)
+    order = _make_order(db_session, restaurant, customer, address, "COD", rider)
 
     result = service.rider_advance_delivery_status(
         db_session, rider.id, order.id, "Delivered"
@@ -313,12 +304,13 @@ def test_delivered_insufficient_balance_deduction_skipped(db_session):
 
     assert result["status"] == "Delivered"
     db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 5  # unchanged, deduction skipped
+    assert float(rider.wallet_balance) == -12.50  # 5 - 17.50
+    assert rider.is_online is False  # below the auto-offline threshold
 
-    # No deduction WalletTransaction created
-    txns = db_session.query(WalletTransaction).filter(
+    txn = db_session.query(WalletTransaction).filter(
         WalletTransaction.rider_id == rider.id,
         WalletTransaction.order_id == order.id,
-        WalletTransaction.type == "deduction",
-    ).all()
-    assert len(txns) == 0
+    ).first()
+    assert txn is not None
+    assert txn.type == "deduction"
+    assert float(txn.amount) == 17.50

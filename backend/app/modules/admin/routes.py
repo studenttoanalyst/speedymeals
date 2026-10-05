@@ -14,6 +14,7 @@ from app.modules.admin import service
 from app.modules.admin.schemas import (
     AdminOrderDetailResponseSchema,
     AdminOrderSummaryResponseSchema,
+    CashDepositApprovalResponseSchema,
     CashDiscrepancyResponseSchema,
     CustomerAdminResponseSchema,
     CustomerStatusUpdateSchema,
@@ -325,6 +326,20 @@ def list_cash_discrepancies(
     """Step 6 — flag rider cash deposits where submitted != expected
     (spec Sec 3.4/6), for admin investigation."""
     return service.list_cash_discrepancies(db, unresolved_only)
+
+
+@router.post(
+    "/cash-deposits/{deposit_id}/approve",
+    response_model=CashDepositApprovalResponseSchema,
+)
+def approve_cash_deposit(
+    deposit_id: uuid.UUID,
+    current_user: CurrentUser = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Step 6 — verify a rider's cash submission. Only an approved deposit
+    reduces the rider's pending COD cash (restoring their COD eligibility)."""
+    return service.approve_cash_deposit(db, deposit_id)
 
 
 # --- Step 7: reports ---
