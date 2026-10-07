@@ -100,9 +100,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                   src="/assets/restaurant_kitchen_prep.jpg"
                   alt="Restaurant culinary team preparing fresh orders"
                   fill
+                  priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  loading="eager"
                 />
               </div>
             </div>
