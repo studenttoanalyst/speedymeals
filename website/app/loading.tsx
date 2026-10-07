@@ -21,20 +21,9 @@ export default function RootLoading() {
           />
         </div>
 
-        {/* Subtle Brand Title */}
-        <span className="font-heading font-extrabold text-sm sm:text-base tracking-tight uppercase text-ink mt-3">
-          Speedy Meals
-        </span>
-
         {/* Micro-Progress Bar (Zero-weight pure CSS) */}
-        <div className="w-28 sm:w-36 h-1 bg-[#F0EEEB] rounded-full overflow-hidden mt-3 relative">
+        <div className="w-24 sm:w-32 h-1 bg-[#F0EEEB] rounded-full overflow-hidden mt-4 relative">
           <div className="absolute inset-y-0 w-1/2 bg-red rounded-full animate-loader-slide" />
-        </div>
-
-        {/* Ticker Status (Mobile-responsive font size) */}
-        <div className="flex items-center space-x-1.5 mt-2.5 font-mono text-[9px] sm:text-[10px] text-ink-soft uppercase tracking-wider">
-          <span className="w-1.5 h-1.5 rounded-full bg-red animate-ping shrink-0" />
-          <span>CONNECTING TO NETWORK</span>
         </div>
       </div>
     </div>
