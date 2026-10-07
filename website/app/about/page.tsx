@@ -89,8 +89,8 @@ export default function AboutPage() {
             </div>
             <div>
               <div className="text-xs text-[#8C9099] uppercase">RIDER REMUNERATION</div>
-              <div className="text-2xl font-bold text-red mt-1">100% Retained</div>
-              <div className="text-[11px] text-[#5B5F66]">Full delivery fee payout</div>
+              <div className="text-2xl font-bold text-red mt-1">90% Retained</div>
+              <div className="text-[11px] text-[#5B5F66]">Direct delivery fee payout</div>
             </div>
             <div>
               <div className="text-xs text-[#8C9099] uppercase">LOGISTICS ALLIANCE</div>
@@ -230,11 +230,11 @@ export default function AboutPage() {
                     02
                   </div>
                   <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
-                    100% Courier Dignity
+                    Fair Rider Earnings &amp; Respect
                   </h3>
                 </div>
                 <p className="text-sm text-ink-soft font-sans leading-relaxed">
-                  Every single rupee or riyal charged for delivery belongs entirely to the rider. SpeedyMeals takes zero percent from courier delivery fees, provides instant wallet withdrawal, and requires zero predatory kit purchases or upfront bond money.
+                  Riders retain 90% of the delivery customer fee on every completed trip. With a generous Rs. 5,000 float cap, automated weekly Tuesday bank and wallet cash-outs, and transparent per-km rates, riders earn with dignity and security.
                 </p>
               </div>
 
@@ -434,14 +434,14 @@ export default function AboutPage() {
                 href="/#partner"
                 className="px-6 py-3.5 bg-red text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-red transition-colors duration-150 flex items-center space-x-2"
               >
-                <span>RIDE WITH US</span>
+                <span>DELIVER WITH SPEEDYMEALS</span>
                 <ArrowRight size={13} weight="bold" />
               </Link>
               <Link
                 href="/#partner"
                 className="px-6 py-3.5 bg-transparent border border-white text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-ink transition-colors duration-150 flex items-center space-x-2"
               >
-                <span>PARTNER RESTAURANT</span>
+                <span>LIST YOUR RESTAURANT</span>
                 <ArrowRight size={13} weight="bold" />
               </Link>
             </div>

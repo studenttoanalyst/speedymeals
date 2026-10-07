@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/home/Navbar';
 import { HeroSection } from '@/components/home/HeroSection';
-import { PartnerBannerMarquee } from '@/components/home/PartnerBannerMarquee';
+import { PromoBanner } from '@/components/home/PromoBanner';
 import { ServicesSection } from '@/components/home/ServicesSection';
 import { PartnerSection } from '@/components/home/PartnerSection';
 import { Footer } from '@/components/home/Footer';
@@ -37,11 +37,11 @@ export default function HomePage() {
         {/* Section 1: Overview (Hero) */}
         <HeroSection onSelectPersona={handleSelectPersona} />
 
-        {/* Dynamic Partner Alliance Marquee Banners */}
-        <PartnerBannerMarquee />
+        {/* Dynamic Promotional Ribbon Marquee (Full Viewport Width) */}
+        <PromoBanner />
 
-        {/* Section 2: Services (Ecosystem Grid) */}
-        <ServicesSection />
+        {/* Section 2: Services (Ecosystem Stories) */}
+        <ServicesSection onSelectPersona={handleSelectPersona} />
 
         {/* Section 3: Partner (Conversion & Registration) */}
         <PartnerSection

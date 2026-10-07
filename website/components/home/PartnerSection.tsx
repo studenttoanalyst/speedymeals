@@ -42,6 +42,10 @@ interface PersonaFormData {
   customCity?: string;
   vehicleType: string;
   businessName: string;
+  businessType?: string;
+  primaryCategory?: string;
+  areaLocality?: string;
+  streetAddress?: string;
   cuisineType: string;
   branches: string;
   devicePlatform: string;
@@ -65,6 +69,10 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     customCity: '',
     vehicleType: 'Motorcycle',
     businessName: '',
+    businessType: '',
+    primaryCategory: '',
+    areaLocality: '',
+    streetAddress: '',
     cuisineType: '',
     branches: '1-3',
     devicePlatform: '',
@@ -81,7 +89,11 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     customCity: '',
     vehicleType: '',
     businessName: '',
-    cuisineType: 'Pakistani / BBQ & Grills',
+    businessType: 'Restaurant',
+    primaryCategory: '',
+    areaLocality: '',
+    streetAddress: '',
+    cuisineType: '',
     branches: '1-3',
     devicePlatform: '',
     serviceInterest: '',
@@ -97,6 +109,10 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     customCity: '',
     vehicleType: '',
     businessName: '',
+    businessType: '',
+    primaryCategory: '',
+    areaLocality: '',
+    streetAddress: '',
     cuisineType: '',
     branches: '1-3',
     devicePlatform: 'iOS (Apple TestFlight Beta)',
@@ -212,7 +228,12 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.email || !formData.phone) return;
+    if (!formData.fullName || !formData.phone) return;
+    if (activePersona === 'customer' && !formData.email) return;
+    if (activePersona === 'restaurant' && (!formData.businessName || !formData.areaLocality)) {
+      setError('Please provide your Business Name and Area/Locality.');
+      return;
+    }
     if (!formData.agreed) {
       setError('Please review and accept the agreement terms to proceed.');
       return;
@@ -332,15 +353,15 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         <div className="mb-12 sm:mb-16">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center space-x-2 shrink-0">
-              <span className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] whitespace-nowrap">
+              <span className="font-sans text-xs uppercase tracking-wider text-[#5B5F66] font-semibold whitespace-nowrap">
                 [ 03 ]
               </span>
-              <span className="font-mono text-xs uppercase tracking-widest text-[#15171A] font-bold whitespace-nowrap">
+              <span className="font-sans text-xs uppercase tracking-wider text-[#15171A] font-bold whitespace-nowrap">
                 Partner With Us
               </span>
             </div>
             <div className="hidden sm:block h-px flex-1 bg-[#E4E2DD] mx-3" />
-            <span className="font-mono text-[10px] sm:text-xs text-[#E23A2E] tracking-wider uppercase font-semibold whitespace-nowrap">
+            <span className="font-sans text-[10px] sm:text-xs text-[#E23A2E] tracking-wider uppercase font-semibold whitespace-nowrap">
               ENROLLMENT OPEN
             </span>
           </div>
@@ -352,181 +373,179 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 className="block transition-colors duration-300"
                 style={{ color: 'var(--dynamic-accent, #E23A2E)' }}
               >
-                No Extraction.
+                Transparent Economics.
               </span>
             </h2>
 
-            <p className="text-xs sm:text-sm font-mono text-[#5B5F66] max-w-sm leading-relaxed">
-              Select your persona below to join our pilot launch network across South Asia and the
-              Middle East.
+            <p className="text-xs sm:text-sm font-sans text-ink-soft max-w-sm leading-relaxed">
+              Choose your role below to join our early access launch network across Pakistan and Saudi Arabia.
             </p>
           </div>
         </div>
 
-        {/* Persona-Split Entry: Three Hairline-Divided Columns with Distinct Brand Accents */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-line mb-12 bg-white shadow-sm">
-          {/* Column 1: RIDE (Speedy Red accent) */}
+        {/* Role Selection: Unboxed, Clean, Non-Jargon */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-16">
+          {/* Card 1: Rider */}
           <div
             id="persona-col-rider"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-red transition-all duration-150 ${activePersona === 'rider' ? 'bg-paper-off shadow-xs' : 'bg-white hover:bg-paper-off/50'
+            onClick={() => onSelectPersona('rider')}
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'rider'
+                ? 'bg-paper-off ring-2 ring-red shadow-sm'
+                : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-red/30 text-red flex items-center justify-center bg-red/10">
-                  <Bicycle size={24} weight="bold" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 rounded-full text-red flex items-center justify-center bg-red/10">
+                  <Bicycle size={22} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-red font-bold">
-                  COURIER DISPATCH
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-red">
+                  For Riders
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
-                Ride
+              <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
+                Deliver
               </h3>
-              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
-                Keep 100% of your delivery customer fees. Zero platform deduction on distance, zero
-                security deposit, with daily automated payouts.
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-6">
+                Deliver meals on your own terms with transparent fees and regular weekly payouts straight to your account.
               </p>
             </div>
 
-            <div>
-              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
-                <span className="text-ink-soft">FEE RETENTION:</span>
-                <span className="font-bold text-red">100% TO RIDER</span>
-              </div>
-              <button
-                type="button"
-                id="btn-select-rider"
-                onClick={() => onSelectPersona('rider')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'rider'
-                  ? 'bg-red text-white border-red'
-                  : 'bg-transparent text-ink border-ink hover:bg-ink hover:text-white'
-                  }`}
-              >
-                <span>{activePersona === 'rider' ? 'ACTIVE FORM' : 'APPLY TO RIDE'}</span>
-                <ArrowRight size={13} weight="bold" />
-              </button>
-            </div>
+            <button
+              type="button"
+              id="btn-select-rider"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectPersona('rider');
+              }}
+              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'rider'
+                  ? 'bg-red text-white'
+                  : 'bg-black/5 text-ink hover:bg-ink hover:text-white'
+                }`}
+            >
+              <span>{activePersona === 'rider' ? 'Active Form' : 'Apply as Rider'}</span>
+              <ArrowRight size={13} weight="bold" />
+            </button>
           </div>
 
-          {/* Column 2: RESTAURANT (Cobalt Blue accent) */}
+          {/* Card 2: Merchant */}
           <div
             id="persona-col-restaurant"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-blue transition-all duration-150 ${activePersona === 'restaurant'
-              ? 'bg-paper-off shadow-xs'
-              : 'bg-white hover:bg-paper-off/50'
+            onClick={() => onSelectPersona('restaurant')}
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'restaurant'
+                ? 'bg-paper-off ring-2 ring-blue shadow-sm'
+                : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-blue/30 text-blue flex items-center justify-center bg-blue/10">
-                  <Storefront size={24} weight="bold" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 rounded-full text-blue flex items-center justify-center bg-blue/10">
+                  <Storefront size={22} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-blue font-bold">
-                  MERCHANT DIRECT
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-blue">
+                  For Merchants
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
-                Restaurant
+              <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
+                List Your Store
               </h3>
-              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
-                Flat 10% commission. No onboarding penalty, no mandatory sponsored placements to
-                stay visible, and complete menu control.
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-6">
+                Reach hungry customers across your city with easy order management and predictable, low commission rates.
               </p>
             </div>
 
             <div>
-              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
-                <span className="text-ink-soft">COMMISSION:</span>
-                <span className="font-bold text-blue">10% FLAT RATE</span>
-              </div>
               <button
                 type="button"
                 id="btn-select-restaurant"
-                onClick={() => onSelectPersona('restaurant')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'restaurant'
-                  ? 'bg-blue text-white border-blue'
-                  : 'bg-transparent text-blue border-blue hover:bg-blue hover:text-white'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectPersona('restaurant');
+                }}
+                className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'restaurant'
+                    ? 'bg-blue text-white'
+                    : 'bg-black/5 text-blue hover:bg-blue hover:text-white'
                   }`}
               >
-                <span>{activePersona === 'restaurant' ? 'ACTIVE FORM' : 'PARTNER RESTAURANT'}</span>
+                <span>{activePersona === 'restaurant' ? 'Active Form' : 'Partner as Merchant'}</span>
                 <ArrowRight size={13} weight="bold" />
               </button>
 
-              <div className="mt-2.5 text-center">
+              <div className="mt-3 text-center">
                 <Link
                   id="link-existing-restaurant-portal"
                   href="/restaurant"
-                  className="font-mono text-[11px] text-blue hover:underline inline-flex items-center gap-1"
+                  className="font-sans text-xs text-blue hover:underline inline-flex items-center gap-1"
                 >
-                  <span>Already registered? Access Partner Portal</span>
+                  <span>Already registered? Access Merchant Portal</span>
                   <ArrowRight size={10} weight="bold" />
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Column 3: CUSTOMER (Warm Desert Tan accent) */}
+          {/* Card 3: Customer */}
           <div
             id="persona-col-customer"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-t-2 border-t-tan transition-all duration-150 ${activePersona === 'customer'
-              ? 'bg-paper-off shadow-xs'
-              : 'bg-white hover:bg-paper-off/50'
+            onClick={() => onSelectPersona('customer')}
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'customer'
+                ? 'bg-paper-off ring-2 ring-[#C7A874] shadow-sm'
+                : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-tan/30 text-tan flex items-center justify-center bg-tan/20">
-                  <Users size={24} weight="bold" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activePersona === 'customer' ? 'bg-[#C7A874]/20 text-[#A8874E]' : 'bg-black/5 text-ink'
+                  }`}>
+                  <Users size={22} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#A8874E] font-bold">
-                  EARLY ACCESS
+                <span className={`font-sans text-xs font-bold uppercase tracking-wider ${activePersona === 'customer' ? 'text-[#A8874E]' : 'text-ink-soft'
+                  }`}>
+                  For Customers
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
-                Customer
+              <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
+                Get Early Access
               </h3>
-              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
-                Real food prices without sneaky packaging fees or arbitrary delivery inflation. Get
-                notified when SpeedyMeals launches on iOS & Android in your city.
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3">
+                Real food prices from beloved local kitchens. Be the first to order when SpeedyMeals launches in your area.
               </p>
+              {/* VIP promo badge */}
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-[#C7A874]/15 border border-[#C7A874]/30 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C7A874] inline-block" />
+                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-[#9A7A4A]">
+                  VIP: Up to 50% off your first 3 orders
+                </span>
+              </div>
             </div>
 
-            <div>
-              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
-                <span className="text-ink-soft">MARKUP:</span>
-                <span className="font-bold text-[#A8874E]">0% MENU MARKUP</span>
-              </div>
-              <button
-                type="button"
-                id="btn-select-customer"
-                onClick={() => onSelectPersona('customer')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'customer'
-                  ? 'bg-tan text-ink border-tan font-bold'
-                  : 'bg-transparent text-ink border-line hover:border-tan hover:text-[#A8874E]'
-                  }`}
-              >
-                <span>{activePersona === 'customer' ? 'ACTIVE FORM' : 'JOIN WAITLIST'}</span>
-                <ArrowRight size={13} weight="bold" />
-              </button>
-            </div>
+            <button
+              type="button"
+              id="btn-select-customer"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectPersona('customer');
+              }}
+              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'customer'
+                  ? 'bg-[#C7A874] text-[#15171A]'
+                  : 'bg-[#C7A874]/15 text-[#8C6D34] hover:bg-[#C7A874] hover:text-[#15171A]'
+                }`}
+            >
+              <span>{activePersona === 'customer' ? 'Active Form' : 'Get VIP Access'}</span>
+              <ArrowRight size={13} weight="bold" />
+            </button>
           </div>
         </div>
 
-        {/* REGISTRATION FORM PANEL: Styled with dynamic persona color border and accents */}
+        {/* REGISTRATION FORM PANEL: Styled - dark canvas for all personas */}
         <div
           id="registration-flow-panel"
-          className={`bg-[#22252B] text-white border p-6 sm:p-10 lg:p-12 shadow-md transition-colors duration-300 ${activePersona === 'rider'
-            ? 'border-t-2 border-t-red border-x-[#373C46] border-b-[#373C46]'
-            : activePersona === 'restaurant'
-              ? 'border-t-2 border-t-blue border-x-[#373C46] border-b-[#373C46]'
-              : 'border-t-2 border-t-tan border-x-[#373C46] border-b-[#373C46]'
-            }`}
+          className="rounded-3xl p-6 sm:p-10 lg:p-12 shadow-xl border bg-[#1A1D23] text-white border-white/5 transition-all duration-300"
         >
           {/* Top Panel Nav & Title */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[#373C46] mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 mb-8 border-b border-[#373C46]">
             <div>
-              <div className="font-mono text-xs uppercase tracking-widest mb-1 flex items-center space-x-2">
+              <div className="font-sans text-xs uppercase tracking-wider font-semibold mb-1 flex items-center space-x-2">
                 <span
                   className="w-2 h-2 inline-block"
                   style={{
@@ -561,7 +580,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             {/* Controls: Persona Switcher Tabs + Multilingual Language Switcher */}
             <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
               {/* Persona Switcher Tabs inside panel */}
-              <div className="flex border border-[#373C46] font-mono text-xs">
+              <div className="flex font-sans text-xs border border-[#373C46]">
                 <button
                   type="button"
                   id="btn-tab-rider"
@@ -589,7 +608,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   id="btn-tab-customer"
                   onClick={() => onSelectPersona('customer')}
                   className={`px-3.5 sm:px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors cursor-pointer ${activePersona === 'customer'
-                    ? 'bg-tan text-ink font-bold'
+                    ? 'bg-[#C7A874] text-[#15171A] font-bold'
                     : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                     }`}
                 >
@@ -600,7 +619,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               {/* Multilingual Selector [ EN | اردو | العربية ] */}
               <div
                 id="registration-lang-toggle"
-                className="flex items-center border border-[#373C46] bg-[#1A1D23] p-0.5 text-xs font-mono shadow-xs"
+                className="flex items-center border border-[#373C46] bg-[#1A1D23] p-0.5 text-xs font-sans shadow-xs"
               >
                 <button
                   type="button"
@@ -650,7 +669,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className={`border border-[#373C46] bg-[#2A2E37] p-8 max-w-2xl mx-auto font-mono text-left border-t-2 ${activePersona === 'rider'
+                className={`border border-[#373C46] bg-[#2A2E37] p-8 max-w-2xl mx-auto font-sans text-left border-t-2 ${activePersona === 'rider'
                   ? 'border-t-red'
                   : activePersona === 'restaurant'
                     ? 'border-t-blue'
@@ -669,25 +688,25 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   }}
                 >
                   <Check size={28} weight="bold" className="text-[#10B981] shrink-0" />
-                  <span className="font-display text-xl uppercase tracking-tight text-white">
+                  <span className="font-heading font-extrabold text-xl uppercase tracking-tight">
                     {activePersona === 'customer'
-                      ? 'Waitlist Access Reserved'
+                      ? 'Customer Early Access Reserved'
                       : activePersona === 'restaurant'
                         ? 'Merchant Application Received'
                         : 'Rider Application Received'}
                   </span>
                 </div>
-                <p className="text-sm text-[#A0A4AB] mb-6 font-sans">
+                <p className="text-sm mb-6 font-sans text-[#A0A4AB]">
                   {activePersona === 'customer'
-                    ? "You are registered for priority early access. We will email your TestFlight / Google Play beta invite as soon as SpeedyMeals goes live in your area."
-                    : 'Your registration has been logged directly with our regional dispatch operations. Verification review is conducted within 24 hours.'}
+                    ? "You're in! Your VIP early access is reserved. You'll get up to 50% off your first 3 orders, plus a beta app invite as soon as SpeedyMeals launches in your city."
+                    : 'Your registration has been logged directly with our regional dispatch operations. Our team will review your application and contact you within 1 to 2 business days.'}
                 </p>
 
                 <div className="p-4 bg-[#1E2228] border border-[#373C46] space-y-2 mb-6">
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#5B5F66]">REFERENCE CODE:</span>
+                    <span className="text-[#5B5F66] font-semibold">REFERENCE CODE:</span>
                     <span
-                      className="font-bold tracking-widest"
+                      className="font-bold tracking-widest text-sm font-sans"
                       style={{
                         color:
                           activePersona === 'customer'
@@ -701,7 +720,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     </span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#5B5F66]">TARGET ROLE:</span>
+                    <span className="text-[#5B5F66] font-semibold">SELECTED ROLE:</span>
                     <span
                       className="font-bold uppercase tracking-wider"
                       style={{
@@ -714,53 +733,64 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       }}
                     >
                       {activePersona === 'customer'
-                        ? 'Consumer Waitlist'
+                        ? 'Customer Waitlist'
                         : activePersona === 'restaurant'
-                          ? 'Restaurant Merchant'
-                          : 'Delivery Courier Rider'}
+                          ? 'Merchant Partner'
+                          : 'Courier Rider'}
                     </span>
                   </div>
+                  {submittedData.email && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#5B5F66] font-semibold">EMAIL:</span>
+                      <span className="text-white">{submittedData.email}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#5B5F66]">CONTACT EMAIL:</span>
-                    <span className="text-white">{submittedData.email}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-[#5B5F66]">CONTACT PHONE:</span>
-                    <span className="text-white font-mono">
+                    <span className="text-[#5B5F66] font-semibold">PHONE:</span>
+                    <span className="text-white font-sans">
                       {submittedData.countryCode} {submittedData.phone}
                     </span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#5B5F66]">DEPLOYMENT ZONE:</span>
+                    <span className="text-[#5B5F66] font-semibold">CITY / ZONE:</span>
                     <span className="text-white">
-                      {submittedData.city} ({submittedData.countryCode})
+                      {submittedData.city} {submittedData.areaLocality ? `· ${submittedData.areaLocality}` : ''}
                     </span>
                   </div>
-                  {activePersona === 'customer' && (
+                  {activePersona === 'restaurant' && submittedData.businessName && (
                     <div className="flex justify-between text-xs">
-                      <span className="text-[#5B5F66]">TARGET PLATFORM:</span>
-                      <span className="text-white">{submittedData.devicePlatform}</span>
+                      <span className="text-[#5B5F66] font-semibold">BUSINESS:</span>
+                      <span className="text-white">{submittedData.businessName} ({submittedData.businessType || 'Restaurant'})</span>
                     </div>
                   )}
-                  {activePersona === 'restaurant' && (
+                  {activePersona === 'rider' && submittedData.vehicleType && (
                     <div className="flex justify-between text-xs">
-                      <span className="text-[#5B5F66]">BRAND NAME:</span>
-                      <span className="text-white">{submittedData.businessName}</span>
-                    </div>
-                  )}
-                  {activePersona === 'rider' && (
-                    <div className="flex justify-between text-xs">
-                      <span className="text-[#5B5F66]">TRANSPORT MODE:</span>
+                      <span className="text-[#5B5F66] font-semibold">TRANSPORT:</span>
                       <span className="text-white">{submittedData.vehicleType}</span>
                     </div>
                   )}
+                </div>
+
+                {/* Clear Next Steps & Support Channel */}
+                <div className="mb-6 p-3.5 bg-[#17191E] border-l-2 border-l-[#10B981] text-xs font-sans space-y-1">
+                  <span className="text-white font-bold block uppercase tracking-wider">Next Steps:</span>
+                  <p className="text-[#8C9099] font-sans text-xs">
+                    Please keep your Reference Code handy. If you have questions or need to provide documentation, reach out to our team at{' '}
+                    <a href="mailto:support@speedymealservices.com" className="text-white underline hover:text-[#10B981]">
+                      support@speedymealservices.com
+                    </a>{' '}
+                    or WhatsApp{' '}
+                    <a href="https://wa.me/923000000000" target="_blank" rel="noopener noreferrer" className="text-[#10B981] underline">
+                      +92 300 0000000
+                    </a>.
+                  </p>
                 </div>
 
                 <div className="flex space-x-3">
                   <button
                     type="button"
                     onClick={() => handleReset(activePersona)}
-                    className={`px-6 py-3.5 text-xs font-mono uppercase tracking-widest font-bold border transition-colors duration-150 flex items-center space-x-2 cursor-pointer ${activePersona === 'customer'
+                    className={`px-6 py-3.5 text-xs font-sans uppercase tracking-wider font-bold border transition-colors duration-150 flex items-center space-x-2 cursor-pointer ${activePersona === 'customer'
                       ? 'bg-tan text-ink border-tan hover:bg-white hover:text-ink hover:border-white'
                       : activePersona === 'restaurant'
                         ? 'bg-blue text-white border-blue hover:bg-white hover:text-blue hover:border-white'
@@ -790,7 +820,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 className="space-y-6"
               >
                 {error && (
-                  <div className="p-4 border border-[#E23A2E]/50 bg-[#E23A2E]/10 text-xs font-mono text-[#E23A2E] flex items-center justify-between">
+                  <div className="p-4 border border-[#E23A2E]/50 bg-[#E23A2E]/10 text-xs font-sans text-[#E23A2E] flex items-center justify-between">
                     <span>{error}</span>
                     <button
                       type="button"
@@ -803,7 +833,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Full Name */}
+                  {/* Row 1, Col 1: Authorized Representative / Full Legal Name / Full Name */}
                   <div className="space-y-2">
                     <label
                       htmlFor="form-full-name"
@@ -833,24 +863,29 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     />
                   </div>
 
-                  {/* Persona-specific secondary field */}
+                  {/* Row 1, Col 2: Partner Business Type (Merchant) or Platform (Customer) or Mode of Transport (Rider) */}
                   {activePersona === 'restaurant' ? (
                     <div className="space-y-2">
                       <label
-                        htmlFor="form-business-name"
+                        htmlFor="form-business-type"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.restaurantBrandName} *
+                        {t.partnerBusinessType} *
                       </label>
-                      <input
-                        id="form-business-name"
-                        type="text"
-                        required
-                        value={formData.businessName}
-                        onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                        placeholder="e.g. Damascus Charcoal Grill"
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874] transition-colors`}
-                      />
+                      <select
+                        id="form-business-type"
+                        value={formData.businessType || 'Restaurant'}
+                        onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#1E5FA8] transition-colors cursor-pointer`}
+                      >
+                        <option value="Restaurant">Restaurant</option>
+                        <option value="Home Kitchen">Home Kitchen</option>
+                        <option value="Grocery / Mart">Grocery / Mart</option>
+                        <option value="Pharmacy">Pharmacy</option>
+                        <option value="Bakery / Sweets">Bakery / Sweets</option>
+                        <option value="Cafe / Beverages">Cafe / Beverages</option>
+                        <option value="Other Retail">Other Retail</option>
+                      </select>
                     </div>
                   ) : activePersona === 'customer' ? (
                     <div className="space-y-2">
@@ -864,7 +899,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         id="form-platform"
                         value={formData.devicePlatform}
                         onChange={(e) => setFormData({ ...formData, devicePlatform: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#1E5FA8] transition-colors`}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#C7A874] transition-colors cursor-pointer`}
                       >
                         <option value="iOS (Apple TestFlight Beta)">iOS (Apple TestFlight Beta)</option>
                         <option value="Android (Google Play Beta)">Android (Google Play Beta)</option>
@@ -883,7 +918,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         id="form-vehicle"
                         value={formData.vehicleType}
                         onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#E23A2E] transition-colors`}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#E23A2E] transition-colors cursor-pointer`}
                       >
                         <option value="Motorcycle">Motorcycle (125cc - 250cc)</option>
                         <option value="Electric Scooter">Electric Scooter / E-Bike</option>
@@ -893,35 +928,96 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     </div>
                   )}
 
-                  {/* Anti-Bot Honeypot Trap (Hidden from users) */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute -top-[9999px] -left-[9999px] opacity-0 pointer-events-none w-0 h-0 overflow-hidden"
-                  >
-                    <label htmlFor="form-website-url">Website verification</label>
-                    <input
-                      id="form-website-url"
-                      name="website_url"
-                      type="text"
-                      tabIndex={-1}
-                      autoComplete="off"
-                      value={formData.honeypot || ''}
-                      onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
-                    />
-                  </div>
+                  {/* Row 2, Col 1: Business / Brand Name (Merchant) or Service Interest (Customer) or Experience (Rider) */}
+                  {activePersona === 'restaurant' ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-business-name"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.restaurantBrandName} *
+                      </label>
+                      <input
+                        id="form-business-name"
+                        type="text"
+                        required
+                        value={formData.businessName}
+                        onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                        placeholder="e.g. Damascus Charcoal Grill"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8] transition-colors`}
+                      />
+                    </div>
+                  ) : activePersona === 'customer' ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-interest"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.primaryServiceInterest}
+                      </label>
+                      <select
+                        id="form-interest"
+                        value={formData.serviceInterest}
+                        onChange={(e) => setFormData({ ...formData, serviceInterest: e.target.value })}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#C7A874] cursor-pointer`}
+                      >
+                        <option value="Zero-Markup Food Delivery">Zero-Markup Food Delivery</option>
+                        <option value="Express Courier & Parcel">Express Courier & Parcel</option>
+                        <option value="Groceries & Daily Essentials">Groceries & Daily Essentials</option>
+                        <option value="All Speedy Services">All Speedy Services</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-experience"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.deliveryExperience}
+                      </label>
+                      <select
+                        id="form-experience"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#E23A2E] cursor-pointer`}
+                      >
+                        <option>Over 1 Year (Active courier)</option>
+                        <option>6 - 12 Months</option>
+                        <option>New Courier (Needs onboarding)</option>
+                      </select>
+                    </div>
+                  )}
 
-                  {/* Email Address with Uniqueness Protection */}
+                  {/* Row 2, Col 2: Primary Category / Specialties (in English) for Merchant */}
+                  {activePersona === 'restaurant' && (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-primary-category"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.primaryCuisineCategory}
+                      </label>
+                      <input
+                        id="form-primary-category"
+                        type="text"
+                        value={formData.primaryCategory || ''}
+                        onChange={(e) => setFormData({ ...formData, primaryCategory: e.target.value })}
+                        placeholder="e.g. Biryani &amp; Kebabs, Cafe, Pizza"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8]`}
+                      />
+                    </div>
+                  )}
+
+                  {/* Row 3, Col 1: Email Address (Optional for Merchant/Rider, Required for Customer) */}
                   <div className="space-y-2">
                     <label
                       htmlFor="form-email"
                       className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                     >
-                      {t.emailAddress} *
+                      {activePersona === 'customer' ? `${t.fullName.includes('نام') ? 'ای میل کا پتہ' : 'Email Address'} *` : t.emailAddress}
                     </label>
                     <input
                       id="form-email"
                       type="email"
-                      required
+                      required={activePersona === 'customer'}
                       value={formData.email}
                       onChange={(e) => {
                         setFormData({ ...formData, email: e.target.value });
@@ -929,18 +1025,18 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                           setFieldErrors(prev => ({ ...prev, email: undefined }));
                         }
                       }}
-                      placeholder="contact@domain.com"
+                      placeholder="contact@domain.com (optional)"
                       className={`w-full bg-[#1A1D23] border px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors ${fieldErrors.email ? 'border-[#E23A2E]' : 'border-[#373C46]'
                         }`}
                     />
                     {fieldErrors.email && (
-                      <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
+                      <div className="text-xs font-sans text-[#E23A2E] pt-0.5">
                         {fieldErrors.email}
                       </div>
                     )}
                   </div>
 
-                  {/* Phone with Country Code Selector & Region-Specific Validation */}
+                  {/* Row 3, Col 2: Phone Number with Country Code Selector */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label
@@ -949,7 +1045,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       >
                         {t.phoneNumber} *
                       </label>
-                      <span className="font-mono text-[11px] text-[#8C9099]">
+                      <span className="font-sans text-xs text-[#8C9099]">
                         {currentRegion.flag} {currentRegion.country}
                       </span>
                     </div>
@@ -958,7 +1054,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         id="form-country-code"
                         value={formData.countryCode}
                         onChange={(e) => handleCountryCodeChange(e.target.value)}
-                        className="bg-[#262A32] border border-r-0 border-[#373C46] px-3 py-3.5 text-xs text-white font-mono focus:outline-none cursor-pointer"
+                        className="bg-[#262A32] border border-r-0 border-[#373C46] px-3 py-3.5 text-xs text-white font-sans focus:outline-none cursor-pointer"
                       >
                         {Object.entries(SUPPORTED_REGIONS).map(([code, reg]) => (
                           <option key={code} value={code}>
@@ -974,7 +1070,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                           value={formData.phone}
                           onChange={(e) => handlePhoneChange(e.target.value)}
                           placeholder={currentRegion.placeholder}
-                          className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors font-mono ${fieldErrors.phone
+                          className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors font-sans ${fieldErrors.phone
                             ? 'border-[#E23A2E]'
                             : formData.phone.length > 0
                               ? phoneValidation.isValid
@@ -991,30 +1087,30 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       </div>
                     </div>
 
-                    {/* Regional Format Guidance & Real-time Validation Message */}
+                    {/* Regional Format Guidance */}
                     {fieldErrors.phone ? (
-                      <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
+                      <div className="text-xs font-sans text-[#E23A2E] pt-0.5">
                         {fieldErrors.phone}
                       </div>
                     ) : formData.phone.length > 0 ? (
                       phoneValidation.isValid ? (
-                        <div className="flex items-center space-x-1.5 text-[11px] font-mono text-[#10B981] pt-0.5">
+                        <div className="flex items-center space-x-1.5 text-xs font-sans text-[#10B981] pt-0.5">
                           <Check size={13} weight="bold" />
                           <span>Valid {currentRegion.country} phone: {phoneValidation.fullInternational}</span>
                         </div>
                       ) : (
-                        <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
+                        <div className="text-xs font-sans text-[#E23A2E] pt-0.5">
                           {phoneValidation.error}
                         </div>
                       )
                     ) : (
-                      <div className="text-[11px] font-mono text-[#5B5F66] pt-0.5">
+                      <div className="text-xs font-sans text-[#5B5F66] pt-0.5">
                         Format: {currentRegion.helper}
                       </div>
                     )}
                   </div>
 
-                  {/* City Selection with Regional Optgroups & Others option */}
+                  {/* Row 4, Col 1: Operating City */}
                   <div className="space-y-2">
                     <label
                       htmlFor="form-city"
@@ -1047,7 +1143,6 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       </optgroup>
                     </select>
 
-                    {/* Conditional input field when 'Other' is selected */}
                     {formData.city === 'Other' && (
                       <motion.div
                         initial={{ opacity: 0, y: -4 }}
@@ -1056,7 +1151,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       >
                         <label
                           htmlFor="form-custom-city"
-                          className="block font-mono text-xs uppercase tracking-wider text-tan"
+                          className="block font-sans text-xs uppercase tracking-wider text-tan font-bold"
                         >
                           Please Specify Your City / Area *
                         </label>
@@ -1069,69 +1164,67 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                           placeholder="e.g. Kasur, Sheikhupura, Sargodha, Abbottabad, etc."
                           className={`w-full bg-[#1A1D23] border border-[#B89865] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors`}
                         />
-                        <p className="font-mono text-[10px] text-[#A0A4AB]">
-                          We log unlisted locations to prioritize our next dispatch zone deployments.
-                        </p>
                       </motion.div>
                     )}
                   </div>
 
-                  {/* Additional Persona-Specific Question */}
+                  {/* Row 4, Col 2: Area / Locality (Merchant) */}
                   {activePersona === 'restaurant' ? (
                     <div className="space-y-2">
                       <label
-                        htmlFor="form-cuisine"
+                        htmlFor="form-area-locality"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.primaryCuisineCategory}
+                        {t.areaLocality} *
                       </label>
                       <input
-                        id="form-cuisine"
+                        id="form-area-locality"
                         type="text"
-                        value={formData.cuisineType}
-                        onChange={(e) => setFormData({ ...formData, cuisineType: e.target.value })}
-                        placeholder="e.g. Biryani & Kebabs, Cafe, Pizza"
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#C7A874]`}
+                        required
+                        value={formData.areaLocality || ''}
+                        onChange={(e) => setFormData({ ...formData, areaLocality: e.target.value })}
+                        placeholder="e.g. DHA Phase 5, Gulberg, Olaya, Al-Malaz"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8]`}
                       />
                     </div>
-                  ) : activePersona === 'customer' ? (
-                    <div className="space-y-2">
+                  ) : null}
+
+                  {/* Row 5: Street Address / Building (Optional) for Merchant (Full Width Span 2) */}
+                  {activePersona === 'restaurant' && (
+                    <div className="md:col-span-2 space-y-2">
                       <label
-                        htmlFor="form-interest"
+                        htmlFor="form-street-address"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.primaryServiceInterest}
+                        {t.streetAddress}
                       </label>
-                      <select
-                        id="form-interest"
-                        value={formData.serviceInterest}
-                        onChange={(e) => setFormData({ ...formData, serviceInterest: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#1E5FA8]`}
-                      >
-                        <option value="Zero-Markup Food Delivery">Zero-Markup Food Delivery</option>
-                        <option value="Express Courier & Parcel">Express Courier & Parcel</option>
-                        <option value="Groceries & Daily Essentials">Groceries & Daily Essentials</option>
-                        <option value="All Speedy Services">All Speedy Services</option>
-                      </select>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="form-experience"
-                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                      >
-                        {t.deliveryExperience}
-                      </label>
-                      <select
-                        id="form-experience"
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#E23A2E]`}
-                      >
-                        <option>Over 1 Year (Active courier)</option>
-                        <option>6 - 12 Months</option>
-                        <option>New Courier (Needs onboarding)</option>
-                      </select>
+                      <input
+                        id="form-street-address"
+                        type="text"
+                        value={formData.streetAddress || ''}
+                        onChange={(e) => setFormData({ ...formData, streetAddress: e.target.value })}
+                        placeholder="e.g. Building 4B, Street 12, Floor 2"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8]`}
+                      />
                     </div>
                   )}
+
+                  {/* Anti-Bot Honeypot Trap (Hidden from users) */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute -top-[9999px] -left-[9999px] opacity-0 pointer-events-none w-0 h-0 overflow-hidden"
+                  >
+                    <label htmlFor="form-website-url">Website verification</label>
+                    <input
+                      id="form-website-url"
+                      name="website_url"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formData.honeypot || ''}
+                      onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
+                    />
+                  </div>
                 </div>
 
                 {/* Terms agreement */}
@@ -1163,17 +1256,27 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     >
                       {t.termsLink}
                     </Link>
+                    <span> and </span>
+                    <Link
+                      id="link-privacy-agreement"
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white underline underline-offset-2 hover:text-red transition-colors font-semibold inline"
+                    >
+                      {t.privacyLink}
+                    </Link>
                     {t.agreementSuffix}
                   </label>
                 </div>
 
                 {/* Submit Action */}
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-[#373C46]">
-                  <div className="font-mono text-xs text-[#8C9099]">
+                  <div className="font-sans text-xs text-[#8C9099]">
                     {activePersona === 'customer' ? (
                       <>
-                        <span className="uppercase">{t.waitlistStatus}: </span>
-                        <span className="text-tan font-bold uppercase">{t.priorityBatch}</span>
+                        <span className="uppercase text-[#9A7A4A] font-bold">VIP: </span>
+                        <span className="text-[#C7A874] font-bold uppercase">50% off your first 3 orders</span>
                       </>
                     ) : (
                       <>
@@ -1221,30 +1324,6 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               </motion.form>
             )}
           </AnimatePresence>
-
-          {/* Trust Signals repeated near conversion */}
-          <div className="mt-10 pt-8 border-t border-[#373C46] grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
-            <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <div className="w-8 h-8 rounded-xs bg-red/10 border border-red/20 flex items-center justify-center shrink-0">
-                <Coins size={18} weight="bold" className="text-red" />
-              </div>
-              <span>100% delivery fee to rider</span>
-            </div>
-
-            <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <div className="w-8 h-8 rounded-xs bg-blue/10 border border-blue/20 flex items-center justify-center shrink-0">
-                <Percent size={18} weight="bold" className="text-blue" />
-              </div>
-              <span>10% flat merchant commission</span>
-            </div>
-
-            <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <div className="w-8 h-8 rounded-xs bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center shrink-0">
-                <ShieldCheck size={18} weight="bold" className="text-[#10B981]" />
-              </div>
-              <span>4000 security deposit required</span>
-            </div>
-          </div>
         </div>
       </div>
     </section>

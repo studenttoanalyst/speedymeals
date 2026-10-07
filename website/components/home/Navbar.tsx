@@ -156,66 +156,41 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           </span>
         </Link>
 
-        {/* Desktop 1:1 Anchor Navigation with Tan Capsule Active Styling & Signature Glowing Tubelight */}
+        {/* Desktop Anchor Navigation: How it works · Registration · About */}
         <nav className="hidden md:flex items-center space-x-1 bg-white/40 backdrop-blur-md border border-white/60 p-1 nav-pill shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_2px_8px_rgba(0,0,0,0.03)]">
           {[
-            { id: 'overview', label: 'Home' },
-            { id: 'services', label: 'Services' },
-            { id: 'partner', label: 'Partner' },
-            { id: 'about', label: 'About Us' },
-          ].map((item) => {
-            const isActive = isAboutPage ? item.id === 'about' : activeSection === item.id;
+            { id: 'services', label: 'How it works' },
+            { id: 'partner', label: 'Registration' },
+            { id: 'about', label: 'About' },
+          ].map((item, idx) => {
+            const isAboutActive = isAboutPage && item.id === 'about';
             return (
               <button
-                key={item.id}
-                id={`nav-link-${item.id}`}
+                key={`${item.id}-${item.label}-${idx}`}
+                id={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                 type="button"
                 onClick={() => handleNavClick(item.id as 'overview' | 'services' | 'partner' | 'about')}
-                className={`nav-pill relative px-4 py-2 font-mono text-xs uppercase tracking-widest transition-colors duration-150 cursor-pointer ${isActive
-                  ? 'text-black font-bold'
-                  : 'text-ink-soft hover:text-ink'
+                className={`nav-pill relative px-3.5 py-2 font-mono text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer ${isAboutActive
+                  ? 'text-black font-bold bg-tan/20'
+                  : 'text-ink-soft hover:text-ink hover:bg-paper-off/50'
                   }`}
               >
                 <span className="relative z-10">{item.label}</span>
-                {isActive && (
-                  <motion.div
-                    layoutId="navbar-tubelight-lamp"
-                    className="nav-pill absolute inset-0 bg-tan border border-[#B89865] shadow-xs -z-10"
-                    transition={{
-                      type: 'spring',
-                      stiffness: 350,
-                      damping: 30,
-                    }}
-                  >
-                    {/* Signature glowing red tubelight bar */}
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-red rounded-t-full shadow-[0_0_10px_#E23A2E]" />
-                  </motion.div>
-                )}
               </button>
             );
           })}
         </nav>
 
-        {/* Right Action CTAs: pill shaped on desktop */}
+        {/* Right Action CTAs: One CTA "Get early access" + Portals Menu */}
         <div className="hidden lg:flex items-center space-x-2.5 shrink-0">
           <button
-            id="nav-cta-ride"
+            id="nav-cta-early-access"
             type="button"
-            onClick={() => handleNavClick('partner', 'rider')}
-            className="nav-pill px-3.5 py-2 text-xs font-mono font-semibold tracking-wider uppercase border border-red text-red hover:bg-red hover:text-white transition-colors duration-150 flex items-center space-x-1.5 cursor-pointer"
+            onClick={() => handleNavClick('partner', 'customer')}
+            className="nav-pill px-4 py-2 text-xs font-mono font-bold tracking-wider uppercase bg-[#C7A874] text-[#15171A] hover:bg-[#B3935B] transition-colors duration-150 flex items-center space-x-1.5 cursor-pointer shadow-xs"
           >
-            <span>RIDER</span>
-            <ArrowUpRight size={13} weight="bold" />
-          </button>
-
-          <button
-            id="nav-cta-restaurant"
-            type="button"
-            onClick={() => handleNavClick('partner', 'restaurant')}
-            className="nav-pill px-3.5 py-2 text-xs font-mono font-semibold tracking-wider uppercase border border-blue text-blue hover:bg-blue hover:text-white transition-colors duration-150 flex items-center space-x-1.5 cursor-pointer"
-          >
-            <span>PARTNER</span>
-            <ArrowUpRight size={13} weight="bold" />
+            <span>Get VIP access</span>
+            <ArrowRight size={13} weight="bold" />
           </button>
 
           {/* Interactive Portals Button & Flyout Menu */}
@@ -224,7 +199,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               id="nav-cta-portals"
               type="button"
               onClick={() => setPortalsOpen((prev) => !prev)}
-              className={`nav-pill px-3.5 py-2 text-xs font-mono font-semibold tracking-wider uppercase transition-all duration-150 flex items-center space-x-1.5 cursor-pointer ${sessionRole === 'admin'
+              className={`nav-pill px-3 py-2 text-xs font-mono font-semibold tracking-wider uppercase transition-all duration-150 flex items-center space-x-1.5 cursor-pointer ${sessionRole === 'admin'
                 ? 'border border-ink bg-ink text-white hover:bg-black shadow-xs'
                 : sessionRole === 'restaurant'
                   ? 'border border-blue bg-blue text-white hover:bg-[#155ab6] shadow-xs'
@@ -241,9 +216,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               )}
               <span>
                 {sessionRole === 'admin'
-                  ? 'ADMIN CONSOLE'
+                  ? 'ADMIN'
                   : sessionRole === 'restaurant'
-                    ? 'RESTAURANT PORTAL'
+                    ? 'MERCHANT'
                     : 'PORTALS'}
               </span>
               <CaretDown
@@ -253,121 +228,68 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               />
             </button>
 
-            {/* Interactive Dropdown Popover */}
+            {/* Clean Minimal Dropdown */}
             <AnimatePresence>
               {portalsOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-84 sm:w-92 bg-white border border-line shadow-2xl p-4 z-50 text-left font-sans"
-                  style={{ borderRadius: '0px' }}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute right-0 top-full mt-2 w-56 bg-white border border-line shadow-xl py-2 z-50 rounded-xl"
                 >
-                  {/* Popover Header */}
-                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-line">
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2 h-2 bg-red inline-block" style={{ borderRadius: '0px' }} />
-                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink font-bold">
-                        SPEEDYMEALS PORTALS
-                      </span>
-                    </div>
-                    <span className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 bg-paper-off border border-line text-ink-soft">
-                      {sessionRole ? 'AUTHENTICATED' : 'SIGN IN / ENTER'}
+                  <div className="px-3 pb-2 mb-1 border-b border-line">
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-ink-soft font-bold">
+                      SpeedyMeals Portals
                     </span>
                   </div>
 
-                  {/* Portal Option 1: Restaurant Partner Portal */}
                   <Link
                     href="/restaurant"
                     onClick={() => setPortalsOpen(false)}
                     id="portal-link-restaurant"
-                    className={`group block p-3 border transition-colors mb-2.5 ${sessionRole === 'restaurant'
-                      ? 'border-blue bg-blue/[0.04] hover:bg-blue/[0.08]'
-                      : 'border-line hover:border-blue hover:bg-paper-off'
-                      }`}
-                    style={{ borderRadius: '0px' }}
+                    className="flex items-center justify-between px-3 py-2.5 group hover:bg-paper-off transition-colors"
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center space-x-2">
-                        <div className="p-1.5 bg-blue/10 text-blue border border-blue/20">
-                          <Storefront size={16} weight="bold" />
-                        </div>
-                        <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink group-hover:text-blue transition-colors">
-                          Restaurant Portal
-                        </span>
-                      </div>
-                      <span
-                        className={`font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 border ${sessionRole === 'restaurant'
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-bold'
-                          : 'bg-paper-off border-line text-ink-soft'
-                          }`}
-                      >
-                        {sessionRole === 'restaurant' ? 'ACTIVE SESSION' : 'MERCHANT'}
+                    <div className="flex items-center space-x-2">
+                      <Storefront size={14} weight="bold" className="text-blue shrink-0" />
+                      <span className="font-sans text-sm text-ink group-hover:text-blue transition-colors">
+                        Merchant Portal
                       </span>
                     </div>
-                    <div className="flex items-center justify-between font-mono text-[11px] text-blue font-semibold pt-1 border-t border-line/60">
-                      <span>
-                        {sessionRole === 'restaurant'
-                          ? 'Open Restaurant Dashboard'
-                          : 'Sign In / Portal Login'}
-                      </span>
-                      <ArrowRight size={12} weight="bold" className="group-hover:translate-x-1 transition-transform" />
-                    </div>
+                    {sessionRole === 'restaurant' && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    )}
                   </Link>
 
-                  {/* Portal Option 2: Platform Admin Console */}
                   <Link
                     href="/admin"
                     onClick={() => setPortalsOpen(false)}
                     id="portal-link-admin"
-                    className={`group block p-3 border transition-colors ${sessionRole === 'admin'
-                      ? 'border-red bg-red/[0.04] hover:bg-red/[0.08]'
-                      : 'border-line hover:border-red hover:bg-paper-off'
-                      }`}
-                    style={{ borderRadius: '0px' }}
+                    className="flex items-center justify-between px-3 py-2.5 group hover:bg-paper-off transition-colors"
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center space-x-2">
-                        <div className="p-1.5 bg-red/10 text-red border border-red/20">
-                          <ShieldCheck size={16} weight="bold" />
-                        </div>
-                        <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink group-hover:text-red transition-colors">
-                          Admin Console
-                        </span>
-                      </div>
-                      <span
-                        className={`font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 border ${sessionRole === 'admin'
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-bold'
-                          : 'bg-paper-off border-line text-ink-soft'
-                          }`}
-                      >
-                        {sessionRole === 'admin' ? 'ACTIVE SESSION' : 'RESTRICTED'}
+                    <div className="flex items-center space-x-2">
+                      <ShieldCheck size={14} weight="bold" className="text-red shrink-0" />
+                      <span className="font-sans text-sm text-ink group-hover:text-red transition-colors">
+                        Admin Console
                       </span>
                     </div>
-                    <div className="flex items-center justify-between font-mono text-[11px] text-red font-semibold pt-1 border-t border-line/60">
-                      <span>
-                        {sessionRole === 'admin' ? 'Open Admin Dashboard' : 'Admin Console Login'}
-                      </span>
-                      <ArrowRight size={12} weight="bold" className="group-hover:translate-x-1 transition-transform" />
-                    </div>
+                    {sessionRole === 'admin' && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    )}
                   </Link>
 
-                  {/* Active Session Footer with Sign Out */}
                   {sessionRole && (
-                    <div className="mt-3 pt-3 border-t border-line flex items-center justify-between font-mono text-[11px]">
-                      <div className="text-ink-soft truncate max-w-[180px]">
-                        <span className="text-ink font-semibold">
-                          {sessionUser?.name || sessionUser?.email || sessionRole.toUpperCase()}
-                        </span>
-                      </div>
+                    <div className="px-3 pt-2 mt-1 border-t border-line flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-ink-soft truncate max-w-[100px]">
+                        {sessionUser?.name || sessionRole.toUpperCase()}
+                      </span>
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="text-red hover:text-ink font-bold flex items-center space-x-1 cursor-pointer transition-colors"
+                        className="text-red hover:text-ink font-mono text-[10px] font-bold flex items-center space-x-1 cursor-pointer transition-colors"
                       >
-                        <SignOut size={13} weight="bold" />
-                        <span>SIGN OUT</span>
+                        <SignOut size={11} weight="bold" />
+                        <span>Sign out</span>
                       </button>
                     </div>
                   )}
@@ -399,53 +321,53 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
         >
           <div className="flex flex-col space-y-1 font-mono text-xs uppercase tracking-widest">
             <button
-              id="mobile-link-overview"
-              type="button"
-              onClick={() => handleNavClick('overview')}
-              className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-lg ${activeSection === 'overview'
-                ? 'bg-tan text-black font-bold border-tan/60'
-                : 'text-ink hover:bg-paper-off'
-                }`}
-            >
-              <span>Home</span>
-              <span className={activeSection === 'overview' ? 'text-black' : 'text-ink-soft'}>→</span>
-            </button>
-            <button
               id="mobile-link-services"
               type="button"
               onClick={() => handleNavClick('services')}
               className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-lg ${activeSection === 'services'
-                ? 'bg-tan text-black font-bold border-tan/60'
+                ? 'bg-tan/20 text-black font-bold'
                 : 'text-ink hover:bg-paper-off'
                 }`}
             >
-              <span>Services</span>
-              <span className={activeSection === 'services' ? 'text-black' : 'text-ink-soft'}>→</span>
+              <span>How it works</span>
+              <span className="text-ink-soft">→</span>
             </button>
             <button
-              id="mobile-link-partner"
+              id="mobile-link-registration"
               type="button"
               onClick={() => handleNavClick('partner')}
               className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-lg ${activeSection === 'partner'
-                ? 'bg-tan text-black font-bold border-tan/60'
+                ? 'bg-tan/20 text-black font-bold'
                 : 'text-ink hover:bg-paper-off'
                 }`}
             >
-              <span>Partner</span>
-              <span className={activeSection === 'partner' ? 'text-black' : 'text-ink-soft'}>→</span>
+              <span>Registration</span>
+              <span className="text-ink-soft">→</span>
             </button>
             <button
               id="mobile-link-about"
               type="button"
               onClick={() => handleNavClick('about')}
               className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-lg ${isAboutPage
-                ? 'bg-tan text-black font-bold border-tan/60'
+                ? 'bg-tan/20 text-black font-bold'
                 : 'text-ink hover:bg-paper-off'
                 }`}
             >
-              <span>About Us</span>
-              <span className={isAboutPage ? 'text-black' : 'text-ink-soft'}>→</span>
+              <span>About</span>
+              <span className="text-ink-soft">→</span>
             </button>
+
+            <div className="pt-2">
+              <button
+                id="mobile-link-early-access"
+                type="button"
+                onClick={() => handleNavClick('partner', 'customer')}
+                className="w-full py-3 px-4 bg-[#C7A874] text-[#15171A] font-mono font-bold uppercase tracking-wider rounded-lg flex justify-center items-center space-x-2"
+              >
+                <span>Get VIP access</span>
+                <ArrowRight size={13} weight="bold" />
+              </button>
+            </div>
 
             {/* Mobile Portal Navigation Links */}
             <Link
@@ -507,7 +429,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               onClick={() => handleNavClick('partner', 'restaurant')}
               className="nav-pill w-full py-2.5 text-center border border-blue text-blue hover:bg-blue hover:text-white transition-colors"
             >
-              Partner
+              Merchant
             </button>
             <button
               id="mobile-cta-customer"
@@ -515,7 +437,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               onClick={() => handleNavClick('partner', 'customer')}
               className="nav-pill w-full py-2.5 text-center border border-tan text-[#A8874E] hover:bg-tan hover:text-ink transition-colors"
             >
-              Waitlist
+              Customer
             </button>
           </div>
         </div>

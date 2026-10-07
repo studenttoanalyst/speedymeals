@@ -149,7 +149,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                     className="text-[#A0A4AB] hover:text-red transition-colors cursor-pointer flex items-center space-x-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-red inline-block" />
-                    <span>Ride with Us</span>
+                    <span>Deliver with SpeedyMeals</span>
                   </button>
                 </li>
                 <li>
@@ -159,7 +159,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                     className="text-[#A0A4AB] hover:text-blue transition-colors cursor-pointer flex items-center space-x-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-blue inline-block" />
-                    <span>Partner Restaurant</span>
+                    <span>List your restaurant</span>
                   </button>
                 </li>
                 <li>

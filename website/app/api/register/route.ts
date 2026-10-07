@@ -127,7 +127,7 @@ export async function POST(request: Request) {
     // 4. Input sanitization & Unicode normalization (NFKC)
     const personName = sanitizeTextInput(fullName || name, { maxLength: 80 });
     const contactPhone = (phone || phoneNumber || '').trim();
-    const contactEmail = sanitizeTextInput(email, { maxLength: 254 }).toLowerCase();
+    const contactEmail = email ? sanitizeTextInput(email, { maxLength: 254 }).toLowerCase() : '';
 
     // Resolve city: Strictly save the actual user-typed city name and NEVER "Other" or "Others"
     const rawCityStr = typeof city === 'string' ? city.trim() : '';
@@ -168,15 +168,30 @@ export async function POST(request: Request) {
 
     const sanitizedCity = sanitizeTextInput(resolvedCity, { maxLength: 50 }) || 'Karachi';
     const sanitizedBusinessName = businessName ? sanitizeTextInput(businessName, { maxLength: 100 }) : null;
-    const sanitizedCuisineType = cuisineType ? sanitizeTextInput(cuisineType, { maxLength: 50 }) : null;
+    const rawBusinessType = body.businessType || '';
+    const rawPrimaryCategory = body.primaryCategory || cuisineType || '';
+    const combinedCuisineOrCategory = rawBusinessType && rawPrimaryCategory 
+      ? `${rawBusinessType} - ${rawPrimaryCategory}`
+      : (rawPrimaryCategory || rawBusinessType || null);
+    const sanitizedCuisineType = combinedCuisineOrCategory ? sanitizeTextInput(combinedCuisineOrCategory, { maxLength: 100 }) : null;
     const sanitizedVehicleType = vehicleType ? sanitizeTextInput(vehicleType, { maxLength: 50 }) : null;
     const sanitizedDevicePlatform = devicePlatform ? sanitizeTextInput(devicePlatform, { maxLength: 50 }) : null;
     const sanitizedServiceInterest = serviceInterest ? sanitizeTextInput(serviceInterest, { maxLength: 100 }) : null;
+    const sanitizedArea = (body.areaLocality || body.area) ? sanitizeTextInput(body.areaLocality || body.area, { maxLength: 100 }) : null;
+    const sanitizedAddress = (body.streetAddress || body.address) ? sanitizeTextInput(body.streetAddress || body.address, { maxLength: 200 }) : null;
 
     // 5. Basic field presence & minimum length validation
-    if (!personName || personName.length < 2 || !contactEmail || !contactPhone || !persona) {
+    // For merchant, email is explicitly optional (only name, phone, city, and businessName are required)
+    const isEmailRequired = persona === 'customer';
+    if (!personName || personName.length < 2 || !contactPhone || !persona) {
       return NextResponse.json(
-        { error: 'Missing or invalid required fields: name, email, phone, and persona are required.' },
+        { error: 'Missing or invalid required fields: name, phone, and persona are required.' },
+        { status: 400 }
+      );
+    }
+    if (isEmailRequired && !contactEmail) {
+      return NextResponse.json(
+        { error: 'Email address is required for customer waitlist.', field: 'email' },
         { status: 400 }
       );
     }
@@ -185,7 +200,9 @@ export async function POST(request: Request) {
     if (
       containsPromptInjection(personName) ||
       containsPromptInjection(sanitizedBusinessName || '') ||
-      containsPromptInjection(sanitizedCuisineType || '')
+      containsPromptInjection(sanitizedCuisineType || '') ||
+      containsPromptInjection(sanitizedArea || '') ||
+      containsPromptInjection(sanitizedAddress || '')
     ) {
       console.warn(`[Security Alert] Prompt injection / SQL attack pattern detected from IP ${clientIp}`);
       return NextResponse.json(
@@ -205,7 +222,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (isReservedEmail(contactEmail)) {
+    if (contactEmail && isReservedEmail(contactEmail)) {
       return NextResponse.json(
         {
           error: 'Administrative email aliases cannot be used for registration.',
@@ -215,13 +232,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // 8. Email format check (RFC 5322 compliant standard check)
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-    if (!emailRegex.test(contactEmail)) {
-      return NextResponse.json(
-        { error: 'Please provide a valid email address.', field: 'email' },
-        { status: 400 }
-      );
+    // 8. Email format check (RFC 5322 compliant standard check if email was supplied)
+    if (contactEmail) {
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+      if (!emailRegex.test(contactEmail)) {
+        return NextResponse.json(
+          { error: 'Please provide a valid email address.', field: 'email' },
+          { status: 400 }
+        );
+      }
     }
 
     // 9. Regional phone format verification
@@ -267,26 +286,28 @@ export async function POST(request: Request) {
 
     const db = getDbClient();
 
-    // 10. Uniqueness Enforcement: Check if Email already exists
-    const { data: existingEmail, error: emailCheckError } = await db
-      .from('partner_registrations')
-      .select('id, email')
-      .ilike('email', contactEmail)
-      .limit(1)
-      .maybeSingle();
+    // 10. Uniqueness Enforcement: Check if Email already exists (only if contactEmail is provided)
+    if (contactEmail) {
+      const { data: existingEmail, error: emailCheckError } = await db
+        .from('partner_registrations')
+        .select('id, email')
+        .ilike('email', contactEmail)
+        .limit(1)
+        .maybeSingle();
 
-    if (emailCheckError && emailCheckError.code !== 'PGRST116') {
-      console.warn('[Supabase Email Check Warning]:', emailCheckError.message);
-    }
+      if (emailCheckError && emailCheckError.code !== 'PGRST116') {
+        console.warn('[Supabase Email Check Warning]:', emailCheckError.message);
+      }
 
-    if (existingEmail) {
-      return NextResponse.json(
-        {
-          error: 'This email address is already registered. Please use another email or sign in.',
-          field: 'email',
-        },
-        { status: 409 }
-      );
+      if (existingEmail) {
+        return NextResponse.json(
+          {
+            error: 'This email address is already registered. Please use another email or sign in.',
+            field: 'email',
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // 11. Uniqueness Enforcement: Check if Phone already exists for this country code
@@ -317,11 +338,11 @@ export async function POST(request: Request) {
     // 12. Insert new registration record with strict allowlisted payload (Mass Assignment defense)
     const referenceCode = generateReferenceCode(persona);
 
-    const insertPayload = {
+    const insertPayload: Record<string, unknown> = {
       reference_code: referenceCode,
       persona_type: persona,
       full_name: personName,
-      email: contactEmail,
+      email: contactEmail || null,
       phone: phoneValidation.formatted,
       country_code: countryCode,
       city: sanitizedCity,
@@ -330,6 +351,8 @@ export async function POST(request: Request) {
       cuisine_type: persona === 'restaurant' ? sanitizedCuisineType : null,
       device_platform: persona === 'customer' ? sanitizedDevicePlatform : null,
       service_interest: persona === 'customer' ? sanitizedServiceInterest : null,
+      area: sanitizedArea,
+      address: sanitizedAddress,
       agreed: Boolean(agreed),
       status: 'pending',
     };

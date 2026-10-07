@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowDown, ArrowRight, ShieldCheck, CurrencyCircleDollar, Coins } from '@phosphor-icons/react';
+import { ArrowRight } from '@phosphor-icons/react';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 const COVERED_COUNTRIES = [
@@ -28,7 +27,7 @@ const COVERED_COUNTRIES = [
 ];
 
 interface HeroSectionProps {
-  onSelectPersona: (persona: 'rider' | 'restaurant') => void;
+  onSelectPersona: (persona: 'rider' | 'restaurant' | 'customer') => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => {
@@ -77,7 +76,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
     };
   }, []);
 
-  const handleScrollToPartner = (persona: 'rider' | 'restaurant') => {
+  const handleScrollToPartner = (persona: 'rider' | 'restaurant' | 'customer') => {
     onSelectPersona(persona);
     const partnerSection = document.getElementById('partner');
     if (partnerSection) {
@@ -132,10 +131,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
     }),
   };
 
+  // FAST · FAIR · GLOBAL color cycle states
+  const taglineWords = [
+    { text: 'FAST.', colors: ['#15171A', '#E23A2E', '#1E5FA8'] },
+    { text: 'FAIR.', colors: ['#E23A2E', '#1E5FA8', '#15171A'] },
+    { text: 'GLOBAL.', colors: ['#1E5FA8', '#15171A', '#E23A2E'] },
+  ];
+  const [colorIndex, setColorIndex] = useState(0);
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    const id = setInterval(() => {
+      setColorIndex((prev) => (prev + 1) % 3);
+    }, 2200);
+    return () => clearInterval(id);
+  }, [shouldReduceMotion]);
+
   return (
     <section
       id="overview"
-      className="relative h-[100dvh] min-h-[640px] max-h-[1080px] flex flex-col justify-between pt-24 sm:pt-28 lg:pt-32 [@media(max-height:760px)]:pt-20 [@media(max-height:640px)]:pt-16 pb-2.5 sm:pb-3.5 overflow-hidden"
+      className="relative min-h-screen flex flex-col justify-between pt-16 sm:pt-20 lg:pt-24 pb-4 sm:pb-6 overflow-hidden"
     >
       <span id="about" className="absolute top-0 pointer-events-none" />
       {/* Dedicated White-ish Gradient Band for Top 35% of Hero */}
@@ -143,75 +157,53 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
 
       {/* Hero Content Container in structured vertical flow */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1 flex flex-col items-center justify-between min-h-0">
-        {/* Top: Eyebrow + Headlines: moved down for elegant breathing room below navbar */}
+        {/* Top: Eyebrow + Headlines matching Picture 5 */}
         <motion.div
           variants={containerVariants}
           initial={isMobile ? false : "hidden"}
           animate="visible"
-          className="max-w-5xl w-full flex flex-col items-center text-center shrink-0 pt-1 sm:pt-1.5 md:pt-2 z-20 relative"
+          className="max-w-5xl w-full flex flex-col items-center text-center shrink-0 pt-0 sm:pt-1 z-20 relative"
         >
-          {/* Eyebrow: FAST & SAFE TO YOU + SOUTH ASIA & MIDDLE EAST NETWORK */}
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 mb-1 sm:mb-1.5 px-2">
-            <span className="inline-flex items-center space-x-1.5">
-              <span className="relative flex h-2 w-2 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full bg-red opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 bg-red" />
-              </span>
-              <span
-                id="hero-eyebrow"
-                className="font-mono text-[9px] xs:text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] font-semibold text-red whitespace-nowrap"
-              >
-                FAST & SAFE TO YOU
-              </span>
+          {/* Eyebrow: ■ FAST & SAFE TO YOU ── SOUTH ASIA & MIDDLE EAST NETWORK */}
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 gap-y-1 mb-1.5 sm:mb-2 px-2">
+            <span className="w-2.5 h-2.5 bg-red inline-block shrink-0" />
+            <span
+              id="hero-eyebrow"
+              className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.22em] font-bold text-red whitespace-nowrap"
+            >
+              FAST & SAFE TO YOU
             </span>
-            <div className="h-px w-4 sm:w-10 bg-line shrink-0" />
-            <span className="font-mono text-[8.5px] xs:text-[9.5px] sm:text-[11px] text-ink-soft tracking-wider uppercase whitespace-nowrap">
+            <div className="h-px w-6 sm:w-12 bg-line shrink-0" />
+            <span className="font-mono text-[9.5px] sm:text-[11.5px] text-ink-soft tracking-[0.18em] uppercase whitespace-nowrap">
               SOUTH ASIA & MIDDLE EAST NETWORK
             </span>
           </motion.div>
 
-          {/* Line 1: SPEEDYMEALS in clean negative space */}
-          <motion.div variants={itemVariants} className="relative z-20 w-full mb-0.5">
+          {/* Headline: SPEEDY MEALS (Brand Name) + FAST. FAIR. GLOBAL. (smaller, switching colors) */}
+          <div className="relative z-20 w-full mb-1 sm:mb-2 text-center max-w-5xl mx-auto">
             <h1
               id="hero-headline"
-              className="font-display text-3xl sm:text-5xl lg:text-6xl xl:text-7xl [@media(max-height:760px)]:text-3xl [@media(max-height:640px)]:text-2xl tracking-tight text-ink uppercase leading-none text-center whitespace-nowrap"
+              className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] tracking-tight uppercase leading-[0.92] text-[#15171A] font-black text-center"
             >
               SPEEDY MEALS
             </h1>
-          </motion.div>
-
-          {/* Line 2: FAST. FAIR. GLOBAL. overlapping cleanly over the video's upper sky canvas */}
-          <motion.div variants={itemVariants} className="relative z-20 w-full mb-0">
-            <div className="inline-flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 font-display text-xl sm:text-3xl lg:text-4xl xl:text-5xl [@media(max-height:760px)]:text-2xl [@media(max-height:640px)]:text-xl uppercase leading-none drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
-              <motion.span
-                custom={1}
-                variants={wordVariants}
-                initial="hidden"
-                animate="visible"
-                className="inline-block hover:text-red hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
-              >
-                FAST.
-              </motion.span>
-              <motion.span
-                custom={2}
-                variants={wordVariants}
-                initial="hidden"
-                animate="visible"
-                className="inline-block text-red hover:text-tan hover:scale-105 transition-all duration-200 cursor-default transform origin-center font-extrabold"
-              >
-                FAIR.
-              </motion.span>
-              <motion.span
-                custom={3}
-                variants={wordVariants}
-                initial="hidden"
-                animate="visible"
-                className="inline-block hover:text-blue hover:scale-105 transition-all duration-200 cursor-default transform origin-center"
-              >
-                GLOBAL.
-              </motion.span>
+            <div
+              id="hero-tagline"
+              className="font-display text-xl sm:text-3xl md:text-4xl lg:text-[2.75rem] tracking-tight uppercase leading-tight text-center font-black mt-1 sm:mt-1.5"
+            >
+              {taglineWords.map((word, i) => (
+                <motion.span
+                  key={word.text}
+                  animate={{ color: word.colors[colorIndex] }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-block mr-2 sm:mr-3 last:mr-0"
+                  style={{ color: word.colors[0] }}
+                >
+                  {word.text}
+                </motion.span>
+              ))}
             </div>
-          </motion.div>
+          </div>
         </motion.div>
 
         {/* Video Animation: Pulled up to overlap behind FAST. FAIR. GLOBAL. with seamless perimeter fade into white */}
@@ -255,174 +247,99 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
           />
         </div>
 
-        {/* Lower Space: Vertically centered in the middle of the negative space below the video across all viewports */}
-        <div className="w-full flex-1 flex flex-col items-center justify-center min-h-0 my-auto">
-          <motion.div
-            variants={containerVariants}
-            initial={isMobile ? false : "hidden"}
-            animate="visible"
-            className="max-w-5xl w-full flex flex-col items-center text-center my-auto"
-          >
-            {/* Company detail block: 3 metrics (Rider, Merchant, Infrastructure) */}
-            {/* Company detail block: 3 metrics (Rider, Merchant, Infrastructure) */}
-            <motion.div
-              variants={itemVariants}
-              className="grid grid-cols-3 gap-1 sm:gap-2.5 mb-2.5 sm:mb-3 max-w-3xl w-full mx-auto font-mono text-left"
-            >
-              {/* Metric 1: Rider */}
-              <motion.div
-                whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
-                whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-1.5 sm:p-2.5 bg-paper border-x border-b border-line border-t-2 border-t-red shadow-xs hover:border-red hover:bg-red/[0.02] transition-all duration-200 text-left relative overflow-hidden cursor-default"
-              >
-                <div className="text-[7.5px] xs:text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
-                  <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-xs bg-red/10 flex items-center justify-center shrink-0">
-                      <CurrencyCircleDollar size={12} weight="bold" className="text-red group-hover:scale-110 transition-transform duration-200" />
-                    </span>
-                    <span className="truncate font-semibold text-ink">
-                      <span className="xs:hidden">RIDER</span>
-                      <span className="hidden xs:inline">RIDER REMUNERATION</span>
-                    </span>
-                  </span>
-                  <span className="w-1.5 h-1.5 bg-red opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
-                </div>
-                <div className="text-[10px] xs:text-xs sm:text-base font-bold text-ink group-hover:text-red transition-colors duration-150 truncate">
-                  100% Retained
-                </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">Zero commission on mileage</div>
-              </motion.div>
-
-              {/* Metric 2: Merchant */}
-              <motion.div
-                whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
-                whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-1.5 sm:p-2.5 bg-paper border-x border-b border-line border-t-2 border-t-blue shadow-xs hover:border-blue hover:bg-blue/[0.02] transition-all duration-200 text-left relative overflow-hidden cursor-default"
-              >
-                <div className="text-[7.5px] xs:text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
-                  <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-xs bg-blue/10 flex items-center justify-center shrink-0">
-                      <ShieldCheck size={12} weight="bold" className="text-blue group-hover:scale-110 transition-transform duration-200" />
-                    </span>
-                    <span className="truncate font-semibold text-ink">
-                      <span className="xs:hidden">MERCHANT</span>
-                      <span className="hidden xs:inline">MERCHANT CONTRACT</span>
-                    </span>
-                  </span>
-                  <span className="w-1.5 h-1.5 bg-blue opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
-                </div>
-                <div className="text-[10px] xs:text-xs sm:text-base font-bold text-ink group-hover:text-blue transition-colors duration-150 truncate">
-                  10% Flat Rate
-                </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">No gouging tiers</div>
-              </motion.div>
-
-              {/* Metric 3: Customers */}
-              <motion.div
-                whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
-                whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="group p-1.5 sm:p-2.5 bg-paper border-x border-b border-line border-t-2 border-t-tan shadow-xs hover:border-tan hover:bg-tan/[0.03] transition-all duration-200 text-left relative overflow-hidden cursor-default"
-              >
-                <div className="text-[7.5px] xs:text-[9px] sm:text-[10px] uppercase tracking-wider text-ink-soft flex items-center justify-between mb-0.5">
-                  <span className="flex items-center space-x-1 sm:space-x-1.5 truncate">
-                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-xs bg-tan/20 flex items-center justify-center shrink-0">
-                      <Coins size={12} weight="bold" className="text-tan group-hover:scale-110 transition-transform duration-200" />
-                    </span>
-                    <span className="truncate font-semibold text-ink">
-                      Customers
-                    </span>
-                  </span>
-                  <span className="w-1.5 h-1.5 bg-tan opacity-60 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
-                </div>
-                <div className="text-[10px] xs:text-xs sm:text-base font-bold text-ink group-hover:text-tan transition-colors duration-150 truncate">
-                  Speedy Points
-                </div>
-                <div className="text-[9px] sm:text-[10px] text-ink-soft hidden sm:block truncate">Loyalty points and more</div>
-              </motion.div>
-            </motion.div>
-
-            {/* Two CTAs: RIDE WITH US / PARTNER YOUR RESTAURANT: Responsive stack on mobile to prevent overflow */}
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-2.5 mb-0 w-full max-w-sm sm:max-w-xl mx-auto px-1"
-            >
-              <motion.button
-                id="hero-cta-ride"
-                type="button"
-                whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
-                whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
-                onClick={() => handleScrollToPartner('rider')}
-                className="group w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-red text-white font-mono text-[11px] sm:text-xs uppercase tracking-widest font-bold border border-red hover:bg-ink hover:border-ink transition-all duration-150 flex items-center justify-center space-x-2 shadow-xs hover:shadow-md cursor-pointer whitespace-nowrap"
-              >
-                <span>RIDE WITH US</span>
-                <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
-              </motion.button>
-
-              <motion.button
-                id="hero-cta-restaurant"
-                type="button"
-                whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
-                whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
-                onClick={() => handleScrollToPartner('restaurant')}
-                className="group w-full sm:w-auto px-4 sm:px-5 py-2.5 bg-transparent text-blue font-mono text-[11px] sm:text-xs uppercase tracking-widest font-bold border border-blue hover:bg-blue hover:text-white transition-all duration-150 flex items-center justify-center space-x-2 shadow-xs hover:shadow-md cursor-pointer whitespace-nowrap"
-              >
-                <span>PARTNER YOUR RESTAURANT</span>
-                <ArrowRight size={13} weight="bold" className="group-hover:translate-x-1 transition-transform duration-200 shrink-0" />
-              </motion.button>
-            </motion.div>
-
-            {/* Strategic Partner Authority Badge: Partnered with Pakistan Post (Logo-Only) */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-2.5 sm:mt-3 [@media(max-height:760px)]:mt-1.5 [@media(max-height:640px)]:mt-1 flex items-center justify-center"
-            >
-              <div
-                id="hero-partner-badge"
-                className="inline-flex items-center space-x-2.5 sm:space-x-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-paper/95 border border-line shadow-xs hover:border-red/40 hover:shadow-sm transition-all duration-200 cursor-default group"
-              >
-                <div className="flex items-center space-x-1.5">
-                  <span className="w-1.5 h-1.5 bg-red animate-pulse shrink-0" />
-                  <span className="font-mono text-[9px] sm:text-[10.5px] uppercase tracking-wider text-ink-soft font-bold">
-                    PARTNERED WITH
-                  </span>
-                </div>
-                <div className="h-5 sm:h-6 w-px bg-line" />
-                <div className="flex items-center">
-                  <Image
-                    src="/assets/pakistan-post.png"
-                    alt="Pakistan Post Official Partner"
-                    width={96}
-                    height={36}
-                    className="h-6 sm:h-7 md:h-8 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform duration-200"
-                    priority
+        {/* 3 DoorDash-Style Descriptive Cards: Generous white space gap from video, no overlap */}
+        <div className="w-full max-w-6xl mx-auto shrink-0 z-20 mt-4 sm:mt-6 md:mt-8 lg:mt-10 mb-2 py-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 text-center items-start">
+            {/* Card 1: Become a Rider */}
+            <div className="flex flex-col items-center justify-between p-2 sm:p-3 hover:bg-black/[0.015] transition-colors duration-200 group rounded-2xl">
+              <div className="flex flex-col items-center w-full">
+                <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-visible">
+                  <img
+                    src="/assets/rider-sprite.png"
+                    alt="Become a Rider - SpeedyMeals"
+                    className="h-full w-auto max-h-none object-contain scale-[1.28] drop-shadow-md group-hover:scale-[1.34] transition-transform duration-300 ease-out pointer-events-none"
                   />
                 </div>
+                <h3 className="font-heading font-extrabold text-base sm:text-lg text-ink tracking-tight mb-0.5">
+                  Become a Rider
+                </h3>
+                <p className="text-xs sm:text-[13px] text-ink-soft leading-snug mb-2.5 max-w-[220px] font-sans">
+                  Deliver meals on your own schedule. Reliable weekly pay, direct support.
+                </p>
               </div>
-            </motion.div>
-          </motion.div>
+              <button
+                type="button"
+                id="hero-card-cta-rider"
+                onClick={() => handleScrollToPartner('rider')}
+                className="inline-flex items-center space-x-1.5 px-5 py-1.5 text-xs font-sans font-bold text-red hover:text-white bg-red/10 hover:bg-red transition-all duration-200 rounded-full cursor-pointer shadow-xs"
+              >
+                <span>Start delivering</span>
+                <ArrowRight size={13} weight="bold" />
+              </button>
+            </div>
+
+            {/* Card 2: List your restaurant */}
+            <div className="flex flex-col items-center justify-between p-2 sm:p-3 hover:bg-black/[0.015] transition-colors duration-200 group rounded-2xl">
+              <div className="flex flex-col items-center w-full">
+                <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-visible">
+                  <img
+                    src="/assets/merchant-sprite.png"
+                    alt="Grow your restaurant - SpeedyMeals"
+                    className="h-full w-auto max-h-none object-contain scale-[1.28] drop-shadow-md group-hover:scale-[1.34] transition-transform duration-300 ease-out pointer-events-none"
+                  />
+                </div>
+                <h3 className="font-heading font-extrabold text-base sm:text-lg text-ink tracking-tight mb-0.5">
+                  Grow Your Business
+                </h3>
+                <p className="text-xs sm:text-[13px] text-ink-soft leading-snug mb-2.5 max-w-[220px] font-sans">
+                  Reach more customers with honest fees and simple store management.
+                </p>
+              </div>
+              <button
+                type="button"
+                id="hero-card-cta-merchant"
+                onClick={() => handleScrollToPartner('restaurant')}
+                className="inline-flex items-center space-x-1.5 px-5 py-1.5 text-xs font-sans font-bold text-blue hover:text-white bg-blue/10 hover:bg-blue transition-all duration-200 rounded-full cursor-pointer shadow-xs"
+              >
+                <span>List your store</span>
+                <ArrowRight size={13} weight="bold" />
+              </button>
+            </div>
+
+            {/* Card 3: Order food (Customer) -> Get VIP access */}
+            <div className="flex flex-col items-center justify-between p-2 sm:p-3 hover:bg-black/[0.015] transition-colors duration-200 group rounded-2xl">
+              <div className="flex flex-col items-center w-full">
+                <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-visible">
+                  <img
+                    src="/assets/customer-sprite.png"
+                    alt="Order food delivery - SpeedyMeals"
+                    className="h-full w-auto max-h-none object-contain scale-[1.28] drop-shadow-md group-hover:scale-[1.34] transition-transform duration-300 ease-out pointer-events-none"
+                  />
+                </div>
+                <h3 className="font-heading font-extrabold text-base sm:text-lg text-ink tracking-tight mb-0.5">
+                  Order Food Delivery
+                </h3>
+                <p className="text-xs sm:text-[13px] text-ink-soft leading-snug mb-2.5 max-w-[220px] font-sans">
+                  Hot, fresh food from local kitchens right to your door.
+                </p>
+              </div>
+              <button
+                type="button"
+                id="hero-card-cta-customer"
+                onClick={() => handleScrollToPartner('customer')}
+                className="inline-flex items-center space-x-1.5 px-5 py-1.5 text-xs font-sans font-bold text-[#8C6D34] hover:text-[#15171A] bg-[#C7A874]/20 hover:bg-[#C7A874] border border-[#C7A874]/40 transition-all duration-200 rounded-full cursor-pointer shadow-xs"
+              >
+                <span>Get VIP access</span>
+                <ArrowRight size={13} weight="bold" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom: "SCROLL TO DISCOVER" mono label + scroll indicator + DEPLOYMENT locations on mobile and desktop */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full shrink-0">
-        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-1.5 sm:gap-4 pt-2 border-t border-line">
-          <motion.button
-            id="hero-scroll-indicator"
-            type="button"
-            whileHover={shouldReduceMotion ? {} : { y: 2 }}
-            whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
-            onClick={handleScrollToServices}
-            className="group flex items-center space-x-2 text-ink-soft hover:text-ink transition-colors duration-150 font-mono text-[10px] sm:text-xs uppercase tracking-widest cursor-pointer"
-          >
-            <motion.span
-              animate={shouldReduceMotion ? {} : { y: [0, 3, 0] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-              className="w-4 h-4 sm:w-4.5 sm:h-4.5 border border-ink group-hover:bg-ink group-hover:text-white flex items-center justify-center text-ink transition-colors duration-150"
-            >
-              <ArrowDown size={10} weight="bold" />
-            </motion.span>
-            <span className="group-hover:underline underline-offset-4 decoration-1">SCROLL TO DISCOVER SERVICES</span>
-          </motion.button>
+      {/* Bottom: WE ARE HERE country locations strip */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full shrink-0 mt-2 sm:mt-3 pt-2.5 border-t border-line/60">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
 
           {/* WE ARE HERE: Interactive Country Links with Single Marquee Strip */}
           <div className="relative flex items-center flex-wrap justify-center sm:justify-start gap-y-1 gap-x-2 font-mono text-[9px] sm:text-[11px]">
