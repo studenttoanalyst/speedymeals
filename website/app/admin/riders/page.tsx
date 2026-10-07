@@ -373,7 +373,7 @@ export default function AdminRidersPage() {
         }
         description={`Confirm action for ${actionTarget?.rider.name}. The rider will ${
           actionTarget?.action === 'approve'
-            ? 'be permitted to receive delivery dispatches and retain 100% of customer delivery fees.'
+            ? 'be permitted to receive delivery dispatches and retain 90% of customer delivery fees under the 10% commission model.'
             : 'be blocked from taking delivery orders.'
         }`}
         confirmText={actionTarget?.action === 'approve' ? 'Approve Rider' : 'Confirm'}

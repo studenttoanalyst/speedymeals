@@ -240,7 +240,7 @@ export default function AdminSettlementsPage() {
             subValue="Platform revenue share"
             accent="blue"
             icon={<Coins size={18} weight="bold" />}
-            targetBenchmark="100% Retained"
+            targetBenchmark="10% Standard Rate"
           />
         </div>
 

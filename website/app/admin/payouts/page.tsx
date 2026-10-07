@@ -199,7 +199,7 @@ export default function AdminPayoutsPage() {
           <StatCard
             label="Total Courier Delivery Fees"
             value={formatPKR(totalEarned)}
-            subValue="100% credited to couriers"
+            subValue="90% net credited to couriers"
             accent="blue"
             icon={<Bicycle size={18} weight="bold" />}
             targetBenchmark="Fair-Split Guarantee"
@@ -215,9 +215,9 @@ export default function AdminPayoutsPage() {
           />
 
           <StatCard
-            label="SpeedyMeals Delivery Fee Retention"
-            value="0.0% (Zero)"
-            subValue="Couriers keep 100% of delivery fee"
+            label="SpeedyMeals Delivery Fee Commission"
+            value="10.0%"
+            subValue="Couriers keep 90% of delivery fee"
             accent="none"
             icon={<Coins size={18} weight="bold" />}
             targetBenchmark="Company Doctrine"

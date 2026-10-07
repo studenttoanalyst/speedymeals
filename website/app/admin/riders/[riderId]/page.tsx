@@ -146,7 +146,7 @@ export default function AdminRiderDetailPage({
                   {formatPKR(rider.wallet_balance)}
                 </div>
                 <p className="text-xs text-slate-500">
-                  100% of customer delivery fees credited directly to courier.
+                  90% of customer delivery fees credited to courier (10% commission split).
                 </p>
               </div>
 

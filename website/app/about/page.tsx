@@ -71,7 +71,7 @@ export default function AboutPage() {
             </h1>
 
             <p className="font-sans text-base sm:text-lg text-ink-soft leading-relaxed max-w-3xl">
-              SpeedyMeals was founded in 2023 as a direct institutional countermeasure to predatory aggregator monopolization. We build high-velocity last-mile logistics infrastructure that guarantees fair splits for restaurant partners, 100% retained pay for couriers, and radical transparency for customers.
+              SpeedyMeals was founded in 2023 as a direct institutional countermeasure to predatory aggregator monopolization. We build high-velocity last-mile logistics infrastructure that guarantees a transparent, unified 10% commission model for both restaurant partners and couriers, and radical transparency for customers.
             </p>
           </div>
 
@@ -88,9 +88,9 @@ export default function AboutPage() {
               <div className="text-[11px] text-[#5B5F66]">Zero advertising taxes</div>
             </div>
             <div>
-              <div className="text-xs text-[#8C9099] uppercase">RIDER REMUNERATION</div>
-              <div className="text-2xl font-bold text-red mt-1">100% Retained</div>
-              <div className="text-[11px] text-[#5B5F66]">Direct delivery fee payout</div>
+              <div className="text-xs text-[#8C9099] uppercase">COURIER COMMISSION</div>
+              <div className="text-2xl font-bold text-red mt-1">10% Only</div>
+              <div className="text-[11px] text-[#5B5F66]">Riders retain 90% of delivery fare</div>
             </div>
             <div>
               <div className="text-xs text-[#8C9099] uppercase">LOGISTICS ALLIANCE</div>
@@ -184,7 +184,7 @@ export default function AboutPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="w-1.5 h-1.5 bg-red" />
-                  <span>100% courier fee payout with weekly direct bank &amp; wallet disbursements</span>
+                  <span>Fair 10% platform commission on deliveries with weekly direct bank &amp; wallet disbursements</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="w-1.5 h-1.5 bg-red" />
@@ -234,11 +234,11 @@ export default function AboutPage() {
                     02
                   </div>
                   <h3 className="font-heading font-extrabold text-lg sm:text-xl uppercase tracking-tight text-ink">
-                    100% Retained Rider Earnings
+                    Predictable 10% Rider Commission Split
                   </h3>
                 </div>
                 <p className="text-sm text-ink-soft font-sans leading-relaxed">
-                  Couriers retain 100% of the customer delivery fee on every completed trip. With a fair Rs. 15 nominal platform fee, a generous Rs. 5,000 cash-on-delivery (COD) float cap, automated weekly payouts to bank accounts and mobile wallets (JazzCash, EasyPaisa), and transparent distance-based earnings, riders earn with real dignity and security.
+                  We replaced arbitrary deductions with a transparent 10% platform commission split. Couriers keep 90% of every customer delivery fare. With a fair Rs. 15 nominal app platform fee, a generous Rs. 5,000 cash-on-delivery (COD) float cap, automated weekly payouts to bank accounts and mobile wallets (JazzCash, EasyPaisa), and transparent distance-based earnings, riders earn with dignity, security, and predictability.
                 </p>
               </div>
 

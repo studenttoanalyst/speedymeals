@@ -270,7 +270,7 @@ export async function getAdminOrder(orderId: string): Promise<AdminOrderDetail> 
     total_amount: summary.total_amount,
     commission_amount: 135.0, // 10%
     restaurant_payable: 1215.0,
-    rider_earning: 100.0, // 100% of delivery fee
+    rider_earning: 90.0, // 90% of delivery fee (10% commission split)
     placed_at: summary.placed_at,
     delivered_at: null,
   };

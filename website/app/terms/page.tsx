@@ -548,7 +548,7 @@ export default function TermsAndConditionsPage() {
                     <span>RIDERS</span>
                   </div>
                   <div className="text-[11px] text-[#5B5F66] leading-relaxed">
-                    <HighlightedText text="100% retained customer delivery fare. Standard Rs. 10 flat app fee per completed delivery (Clause D3)." query={searchQuery} />
+                    <HighlightedText text="90% retained customer delivery fare with 10% platform commission. Transparent weekly payouts (Clause D3/D4)." query={searchQuery} />
                   </div>
                 </div>
 

@@ -164,7 +164,7 @@ export default function AdminOrderDetailPage({
                   <span className="font-mono font-medium">{formatPKR(order.delivery_fee)}</span>
                 </div>
                 <div className="flex items-center justify-between text-blue-700 font-semibold">
-                  <span>Courier Delivery Fee Earning (100% Retained)</span>
+                  <span>Courier Delivery Fee Earning (90% Retained)</span>
                   <span className="font-mono">+{formatPKR(order.rider_earning)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-900 font-bold pt-3 border-t border-slate-200 text-sm">

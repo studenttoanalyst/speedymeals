@@ -299,7 +299,7 @@ export default function AdminOrdersPage() {
                   <span className="font-mono">{formatPKR(selectedOrder.restaurant_payable)}</span>
                 </div>
                 <div className="flex items-center justify-between text-blue-700 font-semibold">
-                  <span>Courier Retained Fee (100%)</span>
+                  <span>Courier Retained Fee (90%)</span>
                   <span className="font-mono">+{formatPKR(selectedOrder.rider_earning)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
