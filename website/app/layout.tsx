@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { Archivo, Archivo_Black, Inter, JetBrains_Mono } from 'next/font/google';
+import { Figtree, Archivo_Black, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
-const archivo = Archivo({
+const figtree = Figtree({
   subsets: ['latin'],
-  variable: '--font-archivo',
+  weight: ['400', '600', '700'],
+  variable: '--font-figtree',
   display: 'swap',
 });
 
@@ -15,12 +16,6 @@ const archivoBlack = Archivo_Black({
   display: 'swap',
 });
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jbmono',
@@ -28,8 +23,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SpeedyMeals — Zero-Markup Real-Time Food Delivery',
-  description: 'Order from your favorite local restaurants with transparent menu prices, live GPS rider tracking, and zero hidden markups.',
+  title: 'Speedy Meals',
+  description:
+    'Fair-priced food delivery for South Asia and the Middle East. Real menu prices, low merchant commission, and reliable weekly payouts for riders.',
   icons: {
     icon: '/favicon.jpeg',
     shortcut: '/favicon.jpeg',
@@ -46,12 +42,12 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${archivo.variable} ${archivoBlack.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${figtree.variable} ${archivoBlack.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <link rel="icon" href="/favicon.jpeg" type="image/jpeg" />
       </head>
-      <body className="selection:bg-[#E23A2E] selection:text-white">{children}</body>
+      <body className="font-sans selection:bg-[#E23A2E] selection:text-white">{children}</body>
     </html>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
@@ -15,7 +15,6 @@ import {
   ArrowRight,
   ClipboardText,
 } from '@phosphor-icons/react';
-import { MapPin } from 'lucide-react';
 import { PersonaType } from '@/types/home';
 import {
   SUPPORTED_REGIONS,
@@ -23,10 +22,6 @@ import {
   formatPhoneForRegion,
   validatePhoneForRegion,
 } from '@/lib/validation/phone';
-import {
-  searchCities,
-  searchAreas,
-} from '@/lib/data/cityAreas';
 import {
   SupportedLanguage,
   TRANSLATIONS,
@@ -45,12 +40,12 @@ interface PersonaFormData {
   countryCode: string;
   city: string;
   customCity?: string;
-  area: string;
-  address?: string;
-  partnerType?: string;
   vehicleType: string;
-  deliveryExperience?: string;
   businessName: string;
+  businessType?: string;
+  primaryCategory?: string;
+  areaLocality?: string;
+  streetAddress?: string;
   cuisineType: string;
   branches: string;
   devicePlatform: string;
@@ -70,14 +65,14 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     email: '',
     phone: '',
     countryCode: '+92',
-    city: '',
+    city: 'Karachi',
     customCity: '',
-    area: '',
-    address: '',
-    partnerType: '',
     vehicleType: 'Motorcycle',
-    deliveryExperience: 'Over 1 Year (Active courier)',
     businessName: '',
+    businessType: '',
+    primaryCategory: '',
+    areaLocality: '',
+    streetAddress: '',
     cuisineType: '',
     branches: '1-3',
     devicePlatform: '',
@@ -90,13 +85,14 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     email: '',
     phone: '',
     countryCode: '+92',
-    city: '',
+    city: 'Karachi',
     customCity: '',
-    area: '',
-    address: '',
-    partnerType: 'Restaurant',
     vehicleType: '',
     businessName: '',
+    businessType: 'Restaurant',
+    primaryCategory: '',
+    areaLocality: '',
+    streetAddress: '',
     cuisineType: '',
     branches: '1-3',
     devicePlatform: '',
@@ -109,12 +105,14 @@ const defaultFormState: Record<PersonaType, PersonaFormData> = {
     email: '',
     phone: '',
     countryCode: '+92',
-    city: '',
+    city: 'Karachi',
     customCity: '',
-    area: '',
-    address: '',
     vehicleType: '',
     businessName: '',
+    businessType: '',
+    primaryCategory: '',
+    areaLocality: '',
+    streetAddress: '',
     cuisineType: '',
     branches: '1-3',
     devicePlatform: 'iOS (Apple TestFlight Beta)',
@@ -142,13 +140,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string; city?: string; area?: string }>({});
-  const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
-  const [areaDropdownOpen, setAreaDropdownOpen] = useState(false);
-  const [highlightedCityIndex, setHighlightedCityIndex] = useState(0);
-  const [highlightedAreaIndex, setHighlightedAreaIndex] = useState(0);
-  const cityWrapperRef = useRef<HTMLDivElement>(null);
-  const areaWrapperRef = useRef<HTMLDivElement>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; phone?: string }>({});
   const [formLoadedAt] = useState<number>(() => Date.now());
   const [lang, setLang] = useState<SupportedLanguage>('en');
   const t = TRANSLATIONS[lang];
@@ -158,27 +150,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
   useEffect(() => {
     setError(null);
     setFieldErrors({});
-    setCityDropdownOpen(false);
-    setAreaDropdownOpen(false);
-    setHighlightedCityIndex(0);
-    setHighlightedAreaIndex(0);
   }, [activePersona]);
-
-  // Click outside to dismiss autocomplete dropdowns
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (cityWrapperRef.current && !cityWrapperRef.current.contains(event.target as Node)) {
-        setCityDropdownOpen(false);
-      }
-      if (areaWrapperRef.current && !areaWrapperRef.current.contains(event.target as Node)) {
-        setAreaDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   // Active form data getter and updater for current persona
   const formData = formsData[activePersona];
@@ -199,15 +171,6 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     }
   };
 
-  // Reset highlight indices whenever user types/changes input
-  useEffect(() => {
-    setHighlightedCityIndex(0);
-  }, [formData.city]);
-
-  useEffect(() => {
-    setHighlightedAreaIndex(0);
-  }, [formData.area]);
-
   // Active submission for currently viewed persona
   const activeSubmission = submissions[activePersona];
   const submittedId = activeSubmission ? activeSubmission.referenceCode : null;
@@ -217,126 +180,43 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
   const currentRegion = SUPPORTED_REGIONS[formData.countryCode] || SUPPORTED_REGIONS['+92'];
   const phoneValidation = validatePhoneForRegion(formData.phone, formData.countryCode);
 
-  // Dynamic theme highlights based on persona: Red for Rider, Blue for Restaurant, Tan for Waitlist/Customer
-  const personaTheme = {
-    rider: {
-      accent: '#E23A2E',
-      focusBorder: 'focus:border-[#E23A2E]',
-      borderL: 'border-l-[#E23A2E]',
-      badge: 'bg-[#E23A2E]/20 text-[#E23A2E] border-[#E23A2E]/40',
-      customText: 'text-[#E23A2E]',
-    },
-    restaurant: {
-      accent: '#1E5FA8',
-      focusBorder: 'focus:border-[#1E5FA8]',
-      borderL: 'border-l-[#1E5FA8]',
-      badge: 'bg-[#1E5FA8]/20 text-[#1E5FA8] border-[#1E5FA8]/40',
-      customText: 'text-[#1E5FA8]',
-    },
-    customer: {
-      accent: '#C7A874',
-      focusBorder: 'focus:border-[#C7A874]',
-      borderL: 'border-l-[#C7A874]',
-      badge: 'bg-[#C7A874]/20 text-[#C7A874] border-[#C7A874]/40',
-      customText: 'text-[#C7A874]',
-    },
-  }[activePersona];
-
-  // Filter cities and areas with regex autocomplete
-  const matchingCities = searchCities(formData.city || '');
-  const matchingAreas = searchAreas(formData.city || '', formData.area || '');
-
   const handleCountryCodeChange = (newCountryCode: string) => {
+    const targetRegion = SUPPORTED_REGIONS[newCountryCode];
+    const citiesForRegion = targetRegion ? targetRegion.cities : [];
+    const currentCityValid = formData.city === 'Other' || citiesForRegion.includes(formData.city);
+    const newCity = currentCityValid ? formData.city : (citiesForRegion[0] || formData.city);
     const reformattedPhone = formData.phone
       ? formatPhoneForRegion(formData.phone, newCountryCode)
       : formData.phone;
 
     setFieldErrors(prev => ({ ...prev, phone: undefined }));
-    setFormData(prev => ({
-      ...prev,
+    setFormData({
+      ...formData,
       countryCode: newCountryCode,
+      city: newCity,
       phone: reformattedPhone,
-    }));
+    });
   };
 
-  const handleCitySelect = (selectedCityName: string, selectedCountryCode?: string) => {
-    const code = selectedCountryCode || CITY_TO_COUNTRY_CODE[selectedCityName] || formData.countryCode;
-    const reformattedPhone = formData.phone
-      ? formatPhoneForRegion(formData.phone, code)
-      : formData.phone;
-
-    setFormData(prev => ({
-      ...prev,
-      city: selectedCityName,
-      countryCode: code,
-      phone: reformattedPhone,
-      area: '', // Reset area when city changes so user selects area from the new city
-    }));
-    setCityDropdownOpen(false);
-    setFieldErrors(prev => ({ ...prev, city: undefined, area: undefined }));
-    setAreaDropdownOpen(false); // Do not open area dropdown until user enters at least 1 character
-  };
-
-  const handleAreaSelect = (selectedArea: string) => {
-    setFormData(prev => ({
-      ...prev,
-      area: selectedArea,
-    }));
-    setAreaDropdownOpen(false);
-    setFieldErrors(prev => ({ ...prev, area: undefined }));
-  };
-
-  const handleCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!cityDropdownOpen || matchingCities.length === 0) {
-      if (e.key === 'Enter' && formData.city?.trim()) {
-        e.preventDefault();
-        handleCitySelect(formData.city.trim());
-      }
+  const handleCityChange = (newCity: string) => {
+    if (newCity === 'Other') {
+      setFormData({ ...formData, city: 'Other' });
       return;
     }
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setHighlightedCityIndex((prev) => (prev + 1) % matchingCities.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlightedCityIndex((prev) => (prev - 1 + matchingCities.length) % matchingCities.length);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      const selected = matchingCities[highlightedCityIndex] || matchingCities[0];
-      if (selected) {
-        handleCitySelect(selected.name, selected.countryCode);
-      }
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      setCityDropdownOpen(false);
-    }
-  };
-
-  const handleAreaKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!areaDropdownOpen || matchingAreas.length === 0) {
-      if (e.key === 'Enter' && formData.area?.trim()) {
-        e.preventDefault();
-        handleAreaSelect(formData.area.trim());
-      }
-      return;
-    }
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setHighlightedAreaIndex((prev) => (prev + 1) % matchingAreas.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlightedAreaIndex((prev) => (prev - 1 + matchingAreas.length) % matchingAreas.length);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      const selected = matchingAreas[highlightedAreaIndex] || matchingAreas[0];
-      if (selected) {
-        handleAreaSelect(selected);
-      }
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      setAreaDropdownOpen(false);
+    const inferredCountryCode = CITY_TO_COUNTRY_CODE[newCity];
+    if (inferredCountryCode && inferredCountryCode !== formData.countryCode) {
+      const reformattedPhone = formData.phone
+        ? formatPhoneForRegion(formData.phone, inferredCountryCode)
+        : formData.phone;
+      setFieldErrors(prev => ({ ...prev, phone: undefined }));
+      setFormData({
+        ...formData,
+        city: newCity,
+        countryCode: inferredCountryCode,
+        phone: reformattedPhone,
+      });
+    } else {
+      setFormData({ ...formData, city: newCity });
     }
   };
 
@@ -349,45 +229,20 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.phone) return;
+    if (activePersona === 'customer' && !formData.email) return;
+    if (activePersona === 'restaurant' && (!formData.businessName || !formData.areaLocality)) {
+      setError('Please provide your Business Name and Area/Locality.');
+      return;
+    }
     if (!formData.agreed) {
       setError('Please review and accept the agreement terms to proceed.');
       return;
     }
 
-    // City and Area validation:
-    // Compulsory City for all personas (Rider, Restaurant, Customer).
-    // Compulsory Area and optional Address for Restaurant onboarding ONLY.
-    const trimmedCity = formData.city?.trim() || '';
-    if (!trimmedCity || trimmedCity.length < 2) {
-      setError(
-        activePersona === 'restaurant'
-          ? 'City is compulsory for restaurant registration. Please select or enter your city.'
-          : 'Please select or enter your city.'
-      );
-      setFieldErrors(prev => ({ ...prev, city: 'City is required' }));
-      return;
-    }
-
-    let trimmedArea = '';
-    let trimmedAddress: string | null = null;
-
-    if (activePersona === 'restaurant') {
-      trimmedArea = formData.area?.trim() || '';
-      if (!trimmedArea || trimmedArea.length < 2) {
-        setError('Area is compulsory for restaurant registration. Please select or enter your area/locality.');
-        setFieldErrors(prev => ({ ...prev, area: 'Area is compulsory' }));
-        return;
-      }
-
-      trimmedAddress = formData.address?.trim() || null;
-    }
-
-    // Optional email validation: only validate format if email is provided
-    if (formData.email?.trim()) {
-      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-      if (!emailRegex.test(formData.email.trim())) {
-        setError('Please provide a valid email address.');
-        setFieldErrors(prev => ({ ...prev, email: 'Please provide a valid email address.' }));
+    if (formData.city === 'Other') {
+      const customTrimmed = formData.customCity?.trim();
+      if (!customTrimmed || customTrimmed.toLowerCase() === 'other' || customTrimmed.toLowerCase() === 'others') {
+        setError('Please specify your actual city or district name.');
         return;
       }
     }
@@ -404,6 +259,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     setError(null);
     setFieldErrors({});
 
+    const effectiveCity = formData.city === 'Other'
+      ? formData.customCity!.trim()
+      : formData.city;
+
     try {
       const res = await fetch('/api/register', {
         method: 'POST',
@@ -411,11 +270,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         body: JSON.stringify({
           persona: activePersona,
           ...formData,
-          city: trimmedCity,
-          customCity: formData.customCity?.trim() || null,
-          area: activePersona === 'restaurant' ? trimmedArea : null,
-          address: activePersona === 'restaurant' ? trimmedAddress : null,
-          email: formData.email?.trim() || null,
+          city: effectiveCity,
+          customCity: formData.customCity?.trim(),
           phone: checkValidation.formatted,
           website_url: formData.honeypot || '',
           formLoadedAt,
@@ -438,10 +294,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           referenceCode: data.referenceCode,
           data: {
             ...formData,
-            city: trimmedCity,
-            area: activePersona === 'restaurant' ? trimmedArea : '',
-            address: activePersona === 'restaurant' ? (trimmedAddress || '') : '',
-            email: formData.email?.trim() || '',
+            city: effectiveCity,
             phone: checkValidation.formatted,
           },
         },
@@ -500,15 +353,15 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         <div className="mb-12 sm:mb-16">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center space-x-2 shrink-0">
-              <span className="font-mono text-xs uppercase tracking-widest text-[#5B5F66] whitespace-nowrap">
+              <span className="font-sans text-xs uppercase tracking-wider text-[#5B5F66] font-semibold whitespace-nowrap">
                 [ 03 ]
               </span>
-              <span className="font-mono text-xs uppercase tracking-widest text-[#15171A] font-bold whitespace-nowrap">
+              <span className="font-sans text-xs uppercase tracking-wider text-[#15171A] font-bold whitespace-nowrap">
                 Partner With Us
               </span>
             </div>
             <div className="hidden sm:block h-px flex-1 bg-[#E4E2DD] mx-3" />
-            <span className="font-mono text-[10px] sm:text-xs text-[#E23A2E] tracking-wider uppercase font-semibold whitespace-nowrap">
+            <span className="font-sans text-[10px] sm:text-xs text-[#E23A2E] tracking-wider uppercase font-semibold whitespace-nowrap">
               ENROLLMENT OPEN
             </span>
           </div>
@@ -520,181 +373,179 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 className="block transition-colors duration-300"
                 style={{ color: 'var(--dynamic-accent, #E23A2E)' }}
               >
-                No Extraction.
+                Transparent Economics.
               </span>
             </h2>
 
-            <p className="text-xs sm:text-sm font-mono text-[#5B5F66] max-w-sm leading-relaxed">
-              Select your persona below to join our pilot launch network across South Asia and the
-              Middle East.
+            <p className="text-xs sm:text-sm font-sans text-ink-soft max-w-sm leading-relaxed">
+              Choose your role below to join our early access launch network across Pakistan and Saudi Arabia.
             </p>
           </div>
         </div>
 
-        {/* Persona-Split Entry: Three Hairline-Divided Columns with Distinct Brand Accents */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border border-line mb-12 bg-white shadow-sm">
-          {/* Column 1: RIDE (Speedy Red accent) */}
+        {/* Role Selection: Unboxed, Clean, Non-Jargon */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-16">
+          {/* Card 1: Rider */}
           <div
             id="persona-col-rider"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-red transition-all duration-150 ${activePersona === 'rider' ? 'bg-paper-off shadow-xs' : 'bg-white hover:bg-paper-off/50'
+            onClick={() => onSelectPersona('rider')}
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'rider'
+                ? 'bg-paper-off ring-2 ring-red shadow-sm'
+                : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-red/30 text-red flex items-center justify-center bg-red/10">
-                  <Bicycle size={24} weight="bold" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 rounded-full text-red flex items-center justify-center bg-red/10">
+                  <Bicycle size={22} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-red font-bold">
-                  COURIER DISPATCH
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-red">
+                  For Riders
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
-                Ride
+              <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
+                Deliver
               </h3>
-              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
-                Keep 100% of your delivery customer fees. Zero platform deduction on distance, zero
-                security deposit, with daily automated payouts.
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-6">
+                Deliver meals on your own terms with transparent fees and regular weekly payouts straight to your account.
               </p>
             </div>
 
-            <div>
-              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
-                <span className="text-ink-soft">FEE RETENTION:</span>
-                <span className="font-bold text-red">100% TO RIDER</span>
-              </div>
-              <button
-                type="button"
-                id="btn-select-rider"
-                onClick={() => onSelectPersona('rider')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'rider'
-                  ? 'bg-red text-white border-red'
-                  : 'bg-transparent text-ink border-ink hover:bg-ink hover:text-white'
-                  }`}
-              >
-                <span>{activePersona === 'rider' ? 'ACTIVE FORM' : 'APPLY TO RIDE'}</span>
-                <ArrowRight size={13} weight="bold" />
-              </button>
-            </div>
+            <button
+              type="button"
+              id="btn-select-rider"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectPersona('rider');
+              }}
+              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'rider'
+                  ? 'bg-red text-white'
+                  : 'bg-black/5 text-ink hover:bg-ink hover:text-white'
+                }`}
+            >
+              <span>{activePersona === 'rider' ? 'Active Form' : 'Apply as Rider'}</span>
+              <ArrowRight size={13} weight="bold" />
+            </button>
           </div>
 
-          {/* Column 2: PARTNER (Cobalt Blue accent) */}
+          {/* Card 2: Merchant */}
           <div
             id="persona-col-restaurant"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-line border-t-2 border-t-blue transition-all duration-150 ${activePersona === 'restaurant'
-              ? 'bg-paper-off shadow-xs'
-              : 'bg-white hover:bg-paper-off/50'
+            onClick={() => onSelectPersona('restaurant')}
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'restaurant'
+                ? 'bg-paper-off ring-2 ring-blue shadow-sm'
+                : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-blue/30 text-blue flex items-center justify-center bg-blue/10">
-                  <Storefront size={24} weight="bold" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 rounded-full text-blue flex items-center justify-center bg-blue/10">
+                  <Storefront size={22} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-blue font-bold">
-                  MERCHANT DIRECT
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-blue">
+                  For Merchants
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
-                Partner
+              <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
+                List Your Store
               </h3>
-              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
-                For Restaurants, Home Kitchens, Marts, Groceries & Pharmacies. Flat 10% commission,
-                zero onboarding penalty, and instant direct orders.
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-6">
+                Reach hungry customers across your city with easy order management and predictable, low commission rates.
               </p>
             </div>
 
             <div>
-              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
-                <span className="text-ink-soft">COMMISSION:</span>
-                <span className="font-bold text-blue">10% FLAT RATE</span>
-              </div>
               <button
                 type="button"
                 id="btn-select-restaurant"
-                onClick={() => onSelectPersona('restaurant')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'restaurant'
-                  ? 'bg-blue text-white border-blue'
-                  : 'bg-transparent text-blue border-blue hover:bg-blue hover:text-white'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectPersona('restaurant');
+                }}
+                className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'restaurant'
+                    ? 'bg-blue text-white'
+                    : 'bg-black/5 text-blue hover:bg-blue hover:text-white'
                   }`}
               >
-                <span>{activePersona === 'restaurant' ? 'ACTIVE FORM' : 'BECOME A PARTNER'}</span>
+                <span>{activePersona === 'restaurant' ? 'Active Form' : 'Partner as Merchant'}</span>
                 <ArrowRight size={13} weight="bold" />
               </button>
 
-              <div className="mt-2.5 text-center">
+              <div className="mt-3 text-center">
                 <Link
                   id="link-existing-restaurant-portal"
                   href="/restaurant"
-                  className="font-mono text-[11px] text-blue hover:underline inline-flex items-center gap-1"
+                  className="font-sans text-xs text-blue hover:underline inline-flex items-center gap-1"
                 >
-                  <span>Already registered? Access Partner Portal</span>
+                  <span>Already registered? Access Merchant Portal</span>
                   <ArrowRight size={10} weight="bold" />
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Column 3: CUSTOMER (Warm Desert Tan accent) */}
+          {/* Card 3: Customer */}
           <div
             id="persona-col-customer"
-            className={`p-6 sm:p-8 flex flex-col justify-between border-t-2 border-t-tan transition-all duration-150 ${activePersona === 'customer'
-              ? 'bg-paper-off shadow-xs'
-              : 'bg-white hover:bg-paper-off/50'
+            onClick={() => onSelectPersona('customer')}
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'customer'
+                ? 'bg-paper-off ring-2 ring-[#C7A874] shadow-sm'
+                : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 border border-tan/30 text-tan flex items-center justify-center bg-tan/20">
-                  <Users size={24} weight="bold" />
+              <div className="flex items-center space-x-3 mb-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activePersona === 'customer' ? 'bg-[#C7A874]/20 text-[#A8874E]' : 'bg-black/5 text-ink'
+                  }`}>
+                  <Users size={22} weight="bold" />
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#A8874E] font-bold">
-                  EARLY ACCESS
+                <span className={`font-sans text-xs font-bold uppercase tracking-wider ${activePersona === 'customer' ? 'text-[#A8874E]' : 'text-ink-soft'
+                  }`}>
+                  For Customers
                 </span>
               </div>
-              <h3 className="font-display text-2xl uppercase tracking-tight text-ink mb-2">
-                Customer
+              <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
+                Get Early Access
               </h3>
-              <p className="text-sm text-ink-soft mb-6 leading-relaxed font-sans">
-                Real food prices without sneaky packaging fees or arbitrary delivery inflation. Get
-                notified when SpeedyMeals launches on iOS & Android in your city.
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3">
+                Real food prices from beloved local kitchens. Be the first to order when SpeedyMeals launches in your area.
               </p>
+              {/* VIP promo badge */}
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-[#C7A874]/15 border border-[#C7A874]/30 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C7A874] inline-block" />
+                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-[#9A7A4A]">
+                  VIP: Up to 50% off your first 3 orders
+                </span>
+              </div>
             </div>
 
-            <div>
-              <div className="py-2 mb-4 border-t border-b border-line font-mono text-xs text-ink flex justify-between">
-                <span className="text-ink-soft">MARKUP:</span>
-                <span className="font-bold text-[#A8874E]">0% MENU MARKUP</span>
-              </div>
-              <button
-                type="button"
-                id="btn-select-customer"
-                onClick={() => onSelectPersona('customer')}
-                className={`w-full py-3 text-xs font-mono font-bold uppercase tracking-wider border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'customer'
-                  ? 'bg-tan text-ink border-tan font-bold'
-                  : 'bg-transparent text-ink border-line hover:border-tan hover:text-[#A8874E]'
-                  }`}
-              >
-                <span>{activePersona === 'customer' ? 'ACTIVE FORM' : 'JOIN AS CUSTOMER'}</span>
-                <ArrowRight size={13} weight="bold" />
-              </button>
-            </div>
+            <button
+              type="button"
+              id="btn-select-customer"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectPersona('customer');
+              }}
+              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'customer'
+                  ? 'bg-[#C7A874] text-[#15171A]'
+                  : 'bg-[#C7A874]/15 text-[#8C6D34] hover:bg-[#C7A874] hover:text-[#15171A]'
+                }`}
+            >
+              <span>{activePersona === 'customer' ? 'Active Form' : 'Get VIP Access'}</span>
+              <ArrowRight size={13} weight="bold" />
+            </button>
           </div>
         </div>
 
-        {/* REGISTRATION FORM PANEL: Styled with dynamic persona color border and accents */}
+        {/* REGISTRATION FORM PANEL: Styled - dark canvas for all personas */}
         <div
           id="registration-flow-panel"
-          className={`bg-[#22252B] text-white border p-6 sm:p-10 lg:p-12 shadow-md transition-colors duration-300 ${activePersona === 'rider'
-            ? 'border-t-2 border-t-red border-x-[#373C46] border-b-[#373C46]'
-            : activePersona === 'restaurant'
-              ? 'border-t-2 border-t-blue border-x-[#373C46] border-b-[#373C46]'
-              : 'border-t-2 border-t-tan border-x-[#373C46] border-b-[#373C46]'
-            }`}
+          className="rounded-3xl p-6 sm:p-10 lg:p-12 shadow-xl border bg-[#1A1D23] text-white border-white/5 transition-all duration-300"
         >
           {/* Top Panel Nav & Title */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[#373C46] mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 mb-8 border-b border-[#373C46]">
             <div>
-              <div className="font-mono text-xs uppercase tracking-widest mb-1 flex items-center space-x-2">
+              <div className="font-sans text-xs uppercase tracking-wider font-semibold mb-1 flex items-center space-x-2">
                 <span
                   className="w-2 h-2 inline-block"
                   style={{
@@ -729,7 +580,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             {/* Controls: Persona Switcher Tabs + Multilingual Language Switcher */}
             <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
               {/* Persona Switcher Tabs inside panel */}
-              <div className="flex border border-[#373C46] font-mono text-xs">
+              <div className="flex font-sans text-xs border border-[#373C46]">
                 <button
                   type="button"
                   id="btn-tab-rider"
@@ -757,7 +608,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   id="btn-tab-customer"
                   onClick={() => onSelectPersona('customer')}
                   className={`px-3.5 sm:px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors cursor-pointer ${activePersona === 'customer'
-                    ? 'bg-tan text-ink font-bold'
+                    ? 'bg-[#C7A874] text-[#15171A] font-bold'
                     : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                     }`}
                 >
@@ -768,7 +619,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               {/* Multilingual Selector [ EN | اردو | العربية ] */}
               <div
                 id="registration-lang-toggle"
-                className="flex items-center border border-[#373C46] bg-[#1A1D23] p-0.5 text-xs font-mono shadow-xs"
+                className="flex items-center border border-[#373C46] bg-[#1A1D23] p-0.5 text-xs font-sans shadow-xs"
               >
                 <button
                   type="button"
@@ -818,13 +669,12 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className={`border border-[#373C46] bg-[#2A2E37] p-4 sm:p-8 max-w-2xl mx-auto font-mono text-left border-t-2 w-full overflow-hidden ${
-                  activePersona === 'rider'
-                    ? 'border-t-red'
-                    : activePersona === 'restaurant'
-                      ? 'border-t-blue'
-                      : 'border-t-tan'
-                }`}
+                className={`border border-[#373C46] bg-[#2A2E37] p-8 max-w-2xl mx-auto font-sans text-left border-t-2 ${activePersona === 'rider'
+                  ? 'border-t-red'
+                  : activePersona === 'restaurant'
+                    ? 'border-t-blue'
+                    : 'border-t-tan'
+                  }`}
               >
                 <div
                   className="flex items-center space-x-3 mb-4"
@@ -838,25 +688,25 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   }}
                 >
                   <Check size={28} weight="bold" className="text-[#10B981] shrink-0" />
-                  <span className="font-display text-lg sm:text-xl uppercase tracking-tight text-white">
+                  <span className="font-heading font-extrabold text-xl uppercase tracking-tight">
                     {activePersona === 'customer'
-                      ? 'Waitlist Access Reserved'
+                      ? 'Customer Early Access Reserved'
                       : activePersona === 'restaurant'
                         ? 'Merchant Application Received'
                         : 'Rider Application Received'}
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-[#A0A4AB] mb-6 font-sans">
+                <p className="text-sm mb-6 font-sans text-[#A0A4AB]">
                   {activePersona === 'customer'
-                    ? "You are registered for priority early access. We will email your TestFlight / Google Play beta invite as soon as SpeedyMeals goes live in your area."
-                    : 'Your registration has been logged directly with our regional dispatch operations. Verification review is conducted within 24 hours.'}
+                    ? "You're in! Your VIP early access is reserved. You'll get up to 50% off your first 3 orders, plus a beta app invite as soon as SpeedyMeals launches in your city."
+                    : 'Your registration has been logged directly with our regional dispatch operations. Our team will review your application and contact you within 1 to 2 business days.'}
                 </p>
 
-                <div className="p-3.5 sm:p-5 bg-[#1E2228] border border-[#373C46] divide-y divide-[#2C303B] mb-6 w-full overflow-hidden">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                    <span className="text-[#8C9099] shrink-0">REFERENCE CODE:</span>
+                <div className="p-4 bg-[#1E2228] border border-[#373C46] space-y-2 mb-6">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-[#5B5F66] font-semibold">REFERENCE CODE:</span>
                     <span
-                      className="font-bold tracking-widest break-keep whitespace-nowrap text-left sm:text-right"
+                      className="font-bold tracking-widest text-sm font-sans"
                       style={{
                         color:
                           activePersona === 'customer'
@@ -869,10 +719,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       {submittedId}
                     </span>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                    <span className="text-[#8C9099] shrink-0">TARGET ROLE:</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-[#5B5F66] font-semibold">SELECTED ROLE:</span>
                     <span
-                      className="font-bold uppercase tracking-wider text-left sm:text-right"
+                      className="font-bold uppercase tracking-wider"
                       style={{
                         color:
                           activePersona === 'customer'
@@ -883,81 +733,69 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       }}
                     >
                       {activePersona === 'customer'
-                        ? 'Customer'
+                        ? 'Customer Waitlist'
                         : activePersona === 'restaurant'
-                          ? `Partner Merchant (${submittedData.partnerType || 'Restaurant'})`
-                          : 'Delivery Courier Rider'}
+                          ? 'Merchant Partner'
+                          : 'Courier Rider'}
                     </span>
                   </div>
-                  {activePersona === 'restaurant' && (
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                      <span className="text-[#8C9099] shrink-0">PARTNER TYPE:</span>
-                      <span className="text-white font-bold uppercase text-left sm:text-right">
-                        {submittedData.partnerType || 'Restaurant'}
-                      </span>
+                  {submittedData.email && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#5B5F66] font-semibold">EMAIL:</span>
+                      <span className="text-white">{submittedData.email}</span>
                     </div>
                   )}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                    <span className="text-[#8C9099] shrink-0">CONTACT EMAIL:</span>
-                    <span className="text-white break-all text-left sm:text-right">{submittedData.email || 'Not provided'}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                    <span className="text-[#8C9099] shrink-0">CONTACT PHONE:</span>
-                    <span className="text-white font-mono break-all text-left sm:text-right">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-[#5B5F66] font-semibold">PHONE:</span>
+                    <span className="text-white font-sans">
                       {submittedData.countryCode} {submittedData.phone}
                     </span>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                    <span className="text-[#8C9099] shrink-0">
-                      {activePersona === 'customer'
-                        ? 'PREFERRED CITY:'
-                        : activePersona === 'rider'
-                          ? 'DISPATCH ZONE:'
-                          : 'DEPLOYMENT ZONE:'}
-                    </span>
-                    <span className="text-white break-words text-left sm:text-right">
-                      {submittedData.city}
-                      {activePersona === 'restaurant' && submittedData.area ? `, ${submittedData.area}` : ''}{' '}
-                      ({submittedData.countryCode})
+                  <div className="flex justify-between text-xs">
+                    <span className="text-[#5B5F66] font-semibold">CITY / ZONE:</span>
+                    <span className="text-white">
+                      {submittedData.city} {submittedData.areaLocality ? `· ${submittedData.areaLocality}` : ''}
                     </span>
                   </div>
-                  {activePersona === 'restaurant' && submittedData.address && (
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                      <span className="text-[#8C9099] shrink-0">STREET ADDRESS:</span>
-                      <span className="text-white break-words text-left sm:text-right">{submittedData.address}</span>
+                  {activePersona === 'restaurant' && submittedData.businessName && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#5B5F66] font-semibold">BUSINESS:</span>
+                      <span className="text-white">{submittedData.businessName} ({submittedData.businessType || 'Restaurant'})</span>
                     </div>
                   )}
-                  {activePersona === 'customer' && (
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                      <span className="text-[#8C9099] shrink-0">TARGET PLATFORM:</span>
-                      <span className="text-white break-words text-left sm:text-right">{submittedData.devicePlatform}</span>
-                    </div>
-                  )}
-                  {activePersona === 'restaurant' && (
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                      <span className="text-[#8C9099] shrink-0">BUSINESS / BRAND NAME:</span>
-                      <span className="text-white break-words text-left sm:text-right">{submittedData.businessName}</span>
-                    </div>
-                  )}
-                  {activePersona === 'rider' && (
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-2.5 gap-1 sm:gap-4 text-xs font-mono">
-                      <span className="text-[#8C9099] shrink-0">TRANSPORT MODE:</span>
-                      <span className="text-white break-words text-left sm:text-right">{submittedData.vehicleType}</span>
+                  {activePersona === 'rider' && submittedData.vehicleType && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#5B5F66] font-semibold">TRANSPORT:</span>
+                      <span className="text-white">{submittedData.vehicleType}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex">
+                {/* Clear Next Steps & Support Channel */}
+                <div className="mb-6 p-3.5 bg-[#17191E] border-l-2 border-l-[#10B981] text-xs font-sans space-y-1">
+                  <span className="text-white font-bold block uppercase tracking-wider">Next Steps:</span>
+                  <p className="text-[#8C9099] font-sans text-xs">
+                    Please keep your Reference Code handy. If you have questions or need to provide documentation, reach out to our team at{' '}
+                    <a href="mailto:support@speedymealservices.com" className="text-white underline hover:text-[#10B981]">
+                      support@speedymealservices.com
+                    </a>{' '}
+                    or WhatsApp{' '}
+                    <a href="https://wa.me/923000000000" target="_blank" rel="noopener noreferrer" className="text-[#10B981] underline">
+                      +92 300 0000000
+                    </a>.
+                  </p>
+                </div>
+
+                <div className="flex space-x-3">
                   <button
                     type="button"
                     onClick={() => handleReset(activePersona)}
-                    className={`w-full sm:w-auto px-6 py-3.5 text-xs font-mono uppercase tracking-widest font-bold border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${
-                      activePersona === 'customer'
-                        ? 'bg-tan text-ink border-tan hover:bg-white hover:text-ink hover:border-white'
-                        : activePersona === 'restaurant'
-                          ? 'bg-blue text-white border-blue hover:bg-white hover:text-blue hover:border-white'
-                          : 'bg-red text-white border-red hover:bg-white hover:text-red hover:border-white'
-                    }`}
+                    className={`px-6 py-3.5 text-xs font-sans uppercase tracking-wider font-bold border transition-colors duration-150 flex items-center space-x-2 cursor-pointer ${activePersona === 'customer'
+                      ? 'bg-tan text-ink border-tan hover:bg-white hover:text-ink hover:border-white'
+                      : activePersona === 'restaurant'
+                        ? 'bg-blue text-white border-blue hover:bg-white hover:text-blue hover:border-white'
+                        : 'bg-red text-white border-red hover:bg-white hover:text-red hover:border-white'
+                      }`}
                   >
                     <span>
                       {activePersona === 'customer'
@@ -982,7 +820,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 className="space-y-6"
               >
                 {error && (
-                  <div className="p-4 border border-[#E23A2E]/50 bg-[#E23A2E]/10 text-xs font-mono text-[#E23A2E] flex items-center justify-between">
+                  <div className="p-4 border border-[#E23A2E]/50 bg-[#E23A2E]/10 text-xs font-sans text-[#E23A2E] flex items-center justify-between">
                     <span>{error}</span>
                     <button
                       type="button"
@@ -995,7 +833,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Field 1 (Col 1): Full Legal Name / Authorized Rep */}
+                  {/* Row 1, Col 1: Authorized Representative / Full Legal Name / Full Name */}
                   <div className="space-y-2">
                     <label
                       htmlFor="form-full-name"
@@ -1006,7 +844,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         : activePersona === 'customer'
                           ? t.fullName
                           : t.fullLegalName}{' '}
-                      <span className="text-[#E23A2E]">*</span>
+                      *
                     </label>
                     <input
                       id="form-full-name"
@@ -1021,30 +859,32 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                             ? 'e.g. Sarah Jenkins'
                             : 'e.g. Imran Khan'
                       }
-                      className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
+                      className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors`}
                     />
                   </div>
 
-                  {/* Field 2 (Col 2): Partner Type (for Partner) or Platform/Transport */}
+                  {/* Row 1, Col 2: Partner Business Type (Merchant) or Platform (Customer) or Mode of Transport (Rider) */}
                   {activePersona === 'restaurant' ? (
                     <div className="space-y-2">
                       <label
-                        htmlFor="form-partner-type"
+                        htmlFor="form-business-type"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.partnerType} <span className="text-[#E23A2E]">*</span>
+                        {t.partnerBusinessType} *
                       </label>
                       <select
-                        id="form-partner-type"
-                        value={formData.partnerType || 'Restaurant'}
-                        onChange={(e) => setFormData({ ...formData, partnerType: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none ${personaTheme.focusBorder} transition-colors cursor-pointer`}
+                        id="form-business-type"
+                        value={formData.businessType || 'Restaurant'}
+                        onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#1E5FA8] transition-colors cursor-pointer`}
                       >
                         <option value="Restaurant">Restaurant</option>
                         <option value="Home Kitchen">Home Kitchen</option>
-                        <option value="Mart">Mart</option>
-                        <option value="Groceries">Groceries</option>
+                        <option value="Grocery / Mart">Grocery / Mart</option>
                         <option value="Pharmacy">Pharmacy</option>
+                        <option value="Bakery / Sweets">Bakery / Sweets</option>
+                        <option value="Cafe / Beverages">Cafe / Beverages</option>
+                        <option value="Other Retail">Other Retail</option>
                       </select>
                     </div>
                   ) : activePersona === 'customer' ? (
@@ -1053,13 +893,13 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         htmlFor="form-platform"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.mobilePlatformPreference} <span className="text-[#E23A2E]">*</span>
+                        {t.mobilePlatformPreference} *
                       </label>
                       <select
                         id="form-platform"
                         value={formData.devicePlatform}
                         onChange={(e) => setFormData({ ...formData, devicePlatform: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none ${personaTheme.focusBorder} transition-colors cursor-pointer`}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#C7A874] transition-colors cursor-pointer`}
                       >
                         <option value="iOS (Apple TestFlight Beta)">iOS (Apple TestFlight Beta)</option>
                         <option value="Android (Google Play Beta)">Android (Google Play Beta)</option>
@@ -1072,13 +912,13 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         htmlFor="form-vehicle"
                         className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
                       >
-                        {t.primaryModeOfTransport} <span className="text-[#E23A2E]">*</span>
+                        {t.primaryModeOfTransport} *
                       </label>
                       <select
                         id="form-vehicle"
                         value={formData.vehicleType}
                         onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none ${personaTheme.focusBorder} transition-colors cursor-pointer`}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#E23A2E] transition-colors cursor-pointer`}
                       >
                         <option value="Motorcycle">Motorcycle (125cc - 250cc)</option>
                         <option value="Electric Scooter">Electric Scooter / E-Bike</option>
@@ -1088,68 +928,285 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     </div>
                   )}
 
-                  {/* Partner Specific: Row 2 (Business Name & Primary Category) */}
+                  {/* Row 2, Col 1: Business / Brand Name (Merchant) or Service Interest (Customer) or Experience (Rider) */}
+                  {activePersona === 'restaurant' ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-business-name"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.restaurantBrandName} *
+                      </label>
+                      <input
+                        id="form-business-name"
+                        type="text"
+                        required
+                        value={formData.businessName}
+                        onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                        placeholder="e.g. Damascus Charcoal Grill"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8] transition-colors`}
+                      />
+                    </div>
+                  ) : activePersona === 'customer' ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-interest"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.primaryServiceInterest}
+                      </label>
+                      <select
+                        id="form-interest"
+                        value={formData.serviceInterest}
+                        onChange={(e) => setFormData({ ...formData, serviceInterest: e.target.value })}
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#C7A874] cursor-pointer`}
+                      >
+                        <option value="Zero-Markup Food Delivery">Zero-Markup Food Delivery</option>
+                        <option value="Express Courier & Parcel">Express Courier & Parcel</option>
+                        <option value="Groceries & Daily Essentials">Groceries & Daily Essentials</option>
+                        <option value="All Speedy Services">All Speedy Services</option>
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-experience"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.deliveryExperience}
+                      </label>
+                      <select
+                        id="form-experience"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#E23A2E] cursor-pointer`}
+                      >
+                        <option>Over 1 Year (Active courier)</option>
+                        <option>6 - 12 Months</option>
+                        <option>New Courier (Needs onboarding)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Row 2, Col 2: Primary Category / Specialties (in English) for Merchant */}
                   {activePersona === 'restaurant' && (
-                    <>
-                      <div className="space-y-2">
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-primary-category"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.primaryCuisineCategory}
+                      </label>
+                      <input
+                        id="form-primary-category"
+                        type="text"
+                        value={formData.primaryCategory || ''}
+                        onChange={(e) => setFormData({ ...formData, primaryCategory: e.target.value })}
+                        placeholder="e.g. Biryani &amp; Kebabs, Cafe, Pizza"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8]`}
+                      />
+                    </div>
+                  )}
+
+                  {/* Row 3, Col 1: Email Address (Optional for Merchant/Rider, Required for Customer) */}
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="form-email"
+                      className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                    >
+                      {activePersona === 'customer' ? `${t.fullName.includes('نام') ? 'ای میل کا پتہ' : 'Email Address'} *` : t.emailAddress}
+                    </label>
+                    <input
+                      id="form-email"
+                      type="email"
+                      required={activePersona === 'customer'}
+                      value={formData.email}
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value });
+                        if (fieldErrors.email) {
+                          setFieldErrors(prev => ({ ...prev, email: undefined }));
+                        }
+                      }}
+                      placeholder="contact@domain.com (optional)"
+                      className={`w-full bg-[#1A1D23] border px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors ${fieldErrors.email ? 'border-[#E23A2E]' : 'border-[#373C46]'
+                        }`}
+                    />
+                    {fieldErrors.email && (
+                      <div className="text-xs font-sans text-[#E23A2E] pt-0.5">
+                        {fieldErrors.email}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Row 3, Col 2: Phone Number with Country Code Selector */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor="form-phone"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.phoneNumber} *
+                      </label>
+                      <span className="font-sans text-xs text-[#8C9099]">
+                        {currentRegion.flag} {currentRegion.country}
+                      </span>
+                    </div>
+                    <div className="flex relative">
+                      <select
+                        id="form-country-code"
+                        value={formData.countryCode}
+                        onChange={(e) => handleCountryCodeChange(e.target.value)}
+                        className="bg-[#262A32] border border-r-0 border-[#373C46] px-3 py-3.5 text-xs text-white font-sans focus:outline-none cursor-pointer"
+                      >
+                        {Object.entries(SUPPORTED_REGIONS).map(([code, reg]) => (
+                          <option key={code} value={code}>
+                            {reg.flag} {reg.shortName} ({reg.code})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="relative flex-1">
+                        <input
+                          id="form-phone"
+                          type="tel"
+                          required
+                          value={formData.phone}
+                          onChange={(e) => handlePhoneChange(e.target.value)}
+                          placeholder={currentRegion.placeholder}
+                          className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors font-sans ${fieldErrors.phone
+                            ? 'border-[#E23A2E]'
+                            : formData.phone.length > 0
+                              ? phoneValidation.isValid
+                                ? 'border-[#10B981]'
+                                : 'border-[#E23A2E]'
+                              : 'border-[#373C46]'
+                            }`}
+                        />
+                        {formData.phone.length > 0 && phoneValidation.isValid && !fieldErrors.phone && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#10B981] flex items-center pointer-events-none">
+                            <Check size={18} weight="bold" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Regional Format Guidance */}
+                    {fieldErrors.phone ? (
+                      <div className="text-xs font-sans text-[#E23A2E] pt-0.5">
+                        {fieldErrors.phone}
+                      </div>
+                    ) : formData.phone.length > 0 ? (
+                      phoneValidation.isValid ? (
+                        <div className="flex items-center space-x-1.5 text-xs font-sans text-[#10B981] pt-0.5">
+                          <Check size={13} weight="bold" />
+                          <span>Valid {currentRegion.country} phone: {phoneValidation.fullInternational}</span>
+                        </div>
+                      ) : (
+                        <div className="text-xs font-sans text-[#E23A2E] pt-0.5">
+                          {phoneValidation.error}
+                        </div>
+                      )
+                    ) : (
+                      <div className="text-xs font-sans text-[#5B5F66] pt-0.5">
+                        Format: {currentRegion.helper}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Row 4, Col 1: Operating City */}
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="form-city"
+                      className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                    >
+                      {activePersona === 'customer'
+                        ? t.preferredDeliveryCity
+                        : activePersona === 'restaurant'
+                          ? t.restaurantOperatingCity
+                          : t.primaryDispatchZone}{' '}
+                      *
+                    </label>
+                    <select
+                      id="form-city"
+                      value={formData.city}
+                      onChange={(e) => handleCityChange(e.target.value)}
+                      className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none transition-colors cursor-pointer`}
+                    >
+                      {Object.entries(SUPPORTED_REGIONS).map(([code, reg]) => (
+                        <optgroup key={code} label={`${reg.flag} ${reg.country} (${reg.code})`}>
+                          {reg.cities.map((cityName) => (
+                            <option key={cityName} value={cityName}>
+                              {cityName}, {reg.country}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                      <optgroup label="Others...">
+                        <option value="Other">Others... (Specify City)</option>
+                      </optgroup>
+                    </select>
+
+                    {formData.city === 'Other' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="pt-2 space-y-1.5"
+                      >
                         <label
-                          htmlFor="form-business-name"
-                          className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                          htmlFor="form-custom-city"
+                          className="block font-sans text-xs uppercase tracking-wider text-tan font-bold"
                         >
-                          {t.restaurantBrandName} <span className="text-[#E23A2E]">*</span>
+                          Please Specify Your City / Area *
                         </label>
                         <input
-                          id="form-business-name"
+                          id="form-custom-city"
                           type="text"
                           required
-                          value={formData.businessName}
-                          onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                          placeholder={
-                            formData.partnerType === 'Home Kitchen'
-                              ? 'e.g. Ammi’s Special Biryani & Kitchen'
-                              : formData.partnerType === 'Mart'
-                              ? 'e.g. QuickStop 24/7 Mart'
-                              : formData.partnerType === 'Groceries'
-                              ? 'e.g. Fresh Valley Organic Groceries'
-                              : formData.partnerType === 'Pharmacy'
-                              ? 'e.g. HealthCare Plus Pharmacy'
-                              : 'e.g. Damascus Charcoal Grill'
-                          }
-                          className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
+                          value={formData.customCity || ''}
+                          onChange={(e) => setFormData({ ...formData, customCity: e.target.value })}
+                          placeholder="e.g. Kasur, Sheikhupura, Sargodha, Abbottabad, etc."
+                          className={`w-full bg-[#1A1D23] border border-[#B89865] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors`}
                         />
-                      </div>
+                      </motion.div>
+                    )}
+                  </div>
 
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="form-cuisine"
-                          className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                        >
-                          {formData.partnerType === 'Mart' || formData.partnerType === 'Groceries'
-                            ? 'Product Categories / Items'
-                            : formData.partnerType === 'Pharmacy'
-                            ? 'Medicines & Health Scope'
-                            : t.primaryCuisineCategory}
-                        </label>
-                        <input
-                          id="form-cuisine"
-                          type="text"
-                          value={formData.cuisineType || ''}
-                          onChange={(e) => setFormData({ ...formData, cuisineType: e.target.value })}
-                          placeholder={
-                            formData.partnerType === 'Home Kitchen'
-                              ? 'e.g. Daily Lunch Boxes, Homemade Desserts, Frozen Meals'
-                              : formData.partnerType === 'Mart'
-                              ? 'e.g. Snacks, Beverages, Household Goods'
-                              : formData.partnerType === 'Groceries'
-                              ? 'e.g. Fresh Dairy, Fruits & Vegetables, Bakery'
-                              : formData.partnerType === 'Pharmacy'
-                              ? 'e.g. Prescription Drugs, Supplements, Personal Care'
-                              : 'e.g. Biryani & Kebabs, Cafe, Pizza'
-                          }
-                          className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
-                        />
-                      </div>
-                    </>
+                  {/* Row 4, Col 2: Area / Locality (Merchant) */}
+                  {activePersona === 'restaurant' ? (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="form-area-locality"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.areaLocality} *
+                      </label>
+                      <input
+                        id="form-area-locality"
+                        type="text"
+                        required
+                        value={formData.areaLocality || ''}
+                        onChange={(e) => setFormData({ ...formData, areaLocality: e.target.value })}
+                        placeholder="e.g. DHA Phase 5, Gulberg, Olaya, Al-Malaz"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8]`}
+                      />
+                    </div>
+                  ) : null}
+
+                  {/* Row 5: Street Address / Building (Optional) for Merchant (Full Width Span 2) */}
+                  {activePersona === 'restaurant' && (
+                    <div className="md:col-span-2 space-y-2">
+                      <label
+                        htmlFor="form-street-address"
+                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
+                      >
+                        {t.streetAddress}
+                      </label>
+                      <input
+                        id="form-street-address"
+                        type="text"
+                        value={formData.streetAddress || ''}
+                        onChange={(e) => setFormData({ ...formData, streetAddress: e.target.value })}
+                        placeholder="e.g. Building 4B, Street 12, Floor 2"
+                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none focus:border-[#1E5FA8]`}
+                      />
+                    </div>
                   )}
 
                   {/* Anti-Bot Honeypot Trap (Hidden from users) */}
@@ -1168,388 +1225,6 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
                     />
                   </div>
-
-                  {/* Email Address (Optional) */}
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="form-email"
-                      className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                    >
-                      {t.emailAddressOptional}
-                    </label>
-                    <input
-                      id="form-email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => {
-                        setFormData({ ...formData, email: e.target.value });
-                        if (fieldErrors.email) {
-                          setFieldErrors(prev => ({ ...prev, email: undefined }));
-                        }
-                      }}
-                      placeholder="contact@domain.com (optional)"
-                      className={`w-full bg-[#1A1D23] border px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors ${fieldErrors.email ? 'border-[#E23A2E]' : `border-[#373C46] ${personaTheme.focusBorder}`
-                        }`}
-                    />
-                    {fieldErrors.email && (
-                      <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
-                        {fieldErrors.email}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Phone with Country Code Selector & Region-Specific Validation */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label
-                        htmlFor="form-phone"
-                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                      >
-                        {t.phoneNumber} <span className="text-[#E23A2E]">*</span>
-                      </label>
-                      <span className="font-mono text-[11px] text-[#8C9099]">
-                        {currentRegion.flag} {currentRegion.country}
-                      </span>
-                    </div>
-                    <div className="flex relative">
-                      <select
-                        id="form-country-code"
-                        value={formData.countryCode}
-                        onChange={(e) => handleCountryCodeChange(e.target.value)}
-                        className={`bg-[#262A32] border border-r-0 border-[#373C46] px-3 py-3.5 text-xs text-white font-mono focus:outline-none ${personaTheme.focusBorder} cursor-pointer`}
-                      >
-                        {Object.entries(SUPPORTED_REGIONS).map(([code, reg]) => (
-                          <option key={code} value={code}>
-                            {reg.flag} {reg.shortName} ({reg.code})
-                          </option>
-                        ))}
-                      </select>
-                      <div className="relative flex-1">
-                        <input
-                          id="form-phone"
-                          type="tel"
-                          required
-                          value={formData.phone}
-                          onChange={(e) => handlePhoneChange(e.target.value)}
-                          placeholder={currentRegion.placeholder}
-                          className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors font-mono ${fieldErrors.phone
-                            ? 'border-[#E23A2E]'
-                            : formData.phone.length > 0
-                              ? phoneValidation.isValid
-                                ? 'border-[#10B981]'
-                                : 'border-[#E23A2E]'
-                              : `border-[#373C46] ${personaTheme.focusBorder}`
-                            }`}
-                        />
-                        {formData.phone.length > 0 && phoneValidation.isValid && !fieldErrors.phone && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#10B981] flex items-center pointer-events-none">
-                            <Check size={18} weight="bold" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Regional Format Guidance & Real-time Validation Message */}
-                    {fieldErrors.phone ? (
-                      <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
-                        {fieldErrors.phone}
-                      </div>
-                    ) : formData.phone.length > 0 ? (
-                      phoneValidation.isValid ? (
-                        <div className="flex items-center space-x-1.5 text-[11px] font-mono text-[#10B981] pt-0.5">
-                          <Check size={13} weight="bold" />
-                          <span>Valid {currentRegion.country} phone: {phoneValidation.fullInternational}</span>
-                        </div>
-                      ) : (
-                        <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
-                          {phoneValidation.error}
-                        </div>
-                      )
-                    ) : (
-                      <div className="text-[11px] font-mono text-[#5B5F66] pt-0.5">
-                        Format: {currentRegion.helper}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Universal City Selection with Autocomplete for ALL personas (Rider, Restaurant, Waitlist/Customer) */}
-                  <div className="space-y-2 relative" ref={cityWrapperRef}>
-                    <label
-                      htmlFor="form-city-input"
-                      className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                    >
-                      {activePersona === 'customer'
-                        ? t.preferredDeliveryCity
-                        : activePersona === 'rider'
-                          ? t.primaryDispatchZone
-                          : t.restaurantOperatingCity}{' '}
-                      <span className="text-[#E23A2E]">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        id="form-city-input"
-                        type="text"
-                        autoComplete="off"
-                        value={formData.city}
-                        onKeyDown={handleCityKeyDown}
-                        onFocus={() => {
-                          if (formData.city?.trim().length >= 1) {
-                            setCityDropdownOpen(true);
-                          }
-                        }}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setFormData(prev => ({
-                            ...prev,
-                            city: val,
-                            area: '', // Reset area when city changes
-                          }));
-                          if (val.trim().length >= 1) {
-                            setCityDropdownOpen(true);
-                          } else {
-                            setCityDropdownOpen(false);
-                          }
-                          if (fieldErrors.city) {
-                            setFieldErrors(prev => ({ ...prev, city: undefined }));
-                          }
-                        }}
-                        placeholder={t.typeToSearchCity}
-                        className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors ${fieldErrors.city ? 'border-[#E23A2E]' : `border-[#373C46] ${personaTheme.focusBorder}`
-                          }`}
-                      />
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8C9099] pointer-events-none flex items-center">
-                        <MapPin size={18} />
-                      </div>
-                    </div>
-                    {fieldErrors.city && (
-                      <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
-                        {fieldErrors.city}
-                      </div>
-                    )}
-
-                    {/* City Autocomplete Dropdown - only displays when >= 1 character entered */}
-                    {cityDropdownOpen && formData.city?.trim().length >= 1 && (
-                      <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-[#1A1D23] border border-[#373C46] shadow-2xl divide-y divide-[#2B303B]">
-                        {matchingCities.length > 0 ? (
-                          matchingCities.map((c, index) => {
-                            const isHighlighted = index === highlightedCityIndex;
-                            return (
-                              <button
-                                key={`${c.name}-${c.countryCode}-${index}`}
-                                type="button"
-                                onMouseEnter={() => setHighlightedCityIndex(index)}
-                                onClick={() => handleCitySelect(c.name, c.countryCode)}
-                                className={`w-full text-left px-4 py-3 transition-colors flex items-center justify-between cursor-pointer border-l-4 ${
-                                  isHighlighted
-                                    ? `bg-[#2E3542] text-white ${personaTheme.borderL}`
-                                    : 'bg-transparent text-[#D1D5DB] border-transparent hover:bg-[#252A33]'
-                                }`}
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-base">{c.flag}</span>
-                                  <span className={`text-sm ${isHighlighted ? 'text-white font-semibold' : 'text-[#E2E8F0] font-medium'}`}>
-                                    {c.name}
-                                  </span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-xs font-mono text-[#8C9099]">
-                                    {c.country} ({c.countryCode})
-                                  </span>
-                                  {isHighlighted && (
-                                    <span className={`text-[10px] font-mono px-1.5 py-0.5 uppercase tracking-wider font-bold border ${personaTheme.badge}`}>
-                                      PRESS ↵
-                                    </span>
-                                  )}
-                                </div>
-                              </button>
-                            );
-                          })
-                        ) : (
-                          <div className="p-3 text-xs font-mono text-[#8C9099]">
-                            No predefined match for &ldquo;{formData.city}&rdquo;
-                          </div>
-                        )}
-                        {formData.city.trim() && !matchingCities.some(c => c.name.toLowerCase() === formData.city.trim().toLowerCase()) && (
-                          <button
-                            type="button"
-                            onClick={() => handleCitySelect(formData.city.trim())}
-                            className={`w-full text-left px-4 py-3 bg-[#222731] hover:bg-[#2B313E] transition-colors flex items-center justify-between cursor-pointer text-xs font-mono border-l-4 border-transparent ${personaTheme.customText}`}
-                          >
-                            <span>Use custom city: &ldquo;{formData.city.trim()}&rdquo;</span>
-                            <ArrowRight size={13} weight="bold" />
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Second column next to City / Dispatch Zone:
-                      - Customer: Primary Service Interest
-                      - Rider: Delivery Experience
-                      - Restaurant: Area / Locality */}
-                  {activePersona === 'customer' ? (
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="form-interest"
-                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                      >
-                        {t.primaryServiceInterest}
-                      </label>
-                      <select
-                        id="form-interest"
-                        value={formData.serviceInterest}
-                        onChange={(e) => setFormData({ ...formData, serviceInterest: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none ${personaTheme.focusBorder} transition-colors cursor-pointer`}
-                      >
-                        <option value="Zero-Markup Food Delivery">Zero-Markup Food Delivery</option>
-                        <option value="Express Courier & Parcel">Express Courier & Parcel</option>
-                        <option value="Groceries & Daily Essentials">Groceries & Daily Essentials</option>
-                        <option value="All Speedy Services">All Speedy Services</option>
-                      </select>
-                    </div>
-                  ) : activePersona === 'rider' ? (
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="form-experience"
-                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                      >
-                        {t.deliveryExperience}
-                      </label>
-                      <select
-                        id="form-experience"
-                        value={formData.deliveryExperience || 'Over 1 Year (Active courier)'}
-                        onChange={(e) => setFormData({ ...formData, deliveryExperience: e.target.value })}
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none ${personaTheme.focusBorder} transition-colors cursor-pointer`}
-                      >
-                        <option value="Over 1 Year (Active courier)">Over 1 Year (Active courier)</option>
-                        <option value="6 - 12 Months">6 - 12 Months</option>
-                        <option value="New Courier (Needs onboarding)">New Courier (Needs onboarding)</option>
-                      </select>
-                    </div>
-                  ) : (
-                    /* Restaurant: Area Selection (Compulsory, Dependent on City) */
-                    <div className="space-y-2 relative" ref={areaWrapperRef}>
-                      <label
-                        htmlFor="form-area-input"
-                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                      >
-                        {t.areaNeighborhood} <span className="text-[#E23A2E]">*</span>
-                      </label>
-                      <div className="relative">
-                        <input
-                          id="form-area-input"
-                          type="text"
-                          autoComplete="off"
-                          disabled={!formData.city?.trim()}
-                          value={formData.area}
-                          onKeyDown={handleAreaKeyDown}
-                          onFocus={() => {
-                            if (formData.city?.trim() && formData.area?.trim().length >= 1) {
-                              setAreaDropdownOpen(true);
-                            }
-                          }}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setFormData(prev => ({ ...prev, area: val }));
-                            if (val.trim().length >= 1) {
-                              setAreaDropdownOpen(true);
-                            } else {
-                              setAreaDropdownOpen(false);
-                            }
-                            if (fieldErrors.area) {
-                              setFieldErrors(prev => ({ ...prev, area: undefined }));
-                            }
-                          }}
-                          placeholder={!formData.city?.trim() ? t.selectCityFirst : t.typeToSearchArea}
-                          className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors ${
-                            !formData.city?.trim()
-                              ? 'opacity-60 cursor-not-allowed border-[#2C313C]'
-                              : fieldErrors.area
-                                ? 'border-[#E23A2E]'
-                                : `border-[#373C46] ${personaTheme.focusBorder}`
-                          }`}
-                        />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8C9099] pointer-events-none flex items-center">
-                          <MapPin size={18} />
-                        </div>
-                      </div>
-                      {fieldErrors.area && (
-                        <div className="text-[11px] font-mono text-[#E23A2E] pt-0.5">
-                          {fieldErrors.area}
-                        </div>
-                      )}
-
-                      {/* Area Autocomplete Dropdown - only displays when >= 1 character entered */}
-                      {areaDropdownOpen && formData.city?.trim() && formData.area?.trim().length >= 1 && (
-                        <div className="absolute z-50 left-0 right-0 mt-1 max-h-56 overflow-y-auto bg-[#1A1D23] border border-[#373C46] shadow-2xl divide-y divide-[#2B303B]">
-                          {matchingAreas.length > 0 ? (
-                            matchingAreas.map((areaName, index) => {
-                              const isHighlighted = index === highlightedAreaIndex;
-                              return (
-                                <button
-                                  key={`${areaName}-${index}`}
-                                  type="button"
-                                  onMouseEnter={() => setHighlightedAreaIndex(index)}
-                                  onClick={() => handleAreaSelect(areaName)}
-                                  className={`w-full text-left px-4 py-2.5 transition-colors flex items-center justify-between cursor-pointer border-l-4 ${
-                                    isHighlighted
-                                      ? `bg-[#2E3542] text-white ${personaTheme.borderL}`
-                                      : 'bg-transparent text-[#D1D5DB] border-transparent hover:bg-[#252A33]'
-                                  }`}
-                                >
-                                  <span className={`text-sm ${isHighlighted ? 'text-white font-semibold' : 'text-[#E2E8F0]'}`}>
-                                    {areaName}
-                                  </span>
-                                  <div className="flex items-center space-x-2">
-                                    <span className="text-[10px] font-mono text-[#8C9099] uppercase">{formData.city}</span>
-                                    {isHighlighted && (
-                                      <span className={`text-[10px] font-mono px-1.5 py-0.5 uppercase tracking-wider font-bold border ${personaTheme.badge}`}>
-                                        PRESS ↵
-                                      </span>
-                                    )}
-                                  </div>
-                                </button>
-                              );
-                            })
-                          ) : (
-                            <div className="p-3 text-xs font-mono text-[#8C9099]">
-                              No predefined area matches &ldquo;{formData.area}&rdquo; in {formData.city}
-                            </div>
-                          )}
-                          {formData.area.trim() && !matchingAreas.some(a => a.toLowerCase() === formData.area.trim().toLowerCase()) && (
-                            <button
-                              type="button"
-                              onClick={() => handleAreaSelect(formData.area.trim())}
-                              className={`w-full text-left px-4 py-3 bg-[#222731] hover:bg-[#2B313E] transition-colors flex items-center justify-between cursor-pointer text-xs font-mono border-l-4 border-transparent ${personaTheme.customText}`}
-                            >
-                              <span>Use custom area: &ldquo;{formData.area.trim()}&rdquo;</span>
-                              <ArrowRight size={13} weight="bold" />
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Street Address / Building (Optional) - spans both columns for Restaurant */}
-                  {activePersona === 'restaurant' && (
-                    <div className="space-y-2 col-span-1 md:col-span-2">
-                      <label
-                        htmlFor="form-address-input"
-                        className={`block uppercase ${getTypographySize(lang, 'label')} text-[#A0A4AB]`}
-                      >
-                        {t.streetAddressOptional}
-                      </label>
-                      <input
-                        id="form-address-input"
-                        type="text"
-                        value={formData.address || ''}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        placeholder="e.g. Building 4B, Street 12, Floor 2"
-                        className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none ${personaTheme.focusBorder} transition-colors`}
-                      />
-                    </div>
-                  )}
                 </div>
 
                 {/* Terms agreement */}
@@ -1581,17 +1256,27 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     >
                       {t.termsLink}
                     </Link>
+                    <span> and </span>
+                    <Link
+                      id="link-privacy-agreement"
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white underline underline-offset-2 hover:text-red transition-colors font-semibold inline"
+                    >
+                      {t.privacyLink}
+                    </Link>
                     {t.agreementSuffix}
                   </label>
                 </div>
 
                 {/* Submit Action */}
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-[#373C46]">
-                  <div className="font-mono text-xs text-[#8C9099]">
+                  <div className="font-sans text-xs text-[#8C9099]">
                     {activePersona === 'customer' ? (
                       <>
-                        <span className="uppercase">{t.waitlistStatus}: </span>
-                        <span className="text-tan font-bold uppercase">{t.priorityBatch}</span>
+                        <span className="uppercase text-[#9A7A4A] font-bold">VIP: </span>
+                        <span className="text-[#C7A874] font-bold uppercase">50% off your first 3 orders</span>
                       </>
                     ) : (
                       <>
@@ -1639,23 +1324,6 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               </motion.form>
             )}
           </AnimatePresence>
-
-          {/* Trust Signals repeated near conversion */}
-          <div className="mt-10 pt-8 border-t border-[#373C46] flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 font-mono text-xs">
-            <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <div className="w-8 h-8 rounded-xs bg-red/10 border border-red/20 flex items-center justify-center shrink-0">
-                <Coins size={18} weight="bold" className="text-red" />
-              </div>
-              <span>100% delivery fee to rider</span>
-            </div>
-
-            <div className="flex items-center space-x-3 text-[#A0A4AB]">
-              <div className="w-8 h-8 rounded-xs bg-blue/10 border border-blue/20 flex items-center justify-center shrink-0">
-                <Percent size={18} weight="bold" className="text-blue" />
-              </div>
-              <span>10% flat merchant commission</span>
-            </div>
-          </div>
         </div>
       </div>
     </section>

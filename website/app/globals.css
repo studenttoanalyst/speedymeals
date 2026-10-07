@@ -2,8 +2,8 @@
 
 @theme {
   --font-display: var(--font-archivo-black), sans-serif;
-  --font-heading: var(--font-archivo), sans-serif;
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-figtree), sans-serif;
+  --font-sans: var(--font-figtree), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --color-red: #E23A2E;
@@ -48,14 +48,14 @@
   border-radius: 16px;
 }
 
-/* Hero dynamic video sizing: large on desktop matching reference, prominent on mobile */
+/* Hero dynamic video sizing: larger on desktop, prominent on mobile */
 .hero-video-box {
-  max-width: min(520px, 94vw, calc(35dvh * 2.2789));
+  max-width: min(580px, 96vw);
 }
 
 @media (min-width: 768px) {
   .hero-video-box {
-    max-width: min(1200px, 94vw, calc(46dvh * 2.2789));
+    max-width: min(1360px, 96vw);
   }
 }
 
@@ -90,7 +90,7 @@
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee-scroll 24s linear infinite;
+  animation: marquee-scroll 60s linear infinite;
   will-change: transform;
 }
 

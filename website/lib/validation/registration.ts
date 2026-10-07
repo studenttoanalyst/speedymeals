@@ -32,11 +32,15 @@ export interface RawRegistrationInput {
   city?: unknown;
   customCity?: unknown;
   area?: unknown;
+  areaLocality?: unknown;
   address?: unknown;
+  streetAddress?: unknown;
   partnerType?: unknown;
+  businessType?: unknown;
   vehicleType?: unknown;
   businessName?: unknown;
   cuisineType?: unknown;
+  primaryCategory?: unknown;
   devicePlatform?: unknown;
   serviceInterest?: unknown;
   agreed?: unknown;
@@ -152,8 +156,10 @@ export function validateRegistrationPayload(
   if (!cityResult.success) return cityResult;
   const city = cityResult.value;
 
-  const rawAreaStr = typeof body.area === 'string' ? body.area.trim() : '';
-  const rawAddressStr = typeof body.address === 'string' ? body.address.trim() : '';
+  const areaInput = body.areaLocality || body.area;
+  const rawAreaStr = typeof areaInput === 'string' ? areaInput.trim() : '';
+  const addressInput = body.streetAddress || body.address;
+  const rawAddressStr = typeof addressInput === 'string' ? addressInput.trim() : '';
   const area = rawAreaStr ? sanitizeTextInput(rawAreaStr, { maxLength: 100 }) : '';
   const address = rawAddressStr ? sanitizeTextInput(rawAddressStr, { maxLength: 200 }) : null;
 
@@ -174,12 +180,18 @@ export function validateRegistrationPayload(
   const businessName = typeof body.businessName === 'string' && body.businessName.trim()
     ? sanitizeTextInput(body.businessName, { maxLength: 100 })
     : null;
-  const partnerType = typeof body.partnerType === 'string' && body.partnerType.trim()
-    ? sanitizeTextInput(body.partnerType, { maxLength: 50 })
-    : 'Restaurant';
-  const cuisineType = typeof body.cuisineType === 'string' && body.cuisineType.trim()
-    ? sanitizeTextInput(body.cuisineType, { maxLength: 50 })
-    : null;
+  const rawPartnerType = typeof body.businessType === 'string' && body.businessType.trim()
+    ? body.businessType
+    : typeof body.partnerType === 'string' && body.partnerType.trim()
+      ? body.partnerType
+      : 'Restaurant';
+  const partnerType = sanitizeTextInput(rawPartnerType, { maxLength: 50 }) || 'Restaurant';
+  const rawCuisine = typeof body.primaryCategory === 'string' && body.primaryCategory.trim()
+    ? body.primaryCategory
+    : typeof body.cuisineType === 'string' && body.cuisineType.trim()
+      ? body.cuisineType
+      : null;
+  const cuisineType = rawCuisine ? sanitizeTextInput(rawCuisine, { maxLength: 100 }) : null;
   const vehicleType = typeof body.vehicleType === 'string' && body.vehicleType.trim()
     ? sanitizeTextInput(body.vehicleType, { maxLength: 50 })
     : null;
