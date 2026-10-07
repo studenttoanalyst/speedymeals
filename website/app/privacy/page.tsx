@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowLeft,
   ArrowUp,
@@ -148,7 +149,19 @@ export default function PrivacyPolicyPage() {
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#15171A] selection:bg-[#E23A2E] selection:text-white font-sans">
+    <div className="relative min-h-screen bg-[#F8F9FA] text-[#15171A] selection:bg-[#E23A2E] selection:text-white font-sans overflow-x-hidden">
+      {/* Fixed Ambient Transparent SpeedyMeals Favicon Watermark (Persistent viewport-centered background watermark) */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+        <Image
+          src="/favicon.jpeg"
+          alt="SpeedyMeals Favicon Watermark"
+          width={900}
+          height={900}
+          className="w-[75vw] max-w-[700px] md:max-w-[780px] h-auto object-contain opacity-[0.08] select-none pointer-events-none"
+          priority
+        />
+      </div>
+
       {/* Sleek Enterprise Legal Center Top Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
@@ -301,7 +314,7 @@ export default function PrivacyPolicyPage() {
       </header>
 
       {/* Main Privacy Content Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* Left Sticky Sidebar Navigation (Desktop) */}
           <aside className="hidden lg:block lg:col-span-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 border-r border-line/60 print:hidden">
