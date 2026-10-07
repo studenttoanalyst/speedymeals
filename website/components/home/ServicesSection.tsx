@@ -160,9 +160,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
             <div className="lg:col-span-6">
               <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
                 <Image
-                  src="/assets/courier_rider_delivery.jpg"
+                  src="/assets/rider_delivery.jpg"
                   alt="SpeedyMeals courier delivering an order"
                   fill
+                  priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                 />

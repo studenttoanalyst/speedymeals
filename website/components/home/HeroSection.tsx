@@ -253,11 +253,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
             {/* Card 1: Become a Rider */}
             <div className="flex flex-col items-center justify-between p-2 sm:p-3 hover:bg-black/[0.015] transition-colors duration-200 group rounded-2xl">
               <div className="flex flex-col items-center w-full">
-                <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-hidden rounded-2xl shadow-xs border border-line/50">
+                <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-visible">
                   <img
-                    src="/assets/courier_rider_delivery.jpg"
+                    src="/assets/rider-sprite.png"
                     alt="Become a Rider - SpeedyMeals"
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
+                    className="h-full w-auto max-h-none object-contain scale-[1.28] drop-shadow-md group-hover:scale-[1.34] transition-transform duration-300 ease-out pointer-events-none"
                   />
                 </div>
                 <h3 className="font-heading font-extrabold text-base sm:text-lg text-ink tracking-tight mb-0.5">
