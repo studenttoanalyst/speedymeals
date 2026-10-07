@@ -106,6 +106,24 @@
   }
 }
 
+/* Subtle instant loading bar animation for App Router transitions */
+@keyframes loader-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-loader-slide {
+  animation: loader-slide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
 html {
   scroll-behavior: smooth;
   font-family: var(--font-sans);

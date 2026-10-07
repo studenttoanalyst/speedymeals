@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Figtree, Archivo_Black, JetBrains_Mono } from 'next/font/google';
+import { NetworkStatusBanner } from '@/components/common/NetworkStatusBanner';
 import './globals.css';
 
 const figtree = Figtree({
@@ -47,7 +48,10 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.jpeg" type="image/jpeg" />
       </head>
-      <body className="font-sans selection:bg-[#E23A2E] selection:text-white">{children}</body>
+      <body className="font-sans selection:bg-[#E23A2E] selection:text-white">
+        {children}
+        <NetworkStatusBanner />
+      </body>
     </html>
   );
 }
