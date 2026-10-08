@@ -170,7 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                 id={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                 type="button"
                 onClick={() => handleNavClick(item.id as 'overview' | 'services' | 'partner' | 'about')}
-                className={`nav-pill relative px-3.5 py-2 font-mono text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer ${isAboutActive
+                className={`nav-pill relative px-3.5 py-2 font-sans font-medium text-sm tracking-wide transition-colors duration-150 cursor-pointer ${isAboutActive
                   ? 'text-black font-bold bg-tan/20'
                   : 'text-ink-soft hover:text-ink hover:bg-paper-off/50'
                   }`}
@@ -187,7 +187,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-cta-early-access"
             type="button"
             onClick={() => handleNavClick('partner', 'customer')}
-            className="nav-pill px-4 py-2 text-xs font-mono font-bold tracking-wider uppercase bg-[#C7A874] text-[#15171A] hover:bg-[#B3935B] transition-colors duration-150 flex items-center space-x-1.5 cursor-pointer shadow-xs"
+            className="nav-pill px-4 py-2 text-xs font-sans font-bold tracking-wide uppercase bg-[#C7A874] text-[#15171A] hover:bg-[#B3935B] transition-colors duration-150 flex items-center space-x-1.5 cursor-pointer shadow-xs"
           >
             <span>Get VIP access</span>
             <ArrowRight size={13} weight="bold" />
@@ -199,7 +199,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               id="nav-cta-portals"
               type="button"
               onClick={() => setPortalsOpen((prev) => !prev)}
-              className={`nav-pill px-3 py-2 text-xs font-mono font-semibold tracking-wider uppercase transition-all duration-150 flex items-center space-x-1.5 cursor-pointer ${sessionRole === 'admin'
+              className={`nav-pill px-3 py-2 text-xs font-sans font-semibold tracking-wide uppercase transition-all duration-150 flex items-center space-x-1.5 cursor-pointer ${sessionRole === 'admin'
                 ? 'border border-ink bg-ink text-white hover:bg-black shadow-xs'
                 : sessionRole === 'restaurant'
                   ? 'border border-blue bg-blue text-white hover:bg-[#155ab6] shadow-xs'
@@ -239,7 +239,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                   className="absolute right-0 top-full mt-2 w-56 bg-white border border-line shadow-xl py-2 z-50 rounded-xl"
                 >
                   <div className="px-3 pb-2 mb-1 border-b border-line">
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-ink-soft font-bold">
+                    <span className="font-sans text-[10px] uppercase tracking-wider text-ink-soft font-bold">
                       SpeedyMeals Portals
                     </span>
                   </div>
@@ -280,13 +280,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
 
                   {sessionRole && (
                     <div className="px-3 pt-2 mt-1 border-t border-line flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-ink-soft truncate max-w-[100px]">
+                      <span className="font-sans text-xs text-ink-soft truncate max-w-[100px]">
                         {sessionUser?.name || sessionRole.toUpperCase()}
                       </span>
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="text-red hover:text-ink font-mono text-[10px] font-bold flex items-center space-x-1 cursor-pointer transition-colors"
+                        className="text-red hover:text-ink font-sans text-xs font-bold flex items-center space-x-1 cursor-pointer transition-colors"
                       >
                         <SignOut size={11} weight="bold" />
                         <span>Sign out</span>
@@ -319,7 +319,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           id="mobile-drawer-panel"
           className="nav-drawer md:hidden mt-2 border border-line bg-white/98 backdrop-blur-md shadow-2xl p-5 space-y-4"
         >
-          <div className="flex flex-col space-y-1 font-mono text-xs uppercase tracking-widest">
+          <div className="flex flex-col space-y-1 font-sans text-sm uppercase tracking-wider font-semibold">
             <button
               id="mobile-link-services"
               type="button"
@@ -362,7 +362,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                 id="mobile-link-early-access"
                 type="button"
                 onClick={() => handleNavClick('partner', 'customer')}
-                className="w-full py-3 px-4 bg-[#C7A874] text-[#15171A] font-mono font-bold uppercase tracking-wider rounded-lg flex justify-center items-center space-x-2"
+                className="w-full py-3 px-4 bg-[#C7A874] text-[#15171A] font-sans font-bold uppercase tracking-wide rounded-lg flex justify-center items-center space-x-2"
               >
                 <span>Get VIP access</span>
                 <ArrowRight size={13} weight="bold" />
@@ -402,7 +402,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           </div>
 
           {sessionRole && (
-            <div className="pt-1 pb-2 flex items-center justify-between font-mono text-[11px] text-ink-soft border-t border-line">
+            <div className="pt-1 pb-2 flex items-center justify-between font-sans text-xs text-ink-soft border-t border-line">
               <span>Active: <strong className="text-ink">{sessionRole.toUpperCase()}</strong></span>
               <button
                 type="button"
@@ -414,7 +414,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             </div>
           )}
 
-          <div className="pt-2 grid grid-cols-3 gap-2 font-mono text-[10px] uppercase font-bold tracking-wider">
+          <div className="pt-2 grid grid-cols-3 gap-2 font-sans text-xs uppercase font-bold tracking-wide">
             <button
               id="mobile-cta-rider"
               type="button"

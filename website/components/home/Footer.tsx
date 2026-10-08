@@ -69,7 +69,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               </span>
             </div>
 
-            <div className="font-mono text-xs text-blue font-semibold tracking-wide flex items-center space-x-2">
+            <div className="font-sans text-xs text-blue font-semibold tracking-wide flex items-center space-x-2">
               <span className="inline-block w-1.5 h-1.5 bg-blue" />
               <span>&ldquo;Fast &amp; safe to you.&rdquo;</span>
             </div>
@@ -84,10 +84,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           <div className="col-span-1 lg:col-span-5 grid grid-cols-2 gap-6 sm:gap-8">
             {/* Col 2A: Company */}
             <div className="space-y-4">
-              <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+              <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
                 COMPANY
               </div>
-              <ul className="space-y-2.5 text-xs font-mono">
+              <ul className="space-y-2.5 text-xs font-sans">
                 <li>
                   <button
                     type="button"
@@ -138,10 +138,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
 
             {/* Col 2B: Get Started */}
             <div className="space-y-4">
-              <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+              <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
                 GET STARTED
               </div>
-              <ul className="space-y-2.5 text-xs font-mono">
+              <ul className="space-y-2.5 text-xs font-sans">
                 <li>
                   <button
                     type="button"
@@ -166,7 +166,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   <div className="text-[#5B5F66] flex items-center space-x-1.5 cursor-not-allowed">
                     <span className="w-1.5 h-1.5 bg-[#5B5F66] inline-block" />
                     <span>Customer App</span>
-                    <span className="text-[9px] text-amber-500 font-bold ml-1 font-mono tracking-wider">
+                    <span className="text-[10px] text-amber-500 font-bold ml-1 font-sans tracking-wide">
                       ⋯ COMING SOON
                     </span>
                   </div>
@@ -197,10 +197,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
 
           {/* Section 3: Contact (Below on mobile, 3 cols on desktop) */}
           <div className="col-span-1 lg:col-span-3 space-y-4">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+            <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
               CONTACT
             </div>
-            <div className="space-y-2 text-xs font-mono">
+            <div className="space-y-2 text-xs font-sans">
               <div className="text-[#A0A4AB]">Serving South Asia &amp; the Middle East</div>
               <div>
                 <a
@@ -290,7 +290,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         </div>
 
         {/* Regulatory Registration Section: Sleek black hollowed boxes */}
-        <div className="py-6 border-b border-[#2D3139] flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-[#A0A4AB]">
+        <div className="py-6 border-b border-[#2D3139] flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#A0A4AB]">
           <div className="flex items-center space-x-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
@@ -332,7 +332,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         </div>
 
         {/* Bottom bar (hairline top-border) */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-[#5B5F66]">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#5B5F66]">
           <div>&copy; 2026 DiscoverTheTech. All rights reserved.</div>
           <div className="flex items-center space-x-4">
             <Link href="/privacy" className="hover:underline hover:text-[#A0A4AB] transition-colors">
