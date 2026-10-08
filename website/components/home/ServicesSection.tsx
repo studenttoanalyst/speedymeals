@@ -97,8 +97,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
             <div className="lg:col-span-6 order-2 lg:order-1">
               <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
                 <Image
-                  src="/assets/restaurant_kitchen_prep.jpg"
-                  alt="Restaurant culinary team preparing fresh orders"
+                  src="/assets/mascot_app.png"
+                  alt="SpeedyMeals mascot and mobile application"
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"

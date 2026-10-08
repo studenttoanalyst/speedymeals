@@ -255,7 +255,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               <div className="flex flex-col items-center w-full">
                 <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-visible">
                   <img
-                    src="/assets/rider-sprite.png"
+                    src="/assets/rider-spritev2.png"
                     alt="Become a Rider - SpeedyMeals"
                     className="h-full w-auto max-h-none object-contain scale-[1.28] drop-shadow-md group-hover:scale-[1.34] transition-transform duration-300 ease-out pointer-events-none"
                   />
@@ -283,7 +283,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               <div className="flex flex-col items-center w-full">
                 <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-visible">
                   <img
-                    src="/assets/merchant-sprite.png"
+                    src="/assets/merchant-spritev2.png"
                     alt="Grow your restaurant - SpeedyMeals"
                     className="h-full w-auto max-h-none object-contain scale-[1.28] drop-shadow-md group-hover:scale-[1.34] transition-transform duration-300 ease-out pointer-events-none"
                   />
@@ -311,7 +311,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSelectPersona }) => 
               <div className="flex flex-col items-center w-full">
                 <div className="relative h-36 sm:h-40 md:h-44 lg:h-48 w-full mb-2 flex items-center justify-center overflow-visible">
                   <img
-                    src="/assets/customer-sprite.png"
+                    src="/assets/customer-spritev2.png"
                     alt="Order food delivery - SpeedyMeals"
                     className="h-full w-auto max-h-none object-contain scale-[1.28] drop-shadow-md group-hover:scale-[1.34] transition-transform duration-300 ease-out pointer-events-none"
                   />
