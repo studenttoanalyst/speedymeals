@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight } from '@phosphor-icons/react';
 import { HeroBannerCarousel } from './HeroBannerCarousel';
 import { BannerSlide } from '@/lib/banners';
+import { useViewportPopover } from '@/hooks/useViewportPopover';
 
 const COVERED_COUNTRIES = [
   {
@@ -38,19 +40,78 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const shouldReduceMotion = useReducedMotion();
   const [activeCountry, setActiveCountry] = useState<string | null>(null);
-  const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  const handleTouchStart = (code: string) => {
-    touchTimerRef.current = setTimeout(() => {
-      setActiveCountry(code);
-    }, 150);
+  const pkRef = useRef<HTMLButtonElement | null>(null);
+  const ksaRef = useRef<HTMLButtonElement | null>(null);
+  const comingSoonRef = useRef<HTMLButtonElement | null>(null);
+  const emptyRef = useRef<HTMLButtonElement | null>(null);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+
+  const anchorRefs: Record<string, React.RefObject<HTMLButtonElement | null>> = {
+    PK: pkRef,
+    KSA: ksaRef,
+    COMING_SOON: comingSoonRef,
   };
 
-  const handleTouchEnd = () => {
-    if (touchTimerRef.current) {
-      clearTimeout(touchTimerRef.current);
-    }
-  };
+  const currentAnchorRef = activeCountry ? anchorRefs[activeCountry] : emptyRef;
+
+  const position = useViewportPopover({
+    anchorRef: currentAnchorRef,
+    popoverRef,
+    open: Boolean(activeCountry),
+    preferredWidth: 350,
+    margin: 8,
+    gap: 10,
+  });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Touch outside, Escape, and scroll listeners to close active popover
+  useEffect(() => {
+    if (!activeCountry) return;
+
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target as Node | null;
+      const isAnyAnchor = Object.values(anchorRefs).some(
+        (ref) => ref.current && ref.current.contains(target)
+      );
+      if (isAnyAnchor || popoverRef.current?.contains(target)) {
+        return;
+      }
+      setActiveCountry(null);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveCountry(null);
+      }
+    };
+
+    const handleScroll = () => {
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        setActiveCountry(null);
+      }
+    };
+
+    const handleTouchMove = () => {
+      setActiveCountry(null);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [activeCountry]);
 
   const handleScrollToPartner = (persona: 'rider' | 'restaurant' | 'customer') => {
     onSelectPersona(persona);
@@ -76,6 +137,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   }, [shouldReduceMotion]);
 
   const hasBanners = slides.length > 0;
+  const activeCountryItem = COVERED_COUNTRIES.find((c) => c.code === activeCountry);
 
   return (
     <section id="overview" className="relative w-full bg-white overflow-hidden pt-[76px] md:pt-0">
@@ -140,18 +202,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             onClick={() => handleScrollToPartner('rider')}
             className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-200"
           >
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-4 sm:mr-5 md:mr-0 md:mb-3 overflow-visible">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
               <img
                 src="/assets/rider-spritev2.webp"
                 alt="Become a Rider - SpeedyMeals"
                 className="h-full w-auto max-h-none object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
               />
             </div>
-            <div className="flex-1 md:w-full flex flex-col justify-center md:items-center">
+            <div className="flex-1 md:w-full min-w-0 break-words flex flex-col justify-center md:items-center">
               <h3 className="font-heading font-extrabold text-base sm:text-lg md:text-xl text-ink tracking-tight mb-1 md:mb-1.5">
                 Become a Rider
               </h3>
-              <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug line-clamp-1 md:line-clamp-none mb-2 md:mb-3">
+              <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug mb-1.5 md:mb-3">
                 Deliver meals on your own schedule. Reliable weekly pay, direct support.
               </p>
               <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red uppercase tracking-wider group-hover:underline">
@@ -170,18 +232,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             onClick={() => handleScrollToPartner('restaurant')}
             className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-200"
           >
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-4 sm:mr-5 md:mr-0 md:mb-3 overflow-visible">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
               <img
                 src="/assets/merchant-spritev2.webp"
                 alt="Grow your restaurant - SpeedyMeals"
                 className="h-full w-auto max-h-none object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
               />
             </div>
-            <div className="flex-1 md:w-full flex flex-col justify-center md:items-center">
+            <div className="flex-1 md:w-full min-w-0 break-words flex flex-col justify-center md:items-center">
               <h3 className="font-heading font-extrabold text-base sm:text-lg md:text-xl text-ink tracking-tight mb-1 md:mb-1.5">
                 Grow Your Business
               </h3>
-              <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug line-clamp-1 md:line-clamp-none mb-2 md:mb-3">
+              <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug mb-1.5 md:mb-3">
                 Reach more customers with honest fees and simple store management.
               </p>
               <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red uppercase tracking-wider group-hover:underline">
@@ -200,18 +262,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             onClick={() => handleScrollToPartner('customer')}
             className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-200"
           >
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-4 sm:mr-5 md:mr-0 md:mb-3 overflow-visible">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
               <img
                 src="/assets/customer-spritev2.webp"
                 alt="Order food delivery - SpeedyMeals"
                 className="h-full w-auto max-h-none object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
               />
             </div>
-            <div className="flex-1 md:w-full flex flex-col justify-center md:items-center">
+            <div className="flex-1 md:w-full min-w-0 break-words flex flex-col justify-center md:items-center">
               <h3 className="font-heading font-extrabold text-base sm:text-lg md:text-xl text-ink tracking-tight mb-1 md:mb-1.5">
                 Order Food Delivery
               </h3>
-              <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug line-clamp-1 md:line-clamp-none mb-2 md:mb-3">
+              <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug mb-1.5 md:mb-3">
                 Hot, fresh food from local kitchens right to your door.
               </p>
               <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red uppercase tracking-wider group-hover:underline">
@@ -238,7 +300,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <span className="text-ink-soft uppercase tracking-wider font-bold shrink-0">WE ARE HERE:</span>
             <div className="flex items-center flex-wrap gap-y-1 gap-x-1.5 sm:gap-x-2">
               {COVERED_COUNTRIES.map((item, idx) => {
-                const isActiveHover = activeCountry === item.code;
+                const isActive = activeCountry === item.code;
                 const hoverClass = item.isActive
                   ? 'hover:text-[#10B981] hover:decoration-[#10B981]'
                   : 'hover:text-[#F59E0B] hover:decoration-[#F59E0B]';
@@ -247,69 +309,31 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   : 'text-[#F59E0B] decoration-[#F59E0B]';
 
                 return (
-                  <div
-                    key={item.code}
-                    className="relative flex items-center"
-                    onMouseEnter={() => setActiveCountry(item.code)}
-                    onMouseLeave={() => setActiveCountry(null)}
-                  >
+                  <div key={item.code} className="relative flex items-center">
                     {idx > 0 && <span className="text-ink-soft/40 mr-1.5 sm:mr-2 select-none">·</span>}
                     <button
+                      ref={anchorRefs[item.code]}
                       type="button"
-                      onClick={() => setActiveCountry(isActiveHover ? null : item.code)}
-                      onTouchStart={() => handleTouchStart(item.code)}
-                      onTouchEnd={handleTouchEnd}
+                      onClick={() => setActiveCountry(isActive ? null : item.code)}
+                      onPointerEnter={(e) => {
+                        if (e.pointerType === 'mouse') {
+                          setActiveCountry(item.code);
+                        }
+                      }}
+                      onPointerLeave={(e) => {
+                        if (e.pointerType === 'mouse') {
+                          setActiveCountry((prev) => (prev === item.code ? null : prev));
+                        }
+                      }}
                       className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider transition-colors duration-150 cursor-pointer underline underline-offset-4 decoration-1 ${
-                        isActiveHover ? activeColorClass : `text-ink ${hoverClass}`
+                        isActive ? activeColorClass : `text-ink ${hoverClass}`
                       }`}
                       aria-label={`Coverage info for ${item.name}`}
+                      aria-expanded={isActive}
+                      aria-haspopup="true"
                     >
                       {item.isActive ? `${item.name} (${item.code})` : item.name}
                     </button>
-
-                    {isActiveHover && (
-                      <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 z-50 pointer-events-none">
-                        {item.isActive ? (
-                          <div className="w-[280px] sm:w-[350px] bg-[#16181D] text-white border border-[#2D3139] px-2.5 py-1.5 shadow-xl overflow-hidden flex items-center space-x-2 rounded-none">
-                            <span className="w-1.5 h-1.5 bg-[#10B981] shrink-0 inline-block rounded-none" />
-                            <div className="overflow-hidden relative w-full flex">
-                              <div
-                                className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
-                                style={{
-                                  animationDuration: `${Math.max(12, item.cities.length * 1.8)}s`,
-                                }}
-                              >
-                                {[...item.cities, ...item.cities].map((city, cIdx) => (
-                                  <span key={`${city}-${cIdx}`} className="inline-flex items-center space-x-2">
-                                    <span className="text-white font-semibold">{city}</span>
-                                    <span className="text-[#8C9099]">·</span>
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="w-[280px] sm:w-[350px] bg-[#16181D] text-white border border-[#2D3139] px-2.5 py-1.5 shadow-xl overflow-hidden flex items-center space-x-2 rounded-none">
-                            <span className="w-1.5 h-1.5 bg-[#F59E0B] shrink-0 inline-block animate-pulse rounded-none" />
-                            <div className="overflow-hidden relative w-full flex">
-                              <div
-                                className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
-                                style={{
-                                  animationDuration: `${Math.max(10, item.cities.length * 2.2)}s`,
-                                }}
-                              >
-                                {[...item.cities, ...item.cities].map((country, cIdx) => (
-                                  <span key={`${country}-${cIdx}`} className="inline-flex items-center space-x-2">
-                                    <span className="text-white font-semibold">{country}</span>
-                                    <span className="text-[#8C9099]">·</span>
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -317,6 +341,61 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Country Cities Viewport Popover */}
+      {mounted && activeCountryItem && createPortal(
+        <div
+          ref={popoverRef}
+          style={{
+            position: 'fixed',
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            width: `${position.width}px`,
+          }}
+          className="z-50 pointer-events-none"
+        >
+          <div className="relative bg-[#16181D] text-white border border-[#2D3139] px-2.5 py-1.5 shadow-xl flex items-center space-x-2 rounded-none">
+            {/* Arrow pointer */}
+            <span
+              style={{ left: `${position.arrowLeft}px` }}
+              className={`absolute w-2 h-2 rotate-45 bg-[#16181D] pointer-events-none -translate-x-1/2 ${
+                position.placement === 'top'
+                  ? '-bottom-1 border-r border-b border-[#2D3139]'
+                  : '-top-1 border-l border-t border-[#2D3139]'
+              }`}
+            />
+
+            {/* Country status indicator */}
+            {activeCountryItem.isActive ? (
+              <span className="w-1.5 h-1.5 bg-[#10B981] shrink-0 inline-block rounded-none" />
+            ) : (
+              <span className="w-1.5 h-1.5 bg-[#F59E0B] shrink-0 inline-block animate-pulse rounded-none" />
+            )}
+
+            {/* Cities marquee */}
+            <div className="min-w-0 overflow-hidden relative w-full flex">
+              <div
+                className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
+                style={{
+                  animationDuration: `${Math.max(
+                    activeCountryItem.isActive ? 12 : 10,
+                    activeCountryItem.cities.length * (activeCountryItem.isActive ? 1.8 : 2.2)
+                  )}s`,
+                }}
+              >
+                {[...activeCountryItem.cities, ...activeCountryItem.cities].map((cityOrCountry, cIdx) => (
+                  <span key={`${cityOrCountry}-${cIdx}`} className="inline-flex items-center space-x-2">
+                    <span className="text-white font-semibold">{cityOrCountry}</span>
+                    <span className="text-[#8C9099]">·</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </section>
   );
 };
+
