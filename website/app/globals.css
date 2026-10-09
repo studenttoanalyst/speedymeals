@@ -48,16 +48,7 @@
   border-radius: 16px;
 }
 
-/* Hero dynamic video sizing: larger on desktop, prominent on mobile */
-.hero-video-box {
-  max-width: min(580px, 96vw);
-}
 
-@media (min-width: 768px) {
-  .hero-video-box {
-    max-width: min(1360px, 96vw);
-  }
-}
 
 /* Smooth anchor scrolling offsets for fixed header */
 #services,
@@ -103,6 +94,16 @@
   .animate-marquee {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* Promotional Banner Carousel 5s Progress Indicator */
+@keyframes carousel-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
   }
 }
 

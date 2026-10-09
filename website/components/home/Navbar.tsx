@@ -147,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
           }}
         >
           <img
-            src="/favicon.jpeg"
+            src="/favicon.webp"
             alt="SpeedyMeals Logo"
             className="h-8 sm:h-10 lg:h-12 [@media(max-height:760px)]:h-8 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105 drop-shadow-xs"
           />

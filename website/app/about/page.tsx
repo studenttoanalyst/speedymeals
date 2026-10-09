@@ -32,7 +32,7 @@ export default function AboutPage() {
       {/* Fixed Ambient Transparent SpeedyMeals Favicon Watermark (Persistent viewport-centered background watermark) */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
         <Image
-          src="/favicon.jpeg"
+          src="/favicon.webp"
           alt="SpeedyMeals Favicon Watermark"
           width={900}
           height={900}
@@ -266,7 +266,7 @@ export default function AboutPage() {
               <div className="lg:col-span-4 flex flex-col items-start">
                 <div className="p-4 bg-[#1E2228] border border-[#2D3139] mb-4">
                   <Image
-                    src="/assets/pakistan-post.png"
+                    src="/assets/pakistan-post.webp"
                     alt="Pakistan Post Emblem"
                     width={80}
                     height={80}

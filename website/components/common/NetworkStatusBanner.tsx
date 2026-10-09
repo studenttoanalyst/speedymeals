@@ -35,7 +35,7 @@ export function NetworkStatusBanner() {
 
   const handleManualRetry = async () => {
     try {
-      await fetch('/favicon.jpeg', { method: 'HEAD', cache: 'no-store' });
+      await fetch('/favicon.webp', { method: 'HEAD', cache: 'no-store' });
       setIsOffline(false);
       setJustReconnected(true);
       setTimeout(() => setJustReconnected(false), 3000);

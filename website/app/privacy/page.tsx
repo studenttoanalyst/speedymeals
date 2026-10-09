@@ -153,7 +153,7 @@ export default function PrivacyPolicyPage() {
       {/* Fixed Ambient Transparent SpeedyMeals Favicon Watermark (Persistent viewport-centered background watermark) */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
         <Image
-          src="/favicon.jpeg"
+          src="/favicon.webp"
           alt="SpeedyMeals Favicon Watermark"
           width={900}
           height={900}
@@ -168,7 +168,7 @@ export default function PrivacyPolicyPage() {
           <div className="flex items-center space-x-3">
             <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group shrink-0 whitespace-nowrap">
               <img
-                src="/favicon.jpeg"
+                src="/favicon.webp"
                 alt="SpeedyMeals"
                 className="h-8 sm:h-10 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105"
               />

@@ -489,18 +489,16 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             id="persona-col-customer"
             onClick={() => onSelectPersona('customer')}
             className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'customer'
-                ? 'bg-paper-off ring-2 ring-[#C7A874] shadow-sm'
+                ? 'bg-paper-off ring-2 ring-tan shadow-sm'
                 : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activePersona === 'customer' ? 'bg-[#C7A874]/20 text-[#A8874E]' : 'bg-black/5 text-ink'
-                  }`}>
+                <div className="w-10 h-10 rounded-full text-tan flex items-center justify-center bg-tan/10">
                   <Users size={22} weight="bold" />
                 </div>
-                <span className={`font-sans text-xs font-bold uppercase tracking-wider ${activePersona === 'customer' ? 'text-[#A8874E]' : 'text-ink-soft'
-                  }`}>
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-tan">
                   For Customers
                 </span>
               </div>
@@ -511,9 +509,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 Real food prices from beloved local kitchens. Be the first to order when SpeedyMeals launches in your area.
               </p>
               {/* VIP promo badge */}
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-[#C7A874]/15 border border-[#C7A874]/30 rounded-full mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C7A874] inline-block" />
-                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-[#9A7A4A]">
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-tan/15 border border-tan/30 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-tan inline-block" />
+                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-tan">
                   VIP: Up to 50% off your first 3 orders
                 </span>
               </div>
@@ -527,8 +525,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 onSelectPersona('customer');
               }}
               className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'customer'
-                  ? 'bg-[#C7A874] text-[#15171A]'
-                  : 'bg-[#C7A874]/15 text-[#8C6D34] hover:bg-[#C7A874] hover:text-[#15171A]'
+                  ? 'bg-tan text-ink'
+                  : 'bg-tan/15 text-tan hover:bg-tan hover:text-ink'
                 }`}
             >
               <span>{activePersona === 'customer' ? 'Active Form' : 'Get VIP Access'}</span>
@@ -608,7 +606,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   id="btn-tab-customer"
                   onClick={() => onSelectPersona('customer')}
                   className={`px-3.5 sm:px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors cursor-pointer ${activePersona === 'customer'
-                    ? 'bg-[#C7A874] text-[#15171A] font-bold'
+                    ? 'bg-tan text-ink font-bold'
                     : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
                     }`}
                 >

@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           <div className="col-span-1 lg:col-span-4 space-y-4">
             <div className="flex items-center space-x-2.5 sm:space-x-3">
               <img
-                src="/favicon.jpeg"
+                src="/favicon.webp"
                 alt="SpeedyMeals Logo"
                 className="h-8 sm:h-9 md:h-10 w-auto object-contain shrink-0"
               />
@@ -305,7 +305,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             {/* Pakistan Post */}
             <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
               <img
-                src="/assets/pakistan-post.png"
+                src="/assets/pakistan-post.webp"
                 alt="Pakistan Post"
                 className="h-8 sm:h-9 md:h-10 w-auto object-contain"
               />
@@ -314,7 +314,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             {/* SECP */}
             <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
               <img
-                src="/assets/rw/SECP_logo.png"
+                src="/assets/rw/SECP_logo.webp"
                 alt="Securities and Exchange Commission of Pakistan (SECP)"
                 className="h-9 sm:h-10 md:h-11 w-auto object-contain"
               />
@@ -323,7 +323,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             {/* FBR */}
             <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
               <img
-                src="/assets/rw/fbr-logo.png"
+                src="/assets/rw/fbr-logo.webp"
                 alt="Federal Board of Revenue (FBR)"
                 className="h-9 sm:h-10 md:h-11 w-auto object-contain"
               />

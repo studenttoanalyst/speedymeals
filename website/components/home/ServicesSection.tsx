@@ -80,7 +80,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
             <div className="lg:col-span-6">
               <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
                 <Image
-                  src="/assets/customer_food_spread.jpg"
+                  src="/assets/customer_food_spread.webp"
                   alt="Delicious meal spread delivered fresh"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -97,7 +97,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
             <div className="lg:col-span-6 order-2 lg:order-1">
               <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
                 <Image
-                  src="/assets/mascot_app.png"
+                  src="/assets/mascot_app.webp"
                   alt="SpeedyMeals mascot and mobile application"
                   fill
                   priority
@@ -160,7 +160,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
             <div className="lg:col-span-6">
               <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
                 <Image
-                  src="/assets/rider_delivery.jpg"
+                  src="/assets/rider_delivery.webp"
                   alt="SpeedyMeals courier delivering an order"
                   fill
                   priority

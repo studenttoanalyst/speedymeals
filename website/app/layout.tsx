@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   description:
     'Fair-priced food delivery for South Asia and the Middle East. Real menu prices, low merchant commission, and reliable weekly payouts for riders.',
   icons: {
-    icon: '/favicon.jpeg',
-    shortcut: '/favicon.jpeg',
-    apple: '/favicon.jpeg',
+    icon: '/favicon.webp',
+    shortcut: '/favicon.webp',
+    apple: '/favicon.webp',
   },
 };
 
@@ -46,7 +46,7 @@ export default function RootLayout({
       className={`${figtree.variable} ${archivoBlack.variable} ${jetbrainsMono.variable}`}
     >
       <head>
-        <link rel="icon" href="/favicon.jpeg" type="image/jpeg" />
+        <link rel="icon" href="/favicon.webp" type="image/webp" />
       </head>
       <body className="font-sans selection:bg-[#E23A2E] selection:text-white">
         {children}

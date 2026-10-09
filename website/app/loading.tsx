@@ -15,7 +15,7 @@ export default function RootLoading() {
         {/* Logo Frame */}
         <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white border border-[#E4E2DD] shadow-md flex items-center justify-center overflow-hidden">
           <img
-            src="/favicon.jpeg"
+            src="/favicon.webp"
             alt="Speedy Meals"
             className="w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-lg"
           />
