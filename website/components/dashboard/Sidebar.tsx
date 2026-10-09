@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion } from 'motion/react';
 import {
   ChartLineUp,
   Storefront,
@@ -184,13 +185,20 @@ export function Sidebar({ role }: SidebarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all ${
+                    className={`relative flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors active:scale-[0.98] select-none ${
                       isActive
-                        ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                        ? 'text-white font-semibold'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebar-active-nav-pill"
+                        className="absolute inset-0 rounded-lg bg-slate-900 shadow-xs"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <div className="relative z-10 flex items-center gap-2.5">
                       <Icon
                         size={17}
                         weight={isActive ? 'bold' : 'regular'}
@@ -200,7 +208,7 @@ export function Sidebar({ role }: SidebarProps) {
                     </div>
 
                     {item.badge !== undefined && (
-                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                      <span className={`relative z-10 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
                         isActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-700'
                       }`}>
                         {item.badge}
@@ -234,7 +242,7 @@ export function Sidebar({ role }: SidebarProps) {
           <button
             onClick={handleLogout}
             title="Sign out"
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-all duration-100 cursor-pointer active:scale-90 select-none"
           >
             <SignOut size={16} weight="bold" />
           </button>

@@ -65,7 +65,7 @@ export default function AboutPage() {
             </div>
 
             {/* Compact, responsive title: fits on one line per quote without wrapping overflow */}
-            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-[42px] uppercase tracking-tight text-ink leading-tight mb-6">
+            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-[42px] uppercase tracking-[-0.03em] text-ink leading-tight mb-6 select-none">
               ENGINEERED FOR SPEED. <br />
               <span className="text-red">ARCHITECTED FOR FAIRNESS.</span>
             </h1>
@@ -436,14 +436,14 @@ export default function AboutPage() {
             <div className="flex flex-wrap items-center gap-3 shrink-0">
               <Link
                 href="/#partner"
-                className="px-6 py-3.5 bg-red text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-red transition-colors duration-150 flex items-center space-x-2"
+                className="px-6 py-3.5 bg-red text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-red transition-all duration-150 flex items-center space-x-2 active:scale-95 select-none"
               >
                 <span>DELIVER WITH SPEEDYMEALS</span>
                 <ArrowRight size={13} weight="bold" />
               </Link>
               <Link
                 href="/#partner"
-                className="px-6 py-3.5 bg-transparent border border-white text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-ink transition-colors duration-150 flex items-center space-x-2"
+                className="px-6 py-3.5 bg-transparent border border-white text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-ink transition-all duration-150 flex items-center space-x-2 active:scale-95 select-none"
               >
                 <span>LIST YOUR RESTAURANT</span>
                 <ArrowRight size={13} weight="bold" />

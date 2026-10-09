@@ -389,7 +389,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           <div
             id="persona-col-rider"
             onClick={() => onSelectPersona('rider')}
-            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'rider'
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'rider'
                 ? 'bg-paper-off ring-2 ring-red shadow-sm'
                 : 'hover:bg-paper-off/60'
               }`}
@@ -418,7 +418,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 e.stopPropagation();
                 onSelectPersona('rider');
               }}
-              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'rider'
+              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'rider'
                   ? 'bg-red text-white'
                   : 'bg-black/5 text-ink hover:bg-ink hover:text-white'
                 }`}
@@ -432,7 +432,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           <div
             id="persona-col-restaurant"
             onClick={() => onSelectPersona('restaurant')}
-            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'restaurant'
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'restaurant'
                 ? 'bg-paper-off ring-2 ring-blue shadow-sm'
                 : 'hover:bg-paper-off/60'
               }`}
@@ -462,7 +462,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   e.stopPropagation();
                   onSelectPersona('restaurant');
                 }}
-                className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'restaurant'
+                className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'restaurant'
                     ? 'bg-blue text-white'
                     : 'bg-black/5 text-blue hover:bg-blue hover:text-white'
                   }`}
@@ -475,7 +475,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 <Link
                   id="link-existing-restaurant-portal"
                   href="/restaurant"
-                  className="font-sans text-xs text-blue hover:underline inline-flex items-center gap-1"
+                  className="font-sans text-xs text-blue hover:underline inline-flex items-center gap-1 active:opacity-75"
                 >
                   <span>Already registered? Access Merchant Portal</span>
                   <ArrowRight size={10} weight="bold" />
@@ -488,7 +488,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           <div
             id="persona-col-customer"
             onClick={() => onSelectPersona('customer')}
-            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between ${activePersona === 'customer'
+            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'customer'
                 ? 'bg-paper-off ring-2 ring-tan shadow-sm'
                 : 'hover:bg-paper-off/60'
               }`}
@@ -524,7 +524,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 e.stopPropagation();
                 onSelectPersona('customer');
               }}
-              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'customer'
+              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'customer'
                   ? 'bg-tan text-ink'
                   : 'bg-tan/15 text-tan hover:bg-tan hover:text-ink'
                 }`}
@@ -578,83 +578,88 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             {/* Controls: Persona Switcher Tabs + Multilingual Language Switcher */}
             <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
               {/* Persona Switcher Tabs inside panel */}
-              <div className="flex font-sans text-xs border border-[#373C46]">
-                <button
-                  type="button"
-                  id="btn-tab-rider"
-                  onClick={() => onSelectPersona('rider')}
-                  className={`px-3.5 sm:px-4 py-2 uppercase tracking-wider transition-colors cursor-pointer ${activePersona === 'rider'
-                    ? 'bg-red text-white font-bold'
-                    : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
-                    }`}
-                >
-                  {t.rider}
-                </button>
-                <button
-                  type="button"
-                  id="btn-tab-restaurant"
-                  onClick={() => onSelectPersona('restaurant')}
-                  className={`px-3.5 sm:px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors cursor-pointer ${activePersona === 'restaurant'
-                    ? 'bg-blue text-white font-bold'
-                    : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
-                    }`}
-                >
-                  {t.restaurant}
-                </button>
-                <button
-                  type="button"
-                  id="btn-tab-customer"
-                  onClick={() => onSelectPersona('customer')}
-                  className={`px-3.5 sm:px-4 py-2 uppercase tracking-wider border-l border-[#373C46] transition-colors cursor-pointer ${activePersona === 'customer'
-                    ? 'bg-tan text-ink font-bold'
-                    : 'bg-[#1A1D23] text-[#8C9099] hover:text-white hover:bg-[#2A2E37]'
-                    }`}
-                >
-                  {t.waitlist}
-                </button>
+              <div className="relative flex p-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+                {(['rider', 'restaurant', 'customer'] as const).map((persona) => {
+                  const isActive = activePersona === persona;
+                  const label =
+                    persona === 'rider'
+                      ? t.rider
+                      : persona === 'restaurant'
+                        ? t.restaurant
+                        : t.waitlist;
+                  return (
+                    <button
+                      key={persona}
+                      type="button"
+                      id={`btn-tab-${persona}`}
+                      onClick={() => onSelectPersona(persona)}
+                      className="relative px-3.5 sm:px-4 py-1.5 uppercase font-sans text-xs tracking-wider transition-colors z-10 cursor-pointer active:scale-95 select-none"
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="partner-persona-tab-pill"
+                          className={`absolute inset-0 rounded-full shadow-sm ${
+                            persona === 'rider'
+                              ? 'bg-red'
+                              : persona === 'restaurant'
+                                ? 'bg-blue'
+                                : 'bg-tan'
+                          }`}
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                      <span
+                        className={`relative z-10 font-bold ${
+                          isActive
+                            ? persona === 'customer'
+                              ? 'text-ink'
+                              : 'text-white'
+                            : 'text-white/60 hover:text-white'
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Multilingual Selector [ EN | اردو | العربية ] */}
               <div
                 id="registration-lang-toggle"
-                className="flex items-center border border-[#373C46] bg-[#1A1D23] p-0.5 text-xs font-sans shadow-xs"
+                className="relative flex items-center p-1 rounded-full border border-white/10 bg-white/5 text-xs font-sans shadow-xs backdrop-blur-md"
               >
-                <button
-                  type="button"
-                  id="lang-btn-en"
-                  onClick={() => setLang('en')}
-                  className={`px-2.5 py-1.5 transition-all cursor-pointer ${lang === 'en'
-                    ? 'bg-white text-ink font-bold shadow-xs'
-                    : 'text-[#8C9099] hover:text-white'
-                    }`}
-                  title="English"
-                >
-                  EN
-                </button>
-                <button
-                  type="button"
-                  id="lang-btn-ur"
-                  onClick={() => setLang('ur')}
-                  className={`px-3 py-1.5 transition-all cursor-pointer font-sans text-sm ${lang === 'ur'
-                    ? 'bg-white text-ink font-bold shadow-xs'
-                    : 'text-[#8C9099] hover:text-white'
-                    }`}
-                  title="اردو (Urdu)"
-                >
-                  اردو
-                </button>
-                <button
-                  type="button"
-                  id="lang-btn-ar"
-                  onClick={() => setLang('ar')}
-                  className={`px-3 py-1.5 transition-all cursor-pointer font-sans text-sm ${lang === 'ar'
-                    ? 'bg-white text-ink font-bold shadow-xs'
-                    : 'text-[#8C9099] hover:text-white'
-                    }`}
-                  title="العربية (Arabic)"
-                >
-                  العربية
-                </button>
+                {(['en', 'ur', 'ar'] as const).map((l) => {
+                  const isActive = lang === l;
+                  const label = l === 'en' ? 'EN' : l === 'ur' ? 'اردو' : 'العربية';
+                  return (
+                    <button
+                      key={l}
+                      type="button"
+                      id={`lang-btn-${l}`}
+                      onClick={() => setLang(l)}
+                      className={`relative px-3 py-1 font-sans transition-colors cursor-pointer active:scale-95 select-none ${
+                        l === 'ur' || l === 'ar' ? 'text-sm' : 'text-xs'
+                      }`}
+                      title={l === 'en' ? 'English' : l === 'ur' ? 'اردو (Urdu)' : 'العربية (Arabic)'}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="partner-lang-pill"
+                          className="absolute inset-0 rounded-full bg-white shadow-xs"
+                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                      <span
+                        className={`relative z-10 font-bold ${
+                          isActive ? 'text-ink' : 'text-[#8C9099] hover:text-white'
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -1295,7 +1300,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     type="submit"
                     id="btn-submit-registration"
                     disabled={submitting}
-                    className={`px-8 py-4 ${getTypographySize(lang, 'badge')} uppercase font-bold border transition-colors duration-150 flex items-center justify-center space-x-2 cursor-pointer ${activePersona === 'customer'
+                    className={`px-8 py-4 ${getTypographySize(lang, 'badge')} uppercase font-bold border transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] select-none ${activePersona === 'customer'
                       ? 'bg-tan text-ink border-tan hover:bg-white hover:text-ink hover:border-white'
                       : activePersona === 'restaurant'
                         ? 'bg-blue text-white border-blue hover:bg-white hover:text-blue hover:border-white'

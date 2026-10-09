@@ -40,7 +40,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header: Clean, Human, DoorDash Style */}
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
-          <h2 className="font-display text-3xl sm:text-5xl tracking-tight text-ink uppercase leading-tight mb-4">
+          <h2 className="font-display text-3xl sm:text-5xl tracking-[-0.03em] text-ink uppercase leading-tight mb-4 select-none">
             Everything you crave, <span className="text-red">delivered.</span>
           </h2>
           <p className="text-base sm:text-lg text-ink-soft leading-relaxed font-sans">
@@ -68,7 +68,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('customer')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Find food near you</span>
                   <ArrowRight size={15} weight="bold" />
@@ -122,7 +122,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('restaurant')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-blue hover:bg-[#184C86] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-blue hover:bg-[#184C86] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Sign up your store</span>
                   <ArrowRight size={15} weight="bold" />
@@ -148,7 +148,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('rider')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Deliver with us</span>
                   <ArrowRight size={15} weight="bold" />

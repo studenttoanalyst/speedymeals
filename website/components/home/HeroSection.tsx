@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
 import { ArrowRight } from '@phosphor-icons/react';
 import { HeroBannerCarousel } from './HeroBannerCarousel';
 import { BannerSlide } from '@/lib/banners';
@@ -170,7 +170,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* b) SPEEDY MEALS (font-display), compact footprint reduced ~15% */}
         <h1
           id="hero-headline"
-          className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[3.6rem] tracking-tight uppercase leading-[0.92] text-ink font-black text-center"
+          className="font-display display-hero text-3xl sm:text-4xl md:text-5xl lg:text-[3.6rem] tracking-[-0.035em] uppercase leading-[0.92] text-ink font-black text-center select-none"
         >
           SPEEDY MEALS
         </h1>
@@ -178,7 +178,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* c) FAST. FAIR. GLOBAL. colour-cycling tagline */}
         <div
           id="hero-tagline"
-          className="font-display text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight uppercase leading-tight text-center font-black mt-1.5 sm:mt-2"
+          className="font-display text-base sm:text-xl md:text-2xl lg:text-3xl tracking-[-0.025em] uppercase leading-tight text-center font-black mt-1.5 sm:mt-2 select-none"
         >
           {taglineWords.map((word) => (
             <motion.span
@@ -200,7 +200,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Item 1: Become a Rider */}
           <div
             onClick={() => handleScrollToPartner('rider')}
-            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-200"
+            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
               <img
@@ -230,7 +230,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Item 2: Grow Your Business */}
           <div
             onClick={() => handleScrollToPartner('restaurant')}
-            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-200"
+            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
               <img
@@ -260,7 +260,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Item 3: Order Food Delivery */}
           <div
             onClick={() => handleScrollToPartner('customer')}
-            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-200"
+            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
               <img
@@ -325,7 +325,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                           setActiveCountry((prev) => (prev === item.code ? null : prev));
                         }
                       }}
-                      className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider transition-colors duration-150 cursor-pointer underline underline-offset-4 decoration-1 ${
+                      className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider transition-colors duration-150 cursor-pointer underline underline-offset-4 decoration-1 active:scale-95 transition-transform duration-100 ease-out select-none ${
                         isActive ? activeColorClass : `text-ink ${hoverClass}`
                       }`}
                       aria-label={`Coverage info for ${item.name}`}
@@ -343,56 +343,70 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </div>
 
       {/* Country Cities Viewport Popover */}
-      {mounted && activeCountryItem && createPortal(
-        <div
-          ref={popoverRef}
-          style={{
-            position: 'fixed',
-            top: `${position.top}px`,
-            left: `${position.left}px`,
-            width: `${position.width}px`,
-          }}
-          className="z-50 pointer-events-none"
-        >
-          <div className="relative bg-[#16181D] text-white border border-[#2D3139] px-2.5 py-1.5 shadow-xl flex items-center space-x-2 rounded-none">
-            {/* Arrow pointer */}
-            <span
-              style={{ left: `${position.arrowLeft}px` }}
-              className={`absolute w-2 h-2 rotate-45 bg-[#16181D] pointer-events-none -translate-x-1/2 ${
-                position.placement === 'top'
-                  ? '-bottom-1 border-r border-b border-[#2D3139]'
-                  : '-top-1 border-l border-t border-[#2D3139]'
-              }`}
-            />
+      {mounted && createPortal(
+        <AnimatePresence>
+          {activeCountryItem && (
+            <motion.div
+              key={activeCountryItem.code}
+              ref={popoverRef}
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0.1 }
+                  : { type: 'spring', damping: 26, stiffness: 350, mass: 0.8 }
+              }
+              style={{
+                position: 'fixed',
+                top: `${position.top}px`,
+                left: `${position.left}px`,
+                width: `${position.width}px`,
+                transformOrigin: `${position.arrowLeft}px ${position.placement === 'top' ? 'bottom' : 'top'}`,
+              }}
+              className="z-50 pointer-events-none"
+            >
+              <div className="relative bg-[#16181D]/95 backdrop-blur-xl border border-white/10 px-2.5 py-1.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_16px_40px_-6px_rgba(0,0,0,0.5)] flex items-center space-x-2 rounded-lg">
+                {/* Arrow pointer */}
+                <span
+                  style={{ left: `${position.arrowLeft}px` }}
+                  className={`absolute w-2 h-2 rotate-45 bg-[#16181D]/95 pointer-events-none -translate-x-1/2 ${
+                    position.placement === 'top'
+                      ? '-bottom-1 border-r border-b border-white/10'
+                      : '-top-1 border-l border-t border-white/10'
+                  }`}
+                />
 
-            {/* Country status indicator */}
-            {activeCountryItem.isActive ? (
-              <span className="w-1.5 h-1.5 bg-[#10B981] shrink-0 inline-block rounded-none" />
-            ) : (
-              <span className="w-1.5 h-1.5 bg-[#F59E0B] shrink-0 inline-block animate-pulse rounded-none" />
-            )}
+                {/* Country status indicator */}
+                {activeCountryItem.isActive ? (
+                  <span className="w-1.5 h-1.5 bg-[#10B981] shrink-0 inline-block rounded-full shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
+                ) : (
+                  <span className="w-1.5 h-1.5 bg-[#F59E0B] shrink-0 inline-block animate-pulse rounded-full shadow-[0_0_6px_rgba(245,158,11,0.6)]" />
+                )}
 
-            {/* Cities marquee */}
-            <div className="min-w-0 overflow-hidden relative w-full flex">
-              <div
-                className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
-                style={{
-                  animationDuration: `${Math.max(
-                    activeCountryItem.isActive ? 12 : 10,
-                    activeCountryItem.cities.length * (activeCountryItem.isActive ? 1.8 : 2.2)
-                  )}s`,
-                }}
-              >
-                {[...activeCountryItem.cities, ...activeCountryItem.cities].map((cityOrCountry, cIdx) => (
-                  <span key={`${cityOrCountry}-${cIdx}`} className="inline-flex items-center space-x-2">
-                    <span className="text-white font-semibold">{cityOrCountry}</span>
-                    <span className="text-[#8C9099]">·</span>
-                  </span>
-                ))}
+                {/* Cities marquee */}
+                <div className="min-w-0 overflow-hidden relative w-full flex">
+                  <div
+                    className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
+                    style={{
+                      animationDuration: `${Math.max(
+                        activeCountryItem.isActive ? 12 : 10,
+                        activeCountryItem.cities.length * (activeCountryItem.isActive ? 1.8 : 2.2)
+                      )}s`,
+                    }}
+                  >
+                    {[...activeCountryItem.cities, ...activeCountryItem.cities].map((cityOrCountry, cIdx) => (
+                      <span key={`${cityOrCountry}-${cIdx}`} className="inline-flex items-center space-x-2">
+                        <span className="text-white font-semibold">{cityOrCountry}</span>
+                        <span className="text-[#8C9099]">·</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>,
+            </motion.div>
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </section>

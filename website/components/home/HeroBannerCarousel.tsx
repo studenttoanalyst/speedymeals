@@ -92,12 +92,26 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
     center: {
       x: 0,
       opacity: 1,
-      transition: { duration: shouldReduceMotion ? 0.01 : 0.55, ease: [0.16, 1, 0.3, 1] as const },
+      transition: shouldReduceMotion
+        ? { duration: 0.01 }
+        : {
+            type: 'spring' as const,
+            damping: 28,
+            stiffness: 260,
+            mass: 0.9,
+          },
     },
     exit: (dir: number) => ({
       x: shouldReduceMotion ? 0 : dir > 0 ? '-100%' : '100%',
       opacity: shouldReduceMotion ? 1 : 0,
-      transition: { duration: shouldReduceMotion ? 0.01 : 0.55, ease: [0.16, 1, 0.3, 1] as const },
+      transition: shouldReduceMotion
+        ? { duration: 0.01 }
+        : {
+            type: 'spring' as const,
+            damping: 28,
+            stiffness: 260,
+            mass: 0.9,
+          },
     }),
   };
 
@@ -133,10 +147,18 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
             exit="exit"
             drag={totalSlides > 1 ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.18}
+            dragElastic={0.25}
             onDragEnd={(_, info) => {
-              if (info.offset.x < -60) handleNext();
-              else if (info.offset.x > 60) handlePrev();
+              const swipeThreshold = 50;
+              const swipeVelocityThreshold = 400;
+              // Momentum projection formula: projectedOffset = offset + velocity * constant
+              const projectedOffset = info.offset.x + info.velocity.x * 0.2;
+
+              if (projectedOffset < -swipeThreshold || info.velocity.x < -swipeVelocityThreshold) {
+                handleNext();
+              } else if (projectedOffset > swipeThreshold || info.velocity.x > swipeVelocityThreshold) {
+                handlePrev();
+              }
             }}
             className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"
           >
