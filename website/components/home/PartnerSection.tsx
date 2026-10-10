@@ -390,8 +390,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             id="persona-col-rider"
             onClick={() => onSelectPersona('rider')}
             className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'rider'
-                ? 'bg-paper-off ring-2 ring-red shadow-sm'
-                : 'hover:bg-paper-off/60'
+              ? 'bg-paper-off ring-2 ring-red shadow-sm'
+              : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
@@ -419,8 +419,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 onSelectPersona('rider');
               }}
               className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'rider'
-                  ? 'bg-red text-white'
-                  : 'bg-black/5 text-ink hover:bg-ink hover:text-white'
+                ? 'bg-red text-white'
+                : 'bg-black/5 text-ink hover:bg-ink hover:text-white'
                 }`}
             >
               <span>{activePersona === 'rider' ? 'Active Form' : 'Apply as Rider'}</span>
@@ -433,8 +433,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             id="persona-col-restaurant"
             onClick={() => onSelectPersona('restaurant')}
             className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'restaurant'
-                ? 'bg-paper-off ring-2 ring-blue shadow-sm'
-                : 'hover:bg-paper-off/60'
+              ? 'bg-paper-off ring-2 ring-blue shadow-sm'
+              : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
@@ -463,8 +463,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   onSelectPersona('restaurant');
                 }}
                 className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'restaurant'
-                    ? 'bg-blue text-white'
-                    : 'bg-black/5 text-blue hover:bg-blue hover:text-white'
+                  ? 'bg-blue text-white'
+                  : 'bg-black/5 text-blue hover:bg-blue hover:text-white'
                   }`}
               >
                 <span>{activePersona === 'restaurant' ? 'Active Form' : 'Partner as Merchant'}</span>
@@ -489,8 +489,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             id="persona-col-customer"
             onClick={() => onSelectPersona('customer')}
             className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'customer'
-                ? 'bg-paper-off ring-2 ring-tan shadow-sm'
-                : 'hover:bg-paper-off/60'
+              ? 'bg-paper-off ring-2 ring-tan shadow-sm'
+              : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
@@ -525,8 +525,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 onSelectPersona('customer');
               }}
               className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'customer'
-                  ? 'bg-tan text-ink'
-                  : 'bg-tan/15 text-tan hover:bg-tan hover:text-ink'
+                ? 'bg-tan text-ink'
+                : 'bg-tan/15 text-tan hover:bg-tan hover:text-ink'
                 }`}
             >
               <span>{activePersona === 'customer' ? 'Active Form' : 'Get VIP Access'}</span>
@@ -598,24 +598,22 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       {isActive && (
                         <motion.div
                           layoutId="partner-persona-tab-pill"
-                          className={`absolute inset-0 rounded-full shadow-sm ${
-                            persona === 'rider'
+                          className={`absolute inset-0 rounded-full shadow-sm ${persona === 'rider'
                               ? 'bg-red'
                               : persona === 'restaurant'
                                 ? 'bg-blue'
                                 : 'bg-tan'
-                          }`}
+                            }`}
                           transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                         />
                       )}
                       <span
-                        className={`relative z-10 font-bold ${
-                          isActive
+                        className={`relative z-10 font-bold ${isActive
                             ? persona === 'customer'
                               ? 'text-ink'
                               : 'text-white'
                             : 'text-white/60 hover:text-white'
-                        }`}
+                          }`}
                       >
                         {label}
                       </span>
@@ -638,9 +636,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       type="button"
                       id={`lang-btn-${l}`}
                       onClick={() => setLang(l)}
-                      className={`relative px-3 py-1 font-sans transition-colors cursor-pointer active:scale-95 select-none ${
-                        l === 'ur' || l === 'ar' ? 'text-sm' : 'text-xs'
-                      }`}
+                      className={`relative px-3 py-1 font-sans transition-colors cursor-pointer active:scale-95 select-none ${l === 'ur' || l === 'ar' ? 'text-sm' : 'text-xs'
+                        }`}
                       title={l === 'en' ? 'English' : l === 'ur' ? 'اردو (Urdu)' : 'العربية (Arabic)'}
                     >
                       {isActive && (
@@ -651,9 +648,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         />
                       )}
                       <span
-                        className={`relative z-10 font-bold ${
-                          isActive ? 'text-ink' : 'text-[#8C9099] hover:text-white'
-                        }`}
+                        className={`relative z-10 font-bold ${isActive ? 'text-ink' : 'text-[#8C9099] hover:text-white'
+                          }`}
                       >
                         {label}
                       </span>
@@ -739,7 +735,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         ? 'Customer Waitlist'
                         : activePersona === 'restaurant'
                           ? 'Merchant Partner'
-                          : 'Courier Rider'}
+                          : 'Rider'}
                     </span>
                   </div>
                   {submittedData.email && (
@@ -982,9 +978,9 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         id="form-experience"
                         className={`w-full bg-[#1A1D23] border border-[#373C46] px-4 py-3.5 ${getTypographySize(lang, 'input')} text-white focus:outline-none focus:border-[#E23A2E] cursor-pointer`}
                       >
-                        <option>Over 1 Year (Active courier)</option>
+                        <option>Over 1 Year (Active Rider)</option>
                         <option>6 - 12 Months</option>
-                        <option>New Courier (Needs onboarding)</option>
+                        <option>New Rider (Needs onboarding)</option>
                       </select>
                     </div>
                   )}
