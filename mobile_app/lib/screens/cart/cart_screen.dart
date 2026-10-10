@@ -447,8 +447,11 @@ class _CartBody extends StatelessWidget {
                   width: double.infinity,
                   child: FilledButton.icon(
                     onPressed: cart.isCheckoutBlocked ? null : onCheckout,
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                    label: const Text('Go to Checkout'),
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
+                    label: const Text(
+                      'Go to Checkout',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ],

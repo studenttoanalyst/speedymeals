@@ -12,7 +12,81 @@ import '../../services/notification_service.dart';
 import '../cart/cart_screen.dart';
 import '../menu/restaurant_detail_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../../data/models/user_models.dart';
+import '../../data/repositories/user_repository.dart';
 import '../profile/saved_addresses_screen.dart';
+
+// ─── Sort & Filter data model ────────────────────────────────────────────────
+
+/// Sort orders available in the Sort & Filter sheet.
+enum SearchSortOrder {
+  relevance,
+  highestRated,
+  fastestDelivery,
+  priceLowToHigh,
+  priceHighToLow,
+}
+
+extension SearchSortOrderLabel on SearchSortOrder {
+  String get label {
+    switch (this) {
+      case SearchSortOrder.relevance:
+        return 'Relevance';
+      case SearchSortOrder.highestRated:
+        return 'Highest rated';
+      case SearchSortOrder.fastestDelivery:
+        return 'Fastest delivery';
+      case SearchSortOrder.priceLowToHigh:
+        return 'Price: low to high';
+      case SearchSortOrder.priceHighToLow:
+        return 'Price: high to low';
+    }
+  }
+}
+
+/// Immutable snapshot of the active sort/filter choices.
+///
+/// [minRating] 0 means "any". [minPrice] / [maxPrice] of 0 / double.infinity
+/// means "no price constraint". These defaults mean the factory const
+/// `SearchFilters()` is the "no filters applied" sentinel.
+class SearchFilters {
+  final SearchSortOrder sortOrder;
+  final double minRating; // 0 = Any
+  final double minPrice;
+  final double maxPrice;
+
+  const SearchFilters({
+    this.sortOrder = SearchSortOrder.relevance,
+    this.minRating = 0,
+    this.minPrice = 0,
+    this.maxPrice = double.infinity,
+  });
+
+  /// True when any option differs from the default (no-op) values.
+  bool get isActive =>
+      sortOrder != SearchSortOrder.relevance ||
+      minRating > 0 ||
+      minPrice > 0 ||
+      maxPrice < double.infinity;
+
+  SearchFilters copyWith({
+    SearchSortOrder? sortOrder,
+    double? minRating,
+    double? minPrice,
+    double? maxPrice,
+  }) =>
+      SearchFilters(
+        sortOrder: sortOrder ?? this.sortOrder,
+        minRating: minRating ?? this.minRating,
+        minPrice: minPrice ?? this.minPrice,
+        maxPrice: maxPrice ?? this.maxPrice,
+      );
+
+  /// Convenience reset.
+  static const SearchFilters none = SearchFilters();
+}
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
 
 /// Speedy Meals home dashboard screen.
 ///
@@ -38,12 +112,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static const Duration _debounceDuration = Duration(milliseconds: 300);
 
   final RestaurantRepository _restaurantRepository = RestaurantRepository();
+  final UserRepository _userRepository = UserRepository();
+
+  /// The customer's active delivery address, used to display in the location pill
+  /// and backing restaurant browse results.
+  UserAddress? _activeAddress;
+  bool _isLoadingAddress = true;
 
   /// Real restaurants from `GET /restaurants`, scoped to the customer's saved
   /// address. Empty until the first response arrives.
   List<Restaurant> _restaurants = const [];
   bool _isLoadingRestaurants = true;
   ApiException? _restaurantsError;
+
+  /// Active sort/filter state. Default `SearchFilters()` means no filter is on.
+  SearchFilters _filters = const SearchFilters();
 
   /// How many restaurants have their menu pre-fetched. Browse returns summaries
   /// only, so the "popular dishes" rail and search-by-dish need real menu data;
@@ -64,6 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _loadActiveAddress();
     _loadRestaurants();
     // Keeps the bell badge in step with the customer's real order updates.
     NotificationService.instance.refresh();
@@ -138,10 +222,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// Applies a category chip tap as a search query.
   void _applyQuery(String value) {
     _debounce?.cancel();
+    FocusScope.of(context).unfocus();
     _searchController.text = value;
     _searchController.selection =
         TextSelection.fromPosition(TextPosition(offset: value.length));
     setState(() => _query = value);
+    if (value.isNotEmpty && PrimaryScrollController.maybeOf(context)?.hasClients == true) {
+      PrimaryScrollController.maybeOf(context)!.jumpTo(0);
+    }
   }
 
   void _openNotifications() {
@@ -151,11 +239,80 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  /// Opens the Sort & Filter bottom sheet. Works on a *temporary* copy of
+  /// [_filters]; the state is updated only when the user taps "Apply".
+  ///
+  /// Price-range slider constants (in Rs.):
+  ///   min  = 0    (no lower bound)
+  ///   max  = 3000 (covers the vast majority of menu items on the platform)
+  ///
+  /// Free Delivery filter is intentionally omitted: [Restaurant.fromBackend]
+  /// always sets freeDelivery = false because the backend only calculates the
+  /// fee at checkout time (distance-based), so there is no reliable per-row
+  /// boolean to filter on.
+  void _openFilterSheet() {
+    FocusScope.of(context).unfocus();
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return _FilterSheet(
+          initial: _filters,
+          onApply: (newFilters) {
+            setState(() => _filters = newFilters);
+          },
+        );
+      },
+    );
+  }
+
+  /// Fetches the user's saved addresses and sets the default address as active.
+  /// Falls back gracefully for guests or errors so the dashboard never breaks.
+  Future<void> _loadActiveAddress() async {
+    try {
+      final addresses = await _userRepository.listAddresses();
+      if (!mounted) return;
+      UserAddress? resolved;
+      if (addresses.isNotEmpty) {
+        resolved = addresses.firstWhere(
+          (a) => a.isDefault,
+          orElse: () => addresses.first,
+        );
+      }
+      setState(() {
+        _activeAddress = resolved;
+        _isLoadingAddress = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _activeAddress = null;
+        _isLoadingAddress = false;
+      });
+    }
+  }
+
+  /// Opens the saved addresses screen and refreshes both the active address
+  /// and restaurant listings when the user returns.
+  Future<void> _openAddressManager() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SavedAddressesScreen()),
+    );
+    if (!mounted) return;
+    await _loadActiveAddress();
+    if (!mounted) return;
+    _loadRestaurants();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).padding.bottom;
-    final isSearching = _query.isNotEmpty;
+    // Show the results view when the user typed a query OR when filters are active.
+    final isSearching = _query.isNotEmpty || _filters.isActive;
 
     return Scaffold(
       extendBodyBehindAppBar: false,
@@ -235,7 +392,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadRestaurants,
+        onRefresh: () async {
+          await Future.wait([
+            _loadActiveAddress(),
+            _loadRestaurants(),
+          ]);
+        },
         color: const Color(0xFFDC2626),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -248,7 +410,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Search & Active Location Sub-header
-                    _LocationSearchPill(),
+                    _LocationSearchPill(
+                      activeAddress: _activeAddress,
+                      isLoading: _isLoadingAddress,
+                      onTap: _openAddressManager,
+                    ),
                     const SizedBox(height: 12),
 
                     // Quick Search Bar
@@ -256,6 +422,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       controller: _searchController,
                       onChanged: _onSearchChanged,
                       onClear: _clearSearch,
+                      filtersActive: _filters.isActive,
+                      onFilter: _openFilterSheet,
                     ),
                   ],
                 ),
@@ -268,7 +436,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   query: _query,
                   onClear: _clearSearch,
                   onCategorySelected: _applyQuery,
+                  onClearFilters: () => setState(() => _filters = SearchFilters.none),
                   restaurants: _restaurants,
+                  filters: _filters,
                 ),
               )
             else ...[
@@ -276,7 +446,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: _PromoHeroBanner(restaurants: _restaurants),
               ),
 
-              SliverToBoxAdapter(child: _CategorySection(theme: theme)),
+              SliverToBoxAdapter(
+                child: _CategorySection(
+                  theme: theme,
+                  onCategorySelected: _applyQuery,
+                ),
+              ),
 
               SliverToBoxAdapter(child: _LiveOrderSnippet(restaurants: _restaurants)),
 
@@ -308,6 +483,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
 // ----------------------------- Sub-components -----------------------------
 
 class _LocationSearchPill extends StatelessWidget {
+  const _LocationSearchPill({
+    this.activeAddress,
+    this.isLoading = false,
+    this.onTap,
+  });
+
+  final UserAddress? activeAddress;
+  final bool isLoading;
+  final VoidCallback? onTap;
+
+  String get _addressDisplayText {
+    if (isLoading) return 'Loading address...';
+    if (activeAddress == null) return 'Select delivery address';
+    final title = activeAddress!.displayTitle;
+    final subtitle = activeAddress!.displaySubtitle;
+    if (title == subtitle || subtitle.isEmpty) {
+      return title;
+    }
+    return '$title • $subtitle';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -316,39 +512,40 @@ class _LocationSearchPill extends StatelessWidget {
       children: [
         Expanded(
           flex: 5,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: const Color(0xFF1D4ED8), borderRadius: BorderRadius.circular(8)),
-                  child: const Icon(Icons.location_on, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Deliver to',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          letterSpacing: 0.5,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(color: const Color(0xFF1D4ED8), borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.location_on, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Deliver to',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 1),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Row(
+                        const SizedBox(height: 1),
+                        Row(
                           children: [
                             Expanded(
                               child: Text(
-                                'Home • Street 5, Block B, Clifton',
+                                _addressDisplayText,
                                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -356,11 +553,11 @@ class _LocationSearchPill extends StatelessWidget {
                             Icon(Icons.keyboard_arrow_down, color: theme.colorScheme.secondary, size: 20),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -399,11 +596,15 @@ class _SearchBar extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
+  final bool filtersActive;
+  final VoidCallback onFilter;
 
   const _SearchBar({
     required this.controller,
     required this.onChanged,
     required this.onClear,
+    required this.filtersActive,
+    required this.onFilter,
   });
 
   @override
@@ -457,22 +658,27 @@ class _SearchBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context)
-                  ..clearSnackBars()
-                  ..showSnackBar(
-                    const SnackBar(
-                      content: Text('Sort & filter options are coming soon.'),
-                      behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 2),
+              onTap: onFilter,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(10)),
+                    child: const Icon(Icons.tune, color: Colors.white, size: 18),
+                  ),
+                  // Active-filter indicator dot
+                  if (filtersActive)
+                    const Positioned(
+                      top: -3,
+                      right: -3,
+                      child: CircleAvatar(
+                        radius: 5,
+                        backgroundColor: Color(0xFF1D4ED8),
+                      ),
                     ),
-                  );
-              },
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.tune, color: Colors.white, size: 18),
+                ],
               ),
             ),
           ),
@@ -492,6 +698,10 @@ class _SearchResultsView extends StatelessWidget {
   final String query;
   final VoidCallback onClear;
   final ValueChanged<String> onCategorySelected;
+  final VoidCallback onClearFilters;
+
+  /// Active sort/filter choices; defaults to the no-op sentinel.
+  final SearchFilters filters;
 
   /// Real restaurants from the backend, used as the search corpus.
   final List<Restaurant> restaurants;
@@ -500,7 +710,9 @@ class _SearchResultsView extends StatelessWidget {
     required this.query,
     required this.onClear,
     required this.onCategorySelected,
+    required this.onClearFilters,
     required this.restaurants,
+    this.filters = SearchFilters.none,
   });
 
   static const List<String> _suggestedQueries = [
@@ -511,44 +723,147 @@ class _SearchResultsView extends StatelessWidget {
     'Desserts',
   ];
 
+  // ── Helper: parse "13 min" → 13 (returns a large value on failure so
+  //   restaurants without a parseable ETA sort to the end).
+  static int _etaMinutes(String deliveryTime) {
+    final match = RegExp(r'(\d+)').firstMatch(deliveryTime);
+    return match != null ? int.parse(match.group(1)!) : 9999;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final q = query.toLowerCase();
 
-    final matchedRestaurants = restaurants.where((restaurant) {
-      return restaurant.name.toLowerCase().contains(q) ||
-          restaurant.tagline.toLowerCase().contains(q) ||
-          restaurant.categoryTag.toLowerCase().contains(q) ||
-          restaurant.location.toLowerCase().contains(q) ||
+    // ── TEXT matching (unchanged) ──────────────────────────────────────────
+    // Map plural or specific category labels to matching menu keywords (e.g., 'burgers' -> 'burger')
+    final searchTerms = <String>{
+      q,
+      if (q == 'burgers') 'burger',
+      if (q == 'desserts') 'dessert',
+      if (q == 'drinks') ...['drink', 'beverage'],
+      if (q == 'cloud hub') 'cloud',
+    };
+
+    bool matches(String text) {
+      // When query is empty, everything "matches" textually; filters still apply.
+      if (q.isEmpty) return true;
+      final lower = text.toLowerCase();
+      return searchTerms.any((term) => lower.contains(term));
+    }
+
+    var textMatchedRestaurants = restaurants.where((restaurant) {
+      return matches(restaurant.name) ||
+          matches(restaurant.tagline) ||
+          matches(restaurant.categoryTag) ||
+          matches(restaurant.location) ||
           restaurant.categories.any(
             (category) =>
-                category.name.toLowerCase().contains(q) ||
+                matches(category.name) ||
                 category.items.any(
                   (item) =>
-                      item.name.toLowerCase().contains(q) ||
-                      item.description.toLowerCase().contains(q),
+                      matches(item.name) ||
+                      matches(item.description),
                 ),
           );
     }).toList();
 
     // Real dishes matching the query, drawn from the fetched menus.
-    final dishes = <_PopularItem>[
+    var dishes = <_PopularItem>[
       for (final restaurant in restaurants)
         for (final category in restaurant.categories)
           for (final item in category.items)
-            if (item.name.toLowerCase().contains(q) ||
-                item.description.toLowerCase().contains(q))
+            if (matches(item.name) || matches(item.description))
               _PopularItem(restaurant: restaurant, item: item),
     ];
 
     final categories = _categories
-        .where((category) => category.label.toLowerCase().contains(q))
+        .where((category) => matches(category.label))
         .toList();
 
-    final hasResults = matchedRestaurants.isNotEmpty ||
+    // ── FILTER application (after text matching) ───────────────────────────
+    // 1. Minimum restaurant rating
+    if (filters.minRating > 0) {
+      textMatchedRestaurants = textMatchedRestaurants
+          .where((r) => r.rating >= filters.minRating)
+          .toList();
+    }
+
+    // 2. Price range on dishes (Rs.)
+    final hasPriceFilter =
+        filters.minPrice > 0 || filters.maxPrice < double.infinity;
+    if (hasPriceFilter) {
+      dishes = dishes
+          .where((d) =>
+              d.price >= filters.minPrice &&
+              d.price <= filters.maxPrice)
+          .toList();
+    }
+
+    // Also remove from restaurants those where NO dish passes the price range.
+    if (hasPriceFilter) {
+      textMatchedRestaurants = textMatchedRestaurants.where((r) {
+        return r.categories.any((cat) => cat.items.any(
+              (item) =>
+                  item.price >= filters.minPrice &&
+                  item.price <= filters.maxPrice,
+            ));
+      }).toList();
+    }
+
+    // 3. Sorting
+    switch (filters.sortOrder) {
+      case SearchSortOrder.highestRated:
+        textMatchedRestaurants.sort((a, b) => b.rating.compareTo(a.rating));
+        break;
+      case SearchSortOrder.fastestDelivery:
+        textMatchedRestaurants.sort(
+            (a, b) => _etaMinutes(a.deliveryTime).compareTo(_etaMinutes(b.deliveryTime)));
+        break;
+      case SearchSortOrder.priceLowToHigh:
+        // Restaurants: sort by lowest dish price in their menu.
+        textMatchedRestaurants.sort((a, b) {
+          final aMin = _minDishPrice(a);
+          final bMin = _minDishPrice(b);
+          return aMin.compareTo(bMin);
+        });
+        dishes.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case SearchSortOrder.priceHighToLow:
+        textMatchedRestaurants.sort((a, b) {
+          final aMin = _minDishPrice(a);
+          final bMin = _minDishPrice(b);
+          return bMin.compareTo(aMin);
+        });
+        dishes.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case SearchSortOrder.relevance:
+        break; // keep original order
+    }
+
+    final hasResults = textMatchedRestaurants.isNotEmpty ||
         dishes.isNotEmpty ||
         categories.isNotEmpty;
+
+    final filtersActive = filters.isActive;
+
+    // Decide a friendly header label.
+    final String headerTitle;
+    final String headerSub;
+    if (hasResults) {
+      headerTitle = q.isEmpty
+          ? 'Filtered results'
+          : 'Results for "$query"';
+      headerSub =
+          '${textMatchedRestaurants.length} restaurants, ${dishes.length} dishes, ${categories.length} categories';
+    } else {
+      headerTitle = q.isEmpty
+          ? 'No results match your filters'
+          : 'No results for "$query"';
+      headerSub = filtersActive
+          ? 'Try loosening the filters or clearing them.'
+          : 'Try a different keyword or pick one below.';
+    }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -559,9 +874,7 @@ class _SearchResultsView extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  hasResults
-                      ? 'Results for "$query"'
-                      : 'No results for "$query"',
+                  headerTitle,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -569,25 +882,35 @@ class _SearchResultsView extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              TextButton(
-                onPressed: onClear,
-                child: const Text('Clear'),
-              ),
+              if (q.isNotEmpty)
+                TextButton(
+                  onPressed: onClear,
+                  child: const Text('Clear'),
+                ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            hasResults
-                ? '${matchedRestaurants.length} restaurants, ${dishes.length} dishes, ${categories.length} categories'
-                : 'Try a different keyword or pick one below.',
+            headerSub,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+
+          // "Clear filters" chip — visible whenever filters are active.
+          if (filtersActive) ...[
+            const SizedBox(height: 8),
+            ActionChip(
+              avatar: const Icon(Icons.filter_alt_off, size: 16),
+              label: const Text('Clear filters'),
+              onPressed: onClearFilters,
+            ),
+          ],
+
           const SizedBox(height: 16),
 
           if (!hasResults) ...[
-            _buildEmptyState(context, theme),
+            _buildEmptyState(context, theme, filtersActive),
           ] else ...[
             if (categories.isNotEmpty) ...[
               Text(
@@ -610,13 +933,13 @@ class _SearchResultsView extends StatelessWidget {
               const SizedBox(height: 20),
             ],
 
-            if (matchedRestaurants.isNotEmpty) ...[
+            if (textMatchedRestaurants.isNotEmpty) ...[
               Text(
                 'Restaurants & Kitchens',
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...matchedRestaurants.map(
+              ...textMatchedRestaurants.map(
                 (restaurant) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: _SearchRestaurantTile(restaurant: restaurant),
@@ -650,7 +973,20 @@ class _SearchResultsView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, ThemeData theme) {
+  /// Lowest dish price across all menu items in a restaurant.
+  /// Returns 0 if there are no items, so the restaurant sorts first on
+  /// "price: low to high" (better than disappearing).
+  static double _minDishPrice(Restaurant restaurant) {
+    double min = double.infinity;
+    for (final cat in restaurant.categories) {
+      for (final item in cat.items) {
+        if (item.price < min) min = item.price;
+      }
+    }
+    return min.isInfinite ? 0 : min;
+  }
+
+  Widget _buildEmptyState(BuildContext context, ThemeData theme, bool filtersActive) {
     return Column(
       children: [
         const SizedBox(height: 8),
@@ -664,39 +1000,54 @@ class _SearchResultsView extends StatelessWidget {
           child: Column(
             children: [
               Icon(
-                Icons.search_off,
+                filtersActive ? Icons.filter_alt_off : Icons.search_off,
                 size: 56,
                 color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
               const SizedBox(height: 12),
               Text(
-                'Nothing matched "$query"',
+                filtersActive
+                    ? 'No results match your filters'
+                    : 'Nothing matched "$query"',
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
-                'Check the spelling or explore one of these popular craves.',
+                filtersActive
+                    ? 'Try adjusting the rating, price or sort order.'
+                    : 'Check the spelling or explore one of these popular craves.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: _suggestedQueries
-                    .map(
-                      (suggestion) => ActionChip(
-                        avatar: const Icon(Icons.local_fire_department, size: 16),
-                        label: Text(suggestion),
-                        onPressed: () => onCategorySelected(suggestion),
-                      ),
-                    )
-                    .toList(),
-              ),
+              if (filtersActive)
+                FilledButton.icon(
+                  onPressed: onClearFilters,
+                  icon: const Icon(Icons.filter_alt_off, size: 18),
+                  label: const Text('Clear filters'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFDC2626),
+                    foregroundColor: Colors.white,
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: _suggestedQueries
+                      .map(
+                        (suggestion) => ActionChip(
+                          avatar: const Icon(Icons.local_fire_department, size: 16),
+                          label: Text(suggestion),
+                          onPressed: () => onCategorySelected(suggestion),
+                        ),
+                      )
+                      .toList(),
+                ),
             ],
           ),
         ),
@@ -1132,8 +1483,12 @@ class _PromoHeroBannerState extends State<_PromoHeroBanner> {
 
 class _CategorySection extends StatelessWidget {
   final ThemeData theme;
+  final ValueChanged<String> onCategorySelected;
 
-  const _CategorySection({required this.theme});
+  const _CategorySection({
+    required this.theme,
+    required this.onCategorySelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1153,7 +1508,7 @@ class _CategorySection extends StatelessWidget {
                 ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () => onCategorySelected(''),
                 child: Text(
                   'Explore All',
                   style: theme.textTheme.labelMedium?.copyWith(
@@ -1176,51 +1531,55 @@ class _CategorySection extends StatelessWidget {
               final item = _categories[index];
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Image.network(
-                          item.imageUrl,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => onCategorySelected(item.label),
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
                           width: 64,
                           height: 64,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, progress) {
-                            if (progress == null) return child;
-                            return Container(
-                              color: theme.colorScheme.surfaceContainerHigh,
-                              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: theme.colorScheme.primaryContainer,
-                            child: const Icon(Icons.fastfood, color: Colors.white, size: 28),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.06),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Image.network(
+                            item.imageUrl,
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return Container(
+                                color: theme.colorScheme.surfaceContainerHigh,
+                                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: theme.colorScheme.primaryContainer,
+                              child: const Icon(Icons.fastfood, color: Colors.white, size: 28),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      item.label,
-                      style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      const SizedBox(height: 6),
+                      Text(
+                        item.label,
+                        style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -2229,4 +2588,261 @@ class _StickyCartBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _StickyCartBarDelegate oldDelegate) => oldDelegate.bottomPadding != bottomPadding;
+}
+
+// ─── Sort & Filter bottom sheet ──────────────────────────────────────────────
+
+/// The Sort & Filter bottom sheet.
+///
+/// Uses [StatefulBuilder] so the sheet keeps its own ephemeral state and only
+/// commits changes to [_DashboardScreenState._filters] when "Apply" is tapped.
+///
+/// Price range (Rs. 0 – 3 000) was chosen to cover the realistic range of
+/// menu items on the platform.  A [RangeSlider] is used so the user can set
+/// both a floor and a ceiling.
+///
+/// **Free Delivery is intentionally absent.** [Restaurant.fromBackend] always
+/// sets `freeDelivery = false` because the backend only calculates the fee at
+/// checkout time (distance-based) — there is no per-row boolean to filter on.
+class _FilterSheet extends StatefulWidget {
+  final SearchFilters initial;
+  final ValueChanged<SearchFilters> onApply;
+
+  const _FilterSheet({required this.initial, required this.onApply});
+
+  @override
+  State<_FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends State<_FilterSheet> {
+  static const double _priceMin = 0;
+  static const double _priceMax = 3000;
+
+  late SearchSortOrder _sortOrder;
+  late double _minRating;
+  late RangeValues _priceRange;
+
+  @override
+  void initState() {
+    super.initState();
+    _sortOrder = widget.initial.sortOrder;
+    _minRating = widget.initial.minRating;
+    _priceRange = RangeValues(
+      widget.initial.minPrice.clamp(_priceMin, _priceMax),
+      widget.initial.maxPrice.isInfinite ? _priceMax : widget.initial.maxPrice.clamp(_priceMin, _priceMax),
+    );
+  }
+
+  bool get _isActive =>
+      _sortOrder != SearchSortOrder.relevance ||
+      _minRating > 0 ||
+      _priceRange.start > _priceMin ||
+      _priceRange.end < _priceMax;
+
+  void _reset() {
+    setState(() {
+      _sortOrder = SearchSortOrder.relevance;
+      _minRating = 0;
+      _priceRange = const RangeValues(_priceMin, _priceMax);
+    });
+  }
+
+  void _apply() {
+    widget.onApply(
+      SearchFilters(
+        sortOrder: _sortOrder,
+        minRating: _minRating,
+        minPrice: _priceRange.start,
+        maxPrice: _priceRange.end >= _priceMax ? double.infinity : _priceRange.end,
+      ),
+    );
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final mq = MediaQuery.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      // Make the sheet keyboard-safe and scrollable.
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Handle bar
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+
+                // ── Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Sort & Filter',
+                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: _isActive ? _reset : null,
+                        child: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Divider(),
+
+                // ── Sort by
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                  child: Text(
+                    'Sort by',
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: SearchSortOrder.values.map((order) {
+                      return ChoiceChip(
+                        label: Text(order.label),
+                        selected: _sortOrder == order,
+                        onSelected: (_) => setState(() => _sortOrder = order),
+                        selectedColor: const Color(0xFFDC2626),
+                        labelStyle: TextStyle(
+                          color: _sortOrder == order ? Colors.white : null,
+                          fontWeight: _sortOrder == order ? FontWeight.bold : null,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // ── Minimum rating
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                  child: Text(
+                    'Minimum rating',
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      for (final rating in [0.0, 3.0, 3.5, 4.0, 4.5])
+                        ChoiceChip(
+                          label: Text(rating == 0 ? 'Any' : '${rating.toStringAsFixed(1)}+'),
+                          avatar: rating > 0
+                              ? const Icon(Icons.star, size: 14, color: Color(0xFFF59E0B))
+                              : null,
+                          selected: _minRating == rating,
+                          onSelected: (_) => setState(() => _minRating = rating),
+                          selectedColor: const Color(0xFFDC2626),
+                          labelStyle: TextStyle(
+                            color: _minRating == rating ? Colors.white : null,
+                            fontWeight: _minRating == rating ? FontWeight.bold : null,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // ── Price range
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Price range (Rs.)',
+                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${_priceRange.start.round()} – '
+                        '${_priceRange.end >= _priceMax ? '3000+' : _priceRange.end.round()}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                RangeSlider(
+                  values: _priceRange,
+                  min: _priceMin,
+                  max: _priceMax,
+                  divisions: 30,
+                  activeColor: const Color(0xFFDC2626),
+                  labels: RangeLabels(
+                    'Rs. ${_priceRange.start.round()}',
+                    _priceRange.end >= _priceMax
+                        ? 'Rs. 3000+'
+                        : 'Rs. ${_priceRange.end.round()}',
+                  ),
+                  onChanged: (values) => setState(() => _priceRange = values),
+                ),
+
+                const SizedBox(height: 8),
+
+                // ── Apply button
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton(
+                      onPressed: _apply,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFDC2626),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: const Text(
+                        'Apply',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
