@@ -26,6 +26,23 @@ function deleteCookie(name: string) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax${isSecure ? '; Secure' : ''}`;
 }
 
+/**
+ * Normalizes a locally typed phone number into the national-significant form
+ * the backend expects (`country_code + phone_number`).
+ *
+ * The backend concatenates the two, so a local-format number carrying its
+ * trunk prefix (`03001234567`) would be looked up as `+9203001234567` and
+ * never match a restaurant stored as `+923001234567`. Mirrors the Flutter
+ * app's `AuthRepository.normalizeNationalNumber`.
+ */
+export function normalizeNationalNumber(input: string): string {
+  let value = (input ?? '').trim().replace(/[\s\-()]/g, '');
+  if (value.startsWith('+')) value = value.slice(1);
+  if (value.startsWith('92') && value.length > 10) value = value.slice(2);
+  while (value.startsWith('0')) value = value.slice(1);
+  return value;
+}
+
 export function saveSession(tokens: TokenResponse, user: AuthSessionUser) {
   if (typeof window === 'undefined') return;
 
@@ -159,11 +176,18 @@ export async function changeInitialPassword(payload: ChangeInitialPasswordPayloa
  * Restaurant Login via email & password
  */
 export async function loginRestaurant(payload: RestaurantLoginPayload): Promise<TokenResponse> {
-  const fallbackTokens: TokenResponse = {
-    access_token: 'mock-restaurant-access-token-jwt',
-    refresh_token: 'mock-restaurant-refresh-token',
-    token_type: 'bearer',
-  };
+  // Never fabricate a session outside explicit mock mode. A failed login must
+  // surface as an error: a mock token would 401 every later menu/order call,
+  // while the API client's fallbacks made the portal look logged in and made
+  // menu writes look successful even though nothing was persisted.
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const fallbackTokens: TokenResponse | undefined = isMockMode
+    ? {
+        access_token: 'mock-restaurant-access-token-jwt',
+        refresh_token: 'mock-restaurant-refresh-token',
+        token_type: 'bearer',
+      }
+    : undefined;
 
   const tokens = await apiClient<TokenResponse>('/auth/restaurant/login', {
     method: 'POST',
@@ -201,7 +225,7 @@ export async function requestRestaurantOTP(payload: OTPRequestPayload): Promise<
   return apiClient<{ message: string }>('/auth/otp/request', {
     method: 'POST',
     body: JSON.stringify({
-      phone_number: payload.phone_number,
+      phone_number: normalizeNationalNumber(payload.phone_number),
       country_code: payload.country_code ?? '+92',
     }),
     skipAuth: true,
@@ -213,16 +237,21 @@ export async function requestRestaurantOTP(payload: OTPRequestPayload): Promise<
  * Restaurant OTP Verify & Login
  */
 export async function verifyRestaurantOTP(payload: OTPVerifyPayload): Promise<TokenResponse> {
-  const fallbackTokens: TokenResponse = {
-    access_token: 'mock-restaurant-otp-access-token',
-    refresh_token: 'mock-restaurant-otp-refresh-token',
-    token_type: 'bearer',
-  };
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const fallbackTokens: TokenResponse | undefined = isMockMode
+    ? {
+        access_token: 'mock-restaurant-otp-access-token',
+        refresh_token: 'mock-restaurant-otp-refresh-token',
+        token_type: 'bearer',
+      }
+    : undefined;
+
+  const normalizedPhone = normalizeNationalNumber(payload.phone_number);
 
   const tokens = await apiClient<TokenResponse>('/auth/restaurant/otp/verify', {
     method: 'POST',
     body: JSON.stringify({
-      phone_number: payload.phone_number,
+      phone_number: normalizedPhone,
       country_code: payload.country_code ?? '+92',
       otp_code: payload.otp_code,
     }),
@@ -243,7 +272,7 @@ export async function verifyRestaurantOTP(payload: OTPVerifyPayload): Promise<To
 
   const user: AuthSessionUser = {
     id: decodedSub,
-    phoneNumber: `${payload.country_code ?? '+92'}${payload.phone_number}`,
+    phoneNumber: `${payload.country_code ?? '+92'}${normalizedPhone}`,
     role: 'restaurant',
     name: decodedName,
   };

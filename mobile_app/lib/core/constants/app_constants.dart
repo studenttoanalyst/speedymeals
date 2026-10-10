@@ -68,8 +68,10 @@ enum UserRole {
   /// Exact string used by the backend.
   final String wireName;
 
-  /// Rider sign-in uses `POST /auth/rider/otp/verify` instead of
-  /// `POST /auth/otp/verify`; everything else about the flow is identical.
+  /// Rider sign-in uses the rider-specific OTP endpoints instead of
+  /// `POST /auth/otp/verify`: `POST /auth/rider/login/otp-verify` for an
+  /// existing rider and `POST /auth/rider/register` for first-time signup.
+  /// Everything else about the flow is identical.
   bool get isRider => this == UserRole.rider;
 
   static UserRole fromWire(String? value) {
