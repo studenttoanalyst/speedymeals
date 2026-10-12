@@ -9,7 +9,6 @@ configured via SMS_MODE=console|sendpk and SENDPK_* environment variables).
 """
 import hashlib
 import logging
-import random
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -25,6 +24,7 @@ from app.platform.auth.models import Admin, RefreshToken, PasswordResetToken
 from app.platform.auth.sms_client import (
     SMSGatewayError,
     format_otp_message,
+    mask_phone_number,
     send_sms_via_sendpk,
     send_sms_via_sendpk_async,
 )
@@ -69,7 +69,7 @@ def generate_and_send_otp(phone_number: str) -> None:
             detail=f"Please wait {ttl} seconds before requesting another OTP.",
         )
 
-    otp_code = f"{random.randint(0, 999999):06d}"
+    otp_code = f"{secrets.randbelow(1_000_000):06d}"
 
     redis_client.set(_otp_key(phone_number), otp_code, ex=OTP_EXPIRY_SECONDS)
     redis_client.set(_cooldown_key(phone_number), "1", ex=RESEND_COOLDOWN_SECONDS)
@@ -82,7 +82,7 @@ def generate_and_send_otp(phone_number: str) -> None:
         # Clear the OTP & cooldown from Redis so user is not locked out
         redis_client.delete(_otp_key(phone_number))
         redis_client.delete(_cooldown_key(phone_number))
-        logger.error(f"Failed to dispatch OTP SMS to {phone_number}: {exc}")
+        logger.error(f"Failed to dispatch OTP SMS to {mask_phone_number(phone_number)}: {exc}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Failed to send OTP code via SMS. Please try again later.",
@@ -100,7 +100,7 @@ async def generate_and_send_otp_async(phone_number: str) -> None:
             detail=f"Please wait {ttl} seconds before requesting another OTP.",
         )
 
-    otp_code = f"{random.randint(0, 999999):06d}"
+    otp_code = f"{secrets.randbelow(1_000_000):06d}"
 
     redis_client.set(_otp_key(phone_number), otp_code, ex=OTP_EXPIRY_SECONDS)
     redis_client.set(_cooldown_key(phone_number), "1", ex=RESEND_COOLDOWN_SECONDS)
@@ -113,7 +113,7 @@ async def generate_and_send_otp_async(phone_number: str) -> None:
         # Clear the OTP & cooldown from Redis so user is not locked out
         redis_client.delete(_otp_key(phone_number))
         redis_client.delete(_cooldown_key(phone_number))
-        logger.error(f"Failed to dispatch OTP SMS to {phone_number}: {exc}")
+        logger.error(f"Failed to dispatch OTP SMS to {mask_phone_number(phone_number)}: {exc}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Failed to send OTP code via SMS. Please try again later.",
