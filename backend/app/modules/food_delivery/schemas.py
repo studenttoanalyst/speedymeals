@@ -76,6 +76,11 @@ class OrderStatusUpdateSchema(BaseModel):
     status: str
 
 
+class OrderRejectSchema(BaseModel):
+    """Body for POST /restaurants/me/orders/{id}/reject."""
+    reason: str = Field(..., min_length=2, max_length=200)
+
+
 class RestaurantOrderSummaryResponseSchema(BaseModel):
     """One row in GET /restaurants/me/orders - dashboard list view."""
     id: uuid.UUID
@@ -100,7 +105,12 @@ class RestaurantOrderDetailResponseSchema(BaseModel):
     delivery_distance_km: float
     delivery_fee: float
     platform_fee: float
+    gst_rate: float = 0.0
+    prices_include_gst: bool = True
+    gst_amount: float = 0.0
+    net_subtotal: float | None = None
     total_amount: float
+    commission_rate: float | None = None
     commission_amount: float
     restaurant_payable: float
     rider_earning: float
@@ -209,6 +219,10 @@ class CheckoutPreviewResponseSchema(BaseModel):
     delivery_distance_km: float
     delivery_fee: float
     platform_fee: float
+    gst_rate: float = 0.0
+    prices_include_gst: bool = True
+    gst_amount: float = 0.0
+    net_subtotal: float | None = None
     total: float
     route: RouteDetailSchema | None = None
 
@@ -227,6 +241,10 @@ class OrderTrackingResponseSchema(BaseModel):
     delivery_distance_km: float
     delivery_fee: float
     platform_fee: float
+    gst_rate: float = 0.0
+    prices_include_gst: bool = True
+    gst_amount: float = 0.0
+    net_subtotal: float | None = None
     total_amount: float
     restaurant_name: str
     restaurant_lat: float | None = None
@@ -308,6 +326,7 @@ class PlaceOrderSchema(BaseModel):
     payment_method validity are enforced in the service layer."""
     address_id: uuid.UUID
     payment_method: str
+    expected_total: float | None = None
 
 
 class PlaceOrderResponseSchema(BaseModel):
@@ -322,6 +341,10 @@ class PlaceOrderResponseSchema(BaseModel):
     delivery_distance_km: float
     delivery_fee: float
     platform_fee: float
+    gst_rate: float = 0.0
+    prices_include_gst: bool = True
+    gst_amount: float = 0.0
+    net_subtotal: float | None = None
     total_amount: float
     route: RouteDetailSchema | None = None
     commission_amount: float
@@ -353,6 +376,8 @@ class RestaurantProfileResponseSchema(BaseModel):
     prep_time_minutes: int | None = 20
     currency: str
     status: str
+    gst_rate: float = 0.0
+    prices_include_gst: bool = True
 
 
 class RestaurantProfileUpdateSchema(BaseModel):
@@ -364,6 +389,8 @@ class RestaurantProfileUpdateSchema(BaseModel):
     logo_url: str | None = None
     cover_photo_url: str | None = None
     banner_url: str | None = None
+    gst_rate: float | None = Field(default=None, ge=0, le=30)
+    prices_include_gst: bool | None = None
 
 
 class RestaurantDashboardMetricsSchema(BaseModel):

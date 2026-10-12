@@ -1,4 +1,4 @@
-package com.example.speedy_meals
+package com.speedymealservices.app
 
 import io.flutter.embedding.android.FlutterActivity
 

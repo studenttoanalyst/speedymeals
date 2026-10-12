@@ -12,6 +12,7 @@ import {
   Timer,
   Camera,
   Buildings,
+  Receipt,
 } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { ImageUpload } from '@/components/common/ImageUpload';
@@ -32,6 +33,8 @@ export default function RestaurantProfilePage() {
   const [openingTime, setOpeningTime] = useState('11:00');
   const [closingTime, setClosingTime] = useState('23:30');
   const [address, setAddress] = useState('');
+  const [gstRate, setGstRate] = useState(0);
+  const [includesGst, setIncludesGst] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -43,6 +46,8 @@ export default function RestaurantProfilePage() {
         setOpeningTime(data.opening_time || '11:00');
         setClosingTime(data.closing_time || '23:30');
         setPrepTime(data.prep_time_minutes || 20);
+        setGstRate(data.gst_rate ?? 0);
+        setIncludesGst(data.prices_include_gst ?? true);
         if (data.logo_url) setLogoUrl(data.logo_url);
         if (data.banner_url || data.cover_photo_url) setBannerUrl(data.banner_url || data.cover_photo_url || null);
       } catch (err) {
@@ -64,6 +69,8 @@ export default function RestaurantProfilePage() {
         opening_time: openingTime,
         closing_time: closingTime,
         prep_time_minutes: prepTime,
+        gst_rate: gstRate,
+        prices_include_gst: includesGst,
         logo_url: logoUrl,
         banner_url: bannerUrl,
         cover_photo_url: bannerUrl,
@@ -273,6 +280,76 @@ export default function RestaurantProfilePage() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* TAX / GST SETTINGS */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Receipt size={16} className="text-slate-400" />
+                  Tax (GST) on Menu Prices
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Tell us whether the prices on your menu already include tax. Applies to new orders only;
+                  existing orders keep the tax they were placed with.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700">GST / Sales Tax Rate (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={30}
+                    step={0.01}
+                    value={gstRate}
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value);
+                      setGstRate(Number.isNaN(v) ? 0 : Math.min(30, Math.max(0, v)));
+                    }}
+                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold"
+                  />
+                  <p className="text-[11px] text-slate-400">Use the rate on your FBR / SRB registration. 0 = no tax charged.</p>
+                </div>
+
+                <div className="space-y-1 md:col-span-2">
+                  <label className="font-semibold text-slate-700">Menu prices are</label>
+                  <div role="radiogroup" aria-label="Menu price tax mode" className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: true, title: 'Tax inclusive', hint: 'Price on menu is final. Tax is shown inside it on the receipt.' },
+                      { value: false, title: 'Tax exclusive', hint: 'Tax is added on top of the menu price at checkout.' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.title}
+                        type="button"
+                        role="radio"
+                        aria-checked={includesGst === opt.value}
+                        onClick={() => setIncludesGst(opt.value)}
+                        className={`text-left p-3 rounded-lg border transition-colors cursor-pointer ${
+                          includesGst === opt.value
+                            ? 'border-rose-500 bg-rose-50 text-rose-900'
+                            : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="font-bold">{opt.title}</div>
+                        <div className="text-[11px] opacity-80 pt-0.5">{opt.hint}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {gstRate > 0 && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600 font-mono">
+                  {(() => {
+                    const base = 1000;
+                    const gst = includesGst ? base - base / (1 + gstRate / 100) : (base * gstRate) / 100;
+                    const total = includesGst ? base : base + gst;
+                    return `Example: Rs 1,000 menu item → customer pays Rs ${total.toFixed(2)} for food (GST Rs ${gst.toFixed(2)} ${includesGst ? 'included' : 'added'}).`;
+                  })()}
+                </div>
+              )}
             </div>
 
             {/* SAVE BUTTON */}

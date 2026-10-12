@@ -44,6 +44,11 @@ dependencies:
   url_launcher: ^6.3.2
   uuid: ^4.5.1
   shimmer: ^3.0.0
+  # Push notifications (FCM). flutter_local_notifications needs core library
+  # desugaring on Android (enabled in android/app/build.gradle.kts).
+  firebase_core: ^4.10.0
+  firebase_messaging: ^16.3.0
+  flutter_local_notifications: ^22.0.0
 
 dev_dependencies:
   flutter_test:

@@ -157,7 +157,6 @@ temp/
 # ============================================================
 
 serviceAccountKey.json
-google-services.json
 GoogleService-Info.plist
 
 # ============================================================

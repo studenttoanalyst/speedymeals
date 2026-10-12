@@ -9,6 +9,7 @@ import '../core/storage/token_storage.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/rider_repository.dart';
 import '../data/repositories/user_repository.dart';
+import 'push_service.dart';
 
 // Re-exported so screens keep importing only this file for their auth types.
 export '../core/constants/app_constants.dart' show UserRole;
@@ -217,6 +218,7 @@ class AuthService extends ChangeNotifier {
         // if it merely expired).
         final me = await _auth.me();
         await _loadIdentity(role: me.role, id: me.id);
+        _registerPushIfEligible();
       }
     } on ApiException catch (error) {
       // A dead/revoked session is normal (30-day refresh window) and must not
@@ -331,6 +333,7 @@ class AuthService extends ChangeNotifier {
     _cancelCooldown();
 
     await _loadIdentity(role: role);
+    _registerPushIfEligible();
     return _currentUser!;
   }
 
@@ -347,6 +350,10 @@ class AuthService extends ChangeNotifier {
   /// Local state is cleared even if the network call fails — a user who taps
   /// "log out" must end up logged out.
   Future<void> logout() async {
+    // Unregister this device from push BEFORE the session is revoked: the call
+    // needs a valid access token. Never throws and is time-boxed.
+    await PushService.instance.unregister();
+
     final refreshToken = _tokens.refreshToken;
     if (refreshToken != null) {
       await _auth.logout(refreshToken: refreshToken);
@@ -363,6 +370,15 @@ class AuthService extends ChangeNotifier {
   }
 
   // ------------------------------------------------------------- internals
+
+  /// Customers (order updates) and riders (delivery requests) get push; the
+  /// restaurant and admin roles use the web portals instead.
+  void _registerPushIfEligible() {
+    final role = _currentUser?.role;
+    if (role == UserRole.customer || role == UserRole.rider) {
+      unawaited(PushService.instance.registerForCurrentSession());
+    }
+  }
 
   Future<bool> _refreshAccessToken() async {
     final refreshToken = _tokens.refreshToken;

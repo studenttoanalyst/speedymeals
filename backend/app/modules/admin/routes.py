@@ -166,8 +166,8 @@ def set_rider_status(
     current_user: CurrentUser = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    """Step 3 — deactivate/reactivate a rider (e.g. fraud, violations)."""
-    return service.set_rider_status(db, rider_id, payload.is_active)
+    """Step 3 — deactivate/reactivate a rider (e.g. fraud, violations) or toggle online/offline."""
+    return service.set_rider_status(db, rider_id, payload.is_active, payload.is_online)
 
 
 @router.patch("/riders/{rider_id}/commission", response_model=RiderAdminResponseSchema)

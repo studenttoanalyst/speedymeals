@@ -19,6 +19,7 @@ from app.core.database import SessionLocal
 from app.platform.auth import service as auth_service
 from app.platform.auth.routes import router as auth_router
 from app.platform.location.routes import router as location_router
+from app.platform.notification.routes import router as notification_router
 from app.platform.users.routes import router as users_router
 from app.platform.wallet_payment.routes import router as wallet_router
 from app.modules.admin.routes import router as admin_router
@@ -31,6 +32,9 @@ from app.modules.food_delivery.routes import (
     restaurant_portal_router,
     router as menu_router,
 )
+
+import asyncio
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +58,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(location_router)
+app.include_router(notification_router)
 app.include_router(users_router)
 app.include_router(wallet_router)
 
@@ -122,6 +127,25 @@ def seed_first_admin_on_startup() -> None:
         auth_service.seed_demo_restaurant(db)
     finally:
         db.close()
+
+
+_sweeper_task: "asyncio.Task | None" = None
+
+
+@app.on_event("startup")
+async def start_assignment_sweeper() -> None:
+    """Expire ignored rider offers and retry unassigned orders (see core/assignment_sweeper.py)."""
+    global _sweeper_task
+    if settings.ASSIGNMENT_SWEEPER_ENABLED:
+        from app.core.assignment_sweeper import run_forever
+
+        _sweeper_task = asyncio.create_task(run_forever())
+
+
+@app.on_event("shutdown")
+async def stop_assignment_sweeper() -> None:
+    if _sweeper_task is not None:
+        _sweeper_task.cancel()
 
 
 @app.get("/health")

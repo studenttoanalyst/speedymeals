@@ -295,17 +295,27 @@ def upgrade() -> None:
         )
     )
 
-    # 10. Mandatory Supabase Grants per AGENTS.md rule
+    # 10. Mandatory Supabase Grants per AGENTS.md rule.
+    # The roles (anon, authenticated, service_role) only exist on Supabase. On a
+    # plain PostgreSQL database (docker-compose, CI, local) a failing GRANT puts
+    # the whole migration transaction into an aborted state, and swallowing the
+    # exception afterwards does NOT recover it: every later statement, including
+    # alembic's own version bookkeeping, then fails. Run the grants inside a
+    # SAVEPOINT so a failure rolls back only the grants and the migration goes on.
     try:
-        bind.execute(sa.text("GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;"))
-        bind.execute(sa.text("GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;"))
-        bind.execute(sa.text("GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;"))
-        bind.execute(sa.text("GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated, service_role;"))
-        bind.execute(sa.text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;"))
-        bind.execute(sa.text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;"))
-        bind.execute(sa.text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO anon, authenticated, service_role;"))
+        with bind.begin_nested():
+            for statement in (
+                "GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;",
+                "GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;",
+                "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;",
+                "GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated, service_role;",
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;",
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;",
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO anon, authenticated, service_role;",
+            ):
+                bind.execute(sa.text(statement))
     except Exception:
-        # Pass gracefully on local test databases where these roles may not exist
+        # Roles absent (plain PostgreSQL): grants are skipped, schema is intact.
         pass
 
 

@@ -104,7 +104,7 @@ export default function AdminReportsPage() {
   const discrepancyColumns: Column<CashDiscrepancy>[] = [
     {
       key: 'rider_name',
-      title: 'Courier Name',
+      title: 'Rider Name',
       sortable: true,
       render: (d) => (
         <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
@@ -236,9 +236,9 @@ export default function AdminReportsPage() {
           />
 
           <StatCard
-            label="Courier Payouts (90% Retained)"
+            label="Rider Payouts (90% Retained)"
             value={formatPKR(reports?.total_rider_payouts ?? 0)}
-            subValue="Disbursed to couriers"
+            subValue="Disbursed to riders"
             accent="none"
             icon={<Bicycle size={18} weight="bold" />}
             targetBenchmark="Fair-Split Guarantee"
@@ -269,7 +269,7 @@ export default function AdminReportsPage() {
           />
         </div>
 
-        {/* Courier Cash Float Discrepancy Audits */}
+        {/* Rider Cash Float Discrepancy Audits */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
@@ -283,7 +283,7 @@ export default function AdminReportsPage() {
             data={discrepancies}
             columns={discrepancyColumns}
             keyExtractor={(d) => d.id}
-            searchPlaceholder="Search courier name..."
+            searchPlaceholder="Search rider name..."
             searchFilter={(d, q) => d.rider_name.toLowerCase().includes(q.toLowerCase())}
           />
         </div>

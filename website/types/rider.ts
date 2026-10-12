@@ -20,6 +20,8 @@ export interface RiderAdmin {
   is_online: boolean;
   is_active: boolean;
   commission_rate?: number; // Delivery commission percentage (e.g. 0% launch promo vs 10%)
+  kit_completed?: boolean;
+  kit_deposit_paid?: boolean;
   cnic_front_url?: string | null;
   cnic_back_url?: string | null;
   license_url?: string | null;
@@ -34,7 +36,8 @@ export interface RiderApprovalUpdatePayload {
 }
 
 export interface RiderStatusUpdatePayload {
-  is_active: boolean;
+  is_active?: boolean;
+  is_online?: boolean;
 }
 
 export interface RiderCommissionUpdatePayload {
@@ -58,3 +61,30 @@ export interface RiderPayout {
   paid_at?: string | null;
   reference_code?: string | null;
 }
+
+export interface RiderKitDetails {
+  id: string;
+  name: string;
+  kit_deposit_paid: boolean;
+  kit_deposit_date?: string | null;
+  kit_shirts_issued: number;
+  kit_box_issued: boolean;
+  kit_verified_by?: string | null;
+  kit_completed: boolean;
+  shirt_serial_number?: string | null;
+  shirt_serial_numbers?: string[] | null;
+  box_serial_number?: string | null;
+  helmet_serial_number?: string | null;
+  created_at: string;
+}
+
+export interface RiderKitUpdatePayload {
+  kit_deposit_paid: boolean;
+  kit_shirts_issued: number;
+  kit_box_issued: boolean;
+  shirt_serial_number?: string | null;
+  shirt_serial_numbers?: string[] | null;
+  box_serial_number?: string | null;
+  helmet_serial_number?: string | null;
+}
+

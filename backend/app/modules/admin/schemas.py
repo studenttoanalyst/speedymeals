@@ -6,7 +6,7 @@ list, approve-deactivate, commission, credential reset).
 import uuid
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 
 
 class DashboardSummaryResponseSchema(BaseModel):
@@ -47,6 +47,8 @@ class RestaurantAdminResponseSchema(BaseModel):
     status: str
     commission_rate: float
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RestaurantStatusUpdateSchema(BaseModel):
@@ -91,8 +93,17 @@ class RiderAdminResponseSchema(BaseModel):
     pending_cash_owed: float
     is_online: bool
     is_active: bool
-    commission_rate: float = 0.0
+    commission_rate: float | None = 0.0
+    kit_completed: bool = False
     created_at: datetime
+
+    @field_validator("commission_rate", mode="before")
+    @classmethod
+    def _null_commission_is_zero(cls, value):
+        # riders.commission_rate is NULL until an admin sets a per-rider rate.
+        return 0.0 if value is None else value
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RiderApprovalUpdateSchema(BaseModel):
@@ -101,8 +112,9 @@ class RiderApprovalUpdateSchema(BaseModel):
 
 
 class RiderStatusUpdateSchema(BaseModel):
-    """Body for PATCH /admin/riders/{id}/status — Step 3 deactivate toggle."""
-    is_active: bool
+    """Body for PATCH /admin/riders/{id}/status — Step 3 status toggles."""
+    is_active: bool | None = None
+    is_online: bool | None = None
 
 
 class RiderCommissionUpdateSchema(BaseModel):
@@ -135,6 +147,8 @@ class RiderKitResponseSchema(BaseModel):
     box_serial_number: str | None = None
     helmet_serial_number: str | None = None
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- Step 4: order management ---

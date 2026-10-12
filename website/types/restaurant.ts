@@ -87,6 +87,8 @@ export interface RestaurantProfile {
   opening_time?: string | null;
   closing_time?: string | null;
   prep_time_minutes?: number; // Kitchen prep SLA in minutes
+  gst_rate?: number; // GST/sales-tax % charged on food (0 = none)
+  prices_include_gst?: boolean; // true = menu prices already include tax
   rating?: number;
   total_reviews?: number;
   is_open?: boolean;

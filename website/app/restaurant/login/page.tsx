@@ -59,6 +59,10 @@ export default function RestaurantLoginPage() {
     if (savedPhone) {
       setPhoneNumber(savedPhone);
     }
+
+    if (typeof window !== 'undefined' && window.location.search.includes('expired=true')) {
+      setError('Your session has expired. Please sign in with your credentials to refresh access.');
+    }
   }, [router]);
 
   useEffect(() => {
@@ -245,6 +249,33 @@ export default function RestaurantLoginPage() {
               >
                 Forgot password?
               </Link>
+            </div>
+
+            {/* Quick Demo Partner Login Card */}
+            <div className="p-3 bg-rose-50/60 border border-rose-200/80 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-slate-800 text-[11px] flex items-center gap-1.5">
+                  <ChefHat size={14} className="text-rose-600" weight="bold" />
+                  <span>Demo Partner Account</span>
+                </span>
+                <span className="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded-md uppercase">
+                  Karachi Biryani
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-600 font-mono flex items-center justify-between">
+                <span>contact@karachibiryani.pk</span>
+                <span className="text-slate-400">Partner@123</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('contact@karachibiryani.pk');
+                  setPassword('Partner@123');
+                }}
+                className="w-full py-1.5 px-3 bg-white hover:bg-rose-100 border border-rose-200 text-rose-700 font-semibold rounded-lg text-xs transition-colors cursor-pointer flex items-center justify-center gap-1"
+              >
+                <span>Fill Demo Credentials</span>
+              </button>
             </div>
 
             <button

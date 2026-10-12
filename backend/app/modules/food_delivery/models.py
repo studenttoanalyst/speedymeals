@@ -34,6 +34,11 @@ class Restaurant(BaseModel, UpdatedAtMixin):
     closing_time: Mapped[str | None] = mapped_column(Time, nullable=True)
     country_code: Mapped[str] = mapped_column(String, nullable=False)
     currency: Mapped[str] = mapped_column(String, nullable=False)
+    # GST setting: are menu prices tax-inclusive (True) or tax-exclusive
+    # (False)? Rate 0 = no tax charged. Orders snapshot both at placement.
+    gst_rate: Mapped[float] = mapped_column(Numeric, default=0, server_default="0", nullable=False)
+    prices_include_gst: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true", nullable=False)
+    prep_time_minutes: Mapped[int] = mapped_column(Integer, default=20, server_default="20", nullable=False)
 
 
 class MenuItem(BaseModel):
@@ -83,6 +88,12 @@ class Order(BaseModel):
     currency: Mapped[str] = mapped_column(String, nullable=False)
     cancellation_reason: Mapped[str | None] = mapped_column(String, nullable=True)
     cancelled_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    # GST snapshot frozen at placement (nullable: legacy orders = no tax).
+    # food_subtotal stays the raw menu-price sum; net_subtotal is ex-tax.
+    gst_rate: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    prices_include_gst: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    gst_amount: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    net_subtotal: Mapped[float | None] = mapped_column(Numeric, nullable=True)
     # Point 4 — immutable location snapshots frozen at order placement.
     # Coordinates live here so tracking/rider views never shift if the
     # customer edits their address or the restaurant relocates afterwards.
@@ -96,6 +107,9 @@ class Order(BaseModel):
         DateTime(timezone=True), nullable=True, index=True
     )  # admin dashboard/report date ranges + newest-first ordering
     delivered_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # When the order was last offered to a rider. The assignment sweeper expires
+    # offers older than RIDER_ASSIGNMENT_TIMEOUT_SECONDS (see food_delivery/service.py).
+    rider_assigned_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class OrderItem(BaseModel):

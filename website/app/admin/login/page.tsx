@@ -21,6 +21,13 @@ export default function AdminLoginPage() {
     if (role === 'admin' && token) {
       router.replace('/admin/dashboard');
     }
+
+    const savedEmail = localStorage.getItem('sm_remembered_admin_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    } else {
+      setEmail('admin@speedymeals.com');
+    }
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,10 +139,28 @@ export default function AdminLoginPage() {
             </Link>
           </div>
 
+          {/* Demo Credentials Helper */}
+          <div className="p-3 bg-rose-50/60 border border-rose-100 rounded-xl flex items-center justify-between text-xs">
+            <div>
+              <span className="font-semibold text-slate-800 block">Platform Demo Admin</span>
+              <span className="font-mono text-[11px] text-slate-500">admin@speedymeals.com • admin123</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@speedymeals.com');
+                setPassword('admin123');
+              }}
+              className="py-1 px-2.5 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 font-semibold rounded-lg text-[11px] transition-colors cursor-pointer"
+            >
+              Auto Fill
+            </button>
+          </div>
+
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             <span>{isLoading ? 'Signing in...' : 'Log In to Admin Portal'}</span>
             <ArrowRight size={14} weight="bold" />

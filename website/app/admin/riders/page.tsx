@@ -19,6 +19,7 @@ import {
   Sliders,
   Sparkle,
   LockKey,
+  Package,
 } from '@phosphor-icons/react';
 import { Topbar } from '@/components/dashboard/Topbar';
 import { DataTable, Column } from '@/components/dashboard/DataTable';
@@ -258,11 +259,49 @@ export default function AdminRidersPage() {
       render: (r) => <StatusBadge status={r.approval_status} size="sm" />,
     },
     {
+      key: 'kit_status',
+      title: 'Kit Handover',
+      align: 'center',
+      render: (r) => {
+        if (r.kit_completed) {
+          return (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <CheckCircle size={12} weight="bold" />
+              <span>Kit Verified</span>
+            </span>
+          );
+        }
+        if (r.kit_deposit_paid) {
+          return (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              <Package size={12} weight="bold" />
+              <span>Deposit Paid</span>
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+            <ShieldWarning size={12} weight="bold" />
+            <span>Kit Pending</span>
+          </span>
+        );
+      },
+    },
+    {
       key: 'actions',
       title: 'Inspection & Actions',
       align: 'right',
       render: (r) => (
         <div className="flex items-center justify-end gap-1.5">
+          <Link
+            href={`/admin/riders/${r.id}#kit`}
+            className="px-2.5 py-1 text-xs font-semibold bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg shadow-2xs inline-flex items-center gap-1 transition-colors"
+            title="Inspect & approve rider kit, deposit and inventory handover"
+          >
+            <Package size={12} weight="bold" />
+            <span>Kit</span>
+          </Link>
+
           <button
             onClick={() => handleOpenCommissionModal(r)}
             className="px-2.5 py-1 text-xs font-semibold bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 rounded-lg shadow-2xs inline-flex items-center gap-1 transition-colors"

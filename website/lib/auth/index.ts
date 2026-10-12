@@ -5,7 +5,7 @@
 
 import { TokenResponse, AdminTokenResponse, AdminLoginPayload, RestaurantLoginPayload, OTPRequestPayload, OTPVerifyPayload, AuthSessionUser, UserRole, ChangeInitialPasswordPayload } from '@/types/auth';
 
-import { apiClient, getApiBaseUrl } from '../api/client';
+import { apiClient, getApiBaseUrl, isJwtExpired } from '../api/client';
 
 const ACCESS_TOKEN_KEY = 'sm_access_token';
 const REFRESH_TOKEN_KEY = 'sm_refresh_token';
@@ -86,7 +86,13 @@ export function getStoredRole(): UserRole | null {
 
 export function getStoredAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+  if (!token) return null;
+  if (isJwtExpired(token)) {
+    clearSession();
+    return null;
+  }
+  return token;
 }
 
 /**
@@ -285,6 +291,16 @@ export async function verifyRestaurantOTP(payload: OTPVerifyPayload): Promise<To
  * Logout
  */
 export async function logout(): Promise<void> {
+  // Remove this browser from push BEFORE the session is revoked: the call needs
+  // a valid access token. Never throws; dynamic import keeps firebase out of
+  // the login bundle.
+  try {
+    const { disablePush } = await import('../firebase/push');
+    await disablePush();
+  } catch {
+    // push is optional
+  }
+
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
   if (refreshToken && !refreshToken.startsWith('mock-')) {
     try {

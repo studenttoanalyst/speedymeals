@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
 import 'screens/auth/login_screen.dart';
+import 'services/push_service.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Defensive: replace the framework's default error box with a branded,
   // readable fallback. Without this, a build failure such as the checkout
   // RenderFlex assertion surfaced as an unhelpful blank/white screen.
@@ -15,6 +18,10 @@ void main() {
     }
     return const _AppErrorFallback();
   };
+
+  // Firebase Cloud Messaging. Never throws: without Firebase config this build
+  // simply runs without push (see PushService).
+  await PushService.instance.init();
 
   runApp(const SpeedyMealsApp());
 }

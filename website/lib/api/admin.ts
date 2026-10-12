@@ -28,6 +28,8 @@ import {
   RiderAdmin,
   RiderApprovalUpdatePayload,
   RiderCommissionUpdatePayload,
+  RiderKitDetails,
+  RiderKitUpdatePayload,
   RiderPayout,
   RiderStatusUpdatePayload,
 } from '@/types/rider';
@@ -150,12 +152,16 @@ export async function listAdminRiders(params?: {
   if (params?.is_online !== undefined) query.append('is_online', String(params.is_online));
 
   const qs = query.toString() ? `?${query.toString()}` : '';
-  let fallback = [...mockRiders];
-  if (params?.approval_status) {
-    fallback = fallback.filter((r) => r.approval_status === params.approval_status);
-  }
-  if (params?.is_online !== undefined) {
-    fallback = fallback.filter((r) => r.is_online === params.is_online);
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  let fallback: RiderAdmin[] | undefined = undefined;
+  if (isMockMode) {
+    fallback = [...mockRiders];
+    if (params?.approval_status) {
+      fallback = fallback.filter((r) => r.approval_status === params.approval_status);
+    }
+    if (params?.is_online !== undefined) {
+      fallback = fallback.filter((r) => r.is_online === params.is_online);
+    }
   }
 
   return apiClient<RiderAdmin[]>(`/admin/riders${qs}`, {
@@ -164,7 +170,8 @@ export async function listAdminRiders(params?: {
 }
 
 export async function getAdminRider(riderId: string): Promise<RiderAdmin> {
-  const fallback = mockRiders.find((r) => r.id === riderId) ?? mockRiders[0];
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const fallback = isMockMode ? (mockRiders.find((r) => r.id === riderId) ?? mockRiders[0]) : undefined;
   return apiClient<RiderAdmin>(`/admin/riders/${riderId}`, {
     fallbackData: fallback,
   });
@@ -191,11 +198,15 @@ export async function updateAdminRiderStatus(
   riderId: string,
   payload: RiderStatusUpdatePayload
 ): Promise<RiderAdmin> {
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
   const base = mockRiders.find((r) => r.id === riderId) ?? mockRiders[0];
-  const fallback: RiderAdmin = {
-    ...base,
-    is_active: payload.is_active,
-  };
+  const fallback: RiderAdmin | undefined = isMockMode
+    ? {
+        ...base,
+        is_active: payload.is_active !== undefined ? payload.is_active : base.is_active,
+        is_online: payload.is_online !== undefined ? payload.is_online : base.is_online,
+      }
+    : undefined;
 
   return apiClient<RiderAdmin>(`/admin/riders/${riderId}/status`, {
     method: 'PATCH',
@@ -218,6 +229,37 @@ export async function updateAdminRiderCommission(
     method: 'PATCH',
     body: JSON.stringify(payload),
     fallbackData: fallback,
+  });
+}
+
+export async function getRiderKit(riderId: string): Promise<RiderKitDetails> {
+  const base = mockRiders.find((r) => r.id === riderId) ?? mockRiders[0];
+  const fallback: RiderKitDetails = {
+    id: riderId,
+    name: base?.name || 'Rider Partner',
+    kit_deposit_paid: false,
+    kit_deposit_date: null,
+    kit_shirts_issued: 0,
+    kit_box_issued: false,
+    kit_completed: false,
+    shirt_serial_numbers: [],
+    box_serial_number: null,
+    helmet_serial_number: null,
+    created_at: new Date().toISOString(),
+  };
+
+  return apiClient<RiderKitDetails>(`/admin/riders/${riderId}/kit`, {
+    fallbackData: fallback,
+  });
+}
+
+export async function updateRiderKit(
+  riderId: string,
+  payload: RiderKitUpdatePayload
+): Promise<RiderKitDetails> {
+  return apiClient<RiderKitDetails>(`/admin/riders/${riderId}/kit`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
   });
 }
 

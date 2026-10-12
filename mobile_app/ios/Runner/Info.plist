@@ -38,6 +38,8 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
+		<!-- FCM: wake the app for push notifications. -->
+		<string>remote-notification</string>
 	</array>
 	<!-- Google Maps Platform: configure via $(GOOGLE_MAPS_API_KEY) build setting -->
 	<key>GoogleMapsAPIKey</key>

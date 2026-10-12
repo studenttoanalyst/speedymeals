@@ -42,6 +42,7 @@ import {
   RestaurantAdmin,
 } from '@/types/admin';
 import { RiderAdmin } from '@/types/rider';
+import { isInKitchen, isNewOrder } from '@/lib/orders/status';
 
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null);
@@ -83,13 +84,13 @@ export default function AdminDashboardPage() {
     return `PKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Couriers exceeding cash limit (>15,000 PKR)
+  // Riders exceeding cash limit (>15,000 PKR)
   const floatBreachedRiders = allRiders.filter(
     (r) => (r.pending_cash_owed || 0) > (r.max_cash_float_limit || 15000)
   );
 
-  const placedCount = recentOrders.filter((o) => o.status === 'Placed').length;
-  const prepCount = recentOrders.filter((o) => o.status === 'Accepted' || o.status === 'Preparing').length;
+  const placedCount = recentOrders.filter((o) => isNewOrder(o.status)).length;
+  const prepCount = recentOrders.filter((o) => isInKitchen(o.status)).length;
   const handoverCount = recentOrders.filter((o) => o.status === 'Ready for Pickup').length;
   const transitCount = recentOrders.filter((o) => o.status === 'Out for Delivery').length;
   const deliveredCount = recentOrders.filter((o) => o.status === 'Delivered').length;
@@ -114,7 +115,7 @@ export default function AdminDashboardPage() {
     },
     {
       key: 'rider_name',
-      title: 'Assigned Courier',
+      title: 'Assigned Rider',
       render: (o) => (
         <span className="text-xs text-slate-600 font-medium">
           {o.rider_name || <span className="text-amber-600 italic">Unassigned</span>}
@@ -280,7 +281,7 @@ export default function AdminDashboardPage() {
                 {[
                   { stage: '1. Placed (Pending Accept)', count: placedCount, color: 'bg-indigo-500', pct: `${recentOrders.length > 0 ? Math.round((placedCount / recentOrders.length) * 100) : 0}%` },
                   { stage: '2. Kitchen Prep', count: prepCount, color: 'bg-amber-500', pct: `${recentOrders.length > 0 ? Math.round((prepCount / recentOrders.length) * 100) : 0}%` },
-                  { stage: '3. Ready for Courier Handover', count: handoverCount, color: 'bg-blue-500', pct: `${recentOrders.length > 0 ? Math.round((handoverCount / recentOrders.length) * 100) : 0}%` },
+                  { stage: '3. Ready for Rider Handover', count: handoverCount, color: 'bg-blue-500', pct: `${recentOrders.length > 0 ? Math.round((handoverCount / recentOrders.length) * 100) : 0}%` },
                   { stage: '4. Out for Delivery (In-Transit)', count: transitCount, color: 'bg-sky-500', pct: `${recentOrders.length > 0 ? Math.round((transitCount / recentOrders.length) * 100) : 0}%` },
                   { stage: '5. Completed / Delivered', count: deliveredCount, color: 'bg-emerald-600', pct: `${recentOrders.length > 0 ? Math.round((deliveredCount / recentOrders.length) * 100) : 0}%` },
                 ].map((s) => (
@@ -352,7 +353,7 @@ export default function AdminDashboardPage() {
           })()}
         />
 
-        {/* SRE Observability: Latency SLO & Courier Float Liquidity Risk */}
+        {/* SRE Observability: Latency SLO & Rider Float Liquidity Risk */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SlaLatencyChart
             totalDeliveredOrders={deliveredCount}
@@ -414,7 +415,7 @@ export default function AdminDashboardPage() {
               columns={orderColumns}
               keyExtractor={(o) => o.id}
               isLoading={isLoading}
-              searchPlaceholder="Search order ID, restaurant, or courier..."
+              searchPlaceholder="Search order ID, restaurant, or rider..."
               searchFilter={(o, q) =>
                 o.id.toLowerCase().includes(q.toLowerCase()) ||
                 o.restaurant_name.toLowerCase().includes(q.toLowerCase())
@@ -425,7 +426,7 @@ export default function AdminDashboardPage() {
           {activeQueueTab === 'riders' && (
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-slate-900">Pending Courier Onboarding Approvals</h3>
+                <h3 className="text-sm font-bold text-slate-900">Pending Rider Onboarding Approvals</h3>
                 <Link href="/admin/riders" className="text-xs text-slate-700 font-semibold hover:underline">
                   View All Riders
                 </Link>
@@ -452,7 +453,7 @@ export default function AdminDashboardPage() {
                 ))}
                 {pendingRiders.length === 0 && (
                   <div className="text-center py-6 text-xs text-slate-400">
-                    No pending courier approvals in queue
+                    No pending rider approvals in queue
                   </div>
                 )}
               </div>
@@ -470,7 +471,7 @@ export default function AdminDashboardPage() {
                     Cash-on-Delivery (COD) Float Limit Breaches
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Couriers holding unremitted cash above PKR 15,000 threshold. Automatic dispatch is blocked until cash deposit is reconciled.
+                    Riders holding unremitted cash above PKR 15,000 threshold. Automatic dispatch is blocked until cash deposit is reconciled.
                   </p>
                 </div>
               </div>

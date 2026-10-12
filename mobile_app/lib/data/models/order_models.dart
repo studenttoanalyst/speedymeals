@@ -365,14 +365,17 @@ RouteDetail? _routeOrNull(Object? value) {
 class PlaceOrderRequest {
   final String addressId;
   final PaymentMethod paymentMethod;
+  final double? expectedTotal;
 
   const PlaceOrderRequest({
     required this.addressId,
     required this.paymentMethod,
+    this.expectedTotal,
   });
 
   Map<String, dynamic> toJson() => {
         'address_id': addressId,
         'payment_method': paymentMethod.wireValue,
+        if (expectedTotal != null) 'expected_total': expectedTotal,
       };
 }

@@ -21,6 +21,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
+from app.modules.food_delivery import order_notifications
 from app.modules.food_delivery.models import Order, Restaurant
 from app.platform.users.models import User
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, Settlement
@@ -246,15 +247,26 @@ def update_rider_approval(db: Session, rider_id: uuid.UUID, approval_status: str
     return rider
 
 
-def set_rider_status(db: Session, rider_id: uuid.UUID, is_active: bool) -> Rider:
+def set_rider_status(
+    db: Session,
+    rider_id: uuid.UUID,
+    is_active: bool | None = None,
+    is_online: bool | None = None,
+) -> Rider:
     """PATCH /admin/riders/{id}/status — deactivate for fraud/repeated
-    violations (spec Sec 6, Sec 10 Step 4). Deactivating also forces the
-    rider offline so they stop receiving new assignments immediately,
-    mirroring the same is_online=false path set_online_status() uses."""
+    violations (spec Sec 6, Sec 10 Step 4) or toggle online/offline dispatch status."""
     rider = _get_rider_or_404(db, rider_id)
-    rider.is_active = is_active
-    if not is_active:
-        rider.is_online = False
+    if is_active is not None:
+        rider.is_active = is_active
+        if not is_active:
+            rider.is_online = False
+    if is_online is not None:
+        if is_online and not rider.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot put a deactivated rider online. Activate account first.",
+            )
+        rider.is_online = is_online
     db.commit()
     db.refresh(rider)
     return rider
@@ -394,6 +406,7 @@ def cancel_order(db: Session, order_id: uuid.UUID, reason: str) -> dict:
     order.cancellation_reason = reason
     order.cancelled_by = "admin"
     db.commit()
+    order_notifications.notify_order_cancelled(db, order)
     return get_order(db, order_id)
 
 
@@ -421,7 +434,9 @@ def reassign_order_rider(db: Session, order_id: uuid.UUID, rider_id: uuid.UUID) 
     order.rider_id = rider.id
     if order.status in {"Ready for Pickup", "Rejected"}:
         order.status = "Rider Assigned"
+    order.rider_assigned_at = datetime.now(timezone.utc)
     db.commit()
+    order_notifications.notify_rider_assigned(db, order)
     return get_order(db, order_id)
 
 
@@ -463,7 +478,12 @@ def generate_settlements(db: Session, period_start: date, period_end: date) -> l
     rows = (
         db.query(
             Order.restaurant_id,
-            func.coalesce(func.sum(Order.food_subtotal), 0),
+            # Gross food collected incl. GST: net + gst (legacy rows with
+            # null GST columns fall back to food_subtotal), so
+            # total_sales - commission == net_payable holds.
+            func.coalesce(
+                func.sum(func.coalesce(Order.net_subtotal + Order.gst_amount, Order.food_subtotal)), 0
+            ),
             func.coalesce(func.sum(Order.commission_amount), 0),
             func.coalesce(func.sum(Order.restaurant_payable), 0),
         )

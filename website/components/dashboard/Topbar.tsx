@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ArrowClockwise, WifiHigh, WifiSlash } from '@phosphor-icons/react';
+import { PushAlertsButton } from './PushAlertsButton';
 
 export interface TopbarProps {
   title: string;
@@ -51,6 +52,9 @@ export function Topbar({
       </div>
 
       <div className="flex items-center gap-3 print:hidden">
+        {/* Push alerts (FCM): hidden when unsupported or not configured */}
+        <PushAlertsButton />
+
         {/* Backend API Live Indicator */}
         <button
           type="button"
