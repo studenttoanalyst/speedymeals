@@ -3,6 +3,9 @@ App entry point. Run with:
     uvicorn app.main:app --reload
 (run this command from inside backend/ folder, not backend/app/)
 """
+import logging
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,7 +27,7 @@ from app.modules.food_delivery.routes import (
     router as menu_router,
 )
 
-import os
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="SpeedyMeals API", version="0.1.0")
 
@@ -78,6 +81,34 @@ def seed_first_admin_on_startup() -> None:
     exists during a request) so this runs once, cleanly, before the app
     starts accepting traffic.
     """
+    # ── SMS configuration banner ──────────────────────────────────────────────
+    # Logged at every startup so `journalctl -u speedymeals` immediately shows
+    # which SMS mode is active and whether the env file was picked up.
+    # If you see 'console' here after setting SMS_MODE=sendpk in .env, a
+    # system-level environment variable is overriding the .env file.
+    from app.core.config import ENV_FILE_PATH
+    sms_mode = settings.effective_sms_mode
+    api_key_present = bool(settings.SENDPK_API_KEY)
+    env_file_exists = ENV_FILE_PATH.exists()
+    logger.info(
+        "[CONFIG] SMS_MODE=%s | SENDPK_API_KEY present=%s | "
+        "env_file=%s (exists=%s) | OS SMS_MODE override=%s",
+        sms_mode,
+        api_key_present,
+        ENV_FILE_PATH,
+        env_file_exists,
+        os.environ.get("SMS_MODE", "<not set in OS env>"),
+    )
+    if sms_mode == "console":
+        logger.warning(
+            "[CONFIG] SMS is running in CONSOLE mode — OTPs will NOT be dispatched "
+            "via SendPK. Set SMS_MODE=sendpk in the .env file and ensure no "
+            "system-level SMS_MODE environment variable is overriding it."
+        )
+    else:
+        logger.info("[CONFIG] SMS gateway: SendPK live dispatch ACTIVE.")
+    # ─────────────────────────────────────────────────────────────────────────
+
     db = SessionLocal()
     try:
         auth_service.seed_first_admin(db)

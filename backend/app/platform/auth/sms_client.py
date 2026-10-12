@@ -4,6 +4,7 @@ Provides unified sync and async interfaces to dispatch SMS messages (e.g. OTP co
 via SendPK's HTTP API, with local console logging mode for development/testing.
 Never logs raw OTP codes or API keys to production logs.
 """
+import json
 import logging
 from typing import Any
 from fastapi import status
@@ -102,35 +103,66 @@ def _parse_sendpk_response(response: httpx.Response, phone_number: str) -> dict[
     """
     Parses SendPK API response and raises SMSGatewayError on error codes or failures.
     SendPK responds with JSON or plain text like 'OK ID:29346' or error codes '1'-'9'.
+
+    BUG FIX 1: The original code used `except ValueError: pass` which silently
+    swallowed ALL exceptions raised inside the try block — including SMSGatewayError
+    raised by the error-code checks. This meant gateway rejections (codes 1-9) were
+    caught and discarded, then the function fell through to the plain-text path and
+    returned {"status": "success"} even on hard API errors.
+    Fixed: narrow the except to `json.JSONDecodeError` only, so only a genuine
+    JSON-parse failure is caught; all other exceptions propagate normally.
+
+    BUG FIX 2: Unexpected/unrecognised responses (neither OK nor a known error code)
+    were previously logged as a warning but still returned {"status": "success"}.
+    This masked real delivery failures. Fixed: raise SMSGatewayError so the caller
+    (service.py) triggers the Redis rollback and returns 503 to the mobile app.
     """
     masked_phone = mask_phone_number(phone_number)
+
+    # --- Post-response diagnostic log (Fix 3 / logging improvement) ---
+    # Always log the raw HTTP status and full response body BEFORE any parsing,
+    # so `journalctl -u speedymeals` shows exactly what SendPK returned even if
+    # the subsequent parse logic misidentifies it.
+    logger.info(
+        "[SMS-SENDPK] Raw response from gateway | HTTP %s | body: %r",
+        response.status_code,
+        response.text[:500],   # cap at 500 chars to avoid flooding logs
+    )
 
     if response.is_error:
         error_msg = f"SendPK returned HTTP {response.status_code}: {response.text.strip()}"
         logger.error(f"[SMS-SENDPK] HTTP error delivering to {masked_phone}: {error_msg}")
         raise SMSGatewayError(error_msg, status_code=status.HTTP_502_BAD_GATEWAY)
 
-    # Attempt to parse as JSON first
+    # Attempt to parse as JSON first.
+    # IMPORTANT: only catch json.JSONDecodeError (response is not JSON), NOT all
+    # exceptions. The original broad `except ValueError: pass` would swallow
+    # SMSGatewayError raised inside this block, turning rejections into false successes.
+    # Attempt to parse as JSON first.
+    # Only catch JSON decode errors from response.json(); any SMSGatewayError raised
+    # during dictionary validation propagates directly.
+    data = None
     try:
         data = response.json()
-        if isinstance(data, dict):
-            status_val = str(data.get("code") or data.get("status") or data.get("response") or "").strip()
-            if status_val in SENDPK_ERROR_CODES:
-                desc = SENDPK_ERROR_CODES[status_val]
-                logger.error(f"[SMS-SENDPK] SendPK error code {status_val} for {masked_phone}: {desc}")
-                raise SMSGatewayError(f"SendPK rejected SMS: {desc}")
-
-            if data.get("error") or data.get("status") == "error":
-                msg = str(data.get("message") or data.get("detail") or "Gateway reported error")
-                logger.error(f"[SMS-SENDPK] SendPK error for {masked_phone}: {msg}")
-                raise SMSGatewayError(f"SendPK error: {msg}")
-
-            logger.info(f"[SMS-SENDPK] Successfully dispatched SMS to {masked_phone}")
-            return data
-    except ValueError:
+    except (ValueError, json.JSONDecodeError):
         pass
 
-    # Process plain text response
+    if isinstance(data, dict):
+        status_val = str(data.get("code") or data.get("status") or data.get("response") or "").strip()
+        if status_val in SENDPK_ERROR_CODES:
+            desc = SENDPK_ERROR_CODES[status_val]
+            logger.error(f"[SMS-SENDPK] SendPK error code {status_val} for {masked_phone}: {desc}")
+            raise SMSGatewayError(f"SendPK rejected SMS: {desc}")
+
+        if data.get("error") or data.get("status") == "error":
+            msg = str(data.get("message") or data.get("detail") or "Gateway reported error")
+            logger.error(f"[SMS-SENDPK] SendPK error for {masked_phone}: {msg}")
+            raise SMSGatewayError(f"SendPK error: {msg}")
+
+        logger.info(f"[SMS-SENDPK] Successfully dispatched SMS to {masked_phone}")
+        return data
+
+    # Process plain text response (e.g. "OK ID:29346" or error code "1"–"9").
     raw_text = response.text.strip()
     if raw_text in SENDPK_ERROR_CODES:
         desc = SENDPK_ERROR_CODES[raw_text]
@@ -141,13 +173,28 @@ def _parse_sendpk_response(response: httpx.Response, phone_number: str) -> dict[
         logger.info(f"[SMS-SENDPK] Successfully dispatched SMS to {masked_phone} (Response: {raw_text})")
         return {"status": "success", "response": raw_text}
 
-    logger.warning(f"[SMS-SENDPK] Unexpected response from SendPK for {masked_phone}: {raw_text}")
-    return {"status": "success", "raw_response": raw_text}
+    # BUG FIX 2: Unrecognised response — do NOT silently claim success.
+    # Previously this logged a warning but returned {"status": "success"}, hiding
+    # real failures from the caller. Now we raise so service.py can roll back Redis
+    # keys and return a proper 503 to the mobile app.
+    logger.error(
+        "[SMS-SENDPK] Unrecognised response from SendPK for %s — treating as failure. "
+        "Raw body: %r",
+        masked_phone,
+        raw_text[:300],
+    )
+    raise SMSGatewayError(
+        f"SendPK returned an unrecognised response: {raw_text[:100]!r}. "
+        "Check SendPK dashboard and journalctl logs for details.",
+        status_code=status.HTTP_502_BAD_GATEWAY,
+    )
 
 
 def _build_sendpk_payload(phone_number: str, message: str) -> tuple[str, dict[str, str]]:
     """
     Validates configuration and prepares parameters for SendPK API call.
+    Also emits a pre-request diagnostic log so every outbound attempt is
+    visible in journalctl regardless of what happens next.
     """
     if not settings.SENDPK_API_KEY:
         raise SMSGatewayError(
@@ -169,6 +216,21 @@ def _build_sendpk_payload(phone_number: str, message: str) -> tuple[str, dict[st
         "message": message,
         "format": "json",
     }
+
+    # --- Pre-request diagnostic log (Fix 3 / logging improvement) ---
+    # Log everything needed to reproduce the call manually with curl, without
+    # exposing the full API key (show only the last 8 chars as a fingerprint).
+    api_key_tail = settings.SENDPK_API_KEY[-8:] if len(settings.SENDPK_API_KEY) >= 8 else "***"
+    logger.info(
+        "[SMS-SENDPK] Dispatching SMS | url=%s | mobile=%s | sender=%s | "
+        "msg_len=%d | api_key=...%s",
+        settings.SENDPK_API_URL,
+        normalized_phone,
+        settings.SENDPK_SENDER_ID,
+        len(message),
+        api_key_tail,
+    )
+
     return settings.SENDPK_API_URL, payload
 
 
@@ -188,6 +250,8 @@ def send_sms_via_sendpk(phone_number: str, message: str) -> dict[str, Any]:
         with httpx.Client(timeout=REQUEST_TIMEOUT_SECONDS) as client:
             response = client.post(url, data=payload)
             return _parse_sendpk_response(response, phone_number)
+    except SMSGatewayError:
+        raise  # already logged inside _parse_sendpk_response; re-raise cleanly
     except httpx.TimeoutException as exc:
         logger.error(f"[SMS-SENDPK] Timeout contacting SendPK for {masked}: {exc}")
         raise SMSGatewayError("SendPK SMS gateway timed out.") from exc
@@ -212,6 +276,8 @@ async def send_sms_via_sendpk_async(phone_number: str, message: str) -> dict[str
         async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS) as client:
             response = await client.post(url, data=payload)
             return _parse_sendpk_response(response, phone_number)
+    except SMSGatewayError:
+        raise  # already logged inside _parse_sendpk_response; re-raise cleanly
     except httpx.TimeoutException as exc:
         logger.error(f"[SMS-SENDPK] Timeout contacting SendPK for {masked}: {exc}")
         raise SMSGatewayError("SendPK SMS gateway timed out.") from exc

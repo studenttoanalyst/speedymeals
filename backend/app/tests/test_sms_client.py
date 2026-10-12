@@ -181,3 +181,44 @@ def test_sendpk_http_status_error(monkeypatch):
         with pytest.raises(SMSGatewayError) as exc_info:
             send_sms_via_sendpk("+923001234567", "Your code is 123456")
         assert "HTTP 502" in str(exc_info.value)
+
+
+def test_sendpk_unrecognised_response_raises_error(monkeypatch):
+    # BUG FIX 2 regression test: an unrecognised non-OK response must raise
+    # SMSGatewayError, NOT silently return success. Previously the code returned
+    # success for any response that was not a known error code and did not
+    # start with 'OK', hiding real delivery failures from the application layer.
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.is_error = False
+    mock_response.status_code = 200
+    mock_response.json.side_effect = ValueError("Not JSON")
+    mock_response.text = "SOME_UNEXPECTED_GATEWAY_RESPONSE"
+
+    with patch("httpx.Client.post", return_value=mock_response):
+        with pytest.raises(SMSGatewayError) as exc_info:
+            send_sms_via_sendpk("+923001234567", "Your code is 123456")
+        assert "unrecognised response" in str(exc_info.value).lower()
+
+
+def test_sendpk_json_error_code_not_swallowed(monkeypatch):
+    # BUG FIX 1 regression test: SMSGatewayError raised inside the JSON parse
+    # block must NOT be swallowed. Narrowing the except to json.JSONDecodeError
+    # ensures only genuine parse failures are silenced, and known error codes
+    # always propagate correctly to the caller.
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+
+    # JSON body with error code '4' = Sender ID not registered with PTA
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.is_error = False
+    mock_response.status_code = 200
+    mock_response.text = '{"code": "4"}'
+    mock_response.json.return_value = {"code": "4"}
+
+    with patch("httpx.Client.post", return_value=mock_response):
+        with pytest.raises(SMSGatewayError) as exc_info:
+            send_sms_via_sendpk("+923001234567", "Your code is 123456")
+        assert "Sender ID" in str(exc_info.value)
