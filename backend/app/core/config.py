@@ -101,6 +101,7 @@ class Settings(BaseSettings):
     SENDPK_API_URL: str = "https://sendpk.com/api/sms.php"
     SENDPK_API_KEY: str = ""
     SENDPK_SENDER_ID: str = "SpeedyMeals"
+    SENDPK_TEMPLATE_ID: str = ""
     OTP_TEMPLATE: str = "Your SpeedyMeals OTP code is #code#"
 
     @property

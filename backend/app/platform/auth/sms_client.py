@@ -6,6 +6,7 @@ Never logs raw OTP codes or API keys to production logs.
 """
 import json
 import logging
+import re
 from typing import Any
 from fastapi import status
 import httpx
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 REQUEST_TIMEOUT_SECONDS: float = 10.0
 
 SENDPK_ERROR_CODES: dict[str, str] = {
+    "-4": "Fixed-SMS Template error (Invalid JSON Data or Template ID missing - see https://sendpk.com/blog/fixed-sms-api)",
     "1": "Invalid or disabled API Key",
     "2": "Username/API Key parameter is missing",
     "3": "Password/Authentication parameter is missing",
@@ -205,7 +207,9 @@ def _parse_sendpk_response(response: httpx.Response, phone_number: str) -> dict[
 
 def _build_sendpk_payload(phone_number: str, message: str) -> tuple[str, dict[str, str]]:
     """
-    Validates configuration and prepares parameters for SendPK API call.
+    Validates configuration and prepares form-urlencoded parameters for SendPK API call.
+    If SENDPK_TEMPLATE_ID is configured, passes template_id and ensures message is formatted
+    as a valid JSON string of template variables for PTA Fixed-SMS compliance.
     """
     if not settings.SENDPK_API_KEY:
         raise SMSGatewayError(
@@ -220,13 +224,35 @@ def _build_sendpk_payload(phone_number: str, message: str) -> tuple[str, dict[st
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    payload = {
+    outbound_message = message
+    template_id = getattr(settings, "SENDPK_TEMPLATE_ID", "").strip()
+
+    # For accounts enforcing SendPK Fixed-SMS templates (PTA OTP compliance),
+    # the message parameter must be a valid JSON string mapping variable keys (e.g. {"code":"123456"})
+    if template_id:
+        is_already_json = False
+        try:
+            parsed = json.loads(message)
+            if isinstance(parsed, dict):
+                is_already_json = True
+        except (ValueError, json.JSONDecodeError):
+            pass
+
+        if not is_already_json:
+            code_match = re.search(r'\b\d{4,8}\b', message)
+            code_val = code_match.group(0) if code_match else message
+            outbound_message = json.dumps({"code": code_val, "pin": code_val, "otp": code_val})
+
+    payload: dict[str, str] = {
         "api_key": settings.SENDPK_API_KEY,
         "sender": settings.SENDPK_SENDER_ID,
         "mobile": normalized_phone,
-        "message": message,
+        "message": outbound_message,
         "format": "json",
     }
+    if template_id:
+        payload["template_id"] = template_id
+
     return settings.SENDPK_API_URL, payload
 
 
@@ -240,6 +266,7 @@ def _get_safe_debug_payload(url: str, payload: dict[str, str], phone_number: str
         "mobile": mask_phone_number(phone_number),
         "message_preview": f"{message[:35]}... (length={len(message)})",
         "format": payload.get("format"),
+        "template_id": payload.get("template_id"),
     }
 
 
@@ -247,7 +274,7 @@ def send_sms_via_sendpk(phone_number: str, message: str) -> dict[str, Any]:
     """
     Synchronous SendPK SMS dispatcher.
     If settings.effective_sms_mode is 'console', logs to console without calling the API.
-    Otherwise, sends an HTTP POST request to the SendPK gateway.
+    Otherwise, sends an HTTP POST request with form-urlencoded data to the SendPK gateway.
     """
     active_mode = settings.effective_sms_mode
     masked = mask_phone_number(phone_number)
@@ -267,9 +294,11 @@ def send_sms_via_sendpk(phone_number: str, message: str) -> dict[str, Any]:
     logger.info(f"[SMS-SENDPK] Outbound POST to {url} | Params: {safe_info}")
     print(f"[SMS-SENDPK] >>> Outbound POST to {url} | Params: {safe_info}", flush=True)
 
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
     try:
         with httpx.Client(timeout=REQUEST_TIMEOUT_SECONDS) as client:
-            response = client.post(url, data=payload)
+            response = client.post(url, data=payload, headers=headers)
             print(
                 f"[SMS-SENDPK] <<< Response: HTTP {response.status_code} | Body: {response.text[:500]!r}",
                 flush=True,
@@ -294,6 +323,7 @@ async def send_sms_via_sendpk_async(phone_number: str, message: str) -> dict[str
     Asynchronous SendPK SMS dispatcher using httpx.AsyncClient to keep FastAPI
     event loop unblocked.
     If settings.effective_sms_mode is 'console', logs to console without calling the API.
+    Otherwise, sends an HTTP POST request with form-urlencoded data to the SendPK gateway.
     """
     active_mode = settings.effective_sms_mode
     masked = mask_phone_number(phone_number)
@@ -313,9 +343,11 @@ async def send_sms_via_sendpk_async(phone_number: str, message: str) -> dict[str
     logger.info(f"[SMS-SENDPK] Outbound POST to {url} | Params: {safe_info}")
     print(f"[SMS-SENDPK] >>> Outbound POST to {url} | Params: {safe_info}", flush=True)
 
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
     try:
         async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS) as client:
-            response = await client.post(url, data=payload)
+            response = await client.post(url, data=payload, headers=headers)
             print(
                 f"[SMS-SENDPK] <<< Response: HTTP {response.status_code} | Body: {response.text[:500]!r}",
                 flush=True,

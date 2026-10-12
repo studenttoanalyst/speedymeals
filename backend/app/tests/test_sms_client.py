@@ -65,6 +65,7 @@ def test_sendpk_sync_success_json(monkeypatch):
     monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
     monkeypatch.setattr(settings, "SENDPK_SENDER_ID", "SpeedyMeals")
     monkeypatch.setattr(settings, "SENDPK_API_URL", "https://sendpk.com/api/sms.php")
+    monkeypatch.setattr(settings, "SENDPK_TEMPLATE_ID", "")
 
     mock_response = MagicMock(spec=httpx.Response)
     mock_response.is_error = False
@@ -83,11 +84,13 @@ def test_sendpk_sync_success_json(monkeypatch):
         assert kwargs["data"]["mobile"] == "923001234567"
         assert kwargs["data"]["sender"] == "SpeedyMeals"
         assert kwargs["data"]["message"] == "Your SpeedyMeals OTP code is 123456"
+        assert kwargs["headers"]["Content-Type"] == "application/x-www-form-urlencoded"
 
 
 def test_sendpk_sync_success_text(monkeypatch):
     monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
     monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+    monkeypatch.setattr(settings, "SENDPK_TEMPLATE_ID", "")
 
     mock_response = MagicMock(spec=httpx.Response)
     mock_response.is_error = False
@@ -105,6 +108,7 @@ def test_sendpk_sync_success_text(monkeypatch):
 async def test_sendpk_async_success(monkeypatch):
     monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
     monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+    monkeypatch.setattr(settings, "SENDPK_TEMPLATE_ID", "")
 
     mock_response = MagicMock(spec=httpx.Response)
     mock_response.is_error = False
@@ -249,3 +253,46 @@ def test_sendpk_plain_text_colon_delimited_error(monkeypatch):
         with pytest.raises(SMSGatewayError) as exc_info:
             send_sms_via_sendpk("+923001234567", "Your code is 123456")
         assert "Invalid Username Or Password" in str(exc_info.value)
+
+
+def test_sendpk_template_id_payload_formatting(monkeypatch):
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+    monkeypatch.setattr(settings, "SENDPK_SENDER_ID", "SpeedyMeals")
+    monkeypatch.setattr(settings, "SENDPK_TEMPLATE_ID", "98765")
+
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.is_error = False
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"success": "true", "results": [{"id": "1"}]}
+
+    with patch("httpx.Client.post", return_value=mock_response) as mock_post:
+        res = send_sms_via_sendpk("+923001234567", "Your code is 654321")
+        assert res["success"] == "true"
+
+        mock_post.assert_called_once()
+        _, kwargs = mock_post.call_args
+        assert kwargs["data"]["template_id"] == "98765"
+        assert kwargs["headers"]["Content-Type"] == "application/x-www-form-urlencoded"
+        import json
+        vars_dict = json.loads(kwargs["data"]["message"])
+        assert vars_dict["code"] == "654321"
+
+
+def test_sendpk_json_invalid_json_data_error_handled(monkeypatch):
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.is_error = False
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "success": "false",
+        "results": [{"status": "-4", "error": "Inavlid JSON Data! Please Provide A Valid JSON Data!"}],
+    }
+    mock_response.text = '{"success":"false","results":[{"status":"-4","error":"Inavlid JSON Data! Please Provide A Valid JSON Data!"}]}'
+
+    with patch("httpx.Client.post", return_value=mock_response):
+        with pytest.raises(SMSGatewayError) as exc_info:
+            send_sms_via_sendpk("+923001234567", "Your code is 123456")
+        assert "Inavlid JSON Data" in str(exc_info.value)
