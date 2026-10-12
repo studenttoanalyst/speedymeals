@@ -5,6 +5,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/models/user_models.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../features/address/address.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// Manage the customer's saved delivery addresses
 /// (`GET/POST/PUT/DELETE /users/me/addresses`).
@@ -173,7 +174,7 @@ class _SavedAddressesScreenState extends State<SavedAddressesScreen> {
 
   Widget _buildBody(ThemeData theme) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const AddressListSkeleton();
     }
 
     final failure = _error;

@@ -715,7 +715,7 @@
           "clauses": [
             {
               "num": "D4.1",
-              "text": "A Rider receives 100% of the Delivery Fee for each completed delivery. Speedy Meals takes no share of it."
+              "text": "A Rider receives 90% of the Delivery Fee for each completed delivery under a transparent 10% platform commission retained by Speedy Meals."
             },
             {
               "num": "D4.2",
@@ -891,7 +891,7 @@
           "clauses": [
             {
               "num": "E3.1",
-              "text": "Speedy Meals charges a commission of 10% of the Food Subtotal of each completed Order (or the rate agreed in the individual partnership agreement). The Delivery Fee is not commissionable and belongs to the Rider."
+              "text": "Speedy Meals charges a transparent commission of 10% of the Food Subtotal of each completed Order (or the rate agreed in the individual partnership agreement). On deliveries, couriers retain 90% of the Delivery Fee subject to a 10% platform commission."
             },
             {
               "num": "E3.2",
@@ -975,7 +975,7 @@
       },
       {
         "item": "Rider share of Delivery Fee",
-        "value": "100%"
+        "value": "90% (10% platform commission)"
       },
       {
         "item": "Rider Wallet - minimum first recharge",

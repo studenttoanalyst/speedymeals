@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'motion/react';
 import {
   Receipt,
   Clock,
@@ -235,29 +236,31 @@ export default function RestaurantOrdersPage() {
             </button>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center p-0.5 rounded-lg border border-slate-200 bg-white">
-              <button
-                onClick={() => setViewMode('kanban')}
-                className={`p-1.5 rounded-md text-xs transition-colors cursor-pointer ${
-                  viewMode === 'kanban'
-                    ? 'bg-slate-900 text-white font-semibold'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-                title="Kanban Board View"
-              >
-                <SquaresFour size={16} weight="bold" />
-              </button>
-              <button
-                onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-md text-xs transition-colors cursor-pointer ${
-                  viewMode === 'table'
-                    ? 'bg-slate-900 text-white font-semibold'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-                title="Dense List View"
-              >
-                <ListDashes size={16} weight="bold" />
-              </button>
+            <div className="relative flex items-center p-0.5 rounded-lg border border-slate-200 bg-white shadow-2xs">
+              {(['kanban', 'table'] as const).map((mode) => {
+                const isActive = viewMode === mode;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className="relative p-1.5 rounded-md text-xs transition-colors cursor-pointer active:scale-95 select-none"
+                    title={mode === 'kanban' ? 'Kanban Board View' : 'Dense List View'}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="orders-viewmode-pill"
+                        className="absolute inset-0 rounded-md bg-slate-900 shadow-xs"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    <span className={`relative z-10 flex items-center justify-center ${
+                      isActive ? 'text-white' : 'text-slate-500 hover:text-slate-800'
+                    }`}>
+                      {mode === 'kanban' ? <SquaresFour size={16} weight="bold" /> : <ListDashes size={16} weight="bold" />}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         }

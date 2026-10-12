@@ -43,7 +43,7 @@ export function Topbar({
   }, [checkHealth]);
 
   return (
-    <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between sticky top-0 z-20 shadow-2xs print:hidden">
+    <header className="h-16 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl saturate-180 px-6 flex items-center justify-between sticky top-0 z-20 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] print:hidden">
       <div>
         <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
           {title}
@@ -56,7 +56,7 @@ export function Topbar({
           type="button"
           onClick={() => checkHealth()}
           title="Click to recheck server connection"
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-medium text-slate-600 transition-colors cursor-pointer"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-medium text-slate-600 transition-all duration-100 cursor-pointer active:scale-95 select-none"
         >
           {backendStatus === 'connected' ? (
             <>
@@ -84,7 +84,7 @@ export function Topbar({
             }}
             disabled={isRefreshing}
             title="Refresh Data"
-            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-40 cursor-pointer"
+            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-100 disabled:opacity-40 cursor-pointer active:scale-90 select-none"
           >
             <ArrowClockwise size={15} weight="bold" className={isRefreshing ? 'animate-spin text-slate-700' : ''} />
           </button>
@@ -93,7 +93,7 @@ export function Topbar({
             type="button"
             onClick={() => checkHealth()}
             title="Recheck Server Connection"
-            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-100 cursor-pointer active:scale-90 select-none"
           >
             <ArrowClockwise size={15} weight="bold" />
           </button>

@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           <div className="col-span-1 lg:col-span-4 space-y-4">
             <div className="flex items-center space-x-2.5 sm:space-x-3">
               <img
-                src="/favicon.jpeg"
+                src="/favicon.webp"
                 alt="SpeedyMeals Logo"
                 className="h-8 sm:h-9 md:h-10 w-auto object-contain shrink-0"
               />
@@ -69,7 +69,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               </span>
             </div>
 
-            <div className="font-mono text-xs text-blue font-semibold tracking-wide flex items-center space-x-2">
+            <div className="font-sans text-xs text-blue font-semibold tracking-wide flex items-center space-x-2">
               <span className="inline-block w-1.5 h-1.5 bg-blue" />
               <span>&ldquo;Fast &amp; safe to you.&rdquo;</span>
             </div>
@@ -84,10 +84,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           <div className="col-span-1 lg:col-span-5 grid grid-cols-2 gap-6 sm:gap-8">
             {/* Col 2A: Company */}
             <div className="space-y-4">
-              <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+              <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
                 COMPANY
               </div>
-              <ul className="space-y-2.5 text-xs font-mono">
+              <ul className="space-y-2.5 text-xs font-sans">
                 <li>
                   <button
                     type="button"
@@ -138,10 +138,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
 
             {/* Col 2B: Get Started */}
             <div className="space-y-4">
-              <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+              <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
                 GET STARTED
               </div>
-              <ul className="space-y-2.5 text-xs font-mono">
+              <ul className="space-y-2.5 text-xs font-sans">
                 <li>
                   <button
                     type="button"
@@ -149,7 +149,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                     className="text-[#A0A4AB] hover:text-red transition-colors cursor-pointer flex items-center space-x-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-red inline-block" />
-                    <span>Ride with Us</span>
+                    <span>Deliver with SpeedyMeals</span>
                   </button>
                 </li>
                 <li>
@@ -159,14 +159,14 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                     className="text-[#A0A4AB] hover:text-blue transition-colors cursor-pointer flex items-center space-x-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-blue inline-block" />
-                    <span>Partner Restaurant</span>
+                    <span>List your restaurant</span>
                   </button>
                 </li>
                 <li>
                   <div className="text-[#5B5F66] flex items-center space-x-1.5 cursor-not-allowed">
                     <span className="w-1.5 h-1.5 bg-[#5B5F66] inline-block" />
                     <span>Customer App</span>
-                    <span className="text-[9px] text-amber-500 font-bold ml-1 font-mono tracking-wider">
+                    <span className="text-[10px] text-amber-500 font-bold ml-1 font-sans tracking-wide">
                       ⋯ COMING SOON
                     </span>
                   </div>
@@ -197,10 +197,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
 
           {/* Section 3: Contact (Below on mobile, 3 cols on desktop) */}
           <div className="col-span-1 lg:col-span-3 space-y-4">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold">
+            <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
               CONTACT
             </div>
-            <div className="space-y-2 text-xs font-mono">
+            <div className="space-y-2 text-xs font-sans">
               <div className="text-[#A0A4AB]">Serving South Asia &amp; the Middle East</div>
               <div>
                 <a
@@ -290,7 +290,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         </div>
 
         {/* Regulatory Registration Section: Sleek black hollowed boxes */}
-        <div className="py-6 border-b border-[#2D3139] flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-[#A0A4AB]">
+        <div className="py-6 border-b border-[#2D3139] flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#A0A4AB]">
           <div className="flex items-center space-x-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
@@ -305,7 +305,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             {/* Pakistan Post */}
             <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
               <img
-                src="/assets/pakistan-post.png"
+                src="/assets/pakistan-post.webp"
                 alt="Pakistan Post"
                 className="h-8 sm:h-9 md:h-10 w-auto object-contain"
               />
@@ -314,7 +314,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             {/* SECP */}
             <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
               <img
-                src="/assets/rw/SECP_logo.png"
+                src="/assets/rw/SECP_logo.webp"
                 alt="Securities and Exchange Commission of Pakistan (SECP)"
                 className="h-9 sm:h-10 md:h-11 w-auto object-contain"
               />
@@ -323,7 +323,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
             {/* FBR */}
             <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
               <img
-                src="/assets/rw/fbr-logo.png"
+                src="/assets/rw/fbr-logo.webp"
                 alt="Federal Board of Revenue (FBR)"
                 className="h-9 sm:h-10 md:h-11 w-auto object-contain"
               />
@@ -332,7 +332,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         </div>
 
         {/* Bottom bar (hairline top-border) */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-[#5B5F66]">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#5B5F66]">
           <div>&copy; 2026 DiscoverTheTech. All rights reserved.</div>
           <div className="flex items-center space-x-4">
             <Link href="/privacy" className="hover:underline hover:text-[#A0A4AB] transition-colors">

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_constants.dart' show OrderStatus;
 import '../../core/network/api_exception.dart';
 import '../../data/models/order_models.dart';
 import '../../data/repositories/order_repository.dart';
 import '../../services/cart_service.dart';
 import '../cart/cart_screen.dart';
 import '../tracking/order_tracking_screen.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// The customer's order history (`GET /orders`, newest first).
 ///
@@ -147,7 +149,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
   Widget _buildBody(ThemeData theme) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const OrderListSkeleton();
     }
 
     final failure = _error;
@@ -260,7 +262,7 @@ class _OrderHistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDelivered = order.status.isTerminal && order.status.customerLabel == 'Delivered';
+    final isDelivered = order.status == OrderStatus.delivered;
     final canReorder = isDelivered;
 
     return Card(

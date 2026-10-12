@@ -23,11 +23,11 @@ class TokenPair {
       );
 }
 
-/// Rider signup details for `POST /auth/rider/otp/verify`.
+/// Rider signup details for `POST /auth/rider/register`.
 ///
 /// Required when the phone has no rider account yet (the backend creates the
-/// `riders` row from these fields); ignored for an existing rider, where phone
-/// plus OTP alone is a valid login.
+/// `riders` row from these fields); a returning rider sends none and logs in
+/// through `POST /auth/rider/login/otp-verify` instead.
 class RiderSignupDetails {
   final String name;
   final String cnicNumber;
@@ -94,22 +94,30 @@ class AuthRepository {
 
   /// Verifies a rider's OTP.
   ///
-  /// With [signup] this is a first-time signup — the backend creates the
-  /// `riders` row with `approval_status = "pending"`. Without [signup] it is a
-  /// plain login for an already-registered rider: the backend ignores signup
-  /// fields on an existing phone, so sending none is valid.
+  /// The backend exposes two separate rider OTP endpoints:
+  ///   - `POST /auth/rider/register` — first-time signup, creates the `riders`
+  ///     row with `approval_status = "pending"` from [signup].
+  ///   - `POST /auth/rider/login/otp-verify` — plain login for an
+  ///     already-registered rider (the backend 404s an unknown phone).
+  ///
+  /// Sending both cases to the old combined `/auth/rider/otp/verify` path made
+  /// the app hit a route that no longer exists (404) on the verify step.
   Future<TokenPair> verifyRiderOtp({
     required String phoneNumber,
     required String otpCode,
     RiderSignupDetails? signup,
     String countryCode = defaultCountryCode,
   }) async {
+    final path = signup != null
+        ? '/auth/rider/register'
+        : '/auth/rider/login/otp-verify';
+
     final json = await _client.postJson(
-      '/auth/rider/otp/verify',
-      // Key names must match `RiderSignupOTPVerifySchema` exactly
-      // (backend/app/platform/auth/schemas.py). `otp_code` is stringified
-      // explicitly: Pydantic v2 does not coerce int -> str, so an int here
-      // would come back as a 422 instead of a failed-verification 400.
+      path,
+      // Key names must match `RiderRegisterSchema` / `RiderLoginOTPVerifySchema`
+      // exactly (backend/app/platform/auth/schemas.py). `otp_code` is
+      // stringified explicitly: Pydantic v2 does not coerce int -> str, so an
+      // int here would come back as a 422 instead of a failed-verification 400.
       body: {
         'phone_number': normalizeNationalNumber(phoneNumber),
         'country_code': countryCode,

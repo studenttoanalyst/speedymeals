@@ -243,7 +243,7 @@ export const mockRiderPayouts: RiderPayout[] = [
     rider_name: 'Tariq Mahmood',
     period_start: '2026-09-01',
     period_end: '2026-09-07',
-    total_earning: 14850.0, // 100% of delivery fees retained
+    total_earning: 14850.0, // 90% of delivery fees retained (10% commission split)
     cod_cash_deducted: 11200.0,
     net_payout: 3650.0,
     status: 'Paid',

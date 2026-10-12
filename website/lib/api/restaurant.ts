@@ -32,22 +32,13 @@ export async function listRestaurantMenuItems(): Promise<MenuItem[]> {
 }
 
 export async function createRestaurantMenuItem(payload: MenuItemCreatePayload): Promise<MenuItem> {
-  const fallback: MenuItem = {
-    id: `m1-${Date.now()}`,
-    restaurant_id: mockRestaurants[0].id,
-    name: payload.name,
-    description: payload.description ?? null,
-    price: payload.price,
-    category: payload.category ?? null,
-    photo_url: null,
-    variants: payload.variants ?? null,
-    is_available: payload.is_available ?? true,
-  };
-
+  // No fallbackData on writes: silently returning a fabricated item here made
+  // the portal report success while nothing reached the database (the exact
+  // reason a newly added dish never showed up in the customer app). Errors
+  // must propagate so the page can show them.
   return apiClient<MenuItem>('/restaurants/me/menu-items', {
     method: 'POST',
     body: JSON.stringify(payload),
-    fallbackData: fallback,
   });
 }
 
@@ -55,28 +46,17 @@ export async function updateRestaurantMenuItem(
   itemId: string,
   payload: MenuItemUpdatePayload
 ): Promise<MenuItem> {
-  const base = mockMenuItems.find((m) => m.id === itemId) ?? mockMenuItems[0];
-  const fallback: MenuItem = {
-    ...base,
-    name: payload.name ?? base.name,
-    price: payload.price ?? base.price,
-    description: payload.description !== undefined ? payload.description : base.description,
-    category: payload.category !== undefined ? payload.category : base.category,
-    variants: payload.variants !== undefined ? payload.variants : base.variants,
-    is_available: payload.is_available !== undefined && payload.is_available !== null ? payload.is_available : base.is_available,
-  };
-
+  // No fallbackData on writes - an update that fails must surface, not
+  // pretend to have saved.
   return apiClient<MenuItem>(`/restaurants/me/menu-items/${itemId}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
-    fallbackData: fallback,
   });
 }
 
 export async function deleteRestaurantMenuItem(itemId: string): Promise<void> {
   return apiClient<void>(`/restaurants/me/menu-items/${itemId}`, {
     method: 'DELETE',
-    fallbackData: undefined,
   });
 }
 
@@ -84,16 +64,11 @@ export async function setRestaurantMenuItemAvailability(
   itemId: string,
   payload: MenuItemAvailabilityPayload
 ): Promise<MenuItem> {
-  const base = mockMenuItems.find((m) => m.id === itemId) ?? mockMenuItems[0];
-  const fallback: MenuItem = {
-    ...base,
-    is_available: payload.is_available,
-  };
-
+  // No fallbackData on writes - the page's optimistic toggle must roll back
+  // on a real failure instead of keeping a change the server never accepted.
   return apiClient<MenuItem>(`/restaurants/me/menu-items/${itemId}/availability`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
-    fallbackData: fallback,
   });
 }
 

@@ -236,9 +236,9 @@ export default function AdminReportsPage() {
           />
 
           <StatCard
-            label="Courier Delivery Fees (100%)"
+            label="Courier Payouts (90% Retained)"
             value={formatPKR(reports?.total_rider_payouts ?? 0)}
-            subValue="Fully disbursed to couriers"
+            subValue="Disbursed to couriers"
             accent="none"
             icon={<Bicycle size={18} weight="bold" />}
             targetBenchmark="Fair-Split Guarantee"

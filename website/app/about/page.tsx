@@ -32,7 +32,7 @@ export default function AboutPage() {
       {/* Fixed Ambient Transparent SpeedyMeals Favicon Watermark (Persistent viewport-centered background watermark) */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
         <Image
-          src="/favicon.jpeg"
+          src="/favicon.webp"
           alt="SpeedyMeals Favicon Watermark"
           width={900}
           height={900}
@@ -65,13 +65,13 @@ export default function AboutPage() {
             </div>
 
             {/* Compact, responsive title: fits on one line per quote without wrapping overflow */}
-            <h1 className="font-display text-xl sm:text-2xl md:text-3xl lg:text-[38px] uppercase tracking-tight text-ink leading-tight mb-6 sm:whitespace-nowrap">
+            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-[42px] uppercase tracking-[-0.03em] text-ink leading-tight mb-6 select-none">
               ENGINEERED FOR SPEED. <br />
               <span className="text-red">ARCHITECTED FOR FAIRNESS.</span>
             </h1>
 
             <p className="font-sans text-base sm:text-lg text-ink-soft leading-relaxed max-w-3xl">
-              SpeedyMeals was founded in 2023 as a direct institutional countermeasure to predatory aggregator monopolization. We build high-velocity last-mile logistics infrastructure that guarantees fair splits for restaurant partners, 100% retained pay for couriers, and radical transparency for customers.
+              SpeedyMeals was founded in 2023 as a direct institutional countermeasure to predatory aggregator monopolization. We build high-velocity last-mile logistics infrastructure that guarantees a transparent, unified 10% commission model for both restaurant partners and couriers, and radical transparency for customers.
             </p>
           </div>
 
@@ -88,9 +88,9 @@ export default function AboutPage() {
               <div className="text-[11px] text-[#5B5F66]">Zero advertising taxes</div>
             </div>
             <div>
-              <div className="text-xs text-[#8C9099] uppercase">RIDER REMUNERATION</div>
-              <div className="text-2xl font-bold text-red mt-1">100% Retained</div>
-              <div className="text-[11px] text-[#5B5F66]">Full delivery fee payout</div>
+              <div className="text-xs text-[#8C9099] uppercase">COURIER COMMISSION</div>
+              <div className="text-2xl font-bold text-red mt-1">10% Only</div>
+              <div className="text-[11px] text-[#5B5F66]">Riders retain 90% of delivery fare</div>
             </div>
             <div>
               <div className="text-xs text-[#8C9099] uppercase">LOGISTICS ALLIANCE</div>
@@ -109,12 +109,12 @@ export default function AboutPage() {
                 <span className="w-2 h-2 bg-red inline-block" />
                 <span>FOUNDATIONAL DIRECTIVES</span>
               </div>
-              <h2 className="font-display text-xl sm:text-2xl md:text-3xl uppercase tracking-tight text-ink leading-tight">
+              <h2 className="font-heading font-extrabold text-xl sm:text-2xl md:text-3xl uppercase tracking-tight text-ink leading-tight">
                 OUR VISION &amp; MISSION
               </h2>
             </div>
 
-            <div className="font-display italic text-blue text-lg sm:text-xl tracking-tight">
+            <div className="font-heading font-bold italic text-blue text-lg sm:text-xl tracking-tight">
               Fast &amp; Safe To You
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function AboutPage() {
                   </span>
                 </div>
 
-                <h3 className="font-display text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-ink mb-4">
+                <h3 className="font-heading font-extrabold text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-ink mb-4">
                   Pakistan&apos;s Unified Multi-Service Platform
                 </h3>
 
@@ -168,7 +168,7 @@ export default function AboutPage() {
                   </span>
                 </div>
 
-                <h3 className="font-display text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-ink mb-4">
+                <h3 className="font-heading font-extrabold text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-ink mb-4">
                   Everyday Urban Life, Made Simpler &amp; Fairer
                 </h3>
 
@@ -184,7 +184,11 @@ export default function AboutPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="w-1.5 h-1.5 bg-red" />
-                  <span>100% courier fee payout with direct daily withdrawals</span>
+                  <span>Fair 10% platform commission on deliveries with weekly direct bank &amp; wallet disbursements</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="w-1.5 h-1.5 bg-red" />
+                  <span>Fair Rs. 15 platform fee with zero customer shadow menu markup</span>
                 </div>
               </div>
             </div>
@@ -198,7 +202,7 @@ export default function AboutPage() {
               <div className="font-mono text-xs uppercase tracking-widest text-red font-semibold mb-2">
                 ORIGIN &amp; MOTIVATION
               </div>
-              <h2 className="font-display text-xl sm:text-2xl md:text-3xl uppercase tracking-tight text-ink leading-tight mb-4">
+              <h2 className="font-heading font-extrabold text-xl sm:text-2xl md:text-3xl uppercase tracking-tight text-ink leading-tight mb-4">
                 WHY WE BUILT SPEEDYMEALS
               </h2>
               <p className="font-sans text-base text-ink-soft leading-relaxed mb-4">
@@ -212,43 +216,43 @@ export default function AboutPage() {
             <div className="lg:col-span-7 space-y-4">
               <div className="p-6 sm:p-8 bg-paper border border-line shadow-xs">
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-8 h-8 bg-red/10 text-red flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 bg-red/10 text-red flex items-center justify-center font-bold font-mono">
                     01
                   </div>
-                  <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
-                    The Fair-Split Promise
+                  <h3 className="font-heading font-extrabold text-lg sm:text-xl uppercase tracking-tight text-ink">
+                    The 10% Fair-Split Promise
                   </h3>
                 </div>
                 <p className="text-sm text-ink-soft font-sans leading-relaxed">
-                  We replaced variable commission scales and bidding wars with a permanent 10% flat merchant contract. Restaurants never have to pay to stay visible; our search and dispatch algorithm ranks strictly on distance, operational velocity, and customer ratings.
+                  We replaced variable 30% to 35% commission scales and predatory ad-bidding wars with a permanent 10% flat merchant contract. Restaurants never have to pay to stay visible; our search and dispatch algorithm ranks strictly on proximity, operational velocity, and customer ratings.
                 </p>
               </div>
 
               <div className="p-6 sm:p-8 bg-paper border border-line shadow-xs">
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-8 h-8 bg-blue/10 text-blue flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 bg-blue/10 text-blue flex items-center justify-center font-bold font-mono">
                     02
                   </div>
-                  <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
-                    100% Courier Dignity
+                  <h3 className="font-heading font-extrabold text-lg sm:text-xl uppercase tracking-tight text-ink">
+                    Predictable 10% Rider Commission Split
                   </h3>
                 </div>
                 <p className="text-sm text-ink-soft font-sans leading-relaxed">
-                  Every single rupee or riyal charged for delivery belongs entirely to the rider. SpeedyMeals takes zero percent from courier delivery fees, provides instant wallet withdrawal, and requires zero predatory kit purchases or upfront bond money.
+                  We replaced arbitrary deductions with a transparent 10% platform commission split. Couriers keep 90% of every customer delivery fare. With a fair Rs. 15 nominal app platform fee, a generous Rs. 5,000 cash-on-delivery (COD) float cap, automated weekly payouts to bank accounts and mobile wallets (JazzCash, EasyPaisa), and transparent distance-based earnings, riders earn with dignity, security, and predictability.
                 </p>
               </div>
 
               <div className="p-6 sm:p-8 bg-paper border border-line shadow-xs">
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-8 h-8 bg-tan/20 text-tan flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 bg-tan/20 text-tan flex items-center justify-center font-bold font-mono">
                     03
                   </div>
-                  <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
+                  <h3 className="font-heading font-extrabold text-lg sm:text-xl uppercase tracking-tight text-ink">
                     True Zero-Markup Consumer Menus
                   </h3>
                 </div>
                 <p className="text-sm text-ink-soft font-sans leading-relaxed">
-                  Consumers ordering through SpeedyMeals pay the exact same menu price found inside the physical restaurant. By abolishing inflated shadow pricing, we restore genuine trust between diners and neighborhood kitchens.
+                  Consumers ordering through SpeedyMeals pay the exact same menu price found inside the physical restaurant. By abolishing inflated shadow pricing and charging only a transparent Rs. 15 platform fee, we restore genuine trust between diners and neighborhood kitchens.
                 </p>
               </div>
             </div>
@@ -262,7 +266,7 @@ export default function AboutPage() {
               <div className="lg:col-span-4 flex flex-col items-start">
                 <div className="p-4 bg-[#1E2228] border border-[#2D3139] mb-4">
                   <Image
-                    src="/assets/pakistan-post.png"
+                    src="/assets/pakistan-post.webp"
                     alt="Pakistan Post Emblem"
                     width={80}
                     height={80}
@@ -272,7 +276,7 @@ export default function AboutPage() {
                 <div className="font-mono text-xs uppercase tracking-widest text-tan font-bold mb-1">
                   STRATEGIC ALLIANCE
                 </div>
-                <h3 className="font-display text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
+                <h3 className="font-heading font-extrabold text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
                   PARTNERED WITH PAKISTAN POST
                 </h3>
                 <p className="text-xs font-mono text-[#8C9099]">
@@ -312,7 +316,7 @@ export default function AboutPage() {
             <div className="font-mono text-xs uppercase tracking-widest text-blue font-semibold mb-2">
               VISION &amp; EXPANSION ROADMAP
             </div>
-            <h2 className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tight text-ink leading-tight mb-4">
+            <h2 className="font-heading font-extrabold text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tight text-ink leading-tight mb-4">
               OUR REGIONAL BLUEPRINT
             </h2>
             <p className="font-sans text-base text-ink-soft leading-relaxed">
@@ -326,7 +330,7 @@ export default function AboutPage() {
               <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 mb-4">
                 <div className="flex items-center space-x-2 min-w-0">
                   <span className="text-xl shrink-0">🇵🇰</span>
-                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink break-words">
+                  <span className="font-heading font-extrabold text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink break-words">
                     Pakistan Operational Grid
                   </span>
                 </div>
@@ -362,7 +366,7 @@ export default function AboutPage() {
               <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 mb-4">
                 <div className="flex items-center space-x-2 min-w-0">
                   <span className="text-xl shrink-0">🇸🇦</span>
-                  <span className="font-display text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink break-words">
+                  <span className="font-heading font-extrabold text-base sm:text-lg xl:text-xl uppercase tracking-tight text-ink break-words">
                     Kingdom of Saudi Arabia (KSA)
                   </span>
                 </div>
@@ -400,7 +404,7 @@ export default function AboutPage() {
           <div className="p-8 sm:p-10 bg-[#FAF9F5] border border-line">
             <div className="flex items-center space-x-3 mb-4">
               <Scales size={24} weight="bold" className="text-ink" />
-              <h3 className="font-display text-lg sm:text-xl uppercase tracking-tight text-ink">
+              <h3 className="font-heading font-extrabold text-lg sm:text-xl uppercase tracking-tight text-ink">
                 GOVERNANCE, INTELLECTUAL PROPERTY &amp; RIGHTS
               </h3>
             </div>
@@ -425,23 +429,23 @@ export default function AboutPage() {
               <div className="font-mono text-xs text-red uppercase tracking-widest font-bold mb-1">
                 JOIN THE REVOLUTION
               </div>
-              <h2 className="font-display text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-white">
+              <h2 className="font-heading font-extrabold text-lg sm:text-xl md:text-2xl uppercase tracking-tight text-white">
                 READY TO EXPERIENCE REAL LOGISTICS FREEDOM?
               </h2>
             </div>
             <div className="flex flex-wrap items-center gap-3 shrink-0">
               <Link
                 href="/#partner"
-                className="px-6 py-3.5 bg-red text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-red transition-colors duration-150 flex items-center space-x-2"
+                className="px-6 py-3.5 bg-red text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-red transition-all duration-150 flex items-center space-x-2 active:scale-95 select-none"
               >
-                <span>RIDE WITH US</span>
+                <span>DELIVER WITH SPEEDYMEALS</span>
                 <ArrowRight size={13} weight="bold" />
               </Link>
               <Link
                 href="/#partner"
-                className="px-6 py-3.5 bg-transparent border border-white text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-ink transition-colors duration-150 flex items-center space-x-2"
+                className="px-6 py-3.5 bg-transparent border border-white text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-white hover:text-ink transition-all duration-150 flex items-center space-x-2 active:scale-95 select-none"
               >
-                <span>PARTNER RESTAURANT</span>
+                <span>LIST YOUR RESTAURANT</span>
                 <ArrowRight size={13} weight="bold" />
               </Link>
             </div>

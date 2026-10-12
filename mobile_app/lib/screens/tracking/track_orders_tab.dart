@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_constants.dart' show OrderStatus;
 import '../../core/network/api_exception.dart';
 import '../../data/models/order_models.dart';
 import '../../data/repositories/order_repository.dart';
 import 'order_tracking_screen.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// The app's "Track" tab.
 ///
@@ -82,8 +84,15 @@ class _TrackOrdersTabState extends State<TrackOrdersTab> {
     final theme = Theme.of(context);
 
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: AppBar(
+          backgroundColor: theme.colorScheme.surface,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: const Text('Your Orders'),
+        ),
+        body: const OrderListSkeleton(),
       );
     }
 
@@ -265,7 +274,7 @@ class _OrderHistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDelivered = order.status.customerLabel == 'Delivered';
+    final isDelivered = order.status == OrderStatus.delivered;
 
     return Card(
       margin: EdgeInsets.zero,

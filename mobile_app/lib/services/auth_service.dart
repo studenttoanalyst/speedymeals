@@ -148,7 +148,8 @@ class AuthException implements Exception {
 /// Real backend flow — there is no password anywhere:
 ///
 ///     phone number -> POST /auth/otp/request -> OTP screen
-///     -> POST /auth/otp/verify (or /auth/rider/otp/verify) -> token pair
+///     -> POST /auth/otp/verify (or /auth/rider/login/otp-verify, or
+///        /auth/rider/register for a first-time rider) -> token pair
 ///     -> secure storage -> GET /users/me or GET /wallet/profile
 ///
 /// A [ChangeNotifier] singleton so the existing `AnimatedBuilder`-based screens

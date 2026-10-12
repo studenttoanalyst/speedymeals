@@ -126,7 +126,7 @@ export async function POST(request: Request) {
       ? `[${data.partnerType}] ${data.businessName}`
       : data.businessName;
 
-    const insertPayload = {
+    const insertPayload: Record<string, unknown> = {
       reference_code: data.referenceCode,
       persona_type: data.persona,
       full_name: data.fullName,

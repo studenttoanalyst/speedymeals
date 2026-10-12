@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart'
-    show AppConstants, OrderStatus;
+    show AppConstants, OrderStatus, PaymentMethod;
 import '../../core/network/api_exception.dart';
 import '../../data/json_utils.dart';
 import '../../data/models/order_models.dart';
@@ -35,8 +35,10 @@ class TrackingView {
   final String restaurantName;
   final double foodSubtotal;
   final double deliveryFee;
+  final double platformFee;
   final double deliveryDistanceKm;
   final double totalAmount;
+  final PaymentMethod paymentMethod;
 
   /// Null until a rider is assigned — the backend never sends a placeholder.
   final String? riderName;
@@ -63,8 +65,10 @@ class TrackingView {
     required this.restaurantName,
     this.foodSubtotal = 0,
     this.deliveryFee = 0,
+    this.platformFee = 0,
     this.deliveryDistanceKm = 0,
     this.totalAmount = 0,
+    this.paymentMethod = PaymentMethod.cod,
     this.riderName,
     this.riderPhone,
     this.placedAt,
@@ -87,8 +91,10 @@ class TrackingView {
         restaurantName: tracking.restaurantName,
         foodSubtotal: tracking.foodSubtotal,
         deliveryFee: tracking.deliveryFee,
+        platformFee: tracking.platformFee,
         deliveryDistanceKm: tracking.deliveryDistanceKm,
         totalAmount: tracking.totalAmount,
+        paymentMethod: tracking.paymentMethod,
         riderName: tracking.riderName,
         riderPhone: tracking.riderPhone,
         placedAt: tracking.placedAt,
@@ -152,6 +158,17 @@ class TrackingView {
     final hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute ${time.hour >= 12 ? 'PM' : 'AM'}';
+  }
+
+  /// Platform fee to show on the receipt.
+  ///
+  /// Uses the backend's `platform_fee` value when it is non-zero; otherwise
+  /// back-computes it from `total - subtotal - deliveryFee` so the receipt
+  /// always balances even if the backend omitted the field.
+  double get receiptPlatformFee {
+    if (platformFee > 0) return platformFee;
+    final computed = totalAmount - foodSubtotal - deliveryFee;
+    return computed > 0 ? computed : 0;
   }
 
   String get totalLabel => formatPkr(totalAmount);
@@ -310,7 +327,16 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
         _stopLiveLocation();
       }
 
-      if (_view != null && error.isRetryable) {
+      final view = _view;
+      if (view != null && !error.requiresReauth && view.status.isActive) {
+        _pollTimer?.cancel();
+        _pollTimer = Timer(AppConstants.orderPollInterval, _loadTracking);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      final view = _view;
+      if (view != null && view.status.isActive) {
+        _pollTimer?.cancel();
         _pollTimer = Timer(AppConstants.orderPollInterval, _loadTracking);
       }
     }
@@ -507,43 +533,47 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
                     ),
                   ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _EtaBar(
-                          pingController: _pingController,
-                          view: view,
-                        ),
-                        _MapView(
-                          riderBounceController: _riderBounceController,
-                          view: view,
-                          riderLocation: _riderLocation,
-                          isLocationUnavailable: _isLocationUnavailable,
-                        ),
-                        // Cards section — sits on top of map with negative margin
-                        Transform.translate(
-                          offset: const Offset(0, -16),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              children: [
-                                _OrderProgressCard(status: view.status),
-                                const SizedBox(height: 12),
-                                _RiderCard(
-                                  onChatTap: _openDrawer,
-                                  view: view,
-                                ),
-                                const SizedBox(height: 12),
-                                _OrderItemsCard(
-                                  onRateTap: _openDrawer,
-                                  view: view,
-                                ),
-                                const SizedBox(height: 24),
-                              ],
+                  child: RefreshIndicator(
+                    onRefresh: () => _loadTracking(),
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        children: [
+                          _EtaBar(
+                            pingController: _pingController,
+                            view: view,
+                          ),
+                          _MapView(
+                            riderBounceController: _riderBounceController,
+                            view: view,
+                            riderLocation: _riderLocation,
+                            isLocationUnavailable: _isLocationUnavailable,
+                          ),
+                          // Cards section — sits on top of map with negative margin
+                          Transform.translate(
+                            offset: const Offset(0, -16),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Column(
+                                children: [
+                                  _OrderProgressCard(status: view.status),
+                                  const SizedBox(height: 12),
+                                  _RiderCard(
+                                    onChatTap: _openDrawer,
+                                    view: view,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _OrderItemsCard(
+                                    onRateTap: _openDrawer,
+                                    view: view,
+                                  ),
+                                  const SizedBox(height: 24),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1036,23 +1066,55 @@ class _MapView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        width: 12,
-                        height: 12,
-                        child: CircularProgressIndicator(strokeWidth: 1.5),
-                      ),
-                      SizedBox(width: 6),
-                      Text(
-                        'Finding rider...',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF5C403C),
+                      if (view.status == OrderStatus.accepted) ...[
+                        const Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 13,
+                          color: Color(0xFF16A34A),
                         ),
-                      ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Order confirmed',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF16A34A),
+                          ),
+                        ),
+                      ] else if (view.status == OrderStatus.preparing) ...[
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 1.5),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Preparing food...',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF5C403C),
+                          ),
+                        ),
+                      ] else ...[
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 1.5),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Finding rider...',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF5C403C),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1212,18 +1274,55 @@ class _OrderProgressCard extends StatelessWidget {
     final String headerSubtitle;
     final IconData headerIcon;
 
-    if (isCancelled) {
-      headerTitle = 'Order cancelled';
-      headerSubtitle = 'This order has been cancelled.';
-      headerIcon = Icons.cancel_outlined;
-    } else if (isTerminal) {
-      headerTitle = 'Order delivered';
-      headerSubtitle = 'Your meal has arrived. Enjoy!';
-      headerIcon = Icons.check_circle_outline_rounded;
-    } else {
-      headerTitle = status.customerLabel;
-      headerSubtitle = 'Your order is being taken care of';
-      headerIcon = Icons.electric_moped_rounded;
+    switch (status) {
+      case OrderStatus.cancelled:
+        headerTitle = 'Order cancelled';
+        headerSubtitle = 'This order has been cancelled.';
+        headerIcon = Icons.cancel_outlined;
+      case OrderStatus.delivered:
+        headerTitle = 'Order delivered';
+        headerSubtitle = 'Your meal has arrived. Enjoy!';
+        headerIcon = Icons.check_circle_outline_rounded;
+      case OrderStatus.accepted:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'The restaurant has confirmed your order.';
+        headerIcon = Icons.receipt_long_rounded;
+      case OrderStatus.preparing:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'The kitchen is preparing your food.';
+        headerIcon = Icons.soup_kitchen_rounded;
+      case OrderStatus.readyForPickup:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'Food is ready, looking for nearby rider.';
+        headerIcon = Icons.inventory_2_rounded;
+      case OrderStatus.riderAssigned:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'A delivery rider has been assigned.';
+        headerIcon = Icons.person_pin_circle_rounded;
+      case OrderStatus.rejected:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'Assigning another nearby rider.';
+        headerIcon = Icons.sync_rounded;
+      case OrderStatus.acceptedByRider:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'Rider is on the way to the restaurant.';
+        headerIcon = Icons.directions_bike_rounded;
+      case OrderStatus.arrivedAtRestaurant:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'Rider has arrived at the restaurant.';
+        headerIcon = Icons.storefront_rounded;
+      case OrderStatus.pickedUp:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'Rider has picked up your order.';
+        headerIcon = Icons.takeout_dining_rounded;
+      case OrderStatus.onTheWay:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'Your food is on the way to you.';
+        headerIcon = Icons.delivery_dining_rounded;
+      case OrderStatus.unknown:
+        headerTitle = status.customerLabel;
+        headerSubtitle = 'Your order is being processed.';
+        headerIcon = Icons.info_outline_rounded;
     }
 
     return _CardShell(
@@ -1312,17 +1411,19 @@ class _HorizontalStepper extends StatelessWidget {
   const _HorizontalStepper({required this.activeIdx});
 
   static const _steps = [
-    {'label': 'Placed', 'icon': Icons.check_rounded},
     {'label': 'Confirmed', 'icon': Icons.check_rounded},
-    {'label': 'Prepared', 'icon': Icons.check_rounded},
-    {'label': 'On Delivery', 'icon': Icons.sports_motorsports_rounded},
+    {'label': 'Preparing', 'icon': Icons.soup_kitchen_rounded},
+    {'label': 'Rider assigned', 'icon': Icons.two_wheeler_rounded},
+    {'label': 'On the way', 'icon': Icons.sports_motorsports_rounded},
     {'label': 'Delivered', 'icon': Icons.home_rounded},
   ];
 
   @override
   Widget build(BuildContext context) {
-    // Progress fraction (0.0 – 1.0) based on activeIdx
-    final progressFraction = activeIdx / (_steps.length - 1);
+    // Progress fraction (0.0 – 1.0) based on activeIdx, guarded against negative
+    final clampedIdx = activeIdx < 0 ? 0 : activeIdx.clamp(0, _steps.length - 1);
+    final progressFraction =
+        activeIdx < 0 ? 0.0 : clampedIdx / (_steps.length - 1);
 
     return Column(
       children: [
@@ -1367,8 +1468,8 @@ class _HorizontalStepper extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(_steps.length, (i) {
-                  final isCompleted = i < activeIdx;
-                  final isActive = i == activeIdx;
+                  final isCompleted = activeIdx >= 0 && i < activeIdx;
+                  final isActive = activeIdx >= 0 && i == activeIdx;
 
                   if (isActive) {
                     return _ActiveStepDot(
@@ -1391,13 +1492,15 @@ class _HorizontalStepper extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(_steps.length, (i) {
-            final isActive = i == activeIdx;
-            final isCompleted = i < activeIdx;
+            final isActive = activeIdx >= 0 && i == activeIdx;
+            final isCompleted = activeIdx >= 0 && i < activeIdx;
             return SizedBox(
               width: 60,
               child: Text(
                 _steps[i]['label'] as String,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: isActive
@@ -1490,9 +1593,52 @@ class _RiderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // If order has no rider and is already terminal (delivered/cancelled), hide card.
+    if (view.status.isTerminal && !view.hasRider) {
+      return const SizedBox.shrink();
+    }
+
     // No rider has been assigned yet (the backend leaves rider_name null until
-    // assignment succeeds) — say so rather than showing a stand-in rider.
+    // assignment succeeds).
     if (!view.hasRider) {
+      // During accepted and preparing, the restaurant is preparing the order.
+      if (view.status == OrderStatus.accepted ||
+          view.status == OrderStatus.preparing) {
+        return _CardShell(
+          child: Row(
+            children: const [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Icon(Icons.soup_kitchen_rounded,
+                    color: Color(0xFFDC2626), size: 20),
+              ),
+              SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kitchen preparing your food',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF131B2E),
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'A rider will be assigned once your meal is ready for pickup.',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF5C403C)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
       return _CardShell(
         child: Row(
           children: const [
@@ -1749,13 +1895,16 @@ class _OrderItemsCard extends StatelessWidget {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {},
-                    child: const Text(
-                      'View Receipt',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1D4ED8),
+                    onTap: () => _showReceipt(context, view),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                      child: Text(
+                        'View Receipt',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1D4ED8),
+                        ),
                       ),
                     ),
                   ),
@@ -1860,6 +2009,340 @@ class _OrderItemsCard extends StatelessWidget {
       ],
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Receipt Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Opens a bottom-sheet receipt for [view].
+void _showReceipt(BuildContext context, TrackingView view) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) => ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: _ReceiptSheet(view: view, scrollController: scrollController),
+      ),
+    ),
+  );
+}
+
+class _ReceiptSheet extends StatelessWidget {
+  final TrackingView view;
+  final ScrollController scrollController;
+
+  const _ReceiptSheet({
+    required this.view,
+    required this.scrollController,
+  });
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  static String _formatDate(DateTime? dt) {
+    if (dt == null) return '—';
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '${dt.day} ${months[dt.month - 1]} ${dt.year}, $hour:$minute $ampm';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const receiptBg = Color(0xFFFAFAFA);
+    const dashColor = Color(0xFFD1D5DB);
+    const labelColor = Color(0xFF6B7280);
+    const valueColor = Color(0xFF111827);
+
+    return Scaffold(
+      backgroundColor: receiptBg,
+      body: ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD1D5DB),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // ── Header ──────────────────────────────────────────────────────
+          Column(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFDC2626),
+                ),
+                child: const Icon(Icons.receipt_long_rounded,
+                    color: Colors.white, size: 28),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'SpeedyMeals',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFFDC2626),
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                view.restaurantName,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: labelColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // ── Dashed divider ───────────────────────────────────────────────
+          _DashedDivider(color: dashColor),
+          const SizedBox(height: 14),
+
+          // ── Order meta ───────────────────────────────────────────────────
+          _ReceiptRow(label: 'Order #', value: view.orderId, labelColor: labelColor, valueColor: valueColor),
+          const SizedBox(height: 6),
+          _ReceiptRow(label: 'Date', value: _formatDate(view.placedAt), labelColor: labelColor, valueColor: valueColor),
+          const SizedBox(height: 6),
+          _ReceiptRow(label: 'Payment', value: view.paymentMethod.label, labelColor: labelColor, valueColor: valueColor),
+          const SizedBox(height: 6),
+          _ReceiptRow(label: 'Status', value: view.status.wireValue, labelColor: labelColor, valueColor: valueColor),
+          const SizedBox(height: 14),
+
+          // ── Dashed divider ───────────────────────────────────────────────
+          _DashedDivider(color: dashColor),
+          const SizedBox(height: 10),
+
+          // ── Items header ─────────────────────────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text('ITEM',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF9CA3AF),
+                    letterSpacing: 0.8,
+                  )),
+              Text('AMOUNT',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF9CA3AF),
+                    letterSpacing: 0.8,
+                  )),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // ── Line items ───────────────────────────────────────────────────
+          if (view.items.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 6),
+              child: Text('No items.',
+                  style: TextStyle(color: labelColor, fontSize: 13)),
+            )
+          else
+            ...view.items.map((item) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: valueColor,
+                              ),
+                            ),
+                            Text(
+                              '${item.quantity}x  ${formatPkr(item.priceAtOrder)}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: labelColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        formatPkr(item.lineTotal),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: valueColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          const SizedBox(height: 14),
+
+          // ── Dashed divider ───────────────────────────────────────────────
+          _DashedDivider(color: dashColor),
+          const SizedBox(height: 10),
+
+          // ── Fee breakdown ────────────────────────────────────────────────
+          _ReceiptRow(label: 'Subtotal', value: view.foodSubtotalLabel, labelColor: labelColor, valueColor: valueColor),
+          const SizedBox(height: 6),
+          _ReceiptRow(
+            label: 'Delivery Fee (${view.deliveryDistanceKm.toStringAsFixed(1)} km)',
+            value: view.deliveryFeeLabel,
+            labelColor: labelColor,
+            valueColor: valueColor,
+          ),
+          const SizedBox(height: 6),
+          _ReceiptRow(
+            label: 'Platform Fee',
+            value: formatPkr(view.receiptPlatformFee),
+            labelColor: labelColor,
+            valueColor: valueColor,
+          ),
+          const SizedBox(height: 10),
+          const Divider(thickness: 1.2),
+          const SizedBox(height: 6),
+
+          // ── Total ────────────────────────────────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: valueColor,
+                ),
+              ),
+              Text(
+                view.totalLabel,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFFDC2626),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // ── Footer ───────────────────────────────────────────────────────
+          _DashedDivider(color: dashColor),
+          const SizedBox(height: 16),
+          const Text(
+            'Thank you for ordering with SpeedyMeals!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFFDC2626),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A dashed horizontal line drawn via [CustomPainter].
+class _DashedDivider extends StatelessWidget {
+  final Color color;
+  const _DashedDivider({required this.color});
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+        painter: _DashedLinePainter(color: color),
+        child: const SizedBox(height: 1, width: double.infinity),
+      );
+}
+
+class _DashedLinePainter extends CustomPainter {
+  final Color color;
+  const _DashedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    const dashWidth = 6.0;
+    const dashGap = 4.0;
+    double x = 0;
+    while (x < size.width) {
+      canvas.drawLine(Offset(x, 0), Offset(x + dashWidth, 0), paint);
+      x += dashWidth + dashGap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedLinePainter old) => old.color != color;
+}
+
+/// A single label + value row used in the receipt.
+class _ReceiptRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color labelColor;
+  final Color valueColor;
+
+  const _ReceiptRow({
+    required this.label,
+    required this.value,
+    required this.labelColor,
+    required this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 13, color: labelColor),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: valueColor,
+            ),
+          ),
+        ],
+      );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

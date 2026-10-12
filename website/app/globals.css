@@ -2,8 +2,8 @@
 
 @theme {
   --font-display: var(--font-archivo-black), sans-serif;
-  --font-heading: var(--font-archivo), sans-serif;
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-figtree), sans-serif;
+  --font-sans: var(--font-figtree), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-jbmono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --color-red: #E23A2E;
@@ -48,16 +48,7 @@
   border-radius: 16px;
 }
 
-/* Hero dynamic video sizing: large on desktop matching reference, prominent on mobile */
-.hero-video-box {
-  max-width: min(520px, 94vw, calc(35dvh * 2.2789));
-}
 
-@media (min-width: 768px) {
-  .hero-video-box {
-    max-width: min(1200px, 94vw, calc(46dvh * 2.2789));
-  }
-}
 
 /* Smooth anchor scrolling offsets for fixed header */
 #services,
@@ -90,7 +81,7 @@
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee-scroll 24s linear infinite;
+  animation: marquee-scroll 60s linear infinite;
   will-change: transform;
 }
 
@@ -106,12 +97,104 @@
   }
 }
 
+/* Promotional Banner Carousel 5s Progress Indicator */
+@keyframes carousel-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Subtle instant loading bar animation for App Router transitions */
+@keyframes loader-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-loader-slide {
+  animation: loader-slide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
 html {
   scroll-behavior: smooth;
   font-family: var(--font-sans);
   background-color: var(--paper);
   color: var(--ink);
 }
+
+/* ==========================================================================
+   Apple Design Foundations (WWDC 2018 / 2020 / 2026)
+   1. Tactile Responsiveness — Instant Touch-Down Feedback (:active)
+   2. Optical Typography & Sizing — Negative Display Tracking, Positive Micro Tracking
+   ========================================================================== */
+
+/* 1. Tactile Touch-Down Feedback */
+button,
+a,
+[role="button"],
+.btn-press,
+.persona-card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled):not([aria-disabled="true"]):active,
+a[role="button"]:active,
+.btn-press:active {
+  transform: scale(0.97);
+  transition: transform 80ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.card-press:active {
+  transform: scale(0.985);
+  transition: transform 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:active,
+  a[role="button"]:active,
+  .btn-press:active,
+  .card-press:active {
+    transform: none !important;
+  }
+}
+
+/* 2. Optical Typography & Sizing */
+.font-display {
+  letter-spacing: -0.03em;
+  font-optical-sizing: auto;
+}
+
+h1.font-display,
+h2.font-display,
+.display-hero {
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.font-heading {
+  letter-spacing: -0.018em;
+  font-optical-sizing: auto;
+}
+
+/* Micro-copy & mono tracking expansion for enhanced legibility */
+.font-mono {
+  letter-spacing: 0.025em;
+}
+
+.tracking-optical-mono {
+  letter-spacing: 0.06em;
+}
+
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

@@ -213,7 +213,7 @@ export default function AdminDashboardPage() {
             subValue="Strict 10% Restaurant Commission"
             accent="emerald"
             icon={<Coins size={18} weight="bold" />}
-            targetBenchmark="Margin: 100% Retained"
+            targetBenchmark="10% Commission Model"
           />
 
           <StatCard

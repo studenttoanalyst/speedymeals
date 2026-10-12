@@ -4,26 +4,21 @@ export interface TranslationPhrases {
   rider: string;
   restaurant: string;
   waitlist: string;
-  partnerType: string;
-  partnerTypePlaceholder: string;
   riderApplicationForm: string;
   fullLegalName: string;
   primaryModeOfTransport: string;
   emailAddress: string;
-  emailAddressOptional: string;
   phoneNumber: string;
   primaryDispatchZone: string;
-  areaNeighborhood: string;
-  streetAddressOptional: string;
-  selectCityFirst: string;
-  typeToSearchCity: string;
-  typeToSearchArea: string;
   deliveryExperience: string;
   restaurantPartnerOnboarding: string;
   authorizedRepresentative: string;
+  partnerBusinessType: string;
   restaurantBrandName: string;
   restaurantOperatingCity: string;
   primaryCuisineCategory: string;
+  areaLocality: string;
+  streetAddress: string;
   customerEarlyAccessInvite: string;
   fullName: string;
   mobilePlatformPreference: string;
@@ -38,6 +33,7 @@ export interface TranslationPhrases {
   agreementLabel: string;
   agreementPrefix: string;
   termsLink: string;
+  privacyLink: string;
   agreementSuffix: string;
   submitting: string;
 }
@@ -45,125 +41,113 @@ export interface TranslationPhrases {
 export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
   en: {
     rider: 'Rider',
-    restaurant: 'Partner',
+    restaurant: 'Merchant',
     waitlist: 'Customer',
-    partnerType: 'Partner Business Type',
-    partnerTypePlaceholder: 'Select partner category...',
-    riderApplicationForm: 'Rider Application Form',
+    riderApplicationForm: 'Deliver with SpeedyMeals',
     fullLegalName: 'Full Legal Name',
     primaryModeOfTransport: 'Primary Mode of Transport',
-    emailAddress: 'Email Address',
-    emailAddressOptional: 'Email Address (Optional)',
+    emailAddress: 'Email Address (Optional)',
     phoneNumber: 'Phone Number',
-    primaryDispatchZone: 'Primary Dispatch Zone',
-    areaNeighborhood: 'Area / Locality',
-    streetAddressOptional: 'Street Address / Building (Optional)',
-    selectCityFirst: 'Select a city first...',
-    typeToSearchCity: 'Type to search city (e.g. Karachi, Lahore, Riyadh)...',
-    typeToSearchArea: 'Type to search area (e.g. Clifton, Gulberg)...',
+    primaryDispatchZone: 'Operating City',
     deliveryExperience: 'Delivery Experience',
     restaurantPartnerOnboarding: 'Partner Merchant Onboarding',
     authorizedRepresentative: 'Authorized Representative',
+    partnerBusinessType: 'Partner Business Type',
     restaurantBrandName: 'Business / Brand Name',
     restaurantOperatingCity: 'Operating City',
     primaryCuisineCategory: 'Primary Category / Specialties (in English)',
+    areaLocality: 'Area / Locality',
+    streetAddress: 'Street Address / Building (Optional)',
     customerEarlyAccessInvite: 'Customer Early Access Invite',
     fullName: 'Full Name',
     mobilePlatformPreference: 'Mobile Platform Preference',
     preferredDeliveryCity: 'Preferred Delivery City',
     primaryServiceInterest: 'Primary Service Interest',
-    responseTime: 'Response Time',
-    under24Hours: 'Under 24 hours',
-    waitlistStatus: 'CUSTOMER STATUS',
+    responseTime: 'RESPONSE TIME',
+    under24Hours: '1 to 2 business days',
+    waitlistStatus: 'WAITLIST STATUS',
     priorityBatch: 'PRIORITY BATCH',
     submit: 'Submit',
-    registrationGateway: 'REGISTRATION GATEWAY',
-    agreementLabel: 'I agree to the Terms of Use and service dispatch policy.',
+    registrationGateway: 'SELECTED FORM',
+    agreementLabel: 'I agree to the Terms of Use and Privacy Policy.',
     agreementPrefix: 'I agree to the ',
     termsLink: 'Terms of Use',
-    agreementSuffix: ' and service dispatch policy.',
+    privacyLink: 'Privacy Policy',
+    agreementSuffix: '.',
     submitting: 'Submitting...',
   },
   ur: {
     rider: 'ڈیلیوری رائیڈر',
-    restaurant: 'پارٹنر',
+    restaurant: 'مرچنٹ / پارٹنر',
     waitlist: 'کسٹمر',
-    partnerType: 'کاروباری پارٹنر کی قسم',
-    partnerTypePlaceholder: 'پارٹنر کی قسم منتخب کریں...',
-    riderApplicationForm: 'رائڈر درخواست فارم',
+    riderApplicationForm: 'اسپیڈی میلز کے ساتھ ڈیلیور کریں',
     fullLegalName: 'مکمل قانونی نام',
     primaryModeOfTransport: 'بنیادی وسیلہ نقل',
-    emailAddress: 'ای میل کا پتہ',
-    emailAddressOptional: 'ای میل کا پتہ (اختیاری)',
+    emailAddress: 'ای میل کا پتہ (اختیاری)',
     phoneNumber: 'فون نمبر',
-    primaryDispatchZone: 'بنیادی ڈسپیچ زون',
-    areaNeighborhood: 'علاقہ / لوکیشن',
-    streetAddressOptional: 'گلی کا پتہ / عمارت (اختیاری)',
-    selectCityFirst: 'پہلے شہر منتخب کریں...',
-    typeToSearchCity: 'شہر تلاش کریں (مثلاً کراچی، لاہور، ریاض)...',
-    typeToSearchArea: 'علاقہ تلاش کریں (مثلاً کلفٹن، گلبرگ)...',
+    primaryDispatchZone: 'آپریشن کا شہر',
     deliveryExperience: 'ڈیلیوری کا تجربہ',
     restaurantPartnerOnboarding: 'مرچنٹ پارٹنر آن بورڈنگ',
     authorizedRepresentative: 'مجاز نمائندہ',
+    partnerBusinessType: 'کاروبار کی قسم',
     restaurantBrandName: 'کاروبار / برانڈ کا نام',
     restaurantOperatingCity: 'آپریشن کا شہر',
-    primaryCuisineCategory: 'بنیادی کیٹیگری / خصوصیات (انگریزی میں)',
+    primaryCuisineCategory: 'بنیادی کیٹیگری / خاص پکوان (انگریزی میں)',
+    areaLocality: 'علاقہ / لوکیلٹی',
+    streetAddress: 'گلی کا پتہ / بلڈنگ (اختیاری)',
     customerEarlyAccessInvite: 'صارفین کے لیے ابتدائی رسائی کی دعوت',
     fullName: 'مکمل نام',
     mobilePlatformPreference: 'ترجیحی موبائل پلیٹ فارم',
     preferredDeliveryCity: 'ترجیحی ڈیلیوری شہر',
     primaryServiceInterest: 'بنیادی دلچسپی کی سروس',
     responseTime: 'جواب کی مدت',
-    under24Hours: '۲۴ گھنٹے سے کم',
-    waitlistStatus: 'کسٹمر کا حال',
+    under24Hours: '۱ سے ۲ کاروباری دن',
+    waitlistStatus: 'انتظار کی فہرست کا حال',
     priorityBatch: 'ترجیحی بیچ',
     submit: 'جمع کرائیں',
-    registrationGateway: 'رجسٹریشن گیٹ وے',
-    agreementLabel: 'میں شراکت داری کی شرائط اور سروس ڈسپیچ پالیسی سے اتفاق کرتا ہوں۔',
-    agreementPrefix: 'میں سروس ڈسپیچ پالیسی اور ',
-    termsLink: 'استعمال کی شرائط (Terms of Use)',
+    registrationGateway: 'منتخب فارم',
+    agreementLabel: 'میں استعمال کی شرائط اور پرائیویسی پالیسی سے اتفاق کرتا ہوں۔',
+    agreementPrefix: 'میں ',
+    termsLink: 'استعمال کی شرائط',
+    privacyLink: 'پرائیویسی پالیسی',
     agreementSuffix: ' سے اتفاق کرتا ہوں۔',
     submitting: 'جمع کروایا جا رہا ہے...',
   },
   ar: {
     rider: 'مندوب توصيل',
-    restaurant: 'شريك',
-    waitlist: 'عميل',
-    partnerType: 'نوع نشاط الشريك',
-    partnerTypePlaceholder: 'اختر نوع الشريك...',
-    riderApplicationForm: 'نموذج الطلب لمندوب توصيل',
+    restaurant: 'التاجر / شريك',
+    waitlist: 'العميل',
+    riderApplicationForm: 'التوصيل مع سبيدي ميلز',
     fullLegalName: 'اسم القانوني كامل',
     primaryModeOfTransport: 'وسيلة النقل الاساسية',
-    emailAddress: 'عنوان بريد الالكتروني',
-    emailAddressOptional: 'عنوان بريد الالكتروني (اختياري)',
+    emailAddress: 'عنوان البريد الإلكتروني (اختياري)',
     phoneNumber: 'رقم الهاتف',
-    primaryDispatchZone: 'منطقة التوزيع الأساسية',
-    areaNeighborhood: 'المنطقة / الحي',
-    streetAddressOptional: 'عنوان الشارع / المبنى (اختياري)',
-    selectCityFirst: 'اختر المدينة أولاً...',
-    typeToSearchCity: 'ابحث عن المدينة (مثل الرياض، جدة، كراتشي)...',
-    typeToSearchArea: 'ابحث عن الحي أو المنطقة...',
+    primaryDispatchZone: 'مدينة التشغيل',
     deliveryExperience: 'الخبرة في مجال التوصيل',
-    restaurantPartnerOnboarding: 'تسجيل الشريك التجاري',
+    restaurantPartnerOnboarding: 'تسجيل التاجر الشريك',
     authorizedRepresentative: 'الممثل المفوّض',
-    restaurantBrandName: 'اسم المتجر / العلامة التجارية',
-    restaurantOperatingCity: 'مدينة تشغيل النشاط',
-    primaryCuisineCategory: 'التصنيف الرئيسي / التخصصات بالإنجليزية',
+    partnerBusinessType: 'نوع النشاط التجاري',
+    restaurantBrandName: 'الاسم التجاري للمنشأة',
+    restaurantOperatingCity: 'مدينة تشغيل المتجر',
+    primaryCuisineCategory: 'الفئة الرئيسية / التخصصات (بالإنجليزية)',
+    areaLocality: 'المنطقة / الحي',
+    streetAddress: 'عنوان الشارع / المبنى (اختياري)',
     customerEarlyAccessInvite: 'دعوة العملاء للوصول المبكر',
     fullName: 'الاسم الكامل',
     mobilePlatformPreference: 'المنصة المفضلة للهاتف',
     preferredDeliveryCity: 'مدينة التوصيل المفضلة',
     primaryServiceInterest: 'الخدمة الرئيسية محل الاهتمام',
     responseTime: 'مدة الاستجابة',
-    under24Hours: 'أقل من ٢٤ ساعة',
-    waitlistStatus: 'حالة العميل',
+    under24Hours: '١ إلى ٢ يوم عمل',
+    waitlistStatus: 'حالة قائمة الانتظار',
     priorityBatch: 'الدفعة ذات الأولوية',
     submit: 'إرسال',
-    registrationGateway: 'بوابة التسجيل',
-    agreementLabel: 'أوافق على شروط الشراكة وسياسة توزيع الخدمة.',
-    agreementPrefix: 'أوافق على سياسة توزيع الخدمة و',
-    termsLink: 'شروط الاستخدام (Terms of Use)',
-    agreementSuffix: ' الرسمية.',
+    registrationGateway: 'النموذج المختار',
+    agreementLabel: 'أوافق على شروط الاستخدام وسياسة الخصوصية.',
+    agreementPrefix: 'أوافق على ',
+    termsLink: 'شروط الاستخدام',
+    privacyLink: 'سياسة الخصوصية',
+    agreementSuffix: '.',
     submitting: 'جارٍ الإرسال...',
   },
 };
@@ -171,7 +155,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationPhrases> = {
 /**
  * Returns dynamic typography classes that scale font-size up by ~4px for Urdu/Arabic scripts
  * while preserving standard font sizes for English.
- * Updated: Label font size increased by +2px (from text-xs to text-sm in EN, 12px -> 14px)
  */
 export const getTypographySize = (
   lang: SupportedLanguage,
@@ -180,22 +163,22 @@ export const getTypographySize = (
   if (lang === 'en') {
     switch (type) {
       case 'label':
-        return 'text-sm font-mono tracking-wider font-semibold'; // 14px (+2px from 12px)
+        return 'text-xs font-sans tracking-wider font-semibold'; // 12px
       case 'heading':
-        return 'text-2xl sm:text-3xl font-display tracking-tight'; // 24-30px
+        return 'text-2xl sm:text-3xl font-heading font-extrabold tracking-tight'; // 24-30px
       case 'input':
         return 'text-sm font-sans'; // 14px
       case 'badge':
-        return 'text-[11px] font-mono tracking-widest'; // 11px
+        return 'text-xs font-sans tracking-wider font-bold'; // 12px
       case 'subtext':
-        return 'text-xs font-mono'; // 12px
+        return 'text-xs font-sans'; // 12px
     }
   }
 
   // Urdu & Arabic: +4px average font size boost for optical clarity and script legibility
   switch (type) {
     case 'label':
-      return 'text-lg font-sans font-semibold tracking-normal leading-relaxed'; // 18px (+2px boost)
+      return 'text-base font-sans font-medium tracking-normal leading-relaxed'; // 16px (+4px from 12px)
     case 'heading':
       return 'text-3xl sm:text-4xl font-sans font-bold tracking-normal leading-snug'; // 30-36px (+6px)
     case 'input':

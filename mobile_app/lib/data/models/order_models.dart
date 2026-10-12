@@ -97,6 +97,7 @@ class OrderTracking {
   final double foodSubtotal;
   final double deliveryDistanceKm;
   final double deliveryFee;
+  final double platformFee;
   final double totalAmount;
 
   /// Name of the restaurant the order is coming from.
@@ -153,6 +154,7 @@ class OrderTracking {
     this.foodSubtotal = 0,
     this.deliveryDistanceKm = 0,
     this.deliveryFee = 0,
+    this.platformFee = 0,
     this.totalAmount = 0,
     this.riderName,
     this.riderPhone,
@@ -180,6 +182,7 @@ class OrderTracking {
         foodSubtotal: Json.asDouble(json['food_subtotal']),
         deliveryDistanceKm: Json.asDouble(json['delivery_distance_km']),
         deliveryFee: Json.asDouble(json['delivery_fee']),
+        platformFee: Json.asDouble(json['platform_fee']),
         totalAmount: Json.asDouble(json['total_amount']),
         riderName: Json.asStringOrNull(json['rider_name']),
         riderPhone: Json.asStringOrNull(json['rider_phone']),
@@ -202,6 +205,7 @@ class OrderTracking {
   String get totalLabel => formatPkr(totalAmount);
   String get foodSubtotalLabel => formatPkr(foodSubtotal);
   String get deliveryFeeLabel => formatPkr(deliveryFee);
+  String get platformFeeLabel => formatPkr(platformFee);
   String get distanceLabel => '${deliveryDistanceKm.toStringAsFixed(1)} km';
 
   /// True when a rider has been attached to this order.
@@ -241,13 +245,14 @@ class RouteDetail {
 /// (backend: `CheckoutPreviewResponseSchema`).
 ///
 /// This is the ONLY authority for what the customer will be charged:
-/// `food_subtotal + delivery_fee = total`, where
-/// `delivery_fee = 50 + (km × 20)`. There is no platform fee and no tax — the
-/// backend has neither.
+/// `food_subtotal + delivery_fee + platform_fee = total`, where
+/// `delivery_fee = 100 + (km × 25)` and `platform_fee` is a flat Rs. 15
+/// charge added by the backend.
 class CheckoutPreview {
   final double foodSubtotal;
   final double deliveryDistanceKm;
   final double deliveryFee;
+  final double platformFee;
   final double total;
 
   /// Point 3 route parameters (distance, duration, ETA, polyline); null when
@@ -258,6 +263,7 @@ class CheckoutPreview {
     required this.foodSubtotal,
     required this.deliveryDistanceKm,
     required this.deliveryFee,
+    this.platformFee = 0,
     required this.total,
     this.route,
   });
@@ -266,12 +272,14 @@ class CheckoutPreview {
         foodSubtotal: Json.asDouble(json['food_subtotal']),
         deliveryDistanceKm: Json.asDouble(json['delivery_distance_km']),
         deliveryFee: Json.asDouble(json['delivery_fee']),
+        platformFee: Json.asDouble(json['platform_fee']),
         total: Json.asDouble(json['total']),
         route: _routeOrNull(json['route']),
       );
 
   String get foodSubtotalLabel => formatPkr(foodSubtotal);
   String get deliveryFeeLabel => formatPkr(deliveryFee);
+  String get platformFeeLabel => formatPkr(platformFee);
   String get totalLabel => formatPkr(total);
   String get distanceLabel => '${deliveryDistanceKm.toStringAsFixed(1)} km';
 }
