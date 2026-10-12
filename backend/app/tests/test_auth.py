@@ -6,11 +6,14 @@ Refresh-token rotation itself is already covered separately in
 test_auth_refresh.py — not duplicated here.
 """
 import uuid
+from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.redis_client import redis_client
 from app.core.security import hash_password
@@ -137,6 +140,50 @@ def test_otp_verify_second_time_same_phone_logs_in_existing_customer(db_session,
 
     same_user = db_session.query(type(first_user)).filter_by(phone_number=phone).all()
     assert len(same_user) == 1  # no duplicate row created on second login
+
+
+def test_otp_request_sendpk_mode_success_with_mock(auth_client, monkeypatch):
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-live-key")
+    monkeypatch.setattr(settings, "SENDPK_SENDER_ID", "SpeedyMeals")
+
+    phone = _unique_phone()
+    mock_resp = MagicMock(spec=httpx.Response)
+    mock_resp.is_error = False
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {"status": "success", "id": "mock-9988"}
+
+    with patch("httpx.AsyncClient.post", return_value=mock_resp) as mock_post:
+        response = auth_client.post(
+            "/auth/otp/request", json={"phone_number": phone, "country_code": "+92"}
+        )
+        assert response.status_code == 200
+        assert response.json()["message"] == "OTP sent."
+        assert _otp_for(phone) is not None
+
+        mock_post.assert_called_once()
+        _, kwargs = mock_post.call_args
+        assert kwargs["data"]["api_key"] == "test-live-key"
+        assert kwargs["data"]["sender"] == "SpeedyMeals"
+        assert "Your SpeedyMeals OTP code is" in kwargs["data"]["message"]
+
+
+def test_otp_request_sendpk_gateway_failure_returns_503_and_cleans_redis(auth_client, monkeypatch):
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-live-key")
+
+    phone = _unique_phone()
+
+    with patch("httpx.AsyncClient.post", side_effect=httpx.TimeoutException("SendPK timed out")):
+        response = auth_client.post(
+            "/auth/otp/request", json={"phone_number": phone, "country_code": "+92"}
+        )
+        assert response.status_code == 503
+        assert "SMS" in response.json()["detail"]
+
+        # Redis state was cleaned up so the user is not penalized or locked out
+        assert redis_client.get(service._otp_key(phone)) is None
+        assert redis_client.get(service._cooldown_key(phone)) is None
 
 
 # --- rider OTP signup/login ---

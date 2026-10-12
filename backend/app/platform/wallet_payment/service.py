@@ -144,8 +144,8 @@ def get_wallet_summary(db: Session, rider_id: uuid.UUID) -> Rider:
 
 
 def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Rider:
-    """Go-online/offline toggle. Going online requires kit_completed and
-    wallet_balance >= MIN_WALLET_BALANCE_TO_GO_ONLINE. Going offline is always allowed."""
+    """Go-online/offline toggle. Going online requires kit_completed.
+    Going offline is always allowed."""
     rider = _get_rider_or_404(db, rider_id)
 
     if is_online:
@@ -153,14 +153,6 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Kit deposit and handover must be completed before going online.",
-            )
-        if float(rider.wallet_balance) < MIN_WALLET_BALANCE_TO_GO_ONLINE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Minimum wallet balance of Rs. {MIN_WALLET_BALANCE_TO_GO_ONLINE} required to go online. "
-                    f"Current balance: Rs. {rider.wallet_balance}. Please recharge."
-                ),
             )
         if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
             raise HTTPException(

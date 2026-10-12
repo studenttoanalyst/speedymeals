@@ -87,6 +87,19 @@ class Settings(BaseSettings):
     # Cash Collection Cap (Phase 3, Step 7 - spec Sec 3.4/6)
     CASH_COLLECTION_CAP: float = 5000
 
+    # SMS Gateway (SendPK & Console fallback)
+    # SMS_MODE: 'console' (dev/test default, logs OTP to server console) or 'sendpk' (live SMS gateway)
+    SMS_MODE: str = "console"
+    SENDPK_API_URL: str = "https://sendpk.com/api/sms.php"
+    SENDPK_API_KEY: str = ""
+    SENDPK_SENDER_ID: str = "SpeedyMeals"
+    OTP_TEMPLATE: str = "Your SpeedyMeals OTP code is #code#"
+
+    @property
+    def effective_sms_mode(self) -> str:
+        """Returns the active SMS delivery mode ('console' or 'sendpk')."""
+        return self.SMS_MODE.strip().lower()
+
     model_config = SettingsConfigDict(
         env_file=ENV_FILE_PATH, env_file_encoding="utf-8", extra="ignore"
     )

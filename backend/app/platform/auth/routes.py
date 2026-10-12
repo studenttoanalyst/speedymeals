@@ -46,15 +46,15 @@ def _build_full_number(country_code: str, phone_number: str) -> str:
 
 
 @router.post("/otp/request", response_model=OTPResponseSchema, status_code=status.HTTP_200_OK)
-def request_otp(payload: OTPRequestSchema):
+async def request_otp(payload: OTPRequestSchema):
     """
-    Generate a new OTP and send it (console mode).
+    Generate a new OTP and send it via SendPK SMS gateway (or console fallback in dev).
     Rejects with 429 if called before the resend cooldown (45s) expires.
     Rate-limited (max 5/min).
     """
     full_number = _build_full_number(payload.country_code, payload.phone_number)
     enforce_rate_limit(full_number, action="otp_request")
-    service.generate_and_send_otp(full_number)
+    await service.generate_and_send_otp_async(full_number)
     return OTPResponseSchema(message="OTP sent.")
 
 

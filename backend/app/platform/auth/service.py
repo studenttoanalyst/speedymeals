@@ -1,16 +1,14 @@
 """
-OTP business logic - generate, send (console-mode for now), verify, resend-cooldown.
+OTP business logic - generate, send (SendPK SMS gateway with console fallback), verify, resend-cooldown.
 Also: Step 5/6 - issuing JWT tokens after a successful OTP verify, and
 tracking/revoking refresh tokens (logout).
 Also: Forgot password flows and mandatory initial password rotation.
 
-Per ADR-001 (docs/decisions/ADR-001-otp-sms-provider.md):
-- Real SMS provider is not yet decided.
-- `_send_otp_via_console` is the ONLY place that "sends" the OTP. When a real
-  Pakistani provider is chosen post-MVP, only this function needs to change -
-  nothing else in this file, and nothing in routes.py, needs to know about it.
+SMS delivery is handled via app.platform.auth.sms_client (SendPK API integration,
+configured via SMS_MODE=console|sendpk and SENDPK_* environment variables).
 """
 import hashlib
+import logging
 import random
 import secrets
 import uuid
@@ -24,9 +22,17 @@ from app.core.redis_client import redis_client
 from app.core.security import hash_password, verify_password
 from app.platform.auth import jwt_utils
 from app.platform.auth.models import Admin, RefreshToken, PasswordResetToken
+from app.platform.auth.sms_client import (
+    SMSGatewayError,
+    format_otp_message,
+    send_sms_via_sendpk,
+    send_sms_via_sendpk_async,
+)
 from app.platform.users.models import User
 from app.modules.food_delivery.models import Restaurant
 from app.platform.wallet_payment.models import Rider
+
+logger = logging.getLogger(__name__)
 
 OTP_EXPIRY_SECONDS = 5 * 60        # Step 2: OTP valid for 5 minutes
 RESEND_COOLDOWN_SECONDS = 45       # Step 4: must wait 45s between resend requests
@@ -42,18 +48,19 @@ def _cooldown_key(phone_number: str) -> str:
 
 def _send_otp_via_console(phone_number: str, otp_code: str) -> None:
     """
-    Step 2 - console/log-mode sender (dev/test default, SMS_PROVIDER_MODE=console).
-    Prints the OTP to the server log instead of sending a real SMS - zero cost,
-    zero external dependency, while the rest of the auth flow is built.
+    Backward-compatible console sender helper. Dispatches through sms_client.
     """
-    print(f"[OTP-CONSOLE] Sending OTP {otp_code} to {phone_number}")
+    message = format_otp_message(otp_code, settings.OTP_TEMPLATE)
+    send_sms_via_sendpk(phone_number, message)
 
 
 def generate_and_send_otp(phone_number: str) -> None:
     """
     Step 2 (with Step 4 cooldown guard) - generate a 6-digit OTP, store it in
-    Redis with a 5-minute expiry, and send it (console mode for now).
+    Redis with a 5-minute expiry, and send it via SendPK SMS gateway
+    (or console mode fallback).
     Raises 429 if the caller is still inside the resend cooldown window.
+    Raises 503 if the SMS provider fails to deliver the code.
     """
     if redis_client.exists(_cooldown_key(phone_number)):
         ttl = redis_client.ttl(_cooldown_key(phone_number))
@@ -67,7 +74,50 @@ def generate_and_send_otp(phone_number: str) -> None:
     redis_client.set(_otp_key(phone_number), otp_code, ex=OTP_EXPIRY_SECONDS)
     redis_client.set(_cooldown_key(phone_number), "1", ex=RESEND_COOLDOWN_SECONDS)
 
-    _send_otp_via_console(phone_number, otp_code)
+    message = format_otp_message(otp_code, settings.OTP_TEMPLATE)
+
+    try:
+        send_sms_via_sendpk(phone_number, message)
+    except SMSGatewayError as exc:
+        # Clear the OTP & cooldown from Redis so user is not locked out
+        redis_client.delete(_otp_key(phone_number))
+        redis_client.delete(_cooldown_key(phone_number))
+        logger.error(f"Failed to dispatch OTP SMS to {phone_number}: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Failed to send OTP code via SMS. Please try again later.",
+        ) from exc
+
+
+async def generate_and_send_otp_async(phone_number: str) -> None:
+    """
+    Asynchronous OTP generation and dispatch via SendPK SMS gateway.
+    """
+    if redis_client.exists(_cooldown_key(phone_number)):
+        ttl = redis_client.ttl(_cooldown_key(phone_number))
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Please wait {ttl} seconds before requesting another OTP.",
+        )
+
+    otp_code = f"{random.randint(0, 999999):06d}"
+
+    redis_client.set(_otp_key(phone_number), otp_code, ex=OTP_EXPIRY_SECONDS)
+    redis_client.set(_cooldown_key(phone_number), "1", ex=RESEND_COOLDOWN_SECONDS)
+
+    message = format_otp_message(otp_code, settings.OTP_TEMPLATE)
+
+    try:
+        await send_sms_via_sendpk_async(phone_number, message)
+    except SMSGatewayError as exc:
+        # Clear the OTP & cooldown from Redis so user is not locked out
+        redis_client.delete(_otp_key(phone_number))
+        redis_client.delete(_cooldown_key(phone_number))
+        logger.error(f"Failed to dispatch OTP SMS to {phone_number}: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Failed to send OTP code via SMS. Please try again later.",
+        ) from exc
 
 
 def verify_otp(phone_number: str, otp_code: str) -> None:
