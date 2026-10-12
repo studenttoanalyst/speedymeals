@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/notification_service.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// Notifications feed reached from the dashboard bell icon.
 ///
@@ -56,7 +57,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             // Show a spinner only before the first fetch has ever completed;
             // afterwards an empty feed is a real "nothing yet", not a load.
             if (!NotificationService.instance.hasLoaded) {
-              return const Center(child: CircularProgressIndicator());
+              return const NotificationListSkeleton();
             }
             return const _EmptyNotificationsView();
           }

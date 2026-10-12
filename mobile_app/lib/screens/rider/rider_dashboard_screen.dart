@@ -12,6 +12,7 @@ import 'rider_documents_screen.dart';
 import 'rider_wallet_screen.dart';
 import '../../features/maps/maps.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// Delivery Rider dashboard — the rider's real workspace.
 ///
@@ -510,7 +511,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const RiderDashboardSkeleton();
     }
 
     final failure = _error;

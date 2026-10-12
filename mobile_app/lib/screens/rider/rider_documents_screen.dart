@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/network/api_exception.dart';
 import '../../data/models/rider_models.dart';
 import '../../data/repositories/rider_repository.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// Rider document upload screen — lets the rider upload CNIC, license,
 /// and vehicle photos required for onboarding approval.
@@ -196,7 +197,7 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const RiderDocumentsSkeleton();
     }
 
     final failure = _error;

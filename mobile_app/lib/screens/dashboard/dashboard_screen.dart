@@ -15,6 +15,7 @@ import '../notifications/notifications_screen.dart';
 import '../../data/models/user_models.dart';
 import '../../data/repositories/user_repository.dart';
 import '../profile/saved_addresses_screen.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 // ─── Sort & Filter data model ────────────────────────────────────────────────
 
@@ -1737,10 +1738,7 @@ class _CloudKitchenSection extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, ThemeData theme) {
     if (isLoading) {
-      return const SizedBox(
-        height: 236,
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const RestaurantRailSkeleton();
     }
 
     final failure = error;

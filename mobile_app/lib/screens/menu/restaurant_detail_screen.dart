@@ -6,6 +6,7 @@ import '../../data/repositories/restaurant_repository.dart';
 import '../../models/restaurant.dart';
 import '../../services/cart_service.dart';
 import '../cart/cart_screen.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// Restaurant & Menu Detail Screen matching the Stitch UI design.
 ///
@@ -170,7 +171,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           elevation: 0,
           title: Text(restaurant.name),
         ),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const RestaurantDetailSkeleton(),
       );
     }
 

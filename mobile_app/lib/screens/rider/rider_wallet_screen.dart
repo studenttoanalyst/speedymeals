@@ -5,6 +5,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/json_utils.dart';
 import '../../data/models/rider_models.dart';
 import '../../data/repositories/rider_repository.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// Rider wallet, earnings and COD cash — every figure from the backend.
 ///
@@ -152,7 +153,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const RiderWalletSkeleton();
     }
 
     final failure = _error;

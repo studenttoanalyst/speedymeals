@@ -353,6 +353,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           name: line.name,
                           quantity: line.quantity,
                           price: line.lineTotal,
+                          imageUrl: line.imageUrl,
                         ),
                     const SizedBox(height: 24),
 
@@ -414,18 +415,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         onRetry: _loadPreview,
                       )
                     else if (_preview != null) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _SummaryRow(
-                            label: 'Subtotal',
-                            value: _preview!.foodSubtotalLabel,
-                          ),
-                          _SummaryRow(
-                            label: 'Delivery Fee',
-                            value: _preview!.deliveryFeeLabel,
-                          ),
-                        ],
+                      _SummaryRow(
+                        label: 'Subtotal',
+                        value: _preview!.foodSubtotalLabel,
+                      ),
+                      const SizedBox(height: 6),
+                      _SummaryRow(
+                        label: 'Delivery Fee',
+                        value: _preview!.deliveryFeeLabel,
+                      ),
+                      const SizedBox(height: 6),
+                      _SummaryRow(
+                        label: 'Platform Fee',
+                        value: _preview!.platformFeeLabel,
                       ),
                       const SizedBox(height: 6),
                       Align(
@@ -452,13 +454,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               'Total',
                               style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
                             Text(
                               _preview!.totalLabel,
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
+                                color: Colors.white,
                               ),
                             ),
                           ],
@@ -561,11 +564,13 @@ class _OrderItemCard extends StatelessWidget {
   final String name;
   final int quantity;
   final double price;
+  final String? imageUrl;
 
   const _OrderItemCard({
     required this.name,
     required this.quantity,
     required this.price,
+    this.imageUrl,
   });
 
   @override
@@ -581,14 +586,24 @@ class _OrderItemCard extends StatelessWidget {
             Container(
               width: 120,
               height: 80,
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Icon(Icons.restaurant,
-                    size: 32, color: Color(0xFF5C403C)),
-              ),
+              child: (imageUrl != null && imageUrl!.isNotEmpty)
+                  ? Image.network(
+                      imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Center(
+                        child: Icon(Icons.restaurant,
+                            size: 32, color: Color(0xFF5C403C)),
+                      ),
+                    )
+                  : const Center(
+                      child: Icon(Icons.restaurant,
+                          size: 32, color: Color(0xFF5C403C)),
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(

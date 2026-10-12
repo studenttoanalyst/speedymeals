@@ -8,13 +8,14 @@ import '../../data/repositories/user_repository.dart';
 import '../../data/json_utils.dart';
 import '../../services/cart_service.dart';
 import '../checkout/checkout_screen.dart';
+import '../../widgets/skeleton/skeleton.dart';
 
 /// Cart screen backed by the backend's per-restaurant Redis cart.
 ///
 /// Every price shown comes from the backend: line prices from the restaurant's
-/// menu, and the delivery fee and total from
-/// `GET /restaurants/{id}/cart/checkout-preview`. There is no platform fee and
-/// no tax — the backend has neither, so the app must not invent them.
+/// menu, and the delivery fee, platform fee, and total from
+/// `GET /restaurants/{id}/cart/checkout-preview`. Fees are never invented by
+/// the app — delivery_fee = 100 + (km × 25), plus a flat Rs. 15 platform_fee.
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
@@ -188,7 +189,7 @@ class _CartScreenState extends State<CartScreen> {
           final cart = CartService.instance;
 
           if (cart.isLoading && cart.restaurantId == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const CartScreenSkeleton();
           }
 
           if (cart.hasError && cart.isEmpty) {
@@ -407,6 +408,11 @@ class _CartBody extends StatelessWidget {
                     value: preview!.deliveryFeeLabel,
                   ),
                   const SizedBox(height: 6),
+                  _SummaryRow(
+                    label: 'Platform Fee',
+                    value: preview!.platformFeeLabel,
+                  ),
+                  const SizedBox(height: 6),
                 ] else
                   _DeliveryFeePendingRow(
                     isLoading: isLoadingPreview,
@@ -428,6 +434,7 @@ class _CartBody extends StatelessWidget {
                         'Total',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
@@ -436,7 +443,7 @@ class _CartBody extends StatelessWidget {
                         preview?.totalLabel ?? formatPkr(cart.subtotal),
                         style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
+                          color: Colors.white,
                         ),
                       ),
                     ],

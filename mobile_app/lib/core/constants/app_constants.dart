@@ -85,19 +85,20 @@ enum UserRole {
 
 /// Order lifecycle statuses.
 ///
-/// Wire values are copied verbatim from
-/// `food_delivery/service.py: ORDER_STATUS_TRANSITIONS` plus the two terminal
-/// states the backend can also write (`Cancelled` via
-/// `POST /admin/orders/{id}/cancel`, and `Rejected` when a rider declines).
+/// Wire values are copied verbatim from backend
+/// `food_delivery/service.py: ORDER_STATUS_TRANSITIONS` and placement constants:
 ///
-/// The backend transitions:
-///
-///     Accepted -> Preparing -> Ready for Pickup
-///     Ready for Pickup -> Rider Assigned        (auto-assignment)
-///     Rider Assigned -> Accepted by Rider | Rejected
-///     Rejected -> Rider Assigned                (re-assignment)
-///     Accepted by Rider -> Arrived at Restaurant -> Picked Up
-///     Picked Up -> On the Way -> Delivered
+/// Order Lifecycle Flow:
+///   1. Customer placement creates order directly as `Accepted` (no `Placed` state).
+///   2. Restaurant advances: `Accepted` -> `Preparing`.
+///   3. Restaurant marks food ready: `Preparing` -> `Ready for Pickup`.
+///   4. Backend auto-assignment assigns rider: `Ready for Pickup` -> `Rider Assigned`.
+///   5. Rider response: `Rider Assigned` -> `Accepted by Rider` (or `Rejected` -> reassigns next rider).
+///   6. Rider travels to restaurant: `Accepted by Rider` -> `Arrived at Restaurant`.
+///   7. Rider picks up meal: `Arrived at Restaurant` -> `Picked Up`.
+///   8. Delivery in progress: `Picked Up` -> `On the Way`.
+///   9. Completion: `On the Way` -> `Delivered`.
+///  10. Admin cancellation: `Cancelled` (terminal at any point).
 ///
 /// Orders are created as `Accepted` (the restaurant accepted at placement), so
 /// `Placed` is deliberately NOT a status here.
@@ -152,7 +153,7 @@ enum OrderStatus {
       case OrderStatus.readyForPickup:
         return 'Ready for pickup';
       case OrderStatus.riderAssigned:
-        return 'Finding your rider';
+        return 'Rider assigned';
       case OrderStatus.rejected:
         return 'Reassigning a rider';
       case OrderStatus.acceptedByRider:
