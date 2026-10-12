@@ -14,8 +14,15 @@ import uuid
 
 import pytest
 
+from app.core.config import settings
 from app.core.database import engine
 from app.platform.wallet_payment.models import Rider
+
+
+@pytest.fixture(autouse=True)
+def default_sms_console_mode(monkeypatch):
+    """Ensure automated tests use simulated console SMS mode unless explicitly testing live gateway."""
+    monkeypatch.setattr(settings, "SMS_MODE", "console")
 
 
 @pytest.fixture

@@ -184,10 +184,6 @@ def test_sendpk_http_status_error(monkeypatch):
 
 
 def test_sendpk_unrecognised_response_raises_error(monkeypatch):
-    # BUG FIX 2 regression test: an unrecognised non-OK response must raise
-    # SMSGatewayError, NOT silently return success. Previously the code returned
-    # success for any response that was not a known error code and did not
-    # start with 'OK', hiding real delivery failures from the application layer.
     monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
     monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
 
@@ -204,10 +200,6 @@ def test_sendpk_unrecognised_response_raises_error(monkeypatch):
 
 
 def test_sendpk_json_error_code_not_swallowed(monkeypatch):
-    # BUG FIX 1 regression test: SMSGatewayError raised inside the JSON parse
-    # block must NOT be swallowed. Narrowing the except to json.JSONDecodeError
-    # ensures only genuine parse failures are silenced, and known error codes
-    # always propagate correctly to the caller.
     monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
     monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
 
@@ -222,3 +214,38 @@ def test_sendpk_json_error_code_not_swallowed(monkeypatch):
         with pytest.raises(SMSGatewayError) as exc_info:
             send_sms_via_sendpk("+923001234567", "Your code is 123456")
         assert "Sender ID" in str(exc_info.value)
+
+
+def test_sendpk_json_ip_whitelist_or_disabled_raises_error(monkeypatch):
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.is_error = False
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "success": "false",
+        "results": [{"status": "1", "error": "API Disabled! Please Whitelist Your IP: 141.230.128.228"}],
+    }
+    mock_response.text = '{"success":"false","results":[{"status":"1","error":"API Disabled! Please Whitelist Your IP: 141.230.128.228"}]}'
+
+    with patch("httpx.Client.post", return_value=mock_response):
+        with pytest.raises(SMSGatewayError) as exc_info:
+            send_sms_via_sendpk("+923001234567", "Your code is 123456")
+        assert "Whitelist Your IP" in str(exc_info.value)
+
+
+def test_sendpk_plain_text_colon_delimited_error(monkeypatch):
+    monkeypatch.setattr(settings, "SMS_MODE", "sendpk")
+    monkeypatch.setattr(settings, "SENDPK_API_KEY", "test-api-key")
+
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.is_error = False
+    mock_response.status_code = 200
+    mock_response.json.side_effect = ValueError("Not JSON")
+    mock_response.text = "1 : Invalid Username Or Password"
+
+    with patch("httpx.Client.post", return_value=mock_response):
+        with pytest.raises(SMSGatewayError) as exc_info:
+            send_sms_via_sendpk("+923001234567", "Your code is 123456")
+        assert "Invalid Username Or Password" in str(exc_info.value)

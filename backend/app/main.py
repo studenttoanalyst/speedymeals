@@ -6,6 +6,11 @@ App entry point. Run with:
 import logging
 import os
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -90,23 +95,25 @@ def seed_first_admin_on_startup() -> None:
     sms_mode = settings.effective_sms_mode
     api_key_present = bool(settings.SENDPK_API_KEY)
     env_file_exists = ENV_FILE_PATH.exists()
-    logger.info(
-        "[CONFIG] SMS_MODE=%s | SENDPK_API_KEY present=%s | "
-        "env_file=%s (exists=%s) | OS SMS_MODE override=%s",
-        sms_mode,
-        api_key_present,
-        ENV_FILE_PATH,
-        env_file_exists,
-        os.environ.get("SMS_MODE", "<not set in OS env>"),
+    banner_msg = (
+        f"[CONFIG] SMS_MODE={sms_mode} | SENDPK_API_KEY present={api_key_present} | "
+        f"env_file={ENV_FILE_PATH} (exists={env_file_exists}) | "
+        f"OS SMS_MODE override={os.environ.get('SMS_MODE', '<not set in OS env>')}"
     )
+    logger.info(banner_msg)
+    print(banner_msg, flush=True)
     if sms_mode == "console":
-        logger.warning(
-            "[CONFIG] SMS is running in CONSOLE mode — OTPs will NOT be dispatched "
-            "via SendPK. Set SMS_MODE=sendpk in the .env file and ensure no "
-            "system-level SMS_MODE environment variable is overriding it."
+        warn_msg = (
+            "[CONFIG] WARNING: SMS is running in CONSOLE mode — OTPs will NOT be dispatched "
+            "via SendPK. Set SMS_MODE=sendpk in your .env file and verify no "
+            "systemd/OS Environment override is active."
         )
+        logger.warning(warn_msg)
+        print(warn_msg, flush=True)
     else:
-        logger.info("[CONFIG] SMS gateway: SendPK live dispatch ACTIVE.")
+        active_msg = "[CONFIG] SMS gateway: SendPK live dispatch ACTIVE."
+        logger.info(active_msg)
+        print(active_msg, flush=True)
     # ─────────────────────────────────────────────────────────────────────────
 
     db = SessionLocal()

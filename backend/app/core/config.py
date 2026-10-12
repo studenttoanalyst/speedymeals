@@ -8,11 +8,19 @@ from pathlib import Path
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Always resolve .env relative to this file's own folder (app/), not the
-# current working directory the app happens to be launched from. Without
-# this, `uvicorn app.main:app` run from backend/ silently fails to find
-# backend/app/.env because pydantic-settings looks in the CWD by default.
-ENV_FILE_PATH = Path(__file__).resolve().parent.parent / ".env"
+# Resolve candidate .env files in priority order:
+# 1. backend/.env (standard server deployment root)
+# 2. backend/app/.env (module-level .env)
+# 3. Current working directory .env
+_APP_DIR = Path(__file__).resolve().parent.parent
+_BACKEND_DIR = _APP_DIR.parent
+_CANDIDATE_ENV_PATHS = [
+    _BACKEND_DIR / ".env",
+    _APP_DIR / ".env",
+    Path.cwd() / ".env",
+]
+ENV_FILES: list[Path] = [p for p in _CANDIDATE_ENV_PATHS if p.is_file()] or [_APP_DIR / ".env"]
+ENV_FILE_PATH: Path = ENV_FILES[0]
 
 
 class Settings(BaseSettings):
@@ -98,10 +106,10 @@ class Settings(BaseSettings):
     @property
     def effective_sms_mode(self) -> str:
         """Returns the active SMS delivery mode ('console' or 'sendpk')."""
-        return self.SMS_MODE.strip().lower()
+        return self.SMS_MODE.strip().strip("'\"").lower()
 
     model_config = SettingsConfigDict(
-        env_file=ENV_FILE_PATH, env_file_encoding="utf-8", extra="ignore"
+        env_file=ENV_FILES, env_file_encoding="utf-8", extra="ignore"
     )
 
 
