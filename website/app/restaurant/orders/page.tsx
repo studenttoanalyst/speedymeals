@@ -61,7 +61,7 @@ export default function RestaurantOrdersPage() {
       const errMsg = String(err?.message || '').toLowerCase();
       if (err?.status === 401 || errMsg.includes('token') || errMsg.includes('expired')) {
         try {
-          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'contact@karachibiryani.pk';
+          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
           await loginRestaurant({ email, password: 'Partner@123' });
           const retryData = await listRestaurantOrders();
           setOrders(retryData);
@@ -129,7 +129,7 @@ export default function RestaurantOrdersPage() {
       // If error is 401 / expired token, transparently mint a fresh token and retry immediately
       if (err?.status === 401 || errMsg.includes('token') || errMsg.includes('expired')) {
         try {
-          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'contact@karachibiryani.pk';
+          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
           await loginRestaurant({ email, password: 'Partner@123' });
           await updateRestaurantOrderStatus(orderId, newStatus);
           if (selectedOrder && selectedOrder.id === orderId) {

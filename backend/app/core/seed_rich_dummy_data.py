@@ -26,7 +26,12 @@ def seed_rich_dummy_data():
     db: Session = SessionLocal()
     try:
         print("[SpeedyMeals Seed] Checking restaurants...")
-        kb_restaurant = db.query(Restaurant).filter(Restaurant.email == "contact@karachibiryani.pk").first()
+        kb_restaurant = db.query(Restaurant).filter(
+            Restaurant.email.in_(["karachibiryani@speedymeals.com", "contact@karachibiryani.pk"])
+        ).first()
+        if kb_restaurant and kb_restaurant.email != "karachibiryani@speedymeals.com":
+            kb_restaurant.email = "karachibiryani@speedymeals.com"
+            db.commit()
         if not kb_restaurant:
             print("[SpeedyMeals Seed] Karachi Biryani House not found! Looking for first restaurant...")
             kb_restaurant = db.query(Restaurant).first()

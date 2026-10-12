@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
     if (savedEmail) {
       setEmail(savedEmail);
     } else {
-      setEmail('admin@speedymeals.com');
+      setEmail('admin@speedymealservices.com');
     }
   }, [router]);
 
@@ -143,12 +143,12 @@ export default function AdminLoginPage() {
           <div className="p-3 bg-rose-50/60 border border-rose-100 rounded-xl flex items-center justify-between text-xs">
             <div>
               <span className="font-semibold text-slate-800 block">Platform Demo Admin</span>
-              <span className="font-mono text-[11px] text-slate-500">admin@speedymeals.com • admin123</span>
+              <span className="font-mono text-[11px] text-slate-500">admin@speedymealservices.com • admin123</span>
             </div>
             <button
               type="button"
               onClick={() => {
-                setEmail('admin@speedymeals.com');
+                setEmail('admin@speedymealservices.com');
                 setPassword('admin123');
               }}
               className="py-1 px-2.5 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 font-semibold rounded-lg text-[11px] transition-colors cursor-pointer"

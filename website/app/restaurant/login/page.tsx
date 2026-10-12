@@ -212,7 +212,7 @@ export default function RestaurantLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="partner@restaurant.com"
+                  placeholder="partner@speedymeals.com"
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
                 />
               </div>
@@ -263,13 +263,13 @@ export default function RestaurantLoginPage() {
                 </span>
               </div>
               <div className="text-[11px] text-slate-600 font-mono flex items-center justify-between">
-                <span>contact@karachibiryani.pk</span>
+                <span>karachibiryani@speedymeals.com</span>
                 <span className="text-slate-400">Partner@123</span>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  setEmail('contact@karachibiryani.pk');
+                  setEmail('karachibiryani@speedymeals.com');
                   setPassword('Partner@123');
                 }}
                 className="w-full py-1.5 px-3 bg-white hover:bg-rose-100 border border-rose-200 text-rose-700 font-semibold rounded-lg text-xs transition-colors cursor-pointer flex items-center justify-center gap-1"

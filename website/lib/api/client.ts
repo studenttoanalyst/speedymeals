@@ -141,7 +141,7 @@ async function requestTokenRefresh(failedToken?: string | null): Promise<string 
       const role = localStorage.getItem('sm_user_role');
       if (role === 'restaurant' || typeof window !== 'undefined' && window.location.pathname.startsWith('/restaurant')) {
         try {
-          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'contact@karachibiryani.pk';
+          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
           const reauthRes = await fetch(`${baseUrl}/auth/restaurant/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -174,7 +174,7 @@ async function requestTokenRefresh(failedToken?: string | null): Promise<string 
           const adminReauth = await fetch(`${baseUrl}/auth/admin/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: 'admin@speedymeals.com', password: 'admin123' }),
+            body: JSON.stringify({ email: 'admin@speedymealservices.com', password: 'admin123' }),
           });
 
           if (adminReauth.ok) {

@@ -38,6 +38,16 @@ class RestaurantCreateSchema(BaseModel):
     commission_rate: float = Field(default=10.00, gt=0, le=100)
     currency: str = "PKR"
 
+    @field_validator("email")
+    @classmethod
+    def validate_restaurant_login_email(cls, v: str) -> str:
+        clean = v.strip().lower()
+        if "@" not in clean:
+            return f"{clean}@speedymeals.com"
+        if not clean.endswith("@speedymeals.com"):
+            raise ValueError("Restaurant/Merchant login email must have domain @speedymeals.com")
+        return clean
+
 
 class RestaurantAdminResponseSchema(BaseModel):
     id: uuid.UUID

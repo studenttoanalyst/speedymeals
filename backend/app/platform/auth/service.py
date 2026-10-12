@@ -519,6 +519,7 @@ def seed_first_admin(db: Session) -> None:
     Step 10 - auto-seed on app startup (see ADR-002-first-admin-seed.md).
     Runs once per startup: no-op if ANY admin row already exists.
     Assigns the seeded Superadmin role if available.
+    Ensures domain is @speedymealservices.com.
     """
     admin = db.query(Admin).first()
 
@@ -526,15 +527,22 @@ def seed_first_admin(db: Session) -> None:
     superadmin_role = db.query(AdminRole).filter(AdminRole.slug == "superadmin").first()
     superadmin_role_id = superadmin_role.id if superadmin_role else None
 
+    target_email = (settings.FIRST_ADMIN_EMAIL or "admin@speedymealservices.com").strip().lower()
+    if not target_email.endswith("@speedymealservices.com"):
+        target_email = "admin@speedymealservices.com"
+
     if admin is not None:
+        # Migrate any legacy admin email to @speedymealservices.com
+        if not admin.email.endswith("@speedymealservices.com"):
+            admin.email = target_email
         if admin.role_id is None and superadmin_role_id is not None:
             admin.role_id = superadmin_role_id
-            db.commit()
+        db.commit()
         return
 
     db.add(Admin(
-        email=settings.FIRST_ADMIN_EMAIL,
-        password_hash=hash_password(settings.FIRST_ADMIN_PASSWORD),
+        email=target_email,
+        password_hash=hash_password(settings.FIRST_ADMIN_PASSWORD or "admin123"),
         role="super_admin",
         role_id=superadmin_role_id,
         first_name="Super",
@@ -549,6 +557,7 @@ def seed_demo_restaurant(db: Session) -> None:
     """
     Auto-seed default demo restaurant on app startup if not present,
     matching the restaurant login portal credentials.
+    Mandates domain @speedymeals.com.
     Only seeds in development environment.
     """
     from app.core.config import settings
@@ -558,11 +567,19 @@ def seed_demo_restaurant(db: Session) -> None:
     import datetime
     from app.modules.food_delivery.models import MenuItem
 
-    restaurant = db.query(Restaurant).filter(Restaurant.email == "contact@karachibiryani.pk").first()
-    if not restaurant:
+    restaurant = db.query(Restaurant).filter(
+        Restaurant.email.in_(["karachibiryani@speedymeals.com", "contact@karachibiryani.pk"])
+    ).first()
+
+    if restaurant:
+        # Migrate legacy email to @speedymeals.com
+        if restaurant.email != "karachibiryani@speedymeals.com":
+            restaurant.email = "karachibiryani@speedymeals.com"
+            db.commit()
+    else:
         restaurant = Restaurant(
             name="Karachi Biryani House",
-            email="contact@karachibiryani.pk",
+            email="karachibiryani@speedymeals.com",
             password_hash=hash_password("Partner@123"),
             phone_number="+923001112233",
             address="Shop # 4, Main Boat Basin, Clifton Block 5, Karachi",

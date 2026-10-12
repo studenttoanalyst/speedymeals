@@ -89,8 +89,8 @@ class Settings(BaseSettings):
         return value
 
     # First Admin Auto-Seed (Phase 2, Step 10 - see ADR-002)
-    FIRST_ADMIN_EMAIL: str
-    FIRST_ADMIN_PASSWORD: str
+    FIRST_ADMIN_EMAIL: str = "admin@speedymealservices.com"
+    FIRST_ADMIN_PASSWORD: str = "admin123"
 
     # Firebase Cloud Messaging (push notifications). Leave BOTH empty to disable
     # push entirely (every send becomes a no-op). Provide either the service

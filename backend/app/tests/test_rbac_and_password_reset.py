@@ -26,7 +26,7 @@ def client(db_session):
 def superadmin_headers(client, db_session):
     """Seed or fetch superadmin and generate auth header."""
     superadmin_role = db_session.query(AdminRole).filter(AdminRole.slug == "superadmin").first()
-    email = f"superadmin-{uuid.uuid4().hex[:6]}@speedymeals.pk"
+    email = f"superadmin-{uuid.uuid4().hex[:6]}@speedymealservices.com"
     admin = Admin(
         email=email,
         password_hash=hash_password("SuperSecret@123"),
@@ -57,7 +57,7 @@ def _reset_token_from_logs(capsys, email: str) -> str:
 
 def test_admin_forgot_and_reset_password(client, db_session, capsys):
     """Test full forgot-password and reset-password cycle for admin account."""
-    email = f"admin-reset-{uuid.uuid4().hex[:6]}@speedymeals.pk"
+    email = f"admin-reset-{uuid.uuid4().hex[:6]}@speedymealservices.com"
     admin = Admin(
         email=email,
         password_hash=hash_password("OldPassword@123"),
@@ -93,7 +93,7 @@ def test_admin_forgot_and_reset_password(client, db_session, capsys):
 def test_restaurant_forgot_and_reset_password(client, db_session, capsys):
     """Test full forgot-password and reset-password cycle for restaurant account."""
     unique = uuid.uuid4().hex[:8]
-    email = f"rest-reset-{unique}@speedymeals.pk"
+    email = f"rest-reset-{unique}@speedymeals.com"
     restaurant = Restaurant(
         name="Forgot PW Test Cafe",
         email=email,
@@ -192,6 +192,7 @@ def test_admin_staff_provisioning_and_first_login(client, superadmin_headers, db
 
     generated_email = prov_data["admin"]["email"]
     assert "tariq.mahmood" in generated_email
+    assert "@speedymealservices.com" in generated_email
     temp_pass = prov_data["temporary_password"]
     assert len(temp_pass) >= 16
 
