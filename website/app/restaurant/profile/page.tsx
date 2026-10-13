@@ -86,13 +86,13 @@ export default function RestaurantProfilePage() {
 
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
-      <Topbar title="Restaurant Profile & Photos" />
+      <Topbar title="Merchant Profile & Photos" />
 
       <div className="p-6 max-w-5xl mx-auto w-full space-y-6">
         {savedSuccess && (
           <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-in fade-in">
             <CheckCircle size={16} weight="bold" className="text-emerald-600" />
-            <span>Restaurant profile and photos updated successfully!</span>
+            <span>Merchant profile and photos updated successfully!</span>
           </div>
         )}
 
@@ -143,11 +143,11 @@ export default function RestaurantProfilePage() {
                     <div className="pt-2 sm:pt-3 space-y-1.5">
                       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                         <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                          {name || 'Restaurant Name'}
+                          {name || 'Merchant Name'}
                         </h2>
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
                           <CheckCircle size={13} weight="fill" className="text-emerald-500" />
-                          Verified Restaurant
+                          Verified Merchant
                         </span>
                       </div>
                       <p className="text-xs text-slate-600 flex items-center justify-center sm:justify-start gap-1.5 font-medium">
@@ -180,14 +180,14 @@ export default function RestaurantProfilePage() {
               <div className="border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-bold text-slate-900">Logo & Cover Photos</h3>
                 <p className="text-xs text-slate-400">
-                  Upload your square restaurant logo and wide cover banner photo.
+                  Upload your square merchant logo and wide cover banner photo.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 1:1 Logo Uploader */}
                 <ImageUpload
-                  label="Restaurant Logo"
+                  label="Merchant Logo"
                   aspectRatio="1:1"
                   value={logoUrl}
                   onChange={setLogoUrl}
@@ -196,7 +196,7 @@ export default function RestaurantProfilePage() {
 
                 {/* 16:9 / 3:1 Cover Banner Uploader */}
                 <ImageUpload
-                  label="Restaurant Cover Photo"
+                  label="Merchant Cover Photo"
                   aspectRatio="16:9"
                   value={bannerUrl}
                   onChange={setBannerUrl}
@@ -216,7 +216,7 @@ export default function RestaurantProfilePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Restaurant Name</label>
+                  <label className="font-semibold text-slate-700">Merchant Name</label>
                   <input
                     type="text"
                     required

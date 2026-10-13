@@ -98,7 +98,7 @@ export function Sidebar({ role }: SidebarProps) {
     {
       title: 'Overview',
       items: [
-        { label: 'Restaurant Dashboard', href: '/restaurant/dashboard', icon: ChartLineUp },
+        { label: 'Merchant Dashboard', href: '/restaurant/dashboard', icon: ChartLineUp },
       ],
     },
     {
@@ -121,7 +121,7 @@ export function Sidebar({ role }: SidebarProps) {
       ],
     },
     {
-      title: 'Restaurant Settings',
+      title: 'Merchant Settings',
       items: [
         { label: 'Profile & Photos', href: '/restaurant/profile', icon: Sliders },
       ],
@@ -151,7 +151,7 @@ export function Sidebar({ role }: SidebarProps) {
                 SPEEDY<span className="text-rose-600">MEALS</span>
               </div>
               <div className="text-[10px] text-slate-400 font-medium">
-                {role === 'admin' ? 'Admin Management Portal' : 'Restaurant Portal'}
+                {role === 'admin' ? 'Admin Management Portal' : 'Merchant Portal'}
               </div>
             </div>
           </Link>
@@ -162,7 +162,7 @@ export function Sidebar({ role }: SidebarProps) {
                 : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
             }`}
           >
-            {role === 'admin' ? 'Admin' : 'Restaurant'}
+            {role === 'admin' ? 'Admin' : 'Merchant'}
           </span>
         </div>
 

@@ -194,7 +194,7 @@ export default function RestaurantDashboardPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Restaurant Dashboard"
+        title="Merchant Dashboard"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchData();

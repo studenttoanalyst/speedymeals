@@ -11,7 +11,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -81,6 +81,18 @@ def root_status() -> dict[str, str]:
         "docs": "/docs",
         "health": "/health",
     }
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    """Silence browser /favicon.ico probes with 204 No Content."""
+    return Response(status_code=204)
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots():
+    """Direct search engine bots to not crawl API endpoints."""
+    return Response(content="User-agent: *\nDisallow: /\n", media_type="text/plain")
 
 
 @app.on_event("startup")

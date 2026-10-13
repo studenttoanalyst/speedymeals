@@ -395,7 +395,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               >
                 <div className="flex items-center space-x-2">
                   <Storefront size={16} weight="bold" />
-                  <span>Restaurant Portal</span>
+                  <span>Merchant Portal</span>
                 </div>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 border border-blue/30 bg-blue/10 text-blue">
                   {sessionRole === 'restaurant' ? 'DASHBOARD' : 'LOGIN'}

@@ -174,7 +174,7 @@ export default function RestaurantOrderDetailPage({
                   <span className="font-mono">−{formatPKR(order.commission_amount)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-900 font-bold pt-3 border-t border-slate-200 text-sm">
-                  <span>Net Restaurant Share</span>
+                  <span>Net Merchant Share</span>
                   <span className="font-mono text-emerald-700 text-base">
                     {formatPKR(order.restaurant_payable)}
                   </span>

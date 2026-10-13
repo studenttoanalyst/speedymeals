@@ -46,6 +46,32 @@ def _cooldown_key(phone_number: str) -> str:
     return f"otp:cooldown:{phone_number}"
 
 
+def validate_pakistan_mobile_number(phone_number: str) -> None:
+    """
+    Validates that a phone number conforms strictly to Pakistan telecommunication numbering plan.
+    Must be +92 followed by 10 digits starting with 30-37 (e.g. +923342121401).
+    """
+    cleaned = phone_number.strip()
+    if not cleaned.startswith("+"):
+        if cleaned.startswith("0092"):
+            cleaned = "+" + cleaned[2:]
+        elif cleaned.startswith("92"):
+            cleaned = "+" + cleaned
+        elif cleaned.startswith("0") and len(cleaned) == 11:
+            cleaned = "+92" + cleaned[1:]
+        elif len(cleaned) == 10 and cleaned.startswith("3"):
+            cleaned = "+92" + cleaned
+        else:
+            cleaned = "+" + cleaned
+
+    import re
+    if not re.match(r"^\+923[0-7]\d{8}$", cleaned):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid Pakistani mobile number format. Must be an 11-digit mobile number (e.g. 03342121401).",
+        )
+
+
 def _send_otp_via_console(phone_number: str, otp_code: str) -> None:
     """
     Backward-compatible console sender helper. Dispatches through sms_client.
@@ -113,10 +139,9 @@ async def generate_and_send_otp_async(phone_number: str) -> None:
         # Clear the OTP & cooldown from Redis so user is not locked out
         redis_client.delete(_otp_key(phone_number))
         redis_client.delete(_cooldown_key(phone_number))
-        logger.error(f"Failed to dispatch OTP SMS to {mask_phone_number(phone_number)}: {exc}")
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Failed to send OTP code via SMS. Please try again later.",
+            status_code=getattr(exc, "status_code", status.HTTP_503_SERVICE_UNAVAILABLE),
+            detail=getattr(exc, "message", "Failed to send OTP code via SMS. Please try again later."),
         ) from exc
 
 

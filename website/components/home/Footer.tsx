@@ -177,7 +177,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                     href="/restaurant"
                     className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5"
                   >
-                    <span>Restaurant Portal</span>
+                    <span>Merchant Portal</span>
                     <ArrowUpRight size={12} weight="bold" className="shrink-0" />
                   </Link>
                 </li>

@@ -228,14 +228,13 @@ export async function loginRestaurant(payload: RestaurantLoginPayload): Promise<
  * Restaurant OTP Request
  */
 export async function requestRestaurantOTP(payload: OTPRequestPayload): Promise<{ message: string }> {
-  return apiClient<{ message: string }>('/auth/otp/request', {
+  return apiClient<{ message: string }>('/auth/restaurant/otp/request', {
     method: 'POST',
     body: JSON.stringify({
       phone_number: normalizeNationalNumber(payload.phone_number),
       country_code: payload.country_code ?? '+92',
     }),
     skipAuth: true,
-    fallbackData: { message: 'OTP sent (Dev mode).' },
   });
 }
 

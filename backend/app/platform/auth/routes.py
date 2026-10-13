@@ -49,10 +49,12 @@ def _build_full_number(country_code: str, phone_number: str) -> str:
 async def request_otp(payload: OTPRequestSchema):
     """
     Generate a new OTP and send it via SendPK SMS gateway (or console fallback in dev).
+    Validates Pakistani numbering format to prevent wasting SMS credits.
     Rejects with 429 if called before the resend cooldown (45s) expires.
     Rate-limited (max 5/min).
     """
     full_number = _build_full_number(payload.country_code, payload.phone_number)
+    service.validate_pakistan_mobile_number(full_number)
     enforce_rate_limit(full_number, action="otp_request")
     await service.generate_and_send_otp_async(full_number)
     return OTPResponseSchema(message="OTP sent.")
@@ -148,6 +150,28 @@ def restaurant_login(payload: RestaurantLoginSchema, db: Session = Depends(get_d
     restaurant = service.authenticate_restaurant_by_password(db, payload.email, payload.password)
     tokens = service.issue_tokens(db, restaurant.id, role="restaurant")
     return TokenResponseSchema(**tokens)
+
+
+@router.post("/restaurant/otp/request", response_model=OTPResponseSchema, status_code=status.HTTP_200_OK)
+async def restaurant_otp_request(payload: OTPRequestSchema, db: Session = Depends(get_db)):
+    """
+    Restaurant portal OTP request.
+    Strictly validates Pakistani mobile number format and verifies that an active
+    restaurant account exists BEFORE dispatching SMS to optimize credit usage.
+    """
+    full_number = _build_full_number(payload.country_code, payload.phone_number)
+    service.validate_pakistan_mobile_number(full_number)
+
+    restaurant = service.get_restaurant_by_phone(db, full_number)
+    if restaurant.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your restaurant account is suspended or inactive. Please contact support.",
+        )
+
+    enforce_rate_limit(full_number, action="restaurant_otp_request")
+    await service.generate_and_send_otp_async(full_number)
+    return OTPResponseSchema(message="OTP sent successfully.")
 
 
 @router.post("/restaurant/otp/verify", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
