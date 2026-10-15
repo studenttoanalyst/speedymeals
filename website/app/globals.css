@@ -38,6 +38,14 @@
   --line: #E4E2DD;
   --dynamic-accent: #E23A2E;
   --dynamic-accent-soft: rgba(226, 58, 46, 0.15);
+
+  /* Layered Glass Design Tokens (Apple-grade Spec) */
+  --nav-glass-bg: rgba(255, 255, 255, 0.55);
+  --nav-glass-sheen: linear-gradient(to bottom, rgba(255, 255, 255, 0.70), rgba(255, 255, 255, 0.35));
+  --nav-glass-border: rgba(255, 255, 255, 0.60);
+  --nav-glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.05), 0 10px 32px -6px rgba(0, 0, 0, 0.18);
+  --nav-glass-dropdown-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.05), 0 16px 40px -6px rgba(0, 0, 0, 0.18);
+  --legal-scroll-offset: 88px;
 }
 
 /* Scoped pill navbar exceptions */
@@ -48,13 +56,37 @@
   border-radius: 16px;
 }
 
+.apple-glass-pill {
+  background-image: var(--nav-glass-sheen);
+  background-color: var(--nav-glass-bg);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--nav-glass-border);
+  box-shadow: var(--nav-glass-shadow);
+}
 
+.apple-glass-panel {
+  background-image: var(--nav-glass-sheen);
+  background-color: var(--nav-glass-bg);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--nav-glass-border);
+  box-shadow: var(--nav-glass-dropdown-shadow);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .apple-glass-pill,
+  .apple-glass-panel {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    background-image: none !important;
+  }
+}
 
 /* Smooth anchor scrolling offsets for fixed header */
 #services,
 #partner,
 #overview {
-  scroll-margin-top: 80px;
+  scroll-margin-top: calc(var(--legal-scroll-offset, 88px) + 16px);
 }
 
 /* Mobile & Tablet: Force immediate visibility for key sections so they never get hidden */

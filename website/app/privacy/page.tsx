@@ -24,27 +24,25 @@ import {
 } from '@phosphor-icons/react';
 import { Footer } from '@/components/home/Footer';
 import { HighlightedText } from '@/components/legal/HighlightedText';
+import { useLegalScroll } from '@/components/legal/useLegalScroll';
+import { LegalTabSwitcher } from '@/components/legal/LegalTabSwitcher';
 import privacyData from '@/lib/legal/privacyData.json';
+
+const ALL_PRIVACY_SECTION_IDS = privacyData.sections.map(s => s.id);
 
 export default function PrivacyPolicyPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMatchIndex, setActiveMatchIndex] = useState(0);
   const [totalMatches, setTotalMatches] = useState(0);
-  const [activeSectionId, setActiveSectionId] = useState<string>('sec-1');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [copiedDocLink, setCopiedDocLink] = useState(false);
 
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const { activeSectionId, scrollToSection } = useLegalScroll({
+    defaultSectionId: 'sec-1',
+    sectionIds: ALL_PRIVACY_SECTION_IDS,
+  });
 
-  const scrollToSection = (id: string) => {
-    setActiveSectionId(id);
-    const element = document.getElementById(id);
-    if (element) {
-      const yOffset = -90;
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  };
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleCopySection = (secNum: string) => {
     const slug = `sec-${secNum}`;
@@ -184,24 +182,7 @@ export default function PrivacyPolicyPage() {
 
           {/* Document Switcher Tabs (Desktop & Mobile) */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="flex items-center bg-[#ECEEF1] p-1 border border-[#D5D8DC]">
-              <Link
-                href="/terms"
-                className="px-2.5 sm:px-3 py-1 text-[#5B5F66] hover:text-ink text-xs font-mono transition-colors flex items-center space-x-1.5"
-              >
-                <FileText size={13} />
-                <span className="hidden xs:inline">Terms</span>
-                <span className="xs:hidden">Terms</span>
-              </Link>
-              <Link
-                href="/privacy"
-                className="px-2.5 sm:px-3 py-1 bg-white text-ink text-xs font-mono font-bold shadow-xs flex items-center space-x-1.5"
-              >
-                <LockKey size={13} className="text-red" weight="bold" />
-                <span className="hidden xs:inline">Privacy</span>
-                <span className="xs:hidden">Privacy</span>
-              </Link>
-            </div>
+            <LegalTabSwitcher />
 
             {/* Print and Share Actions */}
             <div className="flex items-center space-x-1.5">
@@ -258,11 +239,10 @@ export default function PrivacyPolicyPage() {
             {searchQuery.trim() && (
               <div className="flex items-center space-x-1 shrink-0">
                 <span
-                  className={`font-mono text-[10px] px-1.5 py-0.5 border ${
-                    totalMatches > 0
+                  className={`font-mono text-[10px] px-1.5 py-0.5 border ${totalMatches > 0
                       ? 'bg-paper-off border-line text-ink font-bold'
                       : 'bg-red/10 border-red/30 text-red font-bold'
-                  }`}
+                    }`}
                 >
                   {totalMatches > 0 ? `${activeMatchIndex + 1}/${totalMatches}` : '0/0'}
                 </span>
@@ -339,11 +319,10 @@ export default function PrivacyPolicyPage() {
                   {searchQuery.trim() && (
                     <div className="flex items-center space-x-1 shrink-0">
                       <span
-                        className={`font-mono text-[10px] px-1.5 py-0.5 border ${
-                          totalMatches > 0
+                        className={`font-mono text-[10px] px-1.5 py-0.5 border ${totalMatches > 0
                             ? 'bg-paper-off border-line text-ink font-bold'
                             : 'bg-red/10 border-red/30 text-red font-bold'
-                        }`}
+                          }`}
                       >
                         {totalMatches > 0 ? `${activeMatchIndex + 1} of ${totalMatches}` : '0 of 0'}
                       </span>
@@ -389,8 +368,8 @@ export default function PrivacyPolicyPage() {
                 )}
               </div>
 
-              {/* Table of Contents */}
-              <div className="space-y-3">
+              {/* Table of Contents (Opaque card with overflow-hidden clips background blobs) */}
+              <div className="space-y-3 bg-white p-4 border border-line shadow-xs overflow-hidden">
                 <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold flex items-center justify-between pb-1 border-b border-line">
                   <span>POLICY SECTIONS</span>
                   <span className="text-[10px] text-[#10B981] font-mono font-bold">{privacyData.sections.length} SECTIONS</span>
@@ -404,11 +383,10 @@ export default function PrivacyPolicyPage() {
                         key={sec.id}
                         type="button"
                         onClick={() => scrollToSection(sec.id)}
-                        className={`w-full text-left py-1.5 px-2 transition-all flex items-center space-x-2 group cursor-pointer ${
-                          isActive
+                        className={`w-full text-left py-1.5 px-2 transition-all flex items-center space-x-2 group cursor-pointer ${isActive
                             ? 'bg-ink text-white font-bold shadow-xs'
-                            : 'text-[#5B5F66] hover:bg-white hover:text-ink'
-                        }`}
+                            : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
+                          }`}
                       >
                         <span className={`text-[10px] font-bold shrink-0 ${isActive ? 'text-red' : 'text-[#8C9099]'}`}>
                           {sec.num}.
@@ -482,7 +460,7 @@ export default function PrivacyPolicyPage() {
               <div className="space-y-3 font-sans text-sm text-[#4B515D] leading-relaxed">
                 {privacyData.meta.intro.map((p, idx) => (
                   <p key={idx}>
-                    <HighlightedText text={p} query={searchQuery} />
+                    <HighlightedText text={p} query={searchQuery} crossLinks={true} />
                   </p>
                 ))}
               </div>
@@ -557,7 +535,7 @@ export default function PrivacyPolicyPage() {
                         ) : (
                           <>
                             <LinkSimple size={12} weight="bold" />
-                            <span className="text-[10px] hidden sm:inline">LINK</span>
+                            <span className="text-[10px] hidden sm:inline">COPY</span>
                           </>
                         )}
                       </button>
@@ -568,7 +546,7 @@ export default function PrivacyPolicyPage() {
                       <div className="space-y-3 font-sans text-xs sm:text-sm text-[#373C46] leading-relaxed mb-4">
                         {sec.paragraphs.map((p, pIdx) => (
                           <p key={pIdx}>
-                            <HighlightedText text={p} query={searchQuery} />
+                            <HighlightedText text={p} query={searchQuery} crossLinks={true} />
                           </p>
                         ))}
                       </div>

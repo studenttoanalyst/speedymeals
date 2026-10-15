@@ -25,27 +25,31 @@ import {
 } from '@phosphor-icons/react';
 import { Footer } from '@/components/home/Footer';
 import { HighlightedText } from '@/components/legal/HighlightedText';
+import { useLegalScroll } from '@/components/legal/useLegalScroll';
+import { LegalTabSwitcher } from '@/components/legal/LegalTabSwitcher';
+import { LegalBadgeChip } from '@/components/legal/LegalBadgeChip';
 import termsData from '@/lib/legal/termsData.json';
+
+const ALL_TERMS_SECTION_IDS = [
+  ...termsData.parts.map(p => p.id),
+  'sched-1',
+  'sched-2',
+  'sec-compliance',
+];
 
 export default function TermsAndConditionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMatchIndex, setActiveMatchIndex] = useState(0);
   const [totalMatches, setTotalMatches] = useState(0);
-  const [activeSectionId, setActiveSectionId] = useState<string>('part-a');
   const [copiedClause, setCopiedClause] = useState<string | null>(null);
   const [copiedDocLink, setCopiedDocLink] = useState(false);
 
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const { activeSectionId, scrollToSection } = useLegalScroll({
+    defaultSectionId: 'part-a',
+    sectionIds: ALL_TERMS_SECTION_IDS,
+  });
 
-  const scrollToSection = (id: string) => {
-    setActiveSectionId(id);
-    const element = document.getElementById(id);
-    if (element) {
-      const yOffset = -90;
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  };
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleCopyClause = (clauseNum: string) => {
     const slug = clauseNum.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -185,24 +189,7 @@ export default function TermsAndConditionsPage() {
 
           {/* Document Switcher Tabs (Desktop & Mobile) */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="flex items-center bg-[#ECEEF1] p-1 border border-[#D5D8DC]">
-              <Link
-                href="/terms"
-                className="px-2.5 sm:px-3 py-1 bg-white text-ink text-xs font-mono font-bold shadow-xs flex items-center space-x-1.5"
-              >
-                <FileText size={13} weight="bold" className="text-red" />
-                <span className="hidden xs:inline">Terms</span>
-                <span className="xs:hidden">Terms</span>
-              </Link>
-              <Link
-                href="/privacy"
-                className="px-2.5 sm:px-3 py-1 text-[#5B5F66] hover:text-ink text-xs font-mono transition-colors flex items-center space-x-1.5"
-              >
-                <LockKey size={13} />
-                <span className="hidden xs:inline">Privacy</span>
-                <span className="xs:hidden">Privacy</span>
-              </Link>
-            </div>
+            <LegalTabSwitcher />
 
             {/* Print and Share Actions */}
             <div className="flex items-center space-x-1.5">
@@ -306,11 +293,11 @@ export default function TermsAndConditionsPage() {
             >
               {termsData.parts.map(p => (
                 <option key={p.id} value={p.id}>
-                  {p.title}
+                  {p.title} ({p.sections.length} §)
                 </option>
               ))}
-              <option value="sched-1">SCHEDULE 1 - RATES &amp; LIMITS</option>
-              <option value="sched-2">SCHEDULE 2 - FAILED ORDERS</option>
+              <option value="sched-1">SCHEDULE 1 - RATES &amp; LIMITS (TABLE)</option>
+              <option value="sched-2">SCHEDULE 2 - FAILED ORDERS (MATRIX)</option>
               <option value="sec-compliance">STATUTORY COMPLIANCE (PK LAW)</option>
             </select>
           </div>
@@ -393,8 +380,8 @@ export default function TermsAndConditionsPage() {
                 )}
               </div>
 
-              {/* Quick Links Table of Contents */}
-              <div className="space-y-3">
+              {/* Quick Links Table of Contents (Opaque card with overflow-hidden clips background blobs) */}
+              <div className="space-y-3 bg-white p-4 border border-line shadow-xs overflow-hidden">
                 <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold flex items-center justify-between pb-1 border-b border-line">
                   <span>TABLE OF CONTENTS</span>
                   <span className="text-[10px] text-red font-mono font-bold">UNABRIDGED</span>
@@ -411,17 +398,17 @@ export default function TermsAndConditionsPage() {
                         className={`w-full text-left py-2 px-2.5 transition-all flex items-center justify-between group cursor-pointer ${
                           isActive
                             ? 'bg-red text-white font-bold shadow-xs'
-                            : 'text-[#5B5F66] hover:bg-white hover:text-ink'
+                            : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
                         }`}
                       >
                         <span className="truncate">{part.title}</span>
-                        <span
-                          className={`text-[10px] ml-1 shrink-0 ${
-                            isActive ? 'text-white/80' : 'text-[#8C9099] group-hover:text-ink'
-                          }`}
-                        >
-                          {part.sections.length} sec
-                        </span>
+                        <LegalBadgeChip
+                          label={`${part.sections.length} §`}
+                          title={`${part.sections.length} sections`}
+                          ariaLabel={`${part.sections.length} sections`}
+                          isActive={isActive}
+                          type="part"
+                        />
                       </button>
                     );
                   })}
@@ -433,42 +420,55 @@ export default function TermsAndConditionsPage() {
                   <button
                     type="button"
                     onClick={() => scrollToSection('sched-1')}
-                    className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono cursor-pointer ${
+                    className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono group cursor-pointer ${
                       activeSectionId === 'sched-1'
                         ? 'bg-blue text-white font-bold'
-                        : 'text-[#5B5F66] hover:bg-white hover:text-ink'
+                        : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
                     }`}
                   >
                     <span className="truncate">SCHEDULE 1 - RATES &amp; LIMITS</span>
-                    <span className="text-[10px] opacity-70 ml-1 shrink-0">TABLE</span>
+                    <LegalBadgeChip
+                      label="TABLE"
+                      title="Schedule 1 - Rates & Limits Table"
+                      isActive={activeSectionId === 'sched-1'}
+                      type="table"
+                    />
                   </button>
 
                   <button
                     type="button"
                     onClick={() => scrollToSection('sched-2')}
-                    className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono cursor-pointer ${
+                    className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono group cursor-pointer ${
                       activeSectionId === 'sched-2'
                         ? 'bg-tan text-ink font-bold'
-                        : 'text-[#5B5F66] hover:bg-white hover:text-ink'
+                        : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
                     }`}
                   >
                     <span className="truncate">SCHEDULE 2 - FAILED ORDERS</span>
-                    <span className="text-[10px] opacity-70 ml-1 shrink-0">MATRIX</span>
+                    <LegalBadgeChip
+                      label="MATRIX"
+                      title="Schedule 2 - Failed Orders Matrix"
+                      isActive={activeSectionId === 'sched-2'}
+                      type="matrix"
+                    />
                   </button>
 
                   <button
                     type="button"
                     onClick={() => scrollToSection('sec-compliance')}
-                    className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono cursor-pointer ${
+                    className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono group cursor-pointer ${
                       activeSectionId === 'sec-compliance'
                         ? 'bg-[#10B981] text-white font-bold'
-                        : 'text-[#5B5F66] hover:bg-white hover:text-ink'
+                        : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
                     }`}
                   >
                     <span className="truncate">STATUTORY COMPLIANCE</span>
-                    <span className="text-[10px] text-[#10B981] font-bold ml-1 shrink-0 group-hover:text-white">
-                      PK LAW
-                    </span>
+                    <LegalBadgeChip
+                      label="PK LAW"
+                      title="Statutory Compliance with Pakistan Law"
+                      isActive={activeSectionId === 'sec-compliance'}
+                      type="law"
+                    />
                   </button>
                 </nav>
               </div>
@@ -535,7 +535,7 @@ export default function TermsAndConditionsPage() {
               <div className="space-y-3 font-sans text-sm text-[#4B515D] leading-relaxed">
                 {termsData.meta.preamble.map((p, idx) => (
                   <p key={idx} className={idx === 3 ? 'font-mono text-xs font-bold text-ink pt-2 uppercase tracking-wide' : ''}>
-                    <HighlightedText text={p} query={searchQuery} />
+                    <HighlightedText text={p} query={searchQuery} crossLinks={true} />
                   </p>
                 ))}
               </div>
@@ -619,7 +619,7 @@ export default function TermsAndConditionsPage() {
                           return (
                             <div
                               key={cIdx}
-                              id={clauseSlug ? `clause-${clauseSlug}` : undefined}
+                              id={clauseSlug || undefined}
                               className="group flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3 py-1 hover:bg-paper-off/50 rounded-xs transition-colors"
                             >
                               {clause.num && (
@@ -628,11 +628,11 @@ export default function TermsAndConditionsPage() {
                                     <HighlightedText text={clause.num} query={searchQuery} />
                                   </span>
                                   <button
-                                    type="button"
-                                    onClick={() => handleCopyClause(clause.num)}
-                                    title={`Copy link to clause ${clause.num}`}
-                                    className="opacity-0 group-hover:opacity-100 text-[#8C9099] hover:text-red transition-opacity cursor-pointer p-0.5"
-                                  >
+                                     type="button"
+                                     onClick={() => handleCopyClause(clause.num)}
+                                     title={`Copy link to clause ${clause.num}`}
+                                     className="opacity-0 group-hover:opacity-100 text-[#8C9099] hover:text-red transition-opacity cursor-pointer p-0.5"
+                                   >
                                     {isCopied ? (
                                       <Check size={11} className="text-[#10B981]" weight="bold" />
                                     ) : (
@@ -642,7 +642,7 @@ export default function TermsAndConditionsPage() {
                                 </div>
                               )}
                               <div className="flex-1 text-[#373C46]">
-                                <HighlightedText text={clause.text} query={searchQuery} />
+                                <HighlightedText text={clause.text} query={searchQuery} crossLinks={true} />
                               </div>
                             </div>
                           );

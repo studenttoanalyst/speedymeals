@@ -230,7 +230,7 @@ export default function RestaurantDashboardPage() {
         )}
 
         {/* Headline Operational KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
           <StatCard
             label="Today's Gross Sales"
             value={formatPKR(metrics?.today_sales_gross ?? 0)}
@@ -253,7 +253,7 @@ export default function RestaurantDashboardPage() {
             label="Active Kitchen Orders"
             value={metrics?.active_orders_count ?? 0}
             subValue={metrics ? `${metrics.today_orders_count ?? 0} orders today` : '0 orders today'}
-            accent="blue"
+            accent="slate"
             icon={<Clock size={18} weight="bold" />}
             targetBenchmark="Capacity: 8 orders"
           />
@@ -291,66 +291,68 @@ export default function RestaurantDashboardPage() {
 
           {/* Top Selling Dishes with Images */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                <Fire size={16} weight="bold" className="text-rose-600" />
-                Top Performing Dishes Today
-              </h2>
-              <Link
-                href="/restaurant/menu"
-                className="text-xs font-semibold text-rose-600 hover:underline"
-              >
-                View Menu
-              </Link>
-            </div>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
+                  <Fire size={16} weight="bold" className="text-rose-600" />
+                  Top Performing Dishes Today
+                </h2>
+                <Link
+                  href="/restaurant/menu"
+                  className="text-xs font-semibold text-rose-600 hover:underline"
+                >
+                  View Menu
+                </Link>
+              </div>
 
-            <div className="space-y-3">
-              {popularDishes.length === 0 ? (
-                <div className="p-6 text-center text-slate-400 text-xs">
-                  No menu items found. Add dishes to track top performers.
-                </div>
-              ) : (
-                popularDishes.map((dish, idx) => {
-                  const photo = dish.photo_url || dish.image_url;
-                  return (
-                    <div
-                      key={dish.id}
-                      className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
-                    >
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
-                        {photo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={photo}
-                            alt={dish.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <ForkKnife size={20} className="text-slate-400" />
-                        )}
-                        <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-slate-900/80 text-white text-[9px] font-bold flex items-center justify-center">
-                          #{idx + 1}
+              <div className="space-y-3">
+                {popularDishes.length === 0 ? (
+                  <div className="p-6 text-center text-slate-400 text-xs">
+                    No menu items found. Add dishes to track top performers.
+                  </div>
+                ) : (
+                  popularDishes.map((dish, idx) => {
+                    const photo = dish.photo_url || dish.image_url;
+                    return (
+                      <div
+                        key={dish.id}
+                        className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
+                          {photo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={photo}
+                              alt={dish.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <ForkKnife size={20} className="text-slate-400" />
+                          )}
+                          <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-slate-900/80 text-white text-[9px] font-bold flex items-center justify-center">
+                            #{idx + 1}
+                          </div>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xs font-semibold text-slate-900 truncate">
+                            {dish.name}
+                          </h3>
+                          <div className="text-[11px] text-slate-400 font-mono">
+                            {formatPKR(dish.price)} · {dish.category || 'Special'}
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="text-xs font-semibold text-slate-600 font-mono">
+                            {dish.is_popular ? 'Featured' : 'Active'}
+                          </span>
                         </div>
                       </div>
-
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xs font-semibold text-slate-900 truncate">
-                          {dish.name}
-                        </h3>
-                        <div className="text-[11px] text-slate-400 font-mono">
-                          {formatPKR(dish.price)} · {dish.category || 'Special'}
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <span className="text-xs font-semibold text-slate-600 font-mono">
-                          {dish.is_popular ? 'Featured' : 'Active'}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">

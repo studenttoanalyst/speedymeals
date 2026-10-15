@@ -1,12 +1,37 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   LinkedinLogo,
   InstagramLogo,
   ArrowUpRight,
 } from '@phosphor-icons/react';
+import { scrollToSection } from '@/lib/scroll';
+
+const REGULATORY_TILES = [
+  {
+    id: 'reg-pakpost',
+    name: 'Pakistan Post',
+    src: '/assets/pakistan-post.webp',
+    imgClass: 'h-8 sm:h-9 md:h-10 w-auto object-contain',
+    align: 'center' as const,
+  },
+  {
+    id: 'reg-secp',
+    name: 'Securities and Exchange Commission of Pakistan (SECP)',
+    src: '/assets/rw/SECP_logo.webp',
+    imgClass: 'h-9 sm:h-10 md:h-11 w-auto object-contain',
+    align: 'right' as const,
+  },
+  {
+    id: 'reg-fbr',
+    name: 'Federal Board of Revenue (FBR)',
+    src: '/assets/rw/fbr-logo.webp',
+    imgClass: 'h-9 sm:h-10 md:h-11 w-auto object-contain',
+    align: 'right' as const,
+  },
+];
 
 const WhatsappIcon: React.FC<{ size?: number; className?: string }> = ({ size = 16, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
@@ -31,6 +56,35 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
+  const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const toggleTooltip = (id: string) => {
+    if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+    if (activeTooltipId === id) {
+      setActiveTooltipId(null);
+    } else {
+      setActiveTooltipId(id);
+      tooltipTimeoutRef.current = setTimeout(() => {
+        setActiveTooltipId(null);
+      }, 2500);
+    }
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-regulatory-tile]')) {
+        setActiveTooltipId(null);
+      }
+    };
+    document.addEventListener('click', handleDocumentClick);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+      if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+    };
+  }, []);
+
   const handleScrollTo = (sectionId: string, persona?: 'rider' | 'restaurant') => {
     if (persona && onSelectPersona) {
       onSelectPersona(persona);
@@ -42,10 +96,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
       }
       return;
     }
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollToSection(sectionId, { gap: 16 });
   };
 
   return (
@@ -302,32 +353,65 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           </div>
 
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4">
-            {/* Pakistan Post */}
-            <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
-              <img
-                src="/assets/pakistan-post.webp"
-                alt="Pakistan Post"
-                className="h-8 sm:h-9 md:h-10 w-auto object-contain"
-              />
-            </div>
+            {REGULATORY_TILES.map((tile) => {
+              const isOpen = activeTooltipId === tile.id;
+              const isRightAligned = tile.align === 'right';
+              return (
+                <div key={tile.id} className="relative group" data-regulatory-tile>
+                  <button
+                    type="button"
+                    tabIndex={0}
+                    aria-label={tile.name}
+                    aria-describedby={tile.id}
+                    onClick={() => toggleTooltip(tile.id)}
+                    onMouseEnter={() => {
+                      if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+                      setActiveTooltipId(tile.id);
+                    }}
+                    onMouseLeave={() => setActiveTooltipId(null)}
+                    onFocus={() => {
+                      if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+                      setActiveTooltipId(tile.id);
+                    }}
+                    onBlur={() => setActiveTooltipId(null)}
+                    className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] focus:border-brand focus:ring-1 focus:ring-brand focus:outline-hidden transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs cursor-pointer rounded-xs"
+                  >
+                    <img
+                      src={tile.src}
+                      alt={tile.name}
+                      className={tile.imgClass}
+                    />
+                  </button>
 
-            {/* SECP */}
-            <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
-              <img
-                src="/assets/rw/SECP_logo.webp"
-                alt="Securities and Exchange Commission of Pakistan (SECP)"
-                className="h-9 sm:h-10 md:h-11 w-auto object-contain"
-              />
-            </div>
-
-            {/* FBR */}
-            <div className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs">
-              <img
-                src="/assets/rw/fbr-logo.webp"
-                alt="Federal Board of Revenue (FBR)"
-                className="h-9 sm:h-10 md:h-11 w-auto object-contain"
-              />
-            </div>
+                  {/* Accessible Clamped Tooltip */}
+                  <div
+                    id={tile.id}
+                    role="tooltip"
+                    className={`absolute bottom-full mb-2.5 z-30 pointer-events-none transition-all duration-150 ${
+                      isRightAligned
+                        ? 'right-0 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto'
+                        : 'left-1/2 -translate-x-1/2'
+                    } ${
+                      isOpen
+                        ? 'opacity-100 translate-y-0 visible'
+                        : 'opacity-0 translate-y-1 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:visible'
+                    }`}
+                  >
+                    <div className="relative bg-[#0F1115] text-[#F3F4F6] text-[11px] font-medium px-3 py-1.5 rounded-lg border border-[#3A3F4A] shadow-xl whitespace-normal w-max max-w-[220px] sm:max-w-[280px] text-center leading-snug">
+                      {tile.name}
+                      {/* Arrow */}
+                      <span
+                        className={`absolute top-full -mt-[1px] border-4 border-transparent border-t-[#3A3F4A] ${
+                          isRightAligned
+                            ? 'right-6 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
+                            : 'left-1/2 -translate-x-1/2'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

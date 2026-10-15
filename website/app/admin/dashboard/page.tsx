@@ -198,12 +198,12 @@ export default function AdminDashboardPage() {
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
         {/* Headline Executive Platform KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
           <StatCard
             label="Total Food Sales (Today)"
             value={formatPKR(summary?.gross_revenue_today ?? 0)}
             change={summary?.gross_revenue_today ? { value: '+14.2%', isPositive: true, period: 'vs target' } : undefined}
-            accent="blue"
+            accent="emerald"
             icon={<ChartLineUp size={18} weight="bold" />}
             targetBenchmark="Daily Target: 220K"
           />
@@ -221,7 +221,7 @@ export default function AdminDashboardPage() {
             label="Riders Delivering Now"
             value={`${summary?.active_deliveries_count ?? 0} Active`}
             subValue="Riders on active orders"
-            accent="none"
+            accent="slate"
             icon={<Bicycle size={18} weight="bold" />}
             targetBenchmark="98.4% On-Time"
           />
