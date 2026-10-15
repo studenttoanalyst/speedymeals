@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   LinkedinLogo,
   InstagramLogo,
@@ -14,6 +15,8 @@ const REGULATORY_TILES = [
     id: 'reg-pakpost',
     name: 'Pakistan Post',
     src: '/assets/pakistan-post.webp',
+    width: 64,
+    height: 40,
     imgClass: 'h-8 sm:h-9 md:h-10 w-auto object-contain',
     align: 'center' as const,
   },
@@ -21,6 +24,8 @@ const REGULATORY_TILES = [
     id: 'reg-secp',
     name: 'Securities and Exchange Commission of Pakistan (SECP)',
     src: '/assets/rw/SECP_logo.webp',
+    width: 64,
+    height: 44,
     imgClass: 'h-9 sm:h-10 md:h-11 w-auto object-contain',
     align: 'right' as const,
   },
@@ -28,6 +33,8 @@ const REGULATORY_TILES = [
     id: 'reg-fbr',
     name: 'Federal Board of Revenue (FBR)',
     src: '/assets/rw/fbr-logo.webp',
+    width: 64,
+    height: 44,
     imgClass: 'h-9 sm:h-10 md:h-11 w-auto object-contain',
     align: 'right' as const,
   },
@@ -110,12 +117,14 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           {/* Section 1: Speedy Meals Brand & Bio (Full width on mobile/tablet, 4 columns on desktop) */}
           <div className="col-span-1 lg:col-span-4 space-y-4">
             <div className="flex items-center space-x-2.5 sm:space-x-3">
-              <img
-                src="/favicon.webp"
+              <Image
+                src="/assets/logo-112.webp"
                 alt="SpeedyMeals Logo"
+                width={40}
+                height={40}
                 className="h-8 sm:h-9 md:h-10 w-auto object-contain shrink-0"
               />
-              <span className="font-display text-xl sm:text-2xl tracking-tight text-[#E23A2E] uppercase whitespace-nowrap shrink-0">
+              <span className="font-display text-xl sm:text-2xl tracking-tight text-red-on-dark uppercase whitespace-nowrap shrink-0">
                 SPEEDY MEALS
               </span>
             </div>
@@ -376,9 +385,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                     onBlur={() => setActiveTooltipId(null)}
                     className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] focus:border-brand focus:ring-1 focus:ring-brand focus:outline-hidden transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs cursor-pointer rounded-xs"
                   >
-                    <img
+                    <Image
                       src={tile.src}
                       alt={tile.name}
+                      width={tile.width}
+                      height={tile.height}
                       className={tile.imgClass}
                     />
                   </button>
@@ -416,14 +427,14 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         </div>
 
         {/* Bottom bar (hairline top-border) */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#5B5F66]">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#CBD0D8]">
           <div>&copy; 2026 DiscoverTheTech. All rights reserved.</div>
           <div className="flex items-center space-x-4">
-            <Link href="/privacy" className="hover:underline hover:text-[#A0A4AB] transition-colors">
+            <Link href="/privacy" className="hover:underline text-[#CBD0D8] hover:text-white transition-colors">
               Privacy Policy
             </Link>
             <span>&middot;</span>
-            <Link href="/terms" className="hover:underline hover:text-[#A0A4AB] transition-colors">
+            <Link href="/terms" className="hover:underline text-[#CBD0D8] hover:text-white transition-colors">
               Terms of Use
             </Link>
           </div>

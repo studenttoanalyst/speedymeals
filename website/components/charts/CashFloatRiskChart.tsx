@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Coins, ShieldWarning, CheckCircle, Warning, ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 

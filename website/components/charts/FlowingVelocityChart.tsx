@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { TrendUp, Flame, Clock, Timer, CheckCircle } from '@phosphor-icons/react';
 
 export interface VelocityDataPoint {

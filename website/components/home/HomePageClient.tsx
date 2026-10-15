@@ -5,11 +5,23 @@ import { Navbar } from '@/components/home/Navbar';
 import { HeroSection } from '@/components/home/HeroSection';
 import { PromoBanner } from '@/components/home/PromoBanner';
 import { ServicesSection } from '@/components/home/ServicesSection';
-import { PartnerSection } from '@/components/home/PartnerSection';
+import dynamic from 'next/dynamic';
 import { Footer } from '@/components/home/Footer';
 import { PersonaType } from '@/types/home';
 import { BannerSlide } from '@/lib/banners';
 import { scrollToSection } from '@/lib/scroll';
+
+const PartnerSection = dynamic(
+  () => import('@/components/home/PartnerSection').then((mod) => mod.PartnerSection),
+  {
+    loading: () => (
+      <div id="partner" className="py-24 max-w-7xl mx-auto px-4 text-center text-[#5B5F66]">
+        <div className="w-8 h-8 mx-auto mb-4 border-2 border-red border-t-transparent rounded-full animate-spin" />
+        <p className="font-sans text-xs uppercase tracking-wider">Loading partnership registration...</p>
+      </div>
+    ),
+  }
+);
 
 interface HomePageClientProps {
   slides: BannerSlide[];

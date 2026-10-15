@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   List,
   X,
@@ -47,34 +48,37 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
     };
     document.addEventListener('mousedown', handleClickOutside);
 
-    // Scroll handler throttled with requestAnimationFrame
-    let rafId: number | null = null;
+    // Scroll handler without forced layout reads
     const handleScroll = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        const scrollPos = window.scrollY;
-        setIsScrolled(scrollPos > 40);
-
-        // Section spy matches real landing position below dynamic navbar
-        if (window.innerWidth >= 768) {
-          const navBottom = document.getElementById('main-navigation')?.getBoundingClientRect().bottom || 80;
-          const servicesEl = document.getElementById('services');
-          const partnerEl = document.getElementById('partner');
-
-          const partnerAnchor = (partnerEl?.querySelector('[data-scroll-anchor]') as HTMLElement) || partnerEl;
-          const servicesAnchor = (servicesEl?.querySelector('[data-scroll-anchor]') as HTMLElement) || servicesEl;
-
-          if (partnerAnchor && partnerAnchor.getBoundingClientRect().top <= navBottom + 60) {
-            setActiveSection('partner');
-          } else if (servicesAnchor && servicesAnchor.getBoundingClientRect().top <= navBottom + 60) {
-            setActiveSection('services');
-          } else {
-            setActiveSection('overview');
-          }
-        }
-      });
+      setIsScrolled(window.scrollY > 40);
     };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    // Section spy using IntersectionObserver to eliminate getBoundingClientRect reflow on every scroll frame
+    let observer: IntersectionObserver | null = null;
+    if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+      const sectionIds = ['overview', 'services', 'partner'];
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(entry.target.id as 'overview' | 'services' | 'partner');
+            }
+          });
+        },
+        {
+          rootMargin: '-88px 0px -50% 0px',
+          threshold: [0, 0.15],
+        }
+      );
+
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer?.observe(el);
+      });
+    }
 
     // Clean #overview from address bar immediately if present
     if (typeof window !== 'undefined' && window.location.hash === '#overview') {
@@ -87,11 +91,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
       }, 150);
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
     return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', handleScroll);
+      observer?.disconnect();
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
@@ -177,12 +179,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               }
             }}
           >
-            <img
-              src="/favicon.webp"
+            <Image
+              src="/assets/logo-112.webp"
               alt="SpeedyMeals Logo"
+              width={48}
+              height={48}
+              priority
               className="h-7 sm:h-10 lg:h-12 [@media(max-height:760px)]:h-8 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105 drop-shadow-xs"
             />
-            <span className="font-display text-[13px] sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-base tracking-tight text-red uppercase whitespace-nowrap shrink-0">
+            <span className="font-display text-[13px] sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-base tracking-tight text-red-accessible uppercase whitespace-nowrap shrink-0">
               SPEEDY MEALS
             </span>
           </Link>

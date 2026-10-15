@@ -369,7 +369,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               </span>
             </div>
             <div className="hidden sm:block h-px flex-1 bg-[#E4E2DD] mx-3" />
-            <span className="font-sans text-[10px] sm:text-xs text-[#E23A2E] tracking-wider uppercase font-semibold whitespace-nowrap">
+            <span className="font-sans text-[10px] sm:text-xs text-red-accessible tracking-wider uppercase font-semibold whitespace-nowrap">
               ENROLLMENT OPEN
             </span>
           </div>
@@ -379,7 +379,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <span className="block">Direct Partnership.</span>
               <span
                 className="block transition-colors duration-300"
-                style={{ color: 'var(--dynamic-accent, #E23A2E)' }}
+                style={{ color: 'var(--dynamic-accent, #C92F24)' }}
               >
                 Transparent Economics.
               </span>
@@ -396,8 +396,18 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           {/* Card 1: Rider */}
           <div
             id="persona-col-rider"
+            role="button"
+            tabIndex={0}
+            aria-label="Select Rider Application"
+            aria-pressed={activePersona === 'rider'}
             onClick={() => handleCardSelect('rider')}
-            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 ${activePersona === 'rider'
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardSelect('rider');
+              }
+            }}
+            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red ${activePersona === 'rider'
               ? 'bg-paper-off ring-2 ring-red shadow-sm'
               : 'hover:bg-paper-off/60'
               }`}
@@ -407,7 +417,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 <div className="w-10 h-10 rounded-full text-red flex items-center justify-center bg-red/10 shrink-0">
                   <Bicycle size={22} weight="bold" />
                 </div>
-                <span className="font-sans text-xs font-bold uppercase tracking-wider text-red">
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-red-accessible">
                   For Riders
                 </span>
               </div>
@@ -425,6 +435,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             <button
               type="button"
               id="btn-select-rider"
+              tabIndex={-1}
+              aria-hidden="true"
               onClick={(e) => {
                 e.stopPropagation();
                 handleCardSelect('rider');
@@ -442,8 +454,18 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           {/* Card 2: Merchant */}
           <div
             id="persona-col-restaurant"
+            role="button"
+            tabIndex={0}
+            aria-label="Select Merchant Application"
+            aria-pressed={activePersona === 'restaurant'}
             onClick={() => handleCardSelect('restaurant')}
-            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 ${activePersona === 'restaurant'
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardSelect('restaurant');
+              }
+            }}
+            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue ${activePersona === 'restaurant'
               ? 'bg-paper-off ring-2 ring-blue shadow-sm'
               : 'hover:bg-paper-off/60'
               }`}
@@ -481,6 +503,8 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             <button
               type="button"
               id="btn-select-restaurant"
+              tabIndex={-1}
+              aria-hidden="true"
               onClick={(e) => {
                 e.stopPropagation();
                 handleCardSelect('restaurant');
@@ -498,8 +522,18 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           {/* Card 3: Customer */}
           <div
             id="persona-col-customer"
+            role="button"
+            tabIndex={0}
+            aria-label="Select Customer Early Access Application"
+            aria-pressed={activePersona === 'customer'}
             onClick={() => handleCardSelect('customer')}
-            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 ${activePersona === 'customer'
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardSelect('customer');
+              }
+            }}
+            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-tan ${activePersona === 'customer'
               ? 'bg-paper-off ring-2 ring-tan shadow-sm'
               : 'hover:bg-paper-off/60'
               }`}
@@ -509,7 +543,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 <div className="w-10 h-10 rounded-full text-tan flex items-center justify-center bg-tan/10 shrink-0">
                   <Users size={22} weight="bold" />
                 </div>
-                <span className="font-sans text-xs font-bold uppercase tracking-wider text-tan">
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-tan-accessible">
                   For Customers
                 </span>
               </div>
@@ -525,7 +559,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             <div className="min-h-[32px] my-3 flex items-center justify-center">
               <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-tan/15 border border-tan/30 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-tan inline-block shrink-0" />
-                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-tan">
+                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-tan-accessible">
                   VIP: Up to 50% off your first 3 orders
                 </span>
               </div>
@@ -534,13 +568,15 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             <button
               type="button"
               id="btn-select-customer"
+              tabIndex={-1}
+              aria-hidden="true"
               onClick={(e) => {
                 e.stopPropagation();
                 handleCardSelect('customer');
               }}
               className={`mt-auto w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'customer'
                 ? 'bg-tan text-ink'
-                : 'bg-tan/15 text-tan hover:bg-tan hover:text-ink'
+                : 'bg-tan/15 text-tan-accessible hover:bg-tan hover:text-ink'
                 }`}
             >
               <span>{activePersona === 'customer' ? 'Active Form' : 'Get VIP Access'}</span>
@@ -563,7 +599,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   style={{
                     backgroundColor:
                       activePersona === 'rider'
-                        ? '#E23A2E'
+                        ? '#C92F24'
                         : activePersona === 'restaurant'
                           ? '#1E5FA8'
                           : '#C7A874',
@@ -573,10 +609,10 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   style={{
                     color:
                       activePersona === 'rider'
-                        ? '#E23A2E'
+                        ? '#FF6B5E'
                         : activePersona === 'restaurant'
-                          ? '#1E5FA8'
-                          : '#C7A874',
+                          ? '#60A5FA'
+                          : '#F3E8D0',
                   }}
                 >
                   {t.registrationGateway}
@@ -1063,8 +1099,12 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       </span>
                     </div>
                     <div className="flex relative min-w-0 w-full">
+                      <label htmlFor="form-country-code" className="sr-only">
+                        Country dialing code
+                      </label>
                       <select
                         id="form-country-code"
+                        aria-label="Country dialing code"
                         value={formData.countryCode}
                         onChange={(e) => handleCountryCodeChange(e.target.value)}
                         className="bg-[#262A32] border border-r-0 border-[#373C46] px-2 sm:px-3 py-3.5 text-xs text-white font-sans focus:outline-none cursor-pointer shrink-0 max-w-[110px] sm:max-w-none"
@@ -1117,7 +1157,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         </div>
                       )
                     ) : (
-                      <div className="text-xs font-sans text-[#5B5F66] pt-0.5">
+                      <div className="text-xs font-sans text-[#A0A4AB] pt-0.5">
                         Format: {currentRegion.helper}
                       </div>
                     )}
@@ -1164,7 +1204,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       >
                         <label
                           htmlFor="form-custom-city"
-                          className="block font-sans text-xs uppercase tracking-wider text-tan font-bold"
+                          className="block font-sans text-xs uppercase tracking-wider text-[#F3E8D0] font-bold"
                         >
                           Please Specify Your City / Area *
                         </label>
@@ -1285,11 +1325,11 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
                 {/* Submit Action */}
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-[#373C46]">
-                  <div className="font-sans text-xs text-[#8C9099]">
+                  <div className="font-sans text-xs text-[#A0A4AB]">
                     {activePersona === 'customer' ? (
                       <>
-                        <span className="uppercase text-[#9A7A4A] font-bold">VIP: </span>
-                        <span className="text-[#C7A874] font-bold uppercase">50% off your first 3 orders</span>
+                        <span className="uppercase text-[#E5D3B3] font-bold">VIP: </span>
+                        <span className="text-[#F3E8D0] font-bold uppercase">50% off your first 3 orders</span>
                       </>
                     ) : (
                       <>
@@ -1297,7 +1337,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         <span
                           className="font-bold uppercase"
                           style={{
-                            color: activePersona === 'restaurant' ? '#1E5FA8' : '#E23A2E',
+                            color: activePersona === 'restaurant' ? '#60A5FA' : '#FF6B5E',
                           }}
                         >
                           {t.under24Hours}
@@ -1314,7 +1354,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       ? 'bg-tan text-ink border-tan hover:bg-white hover:text-ink hover:border-white'
                       : activePersona === 'restaurant'
                         ? 'bg-blue text-white border-blue hover:bg-white hover:text-blue hover:border-white'
-                        : 'bg-red text-white border-red hover:bg-white hover:text-red hover:border-white'
+                        : 'bg-[#C92F24] text-white border-[#C92F24] hover:bg-white hover:text-[#C92F24] hover:border-white'
                       }`}
                   >
                     {submitting ? (

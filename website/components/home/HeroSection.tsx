@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
 import { ArrowRight } from '@phosphor-icons/react';
@@ -121,11 +122,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     }
   };
 
-  // FAST · FAIR · GLOBAL color cycle states
+  // FAST · FAIR · GLOBAL color cycle states (using WCAG AA accessible red #C92F24)
   const taglineWords = [
-    { text: 'FAST.', colors: ['#15171A', '#E23A2E', '#1E5FA8'] },
-    { text: 'FAIR.', colors: ['#E23A2E', '#1E5FA8', '#15171A'] },
-    { text: 'GLOBAL.', colors: ['#1E5FA8', '#15171A', '#E23A2E'] },
+    { text: 'FAST.', colors: ['#15171A', '#C92F24', '#1E5FA8'] },
+    { text: 'FAIR.', colors: ['#C92F24', '#1E5FA8', '#15171A'] },
+    { text: 'GLOBAL.', colors: ['#1E5FA8', '#15171A', '#C92F24'] },
   ];
   const [colorIndex, setColorIndex] = useState(0);
   useEffect(() => {
@@ -158,7 +159,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           className="flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 gap-y-1 px-2 text-center mb-2 sm:mb-2.5"
         >
           <span className="w-2.5 h-2.5 bg-red inline-block shrink-0 rounded-none" />
-          <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.22em] font-bold text-red whitespace-nowrap">
+          <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.22em] font-bold text-red-accessible whitespace-nowrap">
             FAST & SAFE TO YOU
           </span>
           <div className="h-px w-6 sm:w-12 bg-line shrink-0" />
@@ -174,6 +175,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         >
           SPEEDY MEALS
         </h1>
+
+        {/* Screen-reader H2 to guarantee compliant heading hierarchy: H1 -> H2 -> H3 */}
+        <h2 className="sr-only">Our Core Ecosystem Roles</h2>
 
         {/* c) FAST. FAIR. GLOBAL. colour-cycling tagline */}
         <div
@@ -199,13 +203,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-8 lg:gap-12">
           {/* Item 1: Become a Rider */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => handleScrollToPartner('rider')}
-            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleScrollToPartner('rider');
+              }
+            }}
+            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
-              <img
+              <Image
                 src="/assets/rider-spritev2.webp"
                 alt="Become a Rider - SpeedyMeals"
+                width={168}
+                height={168}
                 className="h-full w-auto max-h-none object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
               />
             </div>
@@ -216,7 +230,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug mb-1.5 md:mb-3">
                 Deliver meals on your own schedule. Reliable weekly pay, direct support.
               </p>
-              <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red uppercase tracking-wider group-hover:underline">
+              <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red-accessible uppercase tracking-wider group-hover:underline">
                 <span id="hero-card-cta-rider">Start delivering</span>
                 <ArrowRight
                   size={14}
@@ -229,13 +243,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Item 2: Grow Your Business */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => handleScrollToPartner('restaurant')}
-            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleScrollToPartner('restaurant');
+              }
+            }}
+            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
-              <img
+              <Image
                 src="/assets/merchant-spritev2.webp"
                 alt="Grow your restaurant - SpeedyMeals"
+                width={168}
+                height={168}
                 className="h-full w-auto max-h-none object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
               />
             </div>
@@ -246,7 +270,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug mb-1.5 md:mb-3">
                 Reach more customers with honest fees and simple store management.
               </p>
-              <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red uppercase tracking-wider group-hover:underline">
+              <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red-accessible uppercase tracking-wider group-hover:underline">
                 <span id="hero-card-cta-merchant">List your store</span>
                 <ArrowRight
                   size={14}
@@ -259,13 +283,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Item 3: Order Food Delivery */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => handleScrollToPartner('customer')}
-            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleScrollToPartner('customer');
+              }
+            }}
+            className="group cursor-pointer flex flex-row md:flex-col items-center md:text-center py-3 md:py-4 px-2 sm:px-3 md:px-2 transition-all duration-150 card-press active:scale-[0.985] select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-full md:h-[168px] shrink-0 flex items-center justify-center mr-3 sm:mr-4 md:mr-0 md:mb-3 overflow-visible">
-              <img
+              <Image
                 src="/assets/customer-spritev2.webp"
                 alt="Order food delivery - SpeedyMeals"
+                width={168}
+                height={168}
                 className="h-full w-auto max-h-none object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
               />
             </div>
@@ -276,7 +310,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <p className="font-sans text-xs sm:text-[13px] text-ink-soft leading-snug mb-1.5 md:mb-3">
                 Hot, fresh food from local kitchens right to your door.
               </p>
-              <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red uppercase tracking-wider group-hover:underline">
+              <div className="inline-flex items-center space-x-1.5 font-sans text-xs sm:text-sm font-bold text-red-accessible uppercase tracking-wider group-hover:underline">
                 <span id="hero-card-cta-customer">Get VIP access</span>
                 <ArrowRight
                   size={14}

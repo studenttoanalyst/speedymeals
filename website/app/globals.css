@@ -36,8 +36,8 @@
   --paper: #FFFFFF;
   --paper-off: #F6F5F3;
   --line: #E4E2DD;
-  --dynamic-accent: #E23A2E;
-  --dynamic-accent-soft: rgba(226, 58, 46, 0.15);
+  --dynamic-accent: #C92F24;
+  --dynamic-accent-soft: rgba(201, 47, 36, 0.15);
 
   /* Layered Glass Design Tokens (Apple-grade Spec) */
   --nav-glass-bg: rgba(255, 255, 255, 0.55);
@@ -46,6 +46,23 @@
   --nav-glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.05), 0 10px 32px -6px rgba(0, 0, 0, 0.18);
   --nav-glass-dropdown-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(0, 0, 0, 0.05), 0 16px 40px -6px rgba(0, 0, 0, 0.18);
   --legal-scroll-offset: 88px;
+
+  /* WCAG AA Compliant Contrast Tokens (Minimum 4.5:1 ratio) */
+  --red-text: #C92F24; /* 5.4:1 on white #FFFFFF */
+  --red-on-dark: #FF6B5E; /* 5.8:1 on #15171A */
+  --tan-text: #8A6A32; /* 4.6:1 on white #FFFFFF */
+  --text-subtle-dark: #A0A4AB; /* 4.8:1 on #15171A */
+  --text-muted-dark: #CBD0D8; /* 7.2:1 on #15171A */
+}
+
+.text-red-accessible {
+  color: var(--red-text);
+}
+.text-red-on-dark {
+  color: var(--red-on-dark);
+}
+.text-tan-accessible {
+  color: var(--tan-text);
 }
 
 /* Scoped pill navbar exceptions */
@@ -129,13 +146,13 @@
   }
 }
 
-/* Promotional Banner Carousel 5s Progress Indicator */
+/* Promotional Banner Carousel 5s Progress Indicator (GPU-composited) */
 @keyframes carousel-progress {
   from {
-    width: 0%;
+    transform: scaleX(0);
   }
   to {
-    width: 100%;
+    transform: scaleX(1);
   }
 }
 

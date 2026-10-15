@@ -133,7 +133,7 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
     >
       {/*
         Unified 2.8:1 aspect ratio box — no max-w, no padding, no bg-gray.
-        The blurred backdrop fills the box when art is narrower than 2.8:1.
+        The gradient backdrop fills the box when art is narrower than 2.8:1.
         The sharp foreground is always fully visible (object-contain).
       */}
       <div className="relative w-full overflow-hidden" style={{ aspectRatio: '2.8 / 1' }}>
@@ -233,13 +233,13 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
                     {isActive && (
                       <div
                         key={`prog-${progressKey}`}
-                        className="absolute inset-y-0 left-0 bg-red"
+                        className="absolute inset-0 bg-red origin-left"
                         style={{
-                          width: '100%',
                           animation: shouldReduceMotion
                             ? 'none'
                             : `carousel-progress ${AUTOPLAY_INTERVAL}ms linear forwards`,
                           animationPlayState: isPaused ? 'paused' : 'running',
+                          willChange: 'transform',
                         }}
                       />
                     )}
@@ -255,25 +255,19 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
 };
 
 /**
- * Dual-layer slide art:
- * - Backdrop: blurred, scale-125, object-cover — fills any letterbox gap with colour
- * - Foreground: object-contain, always fully visible, centred
+ * Slide art:
+ * - Backdrop: CSS gradient fill replaces blurred Image to eliminate duplicate image requests and GPU blur cost
+ * - Foreground: full-quality, responsive sizes, object-contain, never cropped
  */
 const SlideArt: React.FC<{ slide: BannerSlide; isFirst: boolean }> = ({ slide, isFirst }) => {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden">
-      {/* Backdrop: low-quality, blurred colour fill — hides letterbox bars */}
-      <Image
-        src={slide.src}
-        alt=""
+      {/* Backdrop: CSS gradient fill */}
+      <div
+        className="absolute inset-0 bg-gradient-to-r from-red-950/70 via-[#15171A] to-red-950/70 pointer-events-none select-none"
         aria-hidden="true"
-        fill
-        sizes="10vw"
-        quality={20}
-        loading={isFirst ? 'eager' : 'lazy'}
-        className="object-cover scale-125 blur-2xl saturate-125 brightness-75 pointer-events-none select-none"
       />
-      {/* Foreground: full-quality, never cropped */}
+      {/* Foreground: full-quality, responsive sizes */}
       <Image
         src={slide.src}
         alt={slide.alt}
@@ -281,7 +275,8 @@ const SlideArt: React.FC<{ slide: BannerSlide; isFirst: boolean }> = ({ slide, i
         priority={isFirst}
         {...(isFirst ? { fetchPriority: 'high' as const } : {})}
         loading={isFirst ? 'eager' : 'lazy'}
-        sizes="100vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, 1440px"
+        quality={65}
         className="object-contain object-center pointer-events-none select-none relative z-10"
       />
     </div>

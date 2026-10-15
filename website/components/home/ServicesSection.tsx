@@ -38,8 +38,9 @@ const StoryImageFrame: React.FC<StoryImageFrameProps> = ({ src, alt, priority = 
           src={src}
           alt={alt}
           fill
-          priority={priority}
-          sizes="(max-width: 1024px) 100vw, 50vw"
+          priority={false}
+          quality={65}
+          sizes="(min-width: 1024px) 568px, 100vw"
           className="object-cover rounded-3xl shadow-sm transition-transform duration-350 ease-out"
         />
         {/* Glassy edge rim layer: masked to outer ~16px only, fades in on hover */}
@@ -69,7 +70,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
         {/* Section Header: Clean, Human, DoorDash Style */}
         <div data-scroll-anchor className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
           <h2 className="font-display text-3xl sm:text-5xl tracking-[-0.03em] text-ink uppercase leading-tight mb-4 select-none">
-            Everything you crave, <span className="text-red">delivered.</span>
+            Everything you crave, <span className="text-red-accessible">delivered.</span>
           </h2>
           <p className="text-base sm:text-lg text-ink-soft leading-relaxed font-sans">
             Connecting hungry diners, passionate kitchens, and dedicated riders on one fair &amp; reliable platform.
@@ -83,7 +84,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Column: Value Proposition */}
             <div className="lg:col-span-6 flex flex-col justify-center">
-              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red mb-2">
+              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red-accessible mb-2">
                 For Food Lovers
               </span>
               <h3 className="font-heading font-extrabold text-2xl sm:text-4xl text-ink tracking-tight mb-4 leading-tight">
@@ -96,7 +97,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('customer')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-[#C92F24] hover:bg-[#A8241B] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Find food near you</span>
                   <ArrowRight size={15} weight="bold" />
@@ -109,7 +110,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <StoryImageFrame
                 src="/assets/customer_food_spread.webp"
                 alt="Delicious meal spread delivered fresh"
-                priority
               />
             </div>
           </div>
@@ -121,7 +121,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <StoryImageFrame
                 src="/assets/mascot_app.webp"
                 alt="SpeedyMeals mascot and mobile application"
-                priority
               />
             </div>
 
@@ -153,7 +152,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Column: Value Proposition */}
             <div className="lg:col-span-6 flex flex-col justify-center">
-              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red mb-2">
+              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red-accessible mb-2">
                 For Delivery Riders
               </span>
               <h3 className="font-heading font-extrabold text-2xl sm:text-4xl text-ink tracking-tight mb-4 leading-tight">
@@ -166,7 +165,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('rider')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-[#C92F24] hover:bg-[#A8241B] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Deliver with us</span>
                   <ArrowRight size={15} weight="bold" />
@@ -179,7 +178,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <StoryImageFrame
                 src="/assets/rider_delivery.webp"
                 alt="SpeedyMeals courier delivering an order"
-                priority
               />
             </div>
           </div>
@@ -214,7 +212,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 Ride-hailing for passengers - safe, transparent fares for everyday city travel.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red border border-red/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
@@ -232,7 +230,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 Same-day parcel delivery for individuals and small businesses within the city.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red border border-red/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
@@ -250,7 +248,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 All services under one roof - a physical lifestyle mall with merchant shops, a food court, and Speedy express counters.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red border border-red/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
