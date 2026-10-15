@@ -24,9 +24,11 @@ export default function AdminLoginPage() {
 
     const savedEmail = localStorage.getItem('sm_remembered_admin_email');
     if (savedEmail) {
-      setEmail(savedEmail);
-    } else {
-      setEmail('admin@speedymealservices.com');
+      if (savedEmail === 'admin@speedymeals.com' || savedEmail === 'admin@speedymealservices.com') {
+        localStorage.removeItem('sm_remembered_admin_email');
+      } else {
+        setEmail(savedEmail);
+      }
     }
   }, [router]);
 
@@ -99,7 +101,10 @@ export default function AdminLoginPage() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError(null);
+                }}
                 placeholder="admin@speedymealservices.com"
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
               />
@@ -118,7 +123,10 @@ export default function AdminLoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError(null);
+                }}
                 placeholder="••••••••••••"
                 className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-mono"
               />
@@ -139,24 +147,6 @@ export default function AdminLoginPage() {
             </Link>
           </div>
 
-          {/* Demo Credentials Helper */}
-          <div className="p-3 bg-rose-50/60 border border-rose-100 rounded-xl flex items-center justify-between text-xs">
-            <div>
-              <span className="font-semibold text-slate-800 block">Platform Demo Admin</span>
-              <span className="font-mono text-[11px] text-slate-500">admin@speedymealservices.com • admin123</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('admin@speedymealservices.com');
-                setPassword('admin123');
-              }}
-              className="py-1 px-2.5 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 font-semibold rounded-lg text-[11px] transition-colors cursor-pointer"
-            >
-              Auto Fill
-            </button>
-          </div>
-
           <button
             type="submit"
             disabled={isLoading}
@@ -168,7 +158,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>Are you a Restaurant Partner?</span>
+          <span>Are you a Merchant Partner?</span>
           <Link
             href="/restaurant/login"
             className="text-rose-600 font-semibold hover:underline"

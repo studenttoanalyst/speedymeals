@@ -65,7 +65,7 @@ export function Sidebar({ role }: SidebarProps) {
     {
       title: 'Platform Management',
       items: [
-        { label: 'Restaurants', href: '/admin/restaurants', icon: Storefront },
+        { label: 'Merchants', href: '/admin/restaurants', icon: Storefront },
         { label: 'Riders', href: '/admin/riders', icon: Bicycle },
         { label: 'Customers', href: '/admin/customers', icon: Users },
       ],
@@ -80,7 +80,7 @@ export function Sidebar({ role }: SidebarProps) {
     {
       title: 'Money & Payouts',
       items: [
-        { label: 'Restaurant Payouts', href: '/admin/settlements', icon: Coins },
+        { label: 'Merchant Payouts', href: '/admin/settlements', icon: Coins },
         { label: 'Rider Payouts & Cash', href: '/admin/payouts', icon: CurrencyDollar },
         { label: 'Analytics & Reports', href: '/admin/reports', icon: ChartLineUp },
       ],
