@@ -276,7 +276,7 @@ const SlideArt: React.FC<{ slide: BannerSlide; isFirst: boolean }> = ({ slide, i
         {...(isFirst ? { fetchPriority: 'high' as const } : {})}
         loading={isFirst ? 'eager' : 'lazy'}
         sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, 1440px"
-        quality={65}
+        quality={90}
         className="object-contain object-center pointer-events-none select-none relative z-10"
       />
     </div>

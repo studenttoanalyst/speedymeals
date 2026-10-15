@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
   ...(process.env.DOCKER_BUILD === 'true' ? { output: 'standalone' } : {}),
   images: {
     formats: ['image/avif', 'image/webp'],
-    qualities: [20, 60, 65, 70, 75, 80],
+    qualities: [20, 60, 65, 70, 75, 80, 90],
   },
   experimental: {
     optimizePackageImports: ['@phosphor-icons/react', 'motion'],
