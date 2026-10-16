@@ -766,3 +766,139 @@ Single source of truth: `mobile_app/lib/core/constants/app_constants.dart:51-53`
 - `flutter test` → **113/113 passing** (107 existing + 6 new in `phase2_release_test.dart`).
 - `git status --porcelain -- website` → **empty** (below in the commit report).
 - `git diff --stat -- website` → **empty**.
+
+---
+
+## Phase 3: Deferred rider account deletion (change request — awaiting approval)
+
+**Scope rules honoured:** `backend/` + `mobile_app/` only; `website/` never touched. The backend
+change is delivered as a **diff + Alembic migration and is NOT applied** — it waits for approval.
+This **replaces** the Phase 2 Part A4 proposal (role-branched immediate `DELETE /users/me` for
+riders): riders are now deferred and admin-reviewed instead.
+
+### 3.1 What is proposed for the backend (not applied)
+
+Artifact: **`mobile_app/docs/account-deletion/backend-deletion-proposal.patch`** (3,212 lines,
+14 files, 3,053 insertions — generated from a detached worktree so this branch's working tree
+never contained the change).
+
+```
+ git apply --check mobile_app/docs/account-deletion/backend-deletion-proposal.patch   # passes today
+ git apply          mobile_app/docs/account-deletion/backend-deletion-proposal.patch   # after approval
+```
+
+| File | Change |
+|---|---|
+| `backend/app/platform/account_deletion/{`__init__`',models,schemas,service,routes}.py` | **new** module: table, schemas, state machine, holder/public/admin routes |
+| `backend/app/core/deletion_review_job.py` | **new** idempotent job (in-process + `python -m` CLI) |
+| `backend/app/core/config.py` | +`RIDER_DELETION_GRACE_DAYS=7`, `ALLOW_EARLY_ADMIN_APPROVAL=false`, `DELETION_REQUEST_OVERDUE_DAYS=30`, `DELETION_REVIEW_JOB_ENABLED=true`, `DELETION_REVIEW_JOB_INTERVAL_SECONDS=3600` |
+| `backend/app/core/storage.py` | +`delete_rider_document_url()` (private `rider-docs` bucket, both S3 and Supabase URL shapes) |
+| `backend/app/platform/auth/dependencies.py` | Redis denylist check (`deleted:<subject_id>`) so an issued access token dies at execution; fails open |
+| `backend/app/main.py` | mounts the three routers; starts/stops the review job |
+| `backend/app/migrations/env.py` | imports the new models for autogenerate/drift |
+| `backend/app/migrations/versions/d4a7c9e1f2b3_add_deletion_requests.py` | **migration (see 3.2)** |
+| `backend/app/tests/test_account_deletion.py` | **new** 33 assertions-worth of tests (see 3.5) |
+| `backend/app/tests/test_migration_drift.py` | imports the new model so drift stays guarded |
+
+**Alembic migration — `d4a7c9e1f2b3_add_deletion_requests.py`**
+
+- Revises `e8b7a6c5d4f3` (the previous single head).
+- Creates `deletion_requests` with exactly the requested columns: `id`, `user_id`, `role`,
+  `status`, `requested_at`, `grace_ends_at`, `requested_via`, `reviewed_by` (FK → `admins.id`,
+  `ON DELETE SET NULL`), `reviewed_at`, `admin_note`, `hold_reason`, `kyc_action`,
+  `kyc_retain_until`, `kyc_purged_at`, plus `created_at`.
+- Indexes: `ix_deletion_requests_user_id`, `ix_deletion_requests_user_role (user_id, role)`,
+  `ix_deletion_requests_status`, `ix_deletion_requests_status_grace (status, grace_ends_at)`
+  (the job's exact scan), `ix_deletion_requests_reviewed_by`.
+- Seeds the permission **`manage_deletion_requests`** (`domain=account_deletion`,
+  `risk_level=critical`) with `ON CONFLICT (key) DO NOTHING`, grants it to the **superadmin**
+  role only (Support does not get a critical action by default), and runs the same Supabase-safe
+  `GRANT` DO-block as the other migrations (no-op on plain Postgres).
+- Downgrade drops the seed rows and the table; it never touches accounts, orders or payments.
+
+**Rules implemented (1–6 of the change request)**
+
+| # | Rule | Where |
+|---|---|---|
+| 1 | `deletion_requests` table + indexes, no sensitive data in logs | `models.py`; logging only ever emits request ids, roles and dates — phone/CNIC are masked or absent |
+| 2 | Rider `DELETE /users/me` → `pending` + deactivate now, 409 on active delivery, returns `grace_ends_at`; `GET`/`POST …/cancel` | `routes.py` + `service.request_rider_deletion` / `cancel_deletion_request` |
+| 3 | Daily job: `pending` → `ready_for_review`, notifies admins, **never deletes**, idempotent | `deletion_review_job.py` + `service.mark_pending_ready_for_review` |
+| 4 | Admin queue with permission + audit rows; approve re-checks dues/delivery → 409 + `on_hold`; hold/release/purge-kyc; early approval gated by flag; 30-day `is_overdue` | `routes.py` (5 endpoints) + `service.admin_*` |
+| 5 | Execution: anonymise, clear CNIC/vehicle/location, revoke refresh tokens, Redis denylist, delete device tokens, keep orders/payments anonymised; KYC `delete_now` / `retain_until` → `purge-kyc`; mark `completed` | `service.execute_deletion` (the **only** data-removing function) |
+| 6 | Public `POST /account-deletion/request` (OTP, always-identical 202) and `/confirm` (OTP → rider deferred / customer immediate) | `routes.py` public router + `service.verified_phone_deletion` |
+
+**Cancellation authentication (your "define it" item):** deactivation does **not** revoke the
+session — revocation happens only at execution (rule 5) — so during the grace period the rider's
+own access token authenticates `GET …/cancel` normally. A rider who lost the device cancels from
+the hosted page with phone + OTP instead (the same verified flow as `/account-deletion/request`).
+
+### 3.2 Public web + privacy text + deployment checklist (deliverables)
+
+| File | For |
+|---|---|
+| `mobile_app/docs/account-deletion/admin-api-contract.md` | your web developer: full request/response JSON for all 5 admin endpoints, the public web endpoints and the mobile endpoints, incl. every error body |
+| `mobile_app/docs/account-deletion/web-deletion-page-copy.md` | exact copy for `https://speedymealservices.com/delete-account` (7-day grace, admin review, dues rule, KYC handling, 30-day target, all error states) |
+| `mobile_app/docs/account-deletion/privacy-policy-addendum.md` | exact privacy-policy section 9 replacement |
+| `mobile_app/docs/account-deletion/deployment-checklist.md` | migration, job scheduler, Redis, storage permissions, admin permissions, staging smoke test, rollback |
+
+### 3.3 Mobile (applied, tested)
+
+| File | Change |
+|---|---|
+| `mobile_app/lib/data/models/deletion_models.dart` | **new** `DeletionRequest` + `DeletionRequestStatus` (labels, agreed wording, cancellability) and `DeletionRequestAction` |
+| `mobile_app/lib/core/network/api_client.dart` | +`deleteJson()` (DELETE that returns a body; 204 tolerated) |
+| `mobile_app/lib/data/repositories/rider_repository.dart` | +`requestAccountDeletion()` / `deletionRequest()` / `cancelDeletionRequest()` |
+| `mobile_app/lib/screens/rider/rider_account_screen.dart` | **new** Request Account Deletion (exact dialog copy), status card (`pending` / `under review` / `on hold` + reason / `completed` / `cancelled`), dates, **Cancel deletion request**, 409 messages verbatim, web-deletion link + Terms/Privacy |
+| `mobile_app/lib/screens/rider/rider_dashboard_screen.dart` | app-bar entry point (`Account & deletion`) → the screen, re-loads the dashboard on return |
+| `mobile_app/test/account_deletion_test.dart` | **new** 18 tests |
+
+Customer flow is unchanged (immediate `DELETE /users/me` → 204, 409 with a clear message), and
+the link to `https://speedymealservices.com/delete-account` is kept on both the profile and the new
+rider screen.
+
+### 3.4 Mobile verification
+
+- `flutter analyze` → **No issues found!**
+- `flutter test` → **131/131 passing** (113 before this change + 18 new).
+- `git status --porcelain -- website` → **empty**; `git diff --stat -- website` → **empty**.
+
+### 3.5 Backend tests — written, **not yet run**
+
+`backend/app/tests/test_account_deletion.py` covers every case in item 8: rider request →
+`pending` + deactivated (+ 409 active delivery, idempotent re-request); cancel → reactivated
+(and refused from `on_hold`/`completed`); job → `ready_for_review` only, never deletes,
+re-run moves 0; approve with dues → `409` + `on_hold` + reason + audit; approve with an active
+delivery → same; approve clean → `completed`, anonymised, refresh/device tokens gone; KYC
+`delete_now` removes all three files (mocked storage); `retain_until` touches storage zero times
+and leaks no URL; `purge-kyc` works then refuses a second time; admin without the permission →
+`403`, customer token → `403`, no header → `401`; audit rows carry the admin id; customer
+immediate; customer with active order → `409` and untouched; access token → `401` after
+deletion; public web flow (identical 202s, `pending`/`deleted`/`no_account`, bad OTP → `400`).
+
+**They could not be executed here:** `backend/venv` lacks `Pillow` (pre-existing; `app.core.storage`
+imports PIL at module load) and there is no `.env`/`DATABASE_URL` for a migrated database, so
+`app.core.config` cannot even be imported. Nothing was installed and no service was started —
+that is environment work outside the "show the diff first" step. After approval, run:
+
+```
+cd backend && ./venv/bin/pip install pillow && cp .env.example .env   # or your real .env
+./venv/bin/alembic upgrade head
+./venv/bin/pytest app/tests/test_account_deletion.py app/tests/test_migration_drift.py -q
+```
+
+Static verification already done: all 14 patched files compile (`python -m py_compile`) and the
+patch passes `git apply --check` against this branch.
+
+### 3.6 Awaiting your approval
+
+1. **Apply `backend-deletion-proposal.patch` as-is?** (It is the only backend change proposed;
+   nothing in `backend/` has been edited.)
+2. **Redis access-token denylist** — keep the one `EXISTS` per request (tokens die immediately
+   after approval) or drop it (tokens live out their ≤30 min TTL; refresh tokens are still revoked)?
+3. **Permission seeding** — `manage_deletion_requests` is granted to `superadmin` only. Say if the
+   `support` role should have it too.
+4. **Public OTP cost** — `/account-deletion/request` sends an SMS even to numbers with no account
+   (that is what keeps responses non-enumerable). Accept, or skip sending for unknown numbers and
+   accept the timing side channel?
+5. Backend test run is blocked on `pillow` + a migrated `DATABASE_URL` (3.5) — approve installing
+   `pillow` in `backend/venv` and I will run the suite before/after applying.

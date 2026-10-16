@@ -8,6 +8,7 @@ import '../../data/models/rider_models.dart';
 import '../../data/repositories/rider_repository.dart';
 import '../../services/auth_service.dart';
 import '../auth/register_as_screen.dart';
+import 'rider_account_screen.dart';
 import 'rider_documents_screen.dart';
 import 'rider_wallet_screen.dart';
 import '../../features/maps/maps.dart';
@@ -493,6 +494,17 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
               selectedColor: const Color(0xFF064E3B),
               side: BorderSide(color: online ? _green : Colors.white24),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.manage_accounts_outlined, color: Colors.white70),
+            tooltip: 'Account & deletion',
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const RiderAccountScreen()),
+              );
+              // The account may have been deactivated or reactivated there.
+              if (mounted) _load();
+            },
           ),
           IconButton(
             icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white70),

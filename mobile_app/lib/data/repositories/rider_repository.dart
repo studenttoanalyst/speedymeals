@@ -1,5 +1,6 @@
 import '../../core/network/api_client.dart';
 import '../json_utils.dart';
+import '../models/deletion_models.dart';
 import '../models/rider_models.dart';
 
 /// Everything a signed-in rider can do.
@@ -158,5 +159,42 @@ class RiderRepository {
     // The upload response carries only the three photo URLs, so the profile is
     // re-read to hand the caller one complete, authoritative object.
     return profile();
+  }
+
+  // -------------------------------------------------------- account deletion
+
+  /// `DELETE /users/me` (rider) — start the deferred deletion request.
+  ///
+  /// The backend deactivates the account immediately, takes the rider offline
+  /// and returns the new request together with its `grace_ends_at`. It answers
+  /// 409 while an active delivery exists — the message is surfaced verbatim.
+  ///
+  /// Nothing is deleted here: the data is removed only after an admin approves
+  /// the request (7-day grace, then review) and only when the rider has no
+  /// pending dues.
+  Future<DeletionRequestAction> requestAccountDeletion() async {
+    final json = await _client.deleteJson('/users/me');
+    return DeletionRequestAction.fromJson(json);
+  }
+
+  /// `GET /users/me/deletion-request` — the rider's current request, or null
+  /// when there is none.
+  ///
+  /// The endpoint is deliberately not an error when empty (the status screen
+  /// asks this on every open), so `request: null` maps to null here.
+  Future<DeletionRequest?> deletionRequest() async {
+    final json = await _client.getJson('/users/me/deletion-request');
+    final request = Json.asMapOrNull(json['request']);
+    return request == null ? null : DeletionRequest.fromJson(request);
+  }
+
+  /// `POST /users/me/deletion-request/cancel` — allowed while the request is
+  /// `pending` or `ready_for_review`; the backend reactivates the account.
+  ///
+  /// 409 once an admin has already approved (or put it on hold) — the rider
+  /// must then contact support instead.
+  Future<DeletionRequestAction> cancelDeletionRequest() async {
+    final json = await _client.postJson('/users/me/deletion-request/cancel');
+    return DeletionRequestAction.fromJson(json);
   }
 }

@@ -204,6 +204,27 @@ class ApiClient {
     await request('DELETE', path, body: body, headers: headers, authenticated: authenticated);
   }
 
+  /// DELETE returning the backend's JSON body.
+  ///
+  /// Needed by the rider's deferred account deletion (`DELETE /users/me`),
+  /// which answers with the created request and its `grace_ends_at` instead of
+  /// 204; a 204 still degrades to an empty map.
+  Future<Map<String, dynamic>> deleteJson(
+    String path, {
+    Object? body,
+    Map<String, String>? headers,
+    bool authenticated = true,
+  }) async {
+    final response = await request(
+      'DELETE',
+      path,
+      body: body,
+      headers: headers,
+      authenticated: authenticated,
+    );
+    return _asObjectOrEmpty(response);
+  }
+
   // ------------------------------------------------------------------ upload
 
   /// Multipart upload (rider documents, menu photos).
