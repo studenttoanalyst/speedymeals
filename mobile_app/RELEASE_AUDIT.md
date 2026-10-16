@@ -356,7 +356,7 @@ The Phase 0 note ("backend is POST") was wrong. The Phase 1 claim ("mobile uses 
 | Reverse geocode | `location_repository.dart` (`reverseGeocode`) | `GET /api/v1/location/reverse-geocode` | ✅ | — |
 | Places autocomplete | `location_repository.dart` (`autocompletePlaces`) | `GET /api/v1/location/places/autocomplete` | ✅ | — |
 | Places details | `location_repository.dart` (`placeDetails`) | `GET /api/v1/location/places/details` | ✅ | — |
-| **Account deletion** | `user_repository.dart` (`deleteAccount`) + profile UI | `DELETE /users/me` — **backend endpoint does not exist yet** | ❌ | Backend diff proposed in A4; mobile calls it, awaiting approval |
+| **Account deletion** | `user_repository.dart` (`deleteAccount`) + profile UI | `DELETE /users/me` (Customer: 204, Rider: 200 deferred request); `GET /users/me/deletion-request`; `POST /users/me/deletion-request/cancel` | ✅ | Tested = live. Backend applied, migrated, and verified live with full test suite |
 
 > **Note on `/users/me`:** the brief says "GET, PATCH". The backend implements **PUT** (`users/routes.py:36`). Mobile matches the backend (`putJson('/users/me')`), so no change.
 
