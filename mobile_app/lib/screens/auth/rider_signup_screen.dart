@@ -1,8 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/repositories/auth_repository.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/legal_links.dart';
 import 'otp_verification_screen.dart';
 import 'rider_login_screen.dart';
 
@@ -33,8 +35,23 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
 
   final List<String> _vehicles = ['Motorcycle', 'Scooter', 'Bicycle', 'Car'];
 
+  // Tappable legal links (same URLs/constants as every other auth screen).
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () => LegalUtils.openTerms(context);
+    _privacyRecognizer = TapGestureRecognizer()
+      ..onTap = () => LegalUtils.openPrivacy(context);
+  }
+
   @override
   void dispose() {
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
     _nameController.dispose();
     _phoneController.dispose();
     _cnicController.dispose();
@@ -48,7 +65,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please accept the Fleet Terms & Partner Policy.'),
+          content: const Text('Please accept the Terms & Conditions and Privacy Policy.'),
           backgroundColor: const Color(0xFFDC2626),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -364,22 +381,26 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                                   fontSize: 12,
                                   color: Color(0xFF64748B),
                                 ),
-                                children: const [
-                                  TextSpan(text: 'I agree to the '),
+                                children: [
+                                  const TextSpan(text: 'I agree to the '),
                                   TextSpan(
-                                    text: 'Fleet Partner Terms',
-                                    style: TextStyle(
+                                    text: 'Terms & Conditions',
+                                    style: const TextStyle(
                                       color: Color(0xFFDC2626),
                                       fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
                                     ),
+                                    recognizer: _termsRecognizer,
                                   ),
-                                  TextSpan(text: ' & '),
+                                  const TextSpan(text: ' and '),
                                   TextSpan(
-                                    text: 'Code of Conduct',
-                                    style: TextStyle(
+                                    text: 'Privacy Policy',
+                                    style: const TextStyle(
                                       color: Color(0xFFDC2626),
                                       fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
                                     ),
+                                    recognizer: _privacyRecognizer,
                                   ),
                                 ],
                               ),

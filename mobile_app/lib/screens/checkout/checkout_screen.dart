@@ -8,6 +8,7 @@ import '../../data/models/user_models.dart';
 import '../../data/repositories/order_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../services/cart_service.dart';
+import '../../widgets/gst_note.dart';
 import '../tracking/order_tracking_screen.dart';
 
 /// Checkout screen — delivery address, order lines, payment method and totals.
@@ -123,6 +124,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
     } on ApiException catch (error) {
       if (!mounted) return;
+
+      // Price-tamper guard: the backend re-prices every line at placement and
+      // rejects with 409 when the sent `expected_total` no longer matches
+      // (`food_delivery/service.py`). Never auto-retry — show a friendly
+      // message, re-fetch the preview so the customer sees the NEW total and
+      // GST, and let them place the order again themselves.
+      if (error.kind == ApiErrorKind.conflict) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Prices changed while you were checking out. Please review the '
+              'updated total and place your order again.',
+            ),
+            backgroundColor: Color(0xFFDC2626),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        await _loadPreview();
+        return;
+      }
 
       // 402 means the (stubbed) digital gateway declined — tell the customer
       // what to do about it rather than showing a raw error.
@@ -421,6 +442,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         value: _preview!.foodSubtotalLabel,
                       ),
                       const SizedBox(height: 6),
+                      // Exclusive GST: added on top of the food subtotal, so
+                      // the rows sum exactly to the backend `total`.
+                      if (_preview!.hasGst && !_preview!.pricesIncludeGst) ...[
+                        _SummaryRow(
+                          label: _preview!.gstRowLabel,
+                          value: _preview!.gstAmountLabel,
+                        ),
+                        const SizedBox(height: 6),
+                      ],
                       _SummaryRow(
                         label: 'Delivery Fee',
                         value: _preview!.deliveryFeeLabel,
@@ -431,6 +461,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         value: _preview!.platformFeeLabel,
                       ),
                       const SizedBox(height: 6),
+                      // Inclusive GST: already inside food prices — note only.
+                      if (_preview!.hasGst && _preview!.pricesIncludeGst) ...[
+                        GstNote(text: _preview!.gstIncludedNote),
+                        const SizedBox(height: 6),
+                      ],
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(

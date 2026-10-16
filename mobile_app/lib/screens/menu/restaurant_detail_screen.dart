@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/network/api_exception.dart';
 import '../../data/json_utils.dart';
 import '../../data/repositories/restaurant_repository.dart';
-import '../../models/restaurant.dart';
+import '../../data/models/catalog_models.dart';
 import '../../services/cart_service.dart';
 import '../cart/cart_screen.dart';
 import '../../widgets/skeleton/skeleton.dart';
@@ -754,76 +754,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   ],
                 ),
               ),
-
-              // Coupon / Offer Card.
-              //
-              // Speedy Meals' backend has no promotion engine at all, so rather
-              // than advertising a discount code that checkout could not honour,
-              // this card is only rendered when a real code exists.
-              if (restaurant.promoCode.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F3FF),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.local_offer,
-                      color: Color(0xFFDC2626),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF131B2E),
-                            fontFamily: 'Plus Jakarta Sans',
-                          ),
-                          children: [
-                            const TextSpan(text: 'Use code '),
-                            TextSpan(
-                              text: restaurant.promoCode,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFDC2626),
-                              ),
-                            ),
-                            TextSpan(text: ' for ${restaurant.promoDiscount}'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Coupon ${restaurant.promoCode} applied!'),
-                            duration: const Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'APPLY',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF1D4ED8),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ],
             ],
           ),
         ),

@@ -344,6 +344,31 @@ class CartService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Forgets the cart entirely and erases the remembered restaurant scope.
+  ///
+  /// Used on logout / account deletion: the server-side cart is already gone
+  /// (or about to be), so keeping the local view or the persisted restaurant id
+  /// would let the next account on this device inherit the previous one's cart
+  /// screen. This is a LOCAL reset only — it never calls the backend, so it is
+  /// safe to run after the session/token has already been cleared.
+  Future<void> purgeLocal() async {
+    _restaurantId = null;
+    _restaurantName = '';
+    _menu = const [];
+    _cart = ResolvedCart.empty;
+    _pendingItemIds.clear();
+    _error = null;
+    _isLoading = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_scopeKeyRestaurantId);
+      await prefs.remove(_scopeKeyRestaurantName);
+    } catch (error) {
+      debugPrint('Could not clear the persisted cart scope: $error');
+    }
+    notifyListeners();
+  }
+
   // ------------------------------------------------------------- internals
 
   /// Sends a mutation and reconciles with the backend's authoritative cart.

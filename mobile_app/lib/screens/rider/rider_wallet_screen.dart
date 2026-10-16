@@ -15,9 +15,10 @@ import '../../widgets/skeleton/skeleton.dart';
 ///   POST /wallet/recharge        → keep the wallet above the Rs. 500 floor
 ///   POST /wallet/cash-deposit    → submit collected COD cash
 ///
-/// The server owns the rules: the Rs. 500 minimum to go online, the Rs. 10
-/// deduction per delivery, the Rs. 10,000 cash cap and the expected-cash /
-/// discrepancy calculation. This screen only displays and submits.
+/// The server owns the rules: the Rs. 500 minimum to go online, the 10%
+/// platform commission on each delivery fee, the COD cash cap and the
+/// expected-cash / discrepancy calculation. This screen only displays and
+/// submits.
 class RiderWalletScreen extends StatefulWidget {
   const RiderWalletScreen({super.key});
 
@@ -306,9 +307,14 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            // Commission split mirrors the backend
+            // (`wallet_payment/service.py`: DELIVERY_COMMISSION_RATE = 0.10,
+            // RIDER_DELIVERY_SHARE = 0.90) — keep in sync if it changes.
             const Text(
-              'Deliveries deduct a flat Rs. 10 from the wallet. Cash on Delivery '
-              'orders add the order total to cash owed, which must be submitted.',
+              'On Cash on Delivery the platform keeps 10% of the delivery fee, '
+              'deducted from your wallet; on digital payments your 90% share is '
+              'credited. Cash on Delivery orders also add the order total to '
+              'cash owed, which must be submitted.',
               style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8), height: 1.5),
             ),
             const SizedBox(height: 8),

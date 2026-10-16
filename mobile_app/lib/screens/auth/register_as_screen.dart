@@ -1,10 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-import 'customer_login_screen.dart';
 import 'customer_signup_screen.dart';
-import 'rider_login_screen.dart';
 import 'rider_signup_screen.dart';
+import '../../widgets/legal_links.dart';
 
 /// Enum representing the user's chosen registration type/role.
 enum RegistrationType {
@@ -47,24 +46,6 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => const RiderSignUpScreen(),
-        ),
-      );
-    }
-  }
-
-  void _onSignIn() {
-    if (_selectedRole == RegistrationType.rider) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const RiderLoginScreen(),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const CustomerLoginScreen(),
         ),
       );
     }
@@ -325,6 +306,9 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      const LegalConsentText(),
+                      const SizedBox(height: 12),
                     ],
                   ),
                 ),

@@ -8,6 +8,7 @@ import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/home_navigation.dart';
+import '../../widgets/legal_links.dart';
 import '../rider/rider_dashboard_screen.dart';
 
 /// Step 2 of the phone+OTP login flow: enter the 6-digit code.
@@ -400,6 +401,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 20),
+                    const LegalConsentText(),
                     const SizedBox(height: 32),
                   ],
                 ),

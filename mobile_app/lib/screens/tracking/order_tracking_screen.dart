@@ -13,6 +13,7 @@ import '../../data/repositories/order_repository.dart';
 import '../../data/repositories/rider_location_repository.dart';
 import '../../features/maps/maps.dart';
 import '../../services/live_location_socket.dart';
+import '../../widgets/gst_note.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,6 +40,12 @@ class TrackingView {
   final double deliveryDistanceKm;
   final double totalAmount;
   final PaymentMethod paymentMethod;
+
+  /// GST snapshot from the backend (`gst_*`); never computed here.
+  final double gstRate;
+  final bool pricesIncludeGst;
+  final double gstAmount;
+  final double? netSubtotal;
 
   /// Null until a rider is assigned — the backend never sends a placeholder.
   final String? riderName;
@@ -69,6 +76,10 @@ class TrackingView {
     this.deliveryDistanceKm = 0,
     this.totalAmount = 0,
     this.paymentMethod = PaymentMethod.cod,
+    this.gstRate = 0,
+    this.pricesIncludeGst = true,
+    this.gstAmount = 0,
+    this.netSubtotal,
     this.riderName,
     this.riderPhone,
     this.placedAt,
@@ -95,6 +106,10 @@ class TrackingView {
         deliveryDistanceKm: tracking.deliveryDistanceKm,
         totalAmount: tracking.totalAmount,
         paymentMethod: tracking.paymentMethod,
+        gstRate: tracking.gstRate,
+        pricesIncludeGst: tracking.pricesIncludeGst,
+        gstAmount: tracking.gstAmount,
+        netSubtotal: tracking.netSubtotal,
         riderName: tracking.riderName,
         riderPhone: tracking.riderPhone,
         placedAt: tracking.placedAt,
@@ -160,14 +175,22 @@ class TrackingView {
     return '$hour:$minute ${time.hour >= 12 ? 'PM' : 'AM'}';
   }
 
+  /// True when the backend charged GST on this order.
+  bool get hasGst => gstRate > 0 && gstAmount > 0;
+  String get gstRowLabel => formatGstRowLabel(gstRate);
+  String get gstAmountLabel => formatPkr(gstAmount);
+  String get gstIncludedNote => formatGstIncludedNote(gstRate, gstAmount);
+
   /// Platform fee to show on the receipt.
   ///
   /// Uses the backend's `platform_fee` value when it is non-zero; otherwise
-  /// back-computes it from `total - subtotal - deliveryFee` so the receipt
-  /// always balances even if the backend omitted the field.
+  /// back-computes it from `total - subtotal - deliveryFee` (minus the tax when
+  /// it was added on top) so the receipt still balances if the backend omitted
+  /// the field. The authoritative `platform_fee` is always preferred.
   double get receiptPlatformFee {
     if (platformFee > 0) return platformFee;
-    final computed = totalAmount - foodSubtotal - deliveryFee;
+    final computed =
+        totalAmount - foodSubtotal - deliveryFee - (pricesIncludeGst ? 0 : gstAmount);
     return computed > 0 ? computed : 0;
   }
 
@@ -2214,6 +2237,17 @@ class _ReceiptSheet extends StatelessWidget {
           // ── Fee breakdown ────────────────────────────────────────────────
           _ReceiptRow(label: 'Subtotal', value: view.foodSubtotalLabel, labelColor: labelColor, valueColor: valueColor),
           const SizedBox(height: 6),
+          // Exclusive GST: added on top, so subtotal + gst + delivery +
+          // platform equals the backend's total.
+          if (view.hasGst && !view.pricesIncludeGst) ...[
+            _ReceiptRow(
+              label: view.gstRowLabel,
+              value: view.gstAmountLabel,
+              labelColor: labelColor,
+              valueColor: valueColor,
+            ),
+            const SizedBox(height: 6),
+          ],
           _ReceiptRow(
             label: 'Delivery Fee (${view.deliveryDistanceKm.toStringAsFixed(1)} km)',
             value: view.deliveryFeeLabel,
@@ -2227,6 +2261,11 @@ class _ReceiptSheet extends StatelessWidget {
             labelColor: labelColor,
             valueColor: valueColor,
           ),
+          // Inclusive GST: already inside the food prices — note only.
+          if (view.hasGst && view.pricesIncludeGst) ...[
+            const SizedBox(height: 8),
+            GstNote(text: view.gstIncludedNote, color: labelColor),
+          ],
           const SizedBox(height: 10),
           const Divider(thickness: 1.2),
           const SizedBox(height: 6),

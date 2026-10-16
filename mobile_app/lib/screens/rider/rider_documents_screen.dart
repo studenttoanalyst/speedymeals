@@ -69,6 +69,11 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
   }
 
   /// Pick a file and upload it for the given [docType].
+  /// Matches the backend's rider-document cap (`MAX_RIDER_DOC_SIZE_BYTES`).
+  /// Checked client-side so an oversized photo is rejected with clear copy
+  /// instead of being uploaded only to come back as a bare HTTP 413.
+  static const int _maxDocumentBytes = 5 * 1024 * 1024; // 5 MB
+
   Future<void> _pickAndUpload(String docType) async {
     if (_uploadingDocType != null) return;
 
@@ -86,6 +91,10 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
       if (!mounted) return;
       if (bytes.isEmpty) {
         _showError('Could not read the selected file. Please try again.');
+        return;
+      }
+      if (bytes.length > _maxDocumentBytes) {
+        _showError('That file is larger than 5 MB. Please choose a smaller photo.');
         return;
       }
 

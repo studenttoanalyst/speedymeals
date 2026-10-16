@@ -75,9 +75,15 @@ class ApiClient {
     bool allowRefresh = true,
     Duration? timeoutOverride,
   }) async {
-    final uri = _buildUri(path, query);
+    // Building the URI reads [baseUrl], which throws a StateError when a release
+    // build was compiled without `--dart-define=API_BASE_URL`. Keep it inside the
+    // try so a configuration failure surfaces as a friendly [ApiException]
+    // rather than an uncaught StateError.
+    Uri? uri;
 
     try {
+      uri = _buildUri(path, query);
+
       final response = await _send(
         method,
         uri,
@@ -125,7 +131,7 @@ class ApiClient {
             'try again.',
       );
     } catch (error, stackTrace) {
-      developer.log('Request $method $uri failed', name: 'ApiClient', error: error, stackTrace: stackTrace);
+      developer.log('Request $method ${uri ?? path} failed', name: 'ApiClient', error: error, stackTrace: stackTrace);
       throw _classifyTransportError(error);
     }
   }
@@ -214,9 +220,13 @@ class ApiClient {
     bool authenticated = true,
     bool allowRefresh = true,
   }) async {
-    final uri = _buildUri(path, null);
+    // Same as [request]: a missing release-time API_BASE_URL must surface as an
+    // [ApiException], not an uncaught StateError.
+    Uri? uri;
 
     try {
+      uri = _buildUri(path, null);
+
       final request = http.MultipartRequest('POST', uri)
         ..files.add(
           http.MultipartFile.fromBytes(
@@ -268,7 +278,7 @@ class ApiClient {
         message: 'The upload took too long. Please try again.',
       );
     } catch (error, stackTrace) {
-      developer.log('Upload $uri failed', name: 'ApiClient', error: error, stackTrace: stackTrace);
+      developer.log('Upload ${uri ?? path} failed', name: 'ApiClient', error: error, stackTrace: stackTrace);
       throw _classifyTransportError(error);
     }
   }
@@ -400,6 +410,18 @@ class ApiClient {
   /// this classification correct without importing `dart:io` (which would break
   /// the web build).
   ApiException _classifyTransportError(Object error) {
+    // A StateError here is the release-build configuration guard in ApiConfig
+    // ("API_BASE_URL is required for release builds"). That is a user-facing
+    // setup problem, not a transport failure, so map it to friendly copy.
+    if (error is StateError) {
+      return ApiException(
+        kind: ApiErrorKind.unknown,
+        message: 'The app is not configured to reach Speedy Meals. '
+            'Please update or reinstall the app and try again.',
+        detail: error,
+      );
+    }
+
     final description = error.toString();
     final isOffline = error is http.ClientException ||
         description.contains('SocketException') ||

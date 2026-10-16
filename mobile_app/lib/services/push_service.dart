@@ -167,6 +167,24 @@ class PushService {
     }
   }
 
+  /// Drops this device's FCM token locally WITHOUT calling the backend.
+  ///
+  /// Used by account deletion: `DELETE /users/me` has already removed the
+  /// server-side device rows, and the now-revoked access token would make a
+  /// `DELETE /devices` call fail. This only deletes the on-device token so the
+  /// next account that signs in on this phone starts clean. Never throws.
+  Future<void> forgetDeviceToken() async {
+    await _tokenRefreshSub?.cancel();
+    _tokenRefreshSub = null;
+    _registeredToken = null;
+    if (!_available) return;
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (error) {
+      developer.log('FCM deleteToken failed: $error', name: 'PushService');
+    }
+  }
+
   // --------------------------------------------------------------- internals
 
   Future<void> _register(String token) async {

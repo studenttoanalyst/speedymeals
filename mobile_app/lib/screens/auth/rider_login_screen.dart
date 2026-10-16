@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../../services/auth_service.dart';
 import 'otp_verification_screen.dart';
-import 'rider_forgot_password_screen.dart';
 import 'rider_signup_screen.dart';
+import '../../widgets/legal_links.dart';
 
 /// Delivery Rider Login Screen matching clean design system & Stitch guidelines.
 class RiderLoginScreen extends StatefulWidget {
@@ -229,9 +229,6 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                       // Riders authenticate exactly like customers — phone + OTP.
                       // The backend keeps no password for `riders` either, so a
                       // Rider ID / password pair no longer exists.
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
                           const Text(
                             'Phone Number',
                             style: TextStyle(
@@ -240,27 +237,6 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                               color: Color(0xFF334155),
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RiderForgotPasswordScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              'Trouble signing in?',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFDC2626),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _phoneController,
@@ -407,6 +383,8 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                         ),
                       ),
 
+                      const SizedBox(height: 12),
+                      const LegalConsentText(),
                       const SizedBox(height: 24),
                     ],
                   ),

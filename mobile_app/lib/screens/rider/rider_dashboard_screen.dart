@@ -732,6 +732,9 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
+                  // The Rs. 5,000 deposit amount mirrors the backend
+                  // (`wallet_payment/service.py`: KIT_DEPOSIT_AMOUNT = 5000) —
+                  // keep in sync manually; no endpoint exposes it.
                   depositPaid
                       ? 'Rs. 5,000 security deposit received. Please collect your official uniform shirts (min. 2) and insulated delivery box from the hub to activate online deliveries.'
                       : 'To go online and receive orders, submit the Rs. 5,000 refundable security deposit and collect your kit (uniform & delivery box) at any SpeedyMeals outlet.',
@@ -841,6 +844,9 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
               child: _MetricCard(
                 title: 'WALLET BALANCE',
                 value: wallet?.walletBalanceLabel ?? '—',
+                // Mirrors backend `MIN_WALLET_BALANCE_TO_GO_ONLINE = 500`
+                // (`wallet_payment/service.py`); the shared constant is
+                // `AppConstants.riderMinWalletBalance`.
                 subtext: 'Min Rs. 500 to go online',
                 icon: Icons.account_balance_wallet_rounded,
                 accentColor: _green,

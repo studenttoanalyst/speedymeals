@@ -1,4 +1,5 @@
 import '../../core/network/api_client.dart';
+import '../json_utils.dart';
 import '../models/rider_models.dart';
 
 /// Everything a signed-in rider can do.
@@ -11,14 +12,25 @@ class RiderRepository {
 
   final ApiClient _client;
 
-  /// `GET /wallet/profile`
+  /// `GET /wallet/profile` + `GET /wallet/balance`
   ///
   /// Added alongside this integration: the audit found no way for a rider client
   /// to read its own `approval_status` (`GET /auth/me` returns only id + role),
   /// which left the app unable to explain why work was being refused.
+  ///
+  /// The second read exists because `/wallet/profile` carries no COD-cash key:
+  /// `pending_cash_owed` (cash collected on COD deliveries and not yet
+  /// deposited) is only on `GET /wallet/balance` / `/wallet/cod-eligibility`,
+  /// so both responses are fetched together and merged into one profile.
   Future<RiderProfile> profile() async {
-    final json = await _client.getJson('/wallet/profile');
-    return RiderProfile.fromJson(json);
+    final results = await Future.wait([
+      _client.getJson('/wallet/profile'),
+      _client.getJson('/wallet/balance'),
+    ]);
+    return RiderProfile.fromJson(
+      results[0],
+      pendingCashOwed: Json.asDouble(results[1]['pending_cash_owed']),
+    );
   }
 
   /// `GET /wallet/assignments`
@@ -49,8 +61,11 @@ class RiderRepository {
   /// `PATCH /wallet/deliveries/{order_id}/status/{arrived|picked-up|on-the-way|delivered}`
   ///
   /// One allowed transition per call. Reaching `Delivered` also settles the
-  /// delivery on the server: Rs. 10 is deducted from the rider's wallet and, for
-  /// COD orders, the order total is added to `pending_cash_owed`.
+  /// delivery on the server: the platform takes a 10% commission on the
+  /// delivery fee (`DELIVERY_COMMISSION_RATE`) — debited from the rider's wallet
+  /// for COD, while for digital orders the rider's 90% share
+  /// (`RIDER_DELIVERY_SHARE`) is credited. For COD orders the order total is
+  /// added to `pending_cash_owed`.
   Future<RiderAssignment> advanceDeliveryStatus({
     required String orderId,
     required RiderAction action,
@@ -59,12 +74,6 @@ class RiderRepository {
       '/wallet/deliveries/$orderId/status/${action.endpointSegment}',
     );
     return RiderAssignment.fromJson(json);
-  }
-
-  /// `GET /wallet/balance` — wallet balance, cash owed and online state.
-  Future<RiderWallet> wallet() async {
-    final json = await _client.getJson('/wallet/balance');
-    return RiderWallet.fromJson(json);
   }
 
   /// `GET /wallet/earnings` — the full three-number view (earnings, wallet,
