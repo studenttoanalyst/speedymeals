@@ -82,6 +82,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       setState(() {
         _preview = preview;
         _isLoadingPreview = false;
+        // If the backend just told us online payments are off, snap an
+        // invalid Digital selection back to COD so the place-order button
+        // can never submit a method the server will reject with 400.
+        if (!preview.onlinePaymentsEnabled &&
+            _paymentMethod == PaymentMethod.digital) {
+          _paymentMethod = PaymentMethod.cod;
+        }
       });
     } on ApiException catch (error) {
       if (!mounted) return;
@@ -136,6 +143,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             content: Text(
               'Prices changed while you were checking out. Please review the '
               'updated total and place your order again.',
+            ),
+            backgroundColor: Color(0xFFDC2626),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        await _loadPreview();
+        return;
+      }
+
+      // Defence-in-depth 400: online payments disabled server-side
+      // (ONLINE_PAYMENTS_ENABLED=false). The option is hidden from the UI
+      // normally, so this only fires if a stale client still tries Digital —
+      // fall back to COD cleanly instead of showing a raw error.
+      if (error.statusCode == 400 &&
+          _paymentMethod == PaymentMethod.digital) {
+        setState(() => _paymentMethod = PaymentMethod.cod);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Online payment is currently unavailable. '
+              'Please choose Cash on Delivery.',
             ),
             backgroundColor: Color(0xFFDC2626),
             behavior: SnackBarBehavior.floating,
@@ -395,16 +423,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       },
                     ),
                     const SizedBox(height: 8),
-                    _PaymentMethodCard(
-                      title: PaymentMethod.digital.label,
-                      subtitle: 'Pay online for this order',
-                      icon: Icons.smartphone,
-                      isSelected: _paymentMethod == PaymentMethod.digital,
-                      onTap: () {
-                        setState(
-                            () => _paymentMethod = PaymentMethod.digital);
-                      },
-                    ),
+                    // Shown ONLY when the backend says online payments are
+                    // live (`checkout-preview.online_payments_enabled`,
+                    // governed by ONLINE_PAYMENTS_ENABLED). Default is false
+                    // because the gateway is still a stub — selling a payment
+                    // method that collects no money would be a broken promise.
+                    // Fail-safe: while the preview is loading or errored the
+                    // option stays hidden (COD-only).
+                    if (_preview?.onlinePaymentsEnabled == true) ...[
+                      _PaymentMethodCard(
+                        title: PaymentMethod.digital.label,
+                        subtitle: 'Pay online for this order',
+                        icon: Icons.smartphone,
+                        isSelected: _paymentMethod == PaymentMethod.digital,
+                        onTap: () {
+                          setState(
+                              () => _paymentMethod = PaymentMethod.digital);
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),

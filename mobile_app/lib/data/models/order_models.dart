@@ -311,6 +311,12 @@ class CheckoutPreview {
   /// the backend could not compute a route.
   final RouteDetail? route;
 
+  /// Whether the backend currently accepts `payment_method=Digital`
+  /// (`ONLINE_PAYMENTS_ENABLED`, default false — the gateway is still a stub
+  /// that never charges anyone). The backend is the ONLY authority for this;
+  /// the checkout screen hides "Pay Online" when false and defaults to COD.
+  final bool onlinePaymentsEnabled;
+
   const CheckoutPreview({
     required this.foodSubtotal,
     required this.deliveryDistanceKm,
@@ -322,6 +328,7 @@ class CheckoutPreview {
     this.gstAmount = 0,
     this.netSubtotal,
     this.route,
+    this.onlinePaymentsEnabled = false,
   });
 
   factory CheckoutPreview.fromJson(Map<String, dynamic> json) => CheckoutPreview(
@@ -335,6 +342,9 @@ class CheckoutPreview {
         gstAmount: Json.asDouble(json['gst_amount']),
         netSubtotal: Json.asDoubleOrNull(json['net_subtotal']),
         route: _routeOrNull(json['route']),
+        // Missing key (older backend) ⇒ false ⇒ option hidden. Fail-safe.
+        onlinePaymentsEnabled:
+            Json.asBool(json['online_payments_enabled'], fallback: false),
       );
 
   String get foodSubtotalLabel => formatPkr(foodSubtotal);
