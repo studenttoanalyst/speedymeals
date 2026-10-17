@@ -181,7 +181,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Login to start delivering with Speedy Meals & boost earnings',
+                        'Login to start delivering with SpeedyMeals & boost earnings',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,

@@ -426,7 +426,7 @@ class _RechargeSheetState extends State<_RechargeSheet> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
-              labelText: 'Amount (PKR)',
+              labelText: 'Amount (Rs.)',
               labelStyle: TextStyle(color: Color(0xFF94A3B8)),
               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF334155))),
               focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
@@ -530,7 +530,7 @@ class _CashDepositSheetState extends State<_CashDepositSheet> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
-              labelText: 'Amount submitted (PKR)',
+              labelText: 'Amount submitted (Rs.)',
               labelStyle: TextStyle(color: Color(0xFF94A3B8)),
               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF334155))),
               focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),

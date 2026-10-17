@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../constants/colors.dart';
 
-/// Reusable Google Maps widget for Speedy Meals mobile application.
+/// Reusable Google Maps widget for SpeedyMeals mobile application.
 ///
 /// Designed for Phase M1 and future phases (Customer tracking, address selection,
 /// and Rider active delivery screens).

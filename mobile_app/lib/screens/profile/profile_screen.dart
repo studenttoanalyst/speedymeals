@@ -170,8 +170,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         title: const Text('Delete account?'),
         content: const Text(
-          'This permanently deletes your Speedy Meals account and personal '
-          'data. Order and payment records are kept in anonymized form for '
+          'This permanently deletes your SpeedyMeals account and personal '
+          'data. Order and payment records are kept in anonymised form for '
           'legal and accounting purposes. This cannot be undone.\n\n'
           'You will need to sign up again to place orders.',
         ),

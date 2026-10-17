@@ -1,4 +1,4 @@
-/// Speedy Meals application constants and backend-aligned enums.
+/// SpeedyMeals application constants and backend-aligned enums.
 ///
 /// This file is the single source of truth for the vocabulary shared between
 /// the Flutter UI and the FastAPI backend. Every wire string here was copied
@@ -40,12 +40,17 @@ class AppConstants {
   /// (`GET /orders/{id}/track`) is the safety net when the socket is unavailable.
   static const Duration orderPollInterval = Duration(seconds: 15);
 
-  // App info
-  static const String appName = 'Speedy Meals';
-  static const String appTagline = 'Fast & Fresh Delivery';
+  // App info — single source of truth for the brand name and tagline.
+  // Every screen (splash, dashboards, notifications, network errors) reads
+  // these instead of hardcoding the strings, so the name can never drift.
+  static const String appName = 'SpeedyMeals';
+  static const String appTagline = 'Lightning Fast Delights';
 
   /// Placeholder shown when a customer has no saved address yet.
   static const String noAddressLabel = 'Add a delivery address';
+
+  /// Support contact shown in the app and in the published policy pages.
+  static const String supportEmail = 'support@speedymealservices.com';
 
   // Legal & Support URLs
   static const String termsUrl = 'https://speedymealservices.com/terms';
@@ -261,8 +266,11 @@ enum PaymentMethod {
   /// Cash on delivery — cash changes hands when the rider delivers.
   cod('COD', 'Cash on Delivery'),
 
-  /// Simulated online payment (no real gateway in the MVP).
-  digital('Digital', 'Pay Online (demo)');
+  /// Online payment. The backend accepts it and completes the order; the
+  /// gateway itself is an MVP stub that records a reference and moves on
+  /// (`food_delivery/service.py: _process_digital_payment`), so no
+  /// customer-facing screen should label it as a demo/test payment.
+  digital('Digital', 'Pay Online');
 
   const PaymentMethod(this.wireValue, this.label);
 

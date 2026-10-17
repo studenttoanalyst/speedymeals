@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-/// Helper factory for constructing Speedy Meals map markers.
+/// Helper factory for constructing SpeedyMeals map markers.
 ///
 /// Ensures consistent naming, color hue, and info windows across Customer
 /// and Rider screens.

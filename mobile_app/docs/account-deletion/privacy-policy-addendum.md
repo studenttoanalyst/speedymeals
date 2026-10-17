@@ -21,6 +21,8 @@ You can also email **support@speedymealservices.com** from the number or email a
 
 If you have **no active or pending order**, your account and personal data are deleted **immediately** when your request is verified: your name, phone number, email and saved addresses are removed. If you still have an active or pending order, we will ask you to wait until it is delivered or cancelled — we answer with a clear message and retry then.
 
+Where a past order still refers to one of your saved addresses, the address record is kept for that order but reduced to a placeholder marked *Address removed* — the label and the street address you typed are erased, and the record is no longer usable as an address. Addresses no order refers to are deleted outright.
+
 ### 9.3 What happens to a rider account (7-day grace period, admin review)
 
 Rider accounts are **never deleted automatically**. A deletion request works like this:

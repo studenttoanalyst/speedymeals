@@ -235,7 +235,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Join Speedy Meals fleet & earn daily with flexible hours',
+                        'Join SpeedyMeals fleet & earn daily with flexible hours',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,

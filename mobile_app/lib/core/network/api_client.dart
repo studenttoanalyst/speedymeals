@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart' show MediaType;
 
 import '../config/api_config.dart';
+import '../constants/app_constants.dart';
 import '../storage/token_storage.dart';
 import 'api_exception.dart';
 
@@ -437,7 +438,7 @@ class ApiClient {
     if (error is StateError) {
       return ApiException(
         kind: ApiErrorKind.unknown,
-        message: 'The app is not configured to reach Speedy Meals. '
+        message: 'The app is not configured to reach ${AppConstants.appName}. '
             'Please update or reinstall the app and try again.',
         detail: error,
       );
@@ -454,8 +455,8 @@ class ApiClient {
     if (isOffline) {
       return ApiException(
         kind: ApiErrorKind.network,
-        message: 'Cannot reach Speedy Meals. Check your internet connection '
-            'and try again.',
+        message: 'Cannot reach ${AppConstants.appName}. Check your internet '
+            'connection and try again.',
         detail: error,
       );
     }

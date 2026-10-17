@@ -11,7 +11,7 @@ enum RegistrationType {
   rider,
 }
 
-/// "Register As" selection screen for Speedy Meals.
+/// "Register As" selection screen for SpeedyMeals.
 ///
 /// Pixel-accurate, compact & responsive implementation matching the Stitch design.
 class RegisterAsScreen extends StatefulWidget {
@@ -151,7 +151,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Choose how you want to use Speedy Meals',
+                          'Choose how you want to use SpeedyMeals',
                           style: theme.textTheme.bodyLarge?.copyWith(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -193,7 +193,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           badgeBgColor: const Color(0xFFEFF6FF),
                           badgeTextColor: const Color(0xFF1D4ED8),
                           description:
-                              'Deliver orders and earn with Speedy Meals',
+                              'Deliver orders and earn with SpeedyMeals',
                           icon: Icons.delivery_dining_rounded,
                           featurePills: [
                             const _FeaturePill(

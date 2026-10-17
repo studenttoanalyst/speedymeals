@@ -4,6 +4,8 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../core/constants/app_constants.dart';
+
 /// GPS permission / service result returned to callers.
 enum LocationPermissionState {
   /// All good — location stream/reads are available.
@@ -289,7 +291,7 @@ class RiderLocationService {
         // active delivery and the app is backgrounded. The service is declared
         // with foregroundServiceType="location" in AndroidManifest.xml.
         foregroundNotificationConfig: const ForegroundNotificationConfig(
-          notificationTitle: 'Speedy Meals',
+          notificationTitle: AppConstants.appName,
           notificationText: 'Delivery in progress',
         ),
       );

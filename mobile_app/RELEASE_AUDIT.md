@@ -356,7 +356,7 @@ The Phase 0 note ("backend is POST") was wrong. The Phase 1 claim ("mobile uses 
 | Reverse geocode | `location_repository.dart` (`reverseGeocode`) | `GET /api/v1/location/reverse-geocode` | ✅ | — |
 | Places autocomplete | `location_repository.dart` (`autocompletePlaces`) | `GET /api/v1/location/places/autocomplete` | ✅ | — |
 | Places details | `location_repository.dart` (`placeDetails`) | `GET /api/v1/location/places/details` | ✅ | — |
-| **Account deletion** | `user_repository.dart` (`deleteAccount`) + profile UI | `DELETE /users/me` (Customer: 204, Rider: 200 deferred request); `GET /users/me/deletion-request`; `POST /users/me/deletion-request/cancel` | ✅ | Tested = live. Backend applied, migrated, and verified live with full test suite |
+| **Account deletion** | `user_repository.dart` (`deleteAccount`) + profile UI | `DELETE /users/me` (Customer: 204, Rider: 200 deferred request); `GET /users/me/deletion-request`; `POST /users/me/deletion-request/cancel` | ✅ | Tested = live. Backend applied, migrated, and verified live with full test suite. Re-audit 2026-10-18 found and fixed two live defects: the web deletion OTP was silently dropped while the login resend cooldown was active, and customer deletion returned 500 (FK violation) for any customer with order history. Both now have regression tests. |
 
 > **Note on `/users/me`:** the brief says "GET, PATCH". The backend implements **PUT** (`users/routes.py:36`). Mobile matches the backend (`putJson('/users/me')`), so no change.
 

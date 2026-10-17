@@ -33,7 +33,7 @@ class SpeedyMealsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Speedy Meals',
+      title: 'SpeedyMeals',
       theme: AppTheme.light,
       home: const SplashScreen(),
     );

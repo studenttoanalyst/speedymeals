@@ -428,7 +428,8 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
             )
           else
             const Text(
-              'Need help with this request? Contact support@speedymealservices.com.',
+              'Need help with this request? Contact '
+              '${AppConstants.supportEmail}.',
               style: TextStyle(color: _muted, fontSize: 12),
             ),
         ],

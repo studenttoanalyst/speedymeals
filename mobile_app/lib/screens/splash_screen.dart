@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_constants.dart';
 import '../services/auth_service.dart';
 import '../widgets/home_navigation.dart';
 import 'auth/register_as_screen.dart';
 import 'rider/rider_dashboard_screen.dart';
 
-/// Splash screen and session restoration for Speedy Meals.
+/// Splash screen and session restoration for SpeedyMeals.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -120,7 +121,7 @@ class _SplashContent extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           const Text(
-            'Speedy Meals',
+            AppConstants.appName,
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
@@ -130,7 +131,7 @@ class _SplashContent extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Lightning Fast Delights',
+            AppConstants.appTagline,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,

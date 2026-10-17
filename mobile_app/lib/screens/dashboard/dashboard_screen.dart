@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/network/api_exception.dart';
 import '../../data/json_utils.dart';
 import '../../data/models/catalog_models.dart';
@@ -88,7 +89,7 @@ class SearchFilters {
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
-/// Speedy Meals home dashboard screen.
+/// SpeedyMeals home dashboard screen.
 ///
 /// Matches the Stitch home mockup: solid red header, compact location/ETA pill in Royal Blue,
 /// search bar, category carousel with food images, live order snippet,
@@ -341,7 +342,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Speedy Meals',
+                AppConstants.appName,
                 style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),

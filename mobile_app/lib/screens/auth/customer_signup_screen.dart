@@ -211,7 +211,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Join Speedy Meals and get your favorite meals delivered fast',
+                        'Join SpeedyMeals and get your favorite meals delivered fast',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,

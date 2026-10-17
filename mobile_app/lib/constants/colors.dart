@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Speedy Meals Design System - Brand Colors
+/// SpeedyMeals Design System - Brand Colors
 /// Primary Red: #DC2626, Royal Blue: #1D4ED8, Accent Orange: #F59E0B, Pure White: #FFFFFF
 class SpeedyMealsColors {
   // Primary Colors

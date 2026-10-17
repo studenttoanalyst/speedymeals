@@ -173,7 +173,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Login to order your favorite food from Speedy Meals',
+                        'Login to order your favorite food from SpeedyMeals',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -186,7 +186,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
 
                       // Phone Number Field
                       //
-                      // Speedy Meals authenticates by phone + OTP — the backend
+                      // SpeedyMeals authenticates by phone + OTP — the backend
                       // has no password column on `users`, so there is nothing
                       // else to collect here.
                       Column(

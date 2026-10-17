@@ -128,7 +128,7 @@ class AuthException implements Exception {
         return AuthException(error.message);
       case ApiErrorKind.network:
         return const AuthException(
-          'Cannot reach Speedy Meals. Check your internet connection.',
+          'Cannot reach ${AppConstants.appName}. Check your internet connection.',
           isRetryable: true,
         );
       case ApiErrorKind.timeout:

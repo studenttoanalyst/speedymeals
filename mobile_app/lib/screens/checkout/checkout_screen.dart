@@ -397,7 +397,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     const SizedBox(height: 8),
                     _PaymentMethodCard(
                       title: PaymentMethod.digital.label,
-                      subtitle: 'Demo payment — no real gateway is connected yet',
+                      subtitle: 'Pay online for this order',
                       icon: Icons.smartphone,
                       isSelected: _paymentMethod == PaymentMethod.digital,
                       onTap: () {
