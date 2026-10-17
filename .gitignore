@@ -236,3 +236,5 @@ GoogleService-Info.plist
 # Firebase service-account keys (backend push sender). Never commit.
 *-firebase-adminsdk-*.json
 backend/app/secrets/
+dump.rdb
+*.rdb
