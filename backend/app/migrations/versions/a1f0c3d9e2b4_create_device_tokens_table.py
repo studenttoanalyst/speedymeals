@@ -33,7 +33,19 @@ def upgrade() -> None:
         sa.UniqueConstraint('token'),
     )
     op.create_index('ix_device_tokens_subject_role', 'device_tokens', ['subject_id', 'role'])
-    op.execute("GRANT ALL ON TABLE public.device_tokens TO anon, authenticated, service_role;")
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+                GRANT ALL ON TABLE public.device_tokens TO anon, authenticated, service_role;
+            END IF;
+        END
+        $$;
+        """
+    )
 
 
 def downgrade() -> None:

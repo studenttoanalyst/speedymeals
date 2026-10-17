@@ -179,11 +179,12 @@ def test_restaurant_management_route_requires_admin_role(admin_client, db_sessio
 
 def test_create_restaurant_route_returns_201(admin_client, admin_token):
     unique = uuid.uuid4().hex[:8]
+    phone_digits = f"{uuid.uuid4().int % 10_000_000:07d}"
     response = admin_client.post(
         "/admin/restaurants",
         json={
-            "name": "Route Cafe", "email": f"route-{unique}@cafe.com",
-            "password": "password123", "phone_number": f"+92305{unique}",
+            "name": "Route Cafe", "email": f"route-{unique}@speedymeals.com",
+            "password": "password123", "phone_number": f"+92305{phone_digits}",
         },
         headers={"Authorization": f"Bearer {admin_token}"},
     )
@@ -519,8 +520,12 @@ def test_list_cash_discrepancies_flags_shortfall_only(db_session):
 
     results = service.list_cash_discrepancies(db_session)
 
-    assert len(results) == 1
-    assert results[0]["discrepancy"] == -200
+    # Scoped to this test's rows: the local dev DB may already hold other
+    # deposits, so assert on the ids we just created instead of len(results).
+    by_id = {row["id"]: row for row in results}
+    assert short_deposit.id in by_id
+    assert by_id[short_deposit.id]["discrepancy"] == -200
+    assert ok_deposit.id not in by_id, "a balanced deposit is not a discrepancy"
 
 
 def test_rider_payouts_route_requires_admin_role(admin_client, db_session):
@@ -543,7 +548,8 @@ def test_cash_discrepancies_route_returns_200(admin_client, db_session, admin_to
         "/admin/cash-discrepancies", headers={"Authorization": f"Bearer {admin_token}"}
     )
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    returned_ids = [row["id"] for row in response.json()]
+    assert str(short_deposit.id) in returned_ids
 
 
 # --- Step 7: reports ---
@@ -574,13 +580,21 @@ def test_get_reports_includes_cash_discrepancy_total(db_session):
     deposit = CashDeposit(
         rider_id=rider.id, amount_submitted=800, expected_amount=1000, discrepancy=-200,
     )
+    period_start, period_end = _period_around_today()
+    # The report total is DB-wide and the local dev DB may already contain
+    # other deposits, so measure the delta this deposit contributes.
+    before = service.get_reports(db_session, period_start, period_end)[
+        "cash_discrepancy_total"
+    ]
+
     db_session.add(deposit)
     db_session.commit()
-    period_start, period_end = _period_around_today()
 
-    result = service.get_reports(db_session, period_start, period_end)
+    after = service.get_reports(db_session, period_start, period_end)[
+        "cash_discrepancy_total"
+    ]
 
-    assert result["cash_discrepancy_total"] == -200
+    assert round(after - before, 2) == -200
 
 
 def test_get_reports_zero_orders_no_division_error(db_session):

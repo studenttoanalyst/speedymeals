@@ -10,11 +10,14 @@ Prefix and bucket strategy:
 - `rider-docs` (private): Sensitive documents (CNIC, license, vehicle registration).
 """
 import io
+import logging
 import uuid
 import boto3
 from PIL import Image
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 _s3_kwargs = {
     "region_name": settings.AWS_REGION,
@@ -185,3 +188,59 @@ def get_signed_document_url(bucket_name: str, key: str, expires_in: int = 300) -
         Params={"Bucket": bucket_name, "Key": key},
         ExpiresIn=expires_in,
     )
+
+
+def _split_stored_document_url(url: str) -> tuple[str, str] | None:
+    """Map a stored rider-document URL back to (bucket, key).
+
+    Handles both shapes this project writes:
+      Supabase: {base}/storage/v1/object/authenticated/rider-docs/{rider}/{doc}.webp
+      S3 path:  https://{bucket}.s3.{region}.amazonaws.com/rider-docs/{rider}/{doc}.webp
+
+    Returns None for anything else, so a legacy or foreign URL is skipped
+    instead of deleting an unrelated object.
+    """
+    if not url:
+        return None
+    marker = "/storage/v1/object/authenticated/"
+    if marker in url:
+        rest = url.split(marker, 1)[1]
+        bucket, _, key = rest.partition("/")
+        return (bucket, key) if bucket and key else None
+    if "amazonaws.com/" in url:
+        # e.g. https://{bucket}.s3.{region}.amazonaws.com/rider-docs/...
+        host_part = url.split("amazonaws.com/", 1)[0]
+        key = url.split("amazonaws.com/", 1)[1]
+        bucket = settings.S3_BUCKET_NAME
+        if "//" in host_part:
+            domain = host_part.split("//", 1)[1].rstrip(".")
+            # e.g. domain = speedymeals-docs.s3.us-east-1
+            subparts = domain.split(".s3")
+            if subparts[0]:
+                bucket = subparts[0]
+        if key.startswith(f"{RIDER_BUCKET}/"):
+            return bucket, key
+    return None
+
+
+def delete_rider_document_url(url: str) -> bool:
+    """Delete one private rider document (CNIC / licence / vehicle photo) from
+    object storage, given the URL stored on the rider row.
+
+    Best effort by design: this runs while an admin-approved deletion executes,
+    so a missing object (already purged, removed by hand) must never fail or
+    roll back the request. Returns True when the object is gone - deleted,
+    already absent, or not one of ours to delete - and False only when the
+    storage call itself failed.
+    """
+    target = _split_stored_document_url(url)
+    if target is None:
+        logger.warning("Skipping stored-object delete: unrecognised document URL")
+        return True
+    bucket, key = target
+    try:
+        _s3_client.delete_object(Bucket=bucket, Key=key)
+        return True
+    except Exception:  # noqa: BLE001 - a failed delete must not abort the request
+        logger.exception("Could not delete stored rider document (bucket=%s)", bucket)
+        return False

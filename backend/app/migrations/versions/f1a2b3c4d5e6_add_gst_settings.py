@@ -28,7 +28,19 @@ def upgrade() -> None:
     op.add_column('orders', sa.Column('prices_include_gst', sa.Boolean(), nullable=True))
     op.add_column('orders', sa.Column('gst_amount', sa.Numeric(), nullable=True))
     op.add_column('orders', sa.Column('net_subtotal', sa.Numeric(), nullable=True))
-    op.execute("GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;")
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+                GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
+            END IF;
+        END
+        $$;
+        """
+    )
 
 
 def downgrade() -> None:

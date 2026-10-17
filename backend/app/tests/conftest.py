@@ -31,7 +31,15 @@ def db_session():
     transaction = connection.begin()
 
     from sqlalchemy.orm import sessionmaker
-    TestingSessionLocal = sessionmaker(bind=connection)
+
+    # join_transaction_mode="create_savepoint": services call db.commit()
+    # internally, which would otherwise commit the outer transaction and leak
+    # test rows into the real database (breaking later tests and repeat runs).
+    # With a savepoint, each commit only releases the savepoint and the outer
+    # transaction is still rolled back by the fixture.
+    TestingSessionLocal = sessionmaker(
+        bind=connection, join_transaction_mode="create_savepoint"
+    )
     session = TestingSessionLocal()
 
     try:

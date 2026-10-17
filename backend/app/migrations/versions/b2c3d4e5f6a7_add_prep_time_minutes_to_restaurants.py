@@ -19,7 +19,19 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.add_column('restaurants', sa.Column('prep_time_minutes', sa.Integer(), nullable=False, server_default='20'))
-    op.execute("GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;")
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+                GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
+            END IF;
+        END
+        $$;
+        """
+    )
 
 
 def downgrade() -> None:

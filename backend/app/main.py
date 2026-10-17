@@ -22,6 +22,11 @@ from app.platform.location.routes import router as location_router
 from app.platform.notification.routes import router as notification_router
 from app.platform.users.routes import router as users_router
 from app.platform.wallet_payment.routes import router as wallet_router
+from app.platform.account_deletion.routes import (
+    admin_router as deletion_admin_router,
+    public_router as deletion_public_router,
+    user_router as deletion_user_router,
+)
 from app.modules.admin.routes import router as admin_router
 from app.modules.admin_roles.routes import router as admin_roles_router
 from app.modules.admin_accounts.routes import router as admin_accounts_router
@@ -85,6 +90,12 @@ app.include_router(customer_orders_router)
 app.include_router(admin_router)
 app.include_router(admin_roles_router)
 app.include_router(admin_accounts_router)
+# Account deletion (Play Store requirement): holder endpoints (/users/...),
+# the signed-out web form (/account-deletion/...) and the staff review queue
+# (/admin/deletion-requests, permission `manage_deletion_requests`).
+app.include_router(deletion_user_router)
+app.include_router(deletion_public_router)
+app.include_router(deletion_admin_router)
 
 
 @app.get("/", tags=["system"])
@@ -157,6 +168,7 @@ def seed_first_admin_on_startup() -> None:
 
 
 _sweeper_task: "asyncio.Task | None" = None
+_deletion_review_task: "asyncio.Task | None" = None
 
 
 @app.on_event("startup")
@@ -169,10 +181,28 @@ async def start_assignment_sweeper() -> None:
         _sweeper_task = asyncio.create_task(run_forever())
 
 
+@app.on_event("startup")
+async def start_deletion_review_job() -> None:
+    """Move expired deletion requests into the admin review queue.
+
+    Idempotent and destructive-free: it only flips `pending` ->
+    `ready_for_review` and notifies admins (see core/deletion_review_job.py).
+    Disable it (DELETION_REVIEW_JOB_ENABLED=false) when the sweep is scheduled
+    out of process instead.
+    """
+    global _deletion_review_task
+    if settings.DELETION_REVIEW_JOB_ENABLED:
+        from app.core.deletion_review_job import run_forever
+
+        _deletion_review_task = asyncio.create_task(run_forever())
+
+
 @app.on_event("shutdown")
-async def stop_assignment_sweeper() -> None:
+async def stop_background_jobs() -> None:
     if _sweeper_task is not None:
         _sweeper_task.cancel()
+    if _deletion_review_task is not None:
+        _deletion_review_task.cancel()
 
 
 @app.get("/health")
