@@ -225,6 +225,10 @@ class CheckoutPreviewResponseSchema(BaseModel):
     net_subtotal: float | None = None
     total: float
     route: RouteDetailSchema | None = None
+    # Whether payment_method="Digital" is accepted right now
+    # (settings.ONLINE_PAYMENTS_ENABLED, default false - the gateway is still a
+    # stub). Clients hide the "Pay Online" option when this is false.
+    online_payments_enabled: bool = False
 
 
 class OrderTrackingResponseSchema(BaseModel):

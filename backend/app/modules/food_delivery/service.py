@@ -1673,6 +1673,11 @@ def preview_checkout(
         "net_subtotal": ctx["tax"]["net_subtotal"],
         "total": ctx["total"],
         "route": ctx["route"],
+        # Advertised here (not in a separate config endpoint) because this is
+        # the call every checkout makes before the customer picks a payment
+        # method - one request fewer, and the answer can never be stale by the
+        # time the form is rendered.
+        "online_payments_enabled": settings.ONLINE_PAYMENTS_ENABLED,
     }
 
 
@@ -1742,6 +1747,20 @@ def place_order(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Payment method must be one of: {sorted(VALID_PAYMENT_METHODS)}.",
+        )
+
+    # Online payments are opt-in (settings.ONLINE_PAYMENTS_ENABLED, default
+    # false) because the gateway is still a stub - no money is ever collected.
+    # Clients learn this from checkout-preview's `online_payments_enabled` and
+    # should hide the option; this guard is for clients that ignore the flag,
+    # and it fires BEFORE the cart is priced into an order so nothing is written.
+    if payment_method == "Digital" and not settings.ONLINE_PAYMENTS_ENABLED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Online payment is currently unavailable. "
+                "Please choose Cash on Delivery."
+            ),
         )
 
     ctx = _build_checkout_context(db, customer_id, restaurant_id, address_id)

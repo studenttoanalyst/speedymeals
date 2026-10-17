@@ -16,6 +16,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
 from app.core import maps_client
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.redis_client import redis_client
 from app.modules.food_delivery import service
@@ -532,6 +533,10 @@ def test_place_order_spec_example_exact_numbers(db_session, customer, address, t
 def test_place_order_multiple_items_variants_quantities(db_session, customer, address, track_carts, monkeypatch):
     from app.modules.food_delivery.models import OrderItem
 
+    # Online payments are OFF by default (the gateway is still a stub), so a
+    # Digital checkout needs the flag switched on for the duration of the test.
+    monkeypatch.setattr(settings, "ONLINE_PAYMENTS_ENABLED", True)
+
     restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
     biryani = _make_menu_item(db_session, restaurant, "Biryani", 500)
     cola = MenuItem(
@@ -800,6 +805,8 @@ def test_place_order_digital_success_gets_payment_reference(
 ):
     """Digital: simulated gateway succeeds, order is created normally, and
     a fake reference is returned (not persisted — no DB column for it)."""
+    monkeypatch.setattr(settings, "ONLINE_PAYMENTS_ENABLED", True)
+
     restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
     item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
     _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
@@ -821,6 +828,8 @@ def test_place_order_digital_gateway_failure_leaves_no_order_and_cart_intact(
     row, no order_items, cart survives untouched. Payment is checked
     before any db.add(), so failure here can never leave a partial write."""
     from app.modules.food_delivery.models import Order
+
+    monkeypatch.setattr(settings, "ONLINE_PAYMENTS_ENABLED", True)
 
     restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
     item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
@@ -848,6 +857,10 @@ def test_place_order_digital_route_returns_reference_and_402_on_failure(
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
     from app.core.database import get_db
+
+    # Online payments default to OFF; this test exercises the gateway path,
+    # so turn the flag on for its duration.
+    monkeypatch.setattr(settings, "ONLINE_PAYMENTS_ENABLED", True)
 
     restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
     item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
@@ -882,6 +895,84 @@ def test_place_order_digital_route_returns_reference_and_402_on_failure(
         headers={"Authorization": f"Bearer {token}", "Idempotency-Key": str(uuid.uuid4())},
     )
     assert declined.status_code == 402
+
+
+def test_preview_advertises_online_payments_disabled_by_default(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """The preview is the app's only source for "may I offer Pay Online?" —
+    it must say no while the gateway is a stub (the default)."""
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    preview = service.preview_checkout(db_session, customer.id, restaurant.id, address.id)
+
+    assert preview["online_payments_enabled"] is False
+    assert settings.ONLINE_PAYMENTS_ENABLED is False  # the setting really is default-off
+
+
+def test_preview_advertises_online_payments_when_enabled(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """Flipping the setting flips the advertised flag - no code change needed."""
+    monkeypatch.setattr(settings, "ONLINE_PAYMENTS_ENABLED", True)
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    preview = service.preview_checkout(db_session, customer.id, restaurant.id, address.id)
+
+    assert preview["online_payments_enabled"] is True
+
+
+def test_place_order_digital_rejected_with_400_when_disabled(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """Defence in depth for clients that ignore `online_payments_enabled`:
+    payment_method=Digital is refused with a clear 400 while the gateway is a
+    stub, and nothing is written - the cart must survive untouched."""
+    from app.modules.food_delivery.models import Order
+
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    assert settings.ONLINE_PAYMENTS_ENABLED is False
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.place_order(
+            db_session, customer.id, restaurant.id, address.id, "Digital"
+        )
+
+    assert exc_info.value.status_code == 400
+    assert "Online payment is currently unavailable" in exc_info.value.detail
+    assert "Cash on Delivery" in exc_info.value.detail
+    assert db_session.query(Order).filter(Order.user_id == customer.id).count() == 0
+    assert len(service.get_cart(db_session, customer.id, restaurant.id)["items"]) == 1
+
+
+def test_place_order_cod_still_accepted_while_online_payments_disabled(
+    db_session, customer, address, track_carts, monkeypatch
+):
+    """The switch only ever touches Digital: cash on delivery must keep working."""
+    restaurant = _make_restaurant(db_session, "Checkout Spot", latitude=31.53, longitude=74.36)
+    item = _make_menu_item(db_session, restaurant, "Biryani", 1000)
+    _seed_cart(db_session, customer, restaurant, item, qty=1, track=track_carts)
+    _fake_maps(monkeypatch, 3.0)
+
+    assert settings.ONLINE_PAYMENTS_ENABLED is False
+
+    result = service.place_order(
+        db_session, customer.id, restaurant.id, address.id, "COD"
+    )
+
+    assert result["payment_method"] == "COD"
+    assert result["payment_reference"] is None
 
 
 def test_place_order_unauthorized_request_still_blocked_for_digital(checkout_client):

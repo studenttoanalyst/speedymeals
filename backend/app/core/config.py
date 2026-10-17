@@ -111,6 +111,21 @@ class Settings(BaseSettings):
     # Cash Collection Cap (Phase 3, Step 7 - spec Sec 3.4/6)
     CASH_COLLECTION_CAP: float = 5000
 
+    # --- Online payments ------------------------------------------------------
+    # The backend's digital checkout path is a STUB: `_process_digital_payment`
+    # returns a fake reference and never charges anyone (no JazzCash/EasyPaisa/
+    # card gateway is wired in). Selling "Pay Online" while no money moves is a
+    # broken promise to the customer, so the feature is switched OFF by default:
+    #
+    #   * checkout-preview advertises `online_payments_enabled` so clients can
+    #     hide the option instead of discovering it at submit time, and
+    #   * `place_order` rejects payment_method=Digital with 400 as a defence in
+    #     depth for clients that ignore the flag.
+    #
+    # COD is unaffected by this setting and is always accepted. Set to true only
+    # once a real gateway is connected (replace _process_digital_payment).
+    ONLINE_PAYMENTS_ENABLED: bool = False
+
     # --- Account deletion (Google Play compliance) ----------------------------
     # A RIDER request never deletes data by itself: the account is deactivated
     # immediately, the request waits RIDER_DELETION_GRACE_DAYS, and only an
