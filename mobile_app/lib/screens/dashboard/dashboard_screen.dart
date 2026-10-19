@@ -1233,22 +1233,10 @@ class _CategorySection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Image.network(
-                            item.imageUrl,
-                            width: 64,
-                            height: 64,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return Container(
-                                color: theme.colorScheme.surfaceContainerHigh,
-                                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.fastfood, color: Colors.white, size: 28),
-                            ),
+                          child: Icon(
+                            item.icon,
+                            color: theme.colorScheme.primary,
+                            size: 30,
                           ),
                         ),
                       ),
@@ -1643,10 +1631,10 @@ class _PopularItemsSection extends StatelessWidget {
 // ----------------------------- Data models -----------------------------
 
 class _Category {
-  final String imageUrl;
+  final IconData icon;
   final String label;
 
-  const _Category({required this.imageUrl, required this.label});
+  const _Category({required this.icon, required this.label});
 }
 
 /// One real dish on the "popular" rail, paired with the restaurant it belongs
@@ -1666,35 +1654,17 @@ class _PopularItem {
 
 // ----------------------------- Static data -----------------------------
 
+// Category chips use bundled Material icons — the previous build shipped
+// placeholder photos hotlinked from Unsplash, which is test content in a
+// release build and an external dependency we do not control.
 final List<_Category> _categories = const [
-  _Category(
-    label: 'Pizza',
-    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Burgers',
-    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Cloud Hub',
-    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Fast Food',
-    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Shawarma',
-    imageUrl: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Desserts',
-    imageUrl: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Drinks',
-    imageUrl: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=200&auto=format&fit=crop&q=80',
-  ),
+  _Category(label: 'Pizza', icon: Icons.local_pizza),
+  _Category(label: 'Burgers', icon: Icons.lunch_dining),
+  _Category(label: 'Cloud Hub', icon: Icons.cloud),
+  _Category(label: 'Fast Food', icon: Icons.fastfood),
+  _Category(label: 'Shawarma', icon: Icons.restaurant),
+  _Category(label: 'Desserts', icon: Icons.icecream),
+  _Category(label: 'Drinks', icon: Icons.local_bar),
 ];
 
 // Removed: the former hardcoded `_popularItems` list (fake dishes, fake ratings,

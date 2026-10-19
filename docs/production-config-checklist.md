@@ -170,3 +170,30 @@ DELETION_REVIEW_JOB_ENABLED
 
 Everything else has a safe default. Re-check this list whenever
 `backend/app/core/config.py` gains a field.
+
+---
+
+## 12. Launch readiness snapshot (read-only check, 2026-10-19)
+
+Checked against the merged `release-audit` tree. Nothing here was deployed —
+this is what is verified locally and what is still open on the server.
+
+| Area | State at launch | Risk if wrong |
+|---|---|---|
+| Database migration | **Verified**: `alembic -c app/alembic.ini heads` → single head `d4a7c9e1f2b3`. Still must be applied to the production DB (`upgrade head`, after a `pg_dump`). | New endpoints (`/users/me` deletion, admin review queue) 404 or the `deletion_requests` table is missing. |
+| Redis | Must run continuously and be **shared by every worker**. | Deleted-account access tokens keep working until they expire; OTPs issued by one worker cannot be verified by another; carts and rider GPS diverge. |
+| `SMS_MODE` | Default is `console` (code printed to the log, **no SMS sent**). | Nobody can log in in production. Must be `sendpk` with `SENDPK_API_KEY` + `SENDPK_TEMPLATE_ID`. |
+| `JWT_SECRET` | Must be set to a strong unique value. | Token forgery / everyone signed out on rotation. |
+| `FIRST_ADMIN_PASSWORD` | Default is the well-known `admin123`. | Anyone knowing the seed email owns the admin panel. Change before first production boot, or change the password immediately after seeding. |
+| `ENVIRONMENT` | Must be `production` (otherwise the admin/restaurant password-reset link is printed to stdout). | Reset tokens in logs. |
+| `GOOGLE_MAPS_API_KEY` | Required (app will not start without it) and must be restricted to the server IP range. | Startup failure, or key abuse once leaked. |
+| Storage (`AWS_*` / `S3_BUCKET_NAME`) | Required at import; the deletion executor additionally needs `s3:DeleteObject` on the `rider-docs` prefix. | Startup failure; deletion approval fails when purging KYC documents. |
+| `ONLINE_PAYMENTS_ENABLED` | `false` — **correct and intentional**: the digital gateway is a stub, so the app offers COD only. | Setting it to `true` would sell a payment method that never charges anyone. Flip only with a real PSP behind it. |
+| `ALLOWED_ORIGINS` | Defaults cover speedymealservices.com / speedymeals.pk; the admin portal and website origins must be present, and `*` must not ship. | Admin/web portals blocked by CORS. |
+| `DELETION_REVIEW_JOB_ENABLED` | Default `true` (in-process). Either keep it, or set `false` **and** schedule `python -m app.core.deletion_review_job` from cron. | Rider deletion requests stay `pending` forever and never reach the admin queue. |
+| Firebase (`FIREBASE_CREDENTIALS_JSON`/`_PATH`) | Optional; leave empty to disable push. | Push notifications silently do nothing (the app is fine). |
+| HTTPS / TLS termination | App requires HTTPS in release; cleartext is only allowed for local dev hosts. | Play rejects cleartext; the release build refuses non-HTTPS bases. |
+| Key restriction for the Firebase Android API key | The key shipped in `mobile_app/android/app/google-services.json` must be restricted in Google Cloud to package `com.speedymealservices.app` **and** the release SHA-1 + the Play App Signing SHA-1. | Anyone can use the key against Firebase from other apps. |
+
+Backend verification done locally: `pytest -q` twice → **511 passed** both runs,
+single migration head, `python -c "import app.main"` OK.

@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../constants/colors.dart';
 import '../../data/repositories/location_repository.dart';
 import '../../features/maps/maps.dart';
+import '../../widgets/location_disclosure.dart';
 import 'address_search_field.dart';
 import 'selected_location.dart';
 
@@ -164,6 +165,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   /// [SavedAddressesScreen] and [RiderDashboardScreen].
   Future<void> _useCurrentLocation() async {
     if (_isLocating) return;
+    if (!mounted) return;
+    // Disclosure before the OS location prompt.
+    if (!await LocationDisclosure.ensureCustomerAcknowledged(context)) return;
     setState(() {
       _isLocating = true;
       _locationError = null;

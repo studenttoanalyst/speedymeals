@@ -13,6 +13,7 @@ import 'rider_documents_screen.dart';
 import 'rider_wallet_screen.dart';
 import '../../features/maps/maps.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../widgets/location_disclosure.dart';
 import '../../widgets/skeleton/skeleton.dart';
 
 /// Delivery Rider dashboard — the rider's real workspace.
@@ -95,6 +96,11 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   /// True once active-delivery tracking has been started via the publisher.
   bool _activeTrackingRunning = false;
+
+  /// Set once the rider dismisses the location disclosure from the automatic
+  /// delivery-tracking path, so every reload does not re-open the dialog.
+  /// An explicit go-online still shows it again.
+  bool _riderDisclosureDeclined = false;
 
   /// Subscription to the live position stream for map marker updates.
   StreamSubscription<Position>? _positionMarkerSub;
@@ -196,6 +202,19 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
     if (_hasActiveDelivery && _isApproved && (_profile?.isOnline ?? false)) {
       if (!_activeTrackingRunning) {
+        // Automatic delivery tracking: never trigger the OS prompt without
+        // the disclosure first. Declining is remembered so the rider is not
+        // re-prompted on every reload; an explicit go-online still can.
+        if (!await LocationDisclosure.isRiderAcknowledged()) {
+          if (_riderDisclosureDeclined || !mounted) return;
+          final accepted =
+              await LocationDisclosure.ensureRiderAcknowledged(context);
+          if (!accepted || !mounted) {
+            _riderDisclosureDeclined = true;
+            setState(() => _locationStatus = 'Location sharing is off');
+            return;
+          }
+        }
         final result = await _locationPublisher.start();
         _activeTrackingRunning = result.isGranted;
 
@@ -258,6 +277,21 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   /// location the backend treats the rider as unavailable, so the UI says so
   /// instead of pretending they are online and reachable.
   Future<bool> _pushLocation({bool silent = false}) async {
+    if (!mounted) return false;
+
+    // Play policy: the prominent location disclosure must appear before the
+    // first OS permission prompt. The background timer never interrupts the
+    // rider — it skips until they have acknowledged it — while the explicit
+    // go-online action always gets the dialog.
+    if (silent) {
+      if (!await LocationDisclosure.isRiderAcknowledged()) return false;
+    } else if (!await LocationDisclosure.ensureRiderAcknowledged(context)) {
+      if (mounted) {
+        setState(() => _locationStatus = 'Location sharing is off');
+      }
+      return false;
+    }
+
     try {
       // M6: this online/TTL path now goes through the single injectable GPS
       // service (instead of calling Geolocator statics directly), so it shares

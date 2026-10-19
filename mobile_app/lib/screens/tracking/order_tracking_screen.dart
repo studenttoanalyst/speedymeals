@@ -822,7 +822,7 @@ class _EtaBar extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Map View (stylised mock map)
+// Map View (vector map preview)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _MapView extends StatelessWidget {

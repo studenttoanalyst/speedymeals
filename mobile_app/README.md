@@ -222,13 +222,34 @@ Output: `build/app/outputs/bundle/release/app-release.aab`.
 Notes:
 
 - `API_BASE_URL` is **mandatory**; a release build without it fails on the
-  first network call with the configuration message.
-- Signing: create `android/key.properties` (ignored) pointing at your keystore
-  (`*.jks` is ignored). Never commit either file.
+  first network call with the configuration message. Replace the domain with
+  the real production API origin.
+- **Release signing is strict.** The build reads `android/key.properties`
+  (gitignored) and signs with that keystore. When it is missing the build fails
+  with `Release signing is not configured` — a release artifact is **never**
+  signed with the debug key. Create the upload keystore once (keep it offline,
+  never commit or share it):
+
+  ```bash
+  keytool -genkey -v -keystore ~/speedymeals-upload.jks     -keyalg RSA -keysize 2048 -validity 10000 -alias speedymeals-upload
+  ```
+
+  then add `android/key.properties` (gitignored):
+
+  ```properties
+  storeFile=/absolute/path/to/speedymeals-upload.jks
+  storePassword=<keystore password>
+  keyAlias=speedymeals-upload
+  keyPassword=<key password>
+  ```
+
+  and enrol the upload key in Play Console → *Setup → App signing*.
+- Release builds run **R8 with code minification and resource shrinking**; the
+  plugin keep rules live in `android/app/proguard-rules.pro`.
 - The same command with `flutter build apk --release --dart-define=...`
   produces an APK for sideloading/testing.
 - Bump `version:` in `pubspec.yaml` before uploading; Play requires a unique
-  `versionCode`.
+  `versionCode` (currently `1.0.0+1`).
 
 ---
 
@@ -284,8 +305,13 @@ runs without a backend. Live backend checks are listed in `RELEASE_AUDIT.md`
 - `docs/maps-status.md` — Maps / live-tracking phase record.
 - `docs/account-deletion/` — API contract, deployment checklist, web page copy,
   privacy addendum.
-- `../docs/production-config-checklist.md` — backend environment variables.
+- `../docs/production-config-checklist.md` — backend environment variables and
+  the launch-readiness snapshot.
 - `../docs/websocket-token-proposal.md` — token-in-URL risk and proposed fix.
+- `docs/play-store-listing.md` — store copy, assets checklist, console answers.
+- `docs/play-console-data-safety.md` — Data safety form, field by field.
+- `docs/release-smoke-test.md` — physical-device checklist for the release
+  build.
 
 ---
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher / task-switcher label. Must match the store listing name and
+         the in-app brand (AppConstants.appName). -->
+    <string name="app_name">SpeedyMeals</string>
+</resources>
