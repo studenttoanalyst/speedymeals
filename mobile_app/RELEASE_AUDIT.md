@@ -5,13 +5,20 @@
 **Source of Truth:** Backend (`backend/app`)  
 **Target:** Google Play Store Production Release  
 
+> **Status (2026-10-19):** this document is a phase-by-phase record. The backend
+> changes proposed in Phases 2 and 3 are now implemented and merged into this
+> branch (Phase 5). Statements such as "not applied", "awaiting approval" and the
+> `backend-deletion-proposal.patch` references describe the state at the time of
+> writing and are historical. The current, verified state is in Phase 4 and
+> Phase 5.
+
 ---
 
 ## Audit Governance & Global Rules Verification
 1. **Website Folder Immutability:** `website/` is strictly READ-ONLY. No files created, modified, renamed, or deleted.
    - **Git Status Baseline (Phase 0):** `git status --porcelain -- website` -> `EMPTY` (0 changes)
    - **Git Diff Baseline (Phase 0):** `git diff --stat -- website` -> `EMPTY` (0 changes)
-2. **Scope of Modification:** Only files within `mobile_app/` are modified. Backend code is untouched unless explicit approval is given.
+2. **Scope of Modification:** Mobile work stays inside `mobile_app/`. Backend work lives on `backend-account-deletion` and was merged into this branch in Phase 5; `website/` is never modified.
 3. **Source of Truth:** Backend API schemas, routes, models, business rules, and error envelopes are authoritative.
 4. **Security & Secrets:** Zero secrets/credentials committed. Production builds use environment variables via `--dart-define` and `key.properties` for signing.
 
@@ -1008,3 +1015,45 @@ is documented both in `.gitignore` and the production checklist.
 - Backend full suite, two consecutive runs against the same local dev DB ->
   **511 passed** / **511 passed**.
 - `git status --porcelain -- website` -> empty; `git diff --stat -- website` -> empty.
+
+---
+
+## Phase 5: Merge, repository hygiene and documentation
+
+### 5.1 Merge result
+
+`backend-account-deletion` was merged into `release-audit` with
+`git merge --no-ff`. **No conflicts** (the earlier dry run had already shown a
+clean merge), and git auto-merged `.gitignore` where both branches had added the
+same `dump.rdb` / `*.rdb` lines.
+
+Merged-tree verification:
+
+- Backend `pytest -q` twice against the same local dev DB: **511 passed** both
+  runs.
+- `alembic -c app/alembic.ini heads` -> single head `d4a7c9e1f2b3`.
+- `flutter analyze` -> no issues; `flutter test` -> **136 passed**.
+- `git status --porcelain -- website` / `git diff --stat -- website` -> empty.
+
+### 5.2 .gitignore
+
+All six app-level ignore files were rewritten or extended: `mobile_app/.gitignore`,
+`android/`, `ios/`, `linux/`, `macos/`, `windows/`. They now cover build output,
+`.dart_tool`, `.gradle`, `local.properties`, `.env*`, `*.jks`, `*.keystore`,
+`key.properties`, logs, OS files, IDE files and generated Flutter files.
+
+`git ls-files -ci --exclude-standard mobile_app` returns **empty**: no tracked
+file is ignored. `android/app/google-services.json` is tracked on purpose
+(public Firebase client identifiers only) and is documented in the ignore file
+and README.
+
+### 5.3 Documentation
+
+`README.md` was rewritten around the current merged code (features, tech stack,
+folder map, prerequisites, setup, dart-defines, run/build commands, backend
+configuration, troubleshooting, limitations). `CHANGELOG.md` was added with the
+`1.0.0` release. `docs/maps-status.md` gained a current-status banner and its
+superseded M3 label; the four `docs/account-deletion/*.md` files no longer refer
+to the removed patch file and use the real Alembic config/command; the five
+`assets/.../DESIGN.md` exports are marked as design references, not
+implementation state.

@@ -137,6 +137,10 @@ spacing:
   max-width-mobile: 480px
 ---
 
+<!-- Design reference only: this file describes visual tokens supplied by the
+     Stitch design export. It is not implementation state; see mobile_app/README.md
+     and mobile_app/RELEASE_AUDIT.md for the current code and audit record. -->
+
 ## Brand & Style
 
 This design system is tailored for an agile, late-night food ordering and rapid delivery experience. Built primarily for OLED-screen devices, the aesthetic projects speed, precision, hunger relief, and premium nocturnal energy. 

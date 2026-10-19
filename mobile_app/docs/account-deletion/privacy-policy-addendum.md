@@ -1,5 +1,9 @@
 # Privacy Policy — exact text for the account deletion section
 
+> Status: matches the implemented behaviour (customers deleted immediately;
+> riders after a 7-day grace period and admin review; order/payment records
+> retained anonymised).
+
 Replace (or insert as) **section 9 "Data Deletion"** of
 `https://speedymealservices.com/privacy`. Nothing in `website/` was modified;
 paste-ready copy follows.

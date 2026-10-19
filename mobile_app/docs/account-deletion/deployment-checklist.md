@@ -1,14 +1,14 @@
 # Production deployment checklist — account deletion
 
-Applies to the backend patch `backend-deletion-proposal.patch` (14 files) plus the
-already-applied `mobile_app/` changes. Run top to bottom; each step has a verification.
+Applies to the account-deletion backend merged into `release-audit` (no patch to
+apply) and the mobile flows in this app. Run top to bottom; each step has a
+verification.
 
 ## 0. Before you deploy
 
-- [ ] Approve/apply the patch from the repo root:
-      `git apply --check mobile_app/docs/account-deletion/backend-deletion-proposal.patch`
-      then `git apply mobile_app/docs/account-deletion/backend-deletion-proposal.patch`
-      (`--check` has already been run on this branch and passes).
+- [ ] Confirm the merged branch contains `backend/app/platform/account_deletion/`
+      and the migration: `git log --oneline -1` and
+      `./venv/bin/alembic -c app/alembic.ini heads` (single head `d4a7c9e1f2b3`).
 - [ ] Review the 4 new settings in `backend/app/core/config.py` (all have safe defaults):
 
 | setting | default | meaning |
@@ -22,11 +22,11 @@ already-applied `mobile_app/` changes. Run top to bottom; each step has a verifi
 ## 1. Database migration
 
 - [ ] Backup first (`pg_dump`).
-- [ ] Apply: `alembic upgrade head` from `backend/` (expect revision `d4a7c9e1f2b3`,
-      parent `e8b7a6c5d4f3` — the previous single head).
+- [ ] Apply from `backend/`: `alembic -c app/alembic.ini upgrade head`
+      (expect revision `d4a7c9e1f2b3`).
 - [ ] Verify the table:
       `SELECT column_name FROM information_schema.columns WHERE table_name='deletion_requests';`
-      → 14 columns (`id`, `created_at`, `user_id`, `role`, `status`, `requested_at`,
+      → 15 columns (`id`, `created_at`, `user_id`, `role`, `status`, `requested_at`,
       `grace_ends_at`, `requested_via`, `reviewed_by`, `reviewed_at`, `admin_note`,
       `hold_reason`, `kyc_action`, `kyc_retain_until`, `kyc_purged_at`).
 - [ ] Verify indexes: `ix_deletion_requests_user_id`, `ix_deletion_requests_user_role`,
@@ -39,7 +39,7 @@ already-applied `mobile_app/` changes. Run top to bottom; each step has a verifi
       → `superadmin`.
 - [ ] Existing tests still pass, including drift protection:
       `pytest backend/app/tests/test_migration_drift.py backend/app/tests/test_account_deletion.py`
-      (requires `pillow` — see §6).
+      (Python dependencies in §6).
 
 ## 2. Job scheduler — pick ONE of the two options
 
@@ -92,9 +92,9 @@ already-applied `mobile_app/` changes. Run top to bottom; each step has a verifi
 
 ## 6. Environment / build
 
-- [ ] `backend/venv` is missing `pillow` (pre-existing; `app.core.storage` imports PIL at module
-      load, so the API and the new tests cannot start without it):
-      `./venv/bin/pip install pillow` — then `python -c "from app.core.storage import delete_rider_document_url"`.
+- [ ] Install the backend requirements (`Pillow` is included; `app.core.storage` imports
+      PIL at module load): `./venv/bin/pip install -r app/requirements.txt`, then
+      `python -c "from app.core.storage import delete_rider_document_url"`.
 - [ ] `.env` must define `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET` (already required today) and
       optionally the new deletion settings.
 - [ ] Restart the API and confirm `/docs` lists the new routes:
@@ -121,9 +121,9 @@ already-applied `mobile_app/` changes. Run top to bottom; each step has a verifi
 
 ## 9. Rollback
 
-- [ ] `alembic downgrade -1` drops `deletion_requests` and the seeded permission (it does **not**
+- [ ] `alembic -c app/alembic.ini downgrade -1` drops `deletion_requests` and the seeded permission (it does **not**
       touch accounts, orders or payments — this feature never deleted business data outside an
       approved request).
 - [ ] Set `DELETION_REVIEW_JOB_ENABLED=false` to stop the job, or disable the new routes by
-      reverting the patch.
+      reverting the merge commit.
 - [ ] Denylist keys expire on their own (TTL ≈ 31 min), so no Redis cleanup is needed.

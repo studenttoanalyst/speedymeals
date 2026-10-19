@@ -6,7 +6,8 @@ Authoritative for:
 - the hosted web page (`https://speedymealservices.com/delete-account`) — section 3
 - the mobile rider flow — section 4
 
-Backend: `backend/app/platform/account_deletion/` (see `backend-deletion-proposal.patch`).
+Backend: `backend/app/platform/account_deletion/` (implemented and merged into
+`release-audit`; Alembic revision `d4a7c9e1f2b3`).
 All timestamps are ISO-8601 UTC (`2026-10-23T12:00:00+00:00`); all amounts are PKR floats.
 
 Statuses: `pending` → `ready_for_review` → `approved` → `completed`, plus `cancelled` and `on_hold`.

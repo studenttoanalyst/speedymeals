@@ -1,5 +1,8 @@
 # `https://speedymealservices.com/delete-account` — exact page copy
 
+> Status: the endpoints this page calls are implemented in the backend; see
+> `admin-api-contract.md` for the request/response contract.
+
 Nothing was created inside `website/`. Copy/paste ready for your web developer.
 Text in quotes is literal. Placeholders in `{{…}}` come from the API.
 
