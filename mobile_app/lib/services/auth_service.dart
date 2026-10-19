@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 
@@ -224,10 +225,13 @@ class AuthService extends ChangeNotifier {
     } on ApiException catch (error) {
       // A dead/revoked session is normal (30-day refresh window) and must not
       // block startup; anything else is also non-fatal here.
-      debugPrint('Session restore failed (${error.kind.name}); signed out.');
+      developer.log(
+        'Session restore failed (${error.kind.name}); signed out.',
+        name: 'AuthService',
+      );
       await _clearSession();
     } catch (error) {
-      debugPrint('Session restore failed: $error');
+      developer.log('Session restore failed: $error', name: 'AuthService');
       await _clearSession();
     } finally {
       _isBootstrapping = false;

@@ -17,7 +17,7 @@ import '../../widgets/gst_note.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Mock data used exclusively by this screen
+// Live tracking view model (real backend data, no mock values)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Everything the tracking UI renders, derived from `GET /orders/{id}/track`.

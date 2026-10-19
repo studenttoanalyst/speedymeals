@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -161,7 +163,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     } on ApiException catch (error) {
       // e.g. the email is already taken by another account — the login itself
       // still succeeded, so surface it without undoing the session.
-      debugPrint('Could not save signup profile details: ${error.message}');
+      developer.log(
+        'Could not save signup profile details: ${error.message}',
+        name: 'OtpVerificationScreen',
+      );
     }
   }
 
