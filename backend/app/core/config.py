@@ -4,6 +4,7 @@ Never hardcode secrets here. This file only defines WHAT settings exist,
 actual values always come from environment (.env locally, Secrets Manager in production).
 """
 from pathlib import Path
+from decimal import Decimal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -109,7 +110,7 @@ class Settings(BaseSettings):
     ASSIGNMENT_SWEEPER_ENABLED: bool = True
 
     # Cash Collection Cap (Phase 3, Step 7 - spec Sec 3.4/6)
-    CASH_COLLECTION_CAP: float = 5000
+    CASH_COLLECTION_CAP: Decimal = Decimal('5000')
 
     # --- Online payments ------------------------------------------------------
     # The backend's digital checkout path is a STUB: `_process_digital_payment`
