@@ -21,52 +21,43 @@
 
 ---
 
-## 2. Sync with Teammates
+## 2. Sync with Teammates & Conflict Resolution
 
-### 2.1 Git Status & Pre-Sync Baseline
-- Pre-sync `git status`: working directory clean on `release-audit`.
+### 2.1 Git Status & Baseline
 - Safety backup branch created: `release-audit-backup-pre-sync` at `7ac80c5`.
-- Local `main` branch aligned with `origin/main` at `88e0b9f` with zero unpushed local changes.
+- Local `main` branch aligned with `origin/main` at `6b82ec8` with zero unpushed local changes.
 
 ### 2.2 Commits Pulled from `origin/main`
 Teammates' latest commits integrated into `release-audit`:
 1. `88e0b9f` — **Fix CUS-06 WebSocket event loop blocking using asyncio.to_thread** (*Muhammad Owais*)
 2. `2288354` — **Merge branch 'main' of https://github.com/studenttoanalyst/speedymeals** (*Muhammad Owais*)
 3. `3a49219` — **Remove first recharge restriction and auto-offline threshold from rider wallet** (*Muhammad Owais*)
+4. `6b82ec8` — **remove function of rider minimum deposit amount** (*Muhammad Owais*)
 
-### 2.3 Files Changed by Teammates (Grouped by Area)
-- **backend:**
-  - `backend/app/modules/food_delivery/routes.py`
-  - `backend/app/modules/food_delivery/service.py`
-  - `backend/app/platform/wallet_payment/routes.py`
-  - `backend/app/platform/wallet_payment/schemas.py`
-  - `backend/app/platform/wallet_payment/service.py`
-  - `backend/app/tests/test_delivered_side_effects.py`
-  - `backend/app/tests/test_delivery_payouts.py`
-  - `backend/app/tests/test_order_lifecycle_e2e.py`
-  - `backend/app/tests/test_rider_assignment.py`
-  - `backend/app/tests/test_wallet_payment.py`
-- **mobile_app:** None (zero teammate commits).
-- **website:** None (zero teammate commits).
-- **other:** None.
+### 2.3 Files Changed by Teammates
+- **backend:** 10 files (`food_delivery/routes.py`, `service.py`, `wallet_payment/routes.py`, `schemas.py`, `service.py`, and associated test suites).
+- **mobile_app:** 0 files (zero teammate commits).
+- **website:** 0 files (zero teammate commits).
+- **other:** 0 files.
 
-### 2.4 Merge Dry-Run & Merge Result
-- Merge dry run: `git merge-tree --write-tree --name-only release-audit origin/main` returned tree `d19a943822ba6744506760162f5efefe3d167245` with **0 merge conflicts**.
-- `git merge origin/main`: Cleanly merged via commit `fd2de6a` and subsequent reconciliation commit `7ac80c5`; current tree is fully up to date with `origin/main` (`Already up to date.`).
+### 2.4 Conflict Resolution Details
+- **Conflicted File:** `backend/app/platform/wallet_payment/service.py` (only conflicted file).
+- **Our Side (HEAD):** `set_online_status()` enforced `kit_completed` and `CASH_COLLECTION_CAP`.
+- **Teammate Side (`3a49219` / `6b82ec8`):** Removed `MIN_WALLET_BALANCE_TO_GO_ONLINE` (500 floor) and minimum deposit amount check.
+- **Resolution:** Both changes preserved. Retained teammate's removal of minimum balance restrictions while retaining the kit completion gate, cash collection cap, and account deletion dues checks (`wallet_balance != 0 or pending_cash_owed != 0`). Conflict markers removed and verified across repository. Completed merge via commit `52b65ac`.
 
 ---
 
-## 3. Backend Parity
+## 3. Backend Parity & Mobile App Adjustments
 
-- **Endpoint Analysis:**
-  - Every mobile API request in `mobile_app/lib/` has an active, corresponding backend route.
-  - Teammates' changes relaxed rider wallet first-recharge constraints (allowing any recharge amount and removing the auto-offline minimum balance requirement while keeping the kit completion gate and cash collection cap).
-  - The mobile app's recharge and status flows remain 100% compatible.
-  - Critical audit additions preserved:
-    - `ONLINE_PAYMENTS_ENABLED` flag (advertised via `/restaurants/{id}/cart/checkout-preview` as `false`, obeyed by `checkout_screen.dart`).
-    - Immediate customer account deletion (`DELETE /users/me` -> `204 No Content`).
-    - Deferred rider account deletion (`DELETE /users/me` -> `200 OK` + cancellation endpoint `POST /users/me/deletion-request/cancel`).
-    - WebSocket real-time tracking authentication failure frame (`auth_failed` + close code 4003).
+To maintain 100% parity with the teammate's backend wallet updates, the following mobile app changes were applied:
+
+| File | Old Implementation / Text | New Implementation / Text | Reason |
+|---|---|---|---|
+| `mobile_app/lib/core/constants/app_constants.dart` | `riderMinWalletBalance = 500.0;` | `riderMinWalletBalance = 0.0;` | Teammate commit `3a49219`/`6b82ec8` removed the Rs. 500 wallet floor from backend. |
+| `mobile_app/lib/data/models/rider_models.dart` | `/// Wallet is below the Rs. 500 floor required to go online.` | `/// Whether the wallet balance is negative (floor removed in backend).` | Aligned model documentation and top-up clamp logic. |
+| `mobile_app/lib/screens/rider/rider_dashboard_screen.dart` | `subtext: 'Min Rs. 500 to go online'` | `subtext: 'Active wallet balance'` | Removed stale Rs. 500 threshold display on the rider dashboard. |
+| `mobile_app/lib/screens/rider/rider_wallet_screen.dart` | `'Below the Rs. 500 minimum. Top up ... to go online.'` | `'Negative balance. Top up ... to restore wallet.'` | Removed stale Rs. 500 minimum notice on rider wallet balance card. |
 
 ---
 
@@ -133,22 +124,25 @@ Real command outputs and exit codes from merged tree verification:
 | **Alembic Heads** | `alembic -c app/alembic.ini heads` | `d4a7c9e1f2b3 (head)` (Single Head) | N/A | **0** |
 | **Alembic Current** | `alembic -c app/alembic.ini current` | `d4a7c9e1f2b3 (head)` | N/A | **0** |
 | **Migration Drift** | `pytest -q app/tests/test_migration_drift.py` | `1 passed` | N/A | **0** |
-| **Backend Pytest** | `pytest -q` | **511 passed**, 145 warnings in 50.04s | **511 passed**, 145 warnings in 40.54s | **0** |
+| **Backend Pytest** | `pytest -q` | **511 passed**, 145 warnings in 43.11s | **511 passed**, 145 warnings in 39.55s | **0** |
 | **Flutter Clean** | `flutter clean` | `Cleaned build, .dart_tool, ephemeral` | N/A | **0** |
 | **Flutter Pub Get** | `flutter pub get` | `Got dependencies!` | N/A | **0** |
-| **Flutter Analyze** | `flutter analyze` | **No issues found!** (ran in 9.7s) | N/A | **0** |
-| **Flutter Test** | `flutter test` | **All 140 tests passed!** (ran in 21s) | N/A | **0** |
+| **Flutter Analyze** | `flutter analyze` | **No issues found!** (ran in 28.8s) | N/A | **0** |
+| **Flutter Test** | `flutter test` | **All 140 tests passed!** (ran in 27s) | N/A | **0** |
 | **Release App Bundle** | `flutter build appbundle --release` | Built `build/app/outputs/bundle/release/app-release.aab` (55.5MB) | N/A | **0** |
+
+### Note on Backend Pytest Count
+The backend test suite executes 511 tests. Teammates updated existing test suites (`test_delivered_side_effects.py`, `test_delivery_payouts.py`, `test_order_lifecycle_e2e.py`, `test_rider_assignment.py`, and `test_wallet_payment.py`) to align assertions with the removal of first-recharge and minimum balance gates rather than creating separate test modules, preserving total test count stability at 511 passed.
 
 ### Release AAB Verification
 - **AAB Path:** `mobile_app/build/app/outputs/bundle/release/app-release.aab`
-- **File Size:** `58,166,079 bytes` (~55.5 MB)
+- **File Size:** `58,165,740 bytes` (~55.5 MB)
 - **Signing Status:** **UNSIGNED** (`jarsigner -verify` output: `jar is unsigned.`; `key.properties` is absent as release keystores must remain local/private to the developer).
 - **Target Base URL:** Compiled with `--dart-define=API_BASE_URL=https://api.speedymealservices.com`.
 - **URL & IP Scan:**
   - `10.0.2.2`: 0 occurrences.
-  - `127.0.0.1`: 0 occurrences in app code (2 debug symbol occurrences in libflutter.so).
-  - `localhost`: 0 occurrences in app code (1 internal Flutter core symbol in libapp.so, 1 in libflutter.so).
+  - `127.0.0.1`: 0 occurrences in app code.
+  - `localhost`: 0 occurrences in app code.
   - `http://`: 0 cleartext API URLs (only license headers for Apache 2.0 and Unicode).
 
 ---
