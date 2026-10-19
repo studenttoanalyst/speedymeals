@@ -118,7 +118,7 @@ export default function AdminOrderDetailPage({
 
               <div className="p-5 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-1 text-xs">
                 <span className="text-slate-400 uppercase tracking-wider font-semibold text-[10px] block">
-                  Assigned Courier
+                  Assigned Rider
                 </span>
                 <div className="font-bold text-slate-900 text-sm">
                   {order.rider_name || 'Unassigned'}
@@ -164,7 +164,7 @@ export default function AdminOrderDetailPage({
                   <span className="font-mono font-medium">{formatPKR(order.delivery_fee)}</span>
                 </div>
                 <div className="flex items-center justify-between text-blue-700 font-semibold">
-                  <span>Courier Delivery Fee Earning (90% Retained)</span>
+                  <span>Rider Delivery Fee Earning (90% Retained)</span>
                   <span className="font-mono">+{formatPKR(order.rider_earning)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-900 font-bold pt-3 border-t border-slate-200 text-sm">

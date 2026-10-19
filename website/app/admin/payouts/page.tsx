@@ -94,7 +94,7 @@ export default function AdminPayoutsPage() {
   const columns: Column<RiderPayout>[] = [
     {
       key: 'rider_name',
-      title: 'Courier Partner',
+      title: 'Rider Partner',
       sortable: true,
       render: (p) => (
         <div className="flex items-center gap-2.5">
@@ -197,9 +197,9 @@ export default function AdminPayoutsPage() {
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
-            label="Total Courier Delivery Fees"
+            label="Total Rider Delivery Fees"
             value={formatPKR(totalEarned)}
-            subValue="90% net credited to couriers"
+            subValue="90% net credited to riders"
             accent="blue"
             icon={<Bicycle size={18} weight="bold" />}
             targetBenchmark="Fair-Split Guarantee"
@@ -217,7 +217,7 @@ export default function AdminPayoutsPage() {
           <StatCard
             label="SpeedyMeals Delivery Fee Commission"
             value="10.0%"
-            subValue="Couriers keep 90% of delivery fee"
+            subValue="Riders keep 90% of delivery fee"
             accent="none"
             icon={<Coins size={18} weight="bold" />}
             targetBenchmark="Company Doctrine"
@@ -230,7 +230,7 @@ export default function AdminPayoutsPage() {
           columns={columns}
           keyExtractor={(p) => p.id}
           isLoading={isLoading}
-          searchPlaceholder="Search courier name or batch..."
+          searchPlaceholder="Search rider name or batch..."
           searchFilter={(p, q) =>
             p.rider_name.toLowerCase().includes(q.toLowerCase()) ||
             p.period_start.includes(q) ||
@@ -250,7 +250,7 @@ export default function AdminPayoutsPage() {
           <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
             <h3 className="text-base font-bold text-slate-900">Run Rider Payout Batch</h3>
             <p className="text-xs text-slate-500">
-              Aggregates all courier deliveries and offsets against cash-on-delivery collected.
+              Aggregates all rider deliveries and offsets against cash-on-delivery collected.
             </p>
 
             <form onSubmit={handleGenerate} className="space-y-4 text-xs">
@@ -301,7 +301,7 @@ export default function AdminPayoutsPage() {
       {markPaidTarget && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95 text-xs">
-            <h3 className="text-base font-bold text-slate-900">Confirm Courier Transfer</h3>
+            <h3 className="text-base font-bold text-slate-900">Confirm Rider Transfer</h3>
             <p className="text-slate-500">
               Disburse <strong>{formatPKR(markPaidTarget.net_payout ?? markPaidTarget.total_earning)}</strong> to {markPaidTarget.rider_name}.
             </p>

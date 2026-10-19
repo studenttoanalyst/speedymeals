@@ -98,7 +98,17 @@ def provision_admin_account(
 
     # 2. Determine and format email address
     if payload.email:
-        final_email = payload.email.strip().lower()
+        clean_email = payload.email.strip().lower()
+        if "@" not in clean_email:
+            final_email = f"{clean_email}@speedymealservices.com"
+        elif not clean_email.endswith("@speedymealservices.com"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Admin staff accounts must belong to domain @speedymealservices.com",
+            )
+        else:
+            final_email = clean_email
+
         if db.query(Admin).filter(Admin.email == final_email).first():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -108,13 +118,13 @@ def provision_admin_account(
         # Auto-generate corporate email
         clean_first = re.sub(r"[^a-zA-Z0-9]", "", payload.first_name).lower()
         clean_last = re.sub(r"[^a-zA-Z0-9]", "", payload.last_name).lower()
-        base_email = f"{clean_first}.{clean_last}@speedymeals.pk"
+        base_email = f"{clean_first}.{clean_last}@speedymealservices.com"
         final_email = base_email
 
         counter = 1
         while db.query(Admin).filter(Admin.email == final_email).first():
             counter += 1
-            final_email = f"{clean_first}.{clean_last}{counter}@speedymeals.pk"
+            final_email = f"{clean_first}.{clean_last}{counter}@speedymealservices.com"
 
     # 3. Generate credentials and invitation tokens
     temp_password = _generate_high_entropy_password(16)
@@ -156,7 +166,7 @@ def provision_admin_account(
     db.add(audit)
     db.commit()
 
-    invitation_url = f"https://speedymeals.pk/admin/setup-password?token={invitation_token}"
+    invitation_url = f"https://speedymealservices.com/admin/setup-password?token={invitation_token}"
     print(f"[ADMIN-ONBOARDING] Account provisioned for <{final_email}>. Temp pass: {temp_password}, Invite URL: {invitation_url}")
 
     return {

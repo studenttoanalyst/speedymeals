@@ -116,9 +116,10 @@ export async function listRestaurantOrders(params?: {
   if (params?.date_to) query.append('date_to', params.date_to);
 
   const qs = query.toString() ? `?${query.toString()}` : '';
-  const fallback = params?.status
-    ? mockRestaurantOrders.filter((o) => o.status === params.status)
-    : mockRestaurantOrders;
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const fallback = isMockMode
+    ? (params?.status ? mockRestaurantOrders.filter((o) => o.status === params.status) : mockRestaurantOrders)
+    : undefined;
 
   return apiClient<RestaurantOrderSummary[]>(`/restaurants/me/orders${qs}`, {
     fallbackData: fallback,
@@ -126,14 +127,20 @@ export async function listRestaurantOrders(params?: {
 }
 
 export async function getRestaurantOrder(orderId: string): Promise<RestaurantOrderDetail> {
-  const fallback: RestaurantOrderDetail = {
+  const isMockMode = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const fallback: RestaurantOrderDetail | undefined = isMockMode ? {
     id: orderId,
     status: 'Preparing',
     payment_method: 'COD',
     food_subtotal: 1350.0,
     delivery_distance_km: 3.2,
     delivery_fee: 100.0,
+    gst_rate: 13.0,
+    gst_amount: 175.5,
+    prices_include_gst: true,
+    net_subtotal: 1174.5,
     total_amount: 1450.0,
+    commission_rate: 10.0,
     commission_amount: 135.0,
     restaurant_payable: 1215.0,
     rider_earning: 100.0,
@@ -163,7 +170,7 @@ export async function getRestaurantOrder(orderId: string): Promise<RestaurantOrd
         price_at_order: 80.0,
       },
     ],
-  };
+  } : undefined;
 
   return apiClient<RestaurantOrderDetail>(`/restaurants/me/orders/${orderId}`, {
     fallbackData: fallback,
@@ -174,15 +181,28 @@ export async function updateRestaurantOrderStatus(
   orderId: string,
   newStatus: string
 ): Promise<RestaurantOrderDetail> {
-  const base = await getRestaurantOrder(orderId);
-  const fallback: RestaurantOrderDetail = {
-    ...base,
-    status: newStatus,
-  };
-
+  // No fallbackData on writes: status changes must hit the backend so database
+  // state transitions, rider auto-assignment, and customer push alerts are issued.
   return apiClient<RestaurantOrderDetail>(`/restaurants/me/orders/${orderId}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status: newStatus }),
+  });
+}
+
+/**
+ * Decline a new order (before cooking starts). Backend: POST
+ * /restaurants/me/orders/{id}/reject -> status "Cancelled", customer notified.
+ */
+export async function rejectRestaurantOrder(
+  orderId: string,
+  reason: string
+): Promise<RestaurantOrderDetail> {
+  const base = await getRestaurantOrder(orderId);
+  const fallback: RestaurantOrderDetail = { ...base, status: 'Cancelled' };
+
+  return apiClient<RestaurantOrderDetail>(`/restaurants/me/orders/${orderId}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
     fallbackData: fallback,
   });
 }

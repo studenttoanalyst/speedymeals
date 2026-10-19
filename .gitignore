@@ -230,4 +230,9 @@ temp/
 
 serviceAccountKey.json
 google-services.json
+!mobile_app/android/app/google-services.json
 GoogleService-Info.plist
+
+# Firebase service-account keys (backend push sender). Never commit.
+*-firebase-adminsdk-*.json
+backend/app/secrets/

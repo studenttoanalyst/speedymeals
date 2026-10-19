@@ -73,7 +73,14 @@ export default function AdminRestaurantsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await createAdminRestaurant(formData);
+      let submitEmail = formData.email.trim().toLowerCase();
+      if (!submitEmail.includes('@')) {
+        submitEmail = `${submitEmail}@speedymeals.com`;
+      } else if (!submitEmail.endsWith('@speedymeals.com')) {
+        const handle = submitEmail.split('@')[0];
+        submitEmail = `${handle}@speedymeals.com`;
+      }
+      await createAdminRestaurant({ ...formData, email: submitEmail });
       setIsModalOpen(false);
       setFormData({
         name: '',
@@ -316,13 +323,18 @@ export default function AdminRestaurantsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Login Email</label>
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-slate-700">Login Email</label>
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                      @speedymeals.com
+                    </span>
+                  </div>
                   <input
-                    type="email"
+                    type="text"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="partner@store.pk"
+                    placeholder="store@speedymeals.com"
                     className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
                   />
                 </div>

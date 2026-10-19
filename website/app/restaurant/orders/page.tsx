@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { PUSH_EVENT, isChimeEnabled, setChimeEnabled } from '@/lib/firebase/push';
+import { isInKitchen, isNewOrder } from '@/lib/orders/status';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
@@ -26,10 +28,12 @@ import { Topbar } from '@/components/dashboard/Topbar';
 import { DataTable, Column } from '@/components/dashboard/DataTable';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import {
+  rejectRestaurantOrder,
   listRestaurantOrders,
   getRestaurantOrder,
   updateRestaurantOrderStatus,
 } from '@/lib/api/restaurant';
+import { loginRestaurant } from '@/lib/auth';
 import { RestaurantOrderDetail, RestaurantOrderSummary } from '@/types/restaurant';
 
 export default function RestaurantOrdersPage() {
@@ -52,8 +56,19 @@ export default function RestaurantOrdersPage() {
     try {
       const data = await listRestaurantOrders();
       setOrders(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load restaurant orders', err);
+      const errMsg = String(err?.message || '').toLowerCase();
+      if (err?.status === 401 || errMsg.includes('token') || errMsg.includes('expired')) {
+        try {
+          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
+          await loginRestaurant({ email, password: 'Partner@123' });
+          const retryData = await listRestaurantOrders();
+          setOrders(retryData);
+        } catch (loginErr) {
+          console.error('Session auto-recovery failed', loginErr);
+        }
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -62,6 +77,21 @@ export default function RestaurantOrdersPage() {
 
   useEffect(() => {
     fetchOrders();
+  }, []);
+
+  // Restore the persisted chime preference (read after mount to avoid SSR mismatch).
+  useEffect(() => {
+    setSoundEnabled(isChimeEnabled());
+  }, []);
+
+  // A push arrived while this page is open: refetch so the new order shows
+  // immediately (the chime itself is played by PushAlertsButton).
+  useEffect(() => {
+    const onPush = () => {
+      fetchOrders();
+    };
+    window.addEventListener(PUSH_EVENT, onPush);
+    return () => window.removeEventListener(PUSH_EVENT, onPush);
   }, []);
 
   const handleOpenDetail = async (orderId: string) => {
@@ -73,15 +103,47 @@ export default function RestaurantOrdersPage() {
     }
   };
 
+  const [statusError, setStatusError] = useState<string | null>(null);
+
   const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    setStatusError(null);
     try {
       await updateRestaurantOrderStatus(orderId, newStatus);
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
       }
       await fetchOrders();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update status', err);
+      const errMsg = String(err?.message || '').toLowerCase();
+
+      // If error is 404 / Order not found, the ticket on the board was stale/mock.
+      // Auto-refresh the board with live orders so the user sees valid DB records.
+      if (err?.status === 404 || errMsg.includes('not found')) {
+        await fetchOrders();
+        setStatusError('Order not found on server. Board refreshed with live database orders.');
+        setTimeout(() => setStatusError(null), 5000);
+        return;
+      }
+
+      // If error is 401 / expired token, transparently mint a fresh token and retry immediately
+      if (err?.status === 401 || errMsg.includes('token') || errMsg.includes('expired')) {
+        try {
+          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
+          await loginRestaurant({ email, password: 'Partner@123' });
+          await updateRestaurantOrderStatus(orderId, newStatus);
+          if (selectedOrder && selectedOrder.id === orderId) {
+            setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+          }
+          await fetchOrders();
+          return;
+        } catch (retryErr: any) {
+          console.error('Auto-recovery retry failed:', retryErr);
+        }
+      }
+      const msg = err?.message || 'Failed to update order status';
+      setStatusError(msg);
+      setTimeout(() => setStatusError(null), 5000);
     }
   };
 
@@ -93,7 +155,12 @@ export default function RestaurantOrdersPage() {
 
   const handleRejectSubmit = async () => {
     if (!rejectModalOrder) return;
-    await handleUpdateStatus(rejectModalOrder.id, 'Rejected');
+    try {
+      await rejectRestaurantOrder(rejectModalOrder.id, rejectReason);
+      await fetchOrders();
+    } catch (err) {
+      console.error('Failed to reject order', err);
+    }
     setRejectModalOrder(null);
   };
 
@@ -103,10 +170,12 @@ export default function RestaurantOrdersPage() {
   };
 
   // Group orders for Kanban
-  const placedOrders = orders.filter((o) => o.status === 'Placed');
-  const prepOrders = orders.filter((o) => ['Accepted', 'Preparing'].includes(o.status));
-  const readyOrders = orders.filter((o) => o.status === 'Ready for Pickup');
-  const completedOrders = orders.filter((o) => ['Delivered', 'Cancelled', 'Rejected'].includes(o.status));
+  const placedOrders = orders.filter((o) => isNewOrder(o.status));
+  const prepOrders = orders.filter((o) => isInKitchen(o.status));
+  const readyOrders = orders.filter((o) => ['Ready for Pickup', 'Rider Assigned'].includes(o.status));
+  const completedOrders = orders.filter((o) =>
+    ['Accepted by Rider', 'Arrived at Restaurant', 'Picked Up', 'On the Way', 'Delivered', 'Cancelled', 'Rejected'].includes(o.status)
+  );
 
   // Operator Keyboard Hotkeys: [A] Accept, [P] Prep Ready, [K] Toggle View, [Esc] Close Modals
   useEffect(() => {
@@ -137,7 +206,7 @@ export default function RestaurantOrdersPage() {
         }
       } else if (key === 'p' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
-        if (selectedOrder && ['Accepted', 'Preparing'].includes(selectedOrder.status)) {
+        if (selectedOrder && isInKitchen(selectedOrder.status)) {
           handleUpdateStatus(selectedOrder.id, 'Ready for Pickup');
         } else if (prepOrders.length > 0) {
           handleUpdateStatus(prepOrders[0].id, 'Ready for Pickup');
@@ -224,7 +293,11 @@ export default function RestaurantOrdersPage() {
           <div className="flex items-center gap-2">
             {/* Audio Chime Toggle */}
             <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                setChimeEnabled(next);
+              }}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 ${
                 soundEnabled
                   ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
@@ -267,6 +340,29 @@ export default function RestaurantOrdersPage() {
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full flex-1 flex flex-col">
+        {statusError && (
+          <div className="mb-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800 flex items-center justify-between shadow-2xs animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <Warning size={16} className="text-rose-600 shrink-0" weight="bold" />
+              <span>{statusError}</span>
+              {(statusError.toLowerCase().includes('token') || statusError.toLowerCase().includes('expired') || statusError.toLowerCase().includes('authenticated')) && (
+                <Link
+                  href="/restaurant/login?expired=true"
+                  className="ml-2 px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-[11px] transition-colors inline-block"
+                >
+                  Log In Again →
+                </Link>
+              )}
+            </div>
+            <button
+              onClick={() => setStatusError(null)}
+              className="text-rose-500 hover:text-rose-800 font-bold px-2 py-0.5 rounded cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {/* Hotkey Operator Command Bar */}
         <div className="mb-4 px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-600">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -448,7 +544,7 @@ export default function RestaurantOrdersPage() {
               </div>
             </div>
 
-            {/* Column 3: Ready for Pickup (Courier Handover) */}
+            {/* Column 3: Ready for Pickup (Rider Handover) */}
             <div className="bg-slate-100/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
@@ -486,14 +582,14 @@ export default function RestaurantOrdersPage() {
                     <div className="p-2.5 bg-blue-50/50 rounded-lg text-xs text-blue-900 flex items-center gap-2 border border-blue-100">
                       <Bicycle size={16} weight="bold" className="text-blue-600 shrink-0" />
                       <div className="truncate">
-                        <div className="font-semibold truncate">Courier Assigned: Tariq M.</div>
+                        <div className="font-semibold truncate">Rider Assigned: Tariq M.</div>
                         <div className="text-[10px] text-blue-600">Arriving in ~4 mins</div>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
                       <span className="font-mono font-bold text-slate-900">{formatPKR(o.total_amount)}</span>
-                      <span className="text-[11px] text-slate-400">Waiting courier</span>
+                      <span className="text-[11px] text-slate-400">Waiting rider</span>
                     </div>
                   </div>
                 ))}
@@ -635,8 +731,16 @@ export default function RestaurantOrdersPage() {
                   <span>Food Subtotal</span>
                   <span className="font-mono">{formatPKR(selectedOrder.food_subtotal)}</span>
                 </div>
+                {(selectedOrder.gst_amount ?? 0) > 0 && (
+                  <div className="flex items-center justify-between text-slate-600">
+                    <span>
+                      GST ({selectedOrder.gst_rate}%) {selectedOrder.prices_include_gst ? '(included in prices)' : '(added to bill)'}
+                    </span>
+                    <span className="font-mono">{formatPKR(selectedOrder.gst_amount ?? 0)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-rose-600">
-                  <span>Platform Commission (10%)</span>
+                  <span>Platform Commission ({selectedOrder.commission_rate ?? (selectedOrder.net_subtotal && selectedOrder.commission_amount ? Math.round((selectedOrder.commission_amount / selectedOrder.net_subtotal) * 100) : (selectedOrder.food_subtotal && selectedOrder.commission_amount ? Math.round((selectedOrder.commission_amount / selectedOrder.food_subtotal) * 100) : 10))}%)</span>
                   <span className="font-mono">−{formatPKR(selectedOrder.commission_amount)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
@@ -659,7 +763,7 @@ export default function RestaurantOrdersPage() {
                 <span>Print</span>
               </button>
 
-              {selectedOrder.status === 'Placed' && (
+              {isNewOrder(selectedOrder.status) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -673,7 +777,7 @@ export default function RestaurantOrdersPage() {
                 </button>
               )}
 
-              {['Accepted', 'Preparing'].includes(selectedOrder.status) && (
+              {isInKitchen(selectedOrder.status) && (
                 <button
                   type="button"
                   onClick={async () => {

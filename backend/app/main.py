@@ -11,7 +11,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -19,6 +19,7 @@ from app.core.database import SessionLocal
 from app.platform.auth import service as auth_service
 from app.platform.auth.routes import router as auth_router
 from app.platform.location.routes import router as location_router
+from app.platform.notification.routes import router as notification_router
 from app.platform.users.routes import router as users_router
 from app.platform.wallet_payment.routes import router as wallet_router
 from app.modules.admin.routes import router as admin_router
@@ -31,6 +32,9 @@ from app.modules.food_delivery.routes import (
     restaurant_portal_router,
     router as menu_router,
 )
+
+import asyncio
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +56,24 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
 )
 
+# --- Security Headers & Sensitive Cache Control Middleware ---
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response: Response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+
+    path = request.url.path
+    if any(path.startswith(prefix) for prefix in ["/api/auth", "/auth", "/wallet", "/api/wallet"]):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+        response.headers["Pragma"] = "no-cache"
+
+    return response
+
 app.include_router(auth_router)
 app.include_router(location_router)
+app.include_router(notification_router)
 app.include_router(users_router)
 app.include_router(wallet_router)
 
@@ -76,6 +96,18 @@ def root_status() -> dict[str, str]:
         "docs": "/docs",
         "health": "/health",
     }
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    """Silence browser /favicon.ico probes with 204 No Content."""
+    return Response(status_code=204)
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots():
+    """Direct search engine bots to not crawl API endpoints."""
+    return Response(content="User-agent: *\nDisallow: /\n", media_type="text/plain")
 
 
 @app.on_event("startup")
@@ -122,6 +154,25 @@ def seed_first_admin_on_startup() -> None:
         auth_service.seed_demo_restaurant(db)
     finally:
         db.close()
+
+
+_sweeper_task: "asyncio.Task | None" = None
+
+
+@app.on_event("startup")
+async def start_assignment_sweeper() -> None:
+    """Expire ignored rider offers and retry unassigned orders (see core/assignment_sweeper.py)."""
+    global _sweeper_task
+    if settings.ASSIGNMENT_SWEEPER_ENABLED:
+        from app.core.assignment_sweeper import run_forever
+
+        _sweeper_task = asyncio.create_task(run_forever())
+
+
+@app.on_event("shutdown")
+async def stop_assignment_sweeper() -> None:
+    if _sweeper_task is not None:
+        _sweeper_task.cancel()
 
 
 @app.get("/health")

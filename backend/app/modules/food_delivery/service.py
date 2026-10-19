@@ -10,15 +10,18 @@ ownership pattern as platform/users/service.py's addresses.
 import json
 import math
 import uuid
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, text
+from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session
 
 from app.core import maps_client, storage
+from app.core.config import settings
 from app.core.redis_client import redis_client
+from app.modules.food_delivery import order_notifications
+from app.modules.food_delivery.tax import calculate_gst
 from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating, Restaurant
 from app.platform.wallet_payment.models import Rider
 from app.platform.users.models import Address
@@ -466,6 +469,7 @@ def get_order_tracking(db: Session, viewer_id: uuid.UUID, order_id: uuid.UUID) -
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
         "platform_fee": PLATFORM_FEE,
+        **_order_tax_fields(order),
         "total_amount": order.total_amount,
         "restaurant_name": restaurant.name if restaurant else None,
         "restaurant_lat": restaurant_lat,
@@ -504,6 +508,7 @@ def get_restaurant_order(db: Session, restaurant_id: uuid.UUID, order_id: uuid.U
 
     customer = db.query(User).filter(User.id == order.user_id).first()
     address = db.query(Address).filter(Address.id == order.delivery_address_id).first()
+    restaurant = db.query(Restaurant).filter(Restaurant.id == order.restaurant_id).first()
     item_rows = (
         db.query(OrderItem, MenuItem.name)
         .join(MenuItem, OrderItem.menu_item_id == MenuItem.id)
@@ -519,7 +524,9 @@ def get_restaurant_order(db: Session, restaurant_id: uuid.UUID, order_id: uuid.U
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
         "platform_fee": PLATFORM_FEE,
+        **_order_tax_fields(order),
         "total_amount": order.total_amount,
+        "commission_rate": float(restaurant.commission_rate) if restaurant and restaurant.commission_rate is not None else 10.0,
         "commission_amount": order.commission_amount,
         "restaurant_payable": order.restaurant_payable,
         "rider_earning": order.rider_earning,
@@ -559,8 +566,9 @@ def get_restaurant_order(db: Session, restaurant_id: uuid.UUID, order_id: uuid.U
 # Accepted -> Preparing -> Ready for Pickup, where rider assignment takes
 # over in Phase 6 (NOT implemented here, by design).
 ORDER_STATUS_TRANSITIONS = {
-    "Accepted": {"Preparing"},
-    "Preparing": {"Ready for Pickup"},
+    "Accepted": {"Preparing", "Cancelled"},
+    "Preparing": {"Ready for Pickup", "Cancelled"},
+    "Ready for Pickup": {"Rider Assigned", "Cancelled"},
     # Phase 6 rider-side transitions
     "Rider Assigned": {"Accepted by Rider", "Rejected"},
     "Rejected": {"Rider Assigned"},  # re-assignment after rejection
@@ -658,6 +666,192 @@ def _find_nearest_rider(
     return best_rider
 
 
+# --- Rider assignment timeout (offer expiry + retry) ---
+
+_EXCLUDED_RIDERS_TTL_SECONDS = 3600
+
+
+def _excluded_riders_key(order_id: uuid.UUID) -> str:
+    return f"order_excluded_riders:{order_id}"
+
+
+def _get_excluded_riders(order_id: uuid.UUID) -> set[uuid.UUID]:
+    """Riders who rejected or let this order's offer expire. Stored as a
+    comma-separated string (the shared Redis wrapper only exposes plain string
+    commands) with a 1h TTL. Fails open (empty set) if Redis is unreachable.
+    Callers hold the order row lock, so read-modify-write is not racy."""
+    try:
+        raw = redis_client.get(_excluded_riders_key(order_id))
+    except Exception:  # noqa: BLE001
+        return set()
+    if not raw:
+        return set()
+    text_value = raw.decode() if isinstance(raw, bytes) else str(raw)
+    result: set[uuid.UUID] = set()
+    for item in text_value.split(","):
+        try:
+            result.add(uuid.UUID(item.strip()))
+        except ValueError:
+            continue
+    return result
+
+
+def _exclude_rider(order_id: uuid.UUID, rider_id: uuid.UUID) -> None:
+    try:
+        riders = _get_excluded_riders(order_id) | {rider_id}
+        redis_client.set(
+            _excluded_riders_key(order_id),
+            ",".join(sorted(str(r) for r in riders)),
+            ex=_EXCLUDED_RIDERS_TTL_SECONDS,
+        )
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _clear_excluded_riders(order_id: uuid.UUID) -> None:
+    try:
+        redis_client.delete(_excluded_riders_key(order_id))
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def expire_stale_rider_assignments(db: Session, timeout_seconds: int | None = None) -> dict:
+    """
+    Background sweep (see core/assignment_sweeper.py). Closes two gaps:
+
+    1. A rider ignores an offer: an order left in "Rider Assigned" longer than
+       the timeout is taken back (that rider is excluded) and offered to the
+       next nearest eligible rider.
+    2. No rider was available when the order became ready: orders in
+       "Ready for Pickup" / "Rejected" without a rider are retried every sweep.
+
+    If every eligible rider has already passed on an order and a full timeout
+    window has gone by with nobody new, the exclusion list is cleared so the
+    cycle starts over instead of deadlocking.
+
+    Each order is handled in its own transaction under SELECT ... FOR UPDATE
+    SKIP LOCKED, so concurrent sweeps or a rider responding at the same moment
+    can never double-assign. Notifications go out after each commit.
+    """
+    from app.modules.food_delivery import order_notifications
+
+    timeout = settings.RIDER_ASSIGNMENT_TIMEOUT_SECONDS if timeout_seconds is None else timeout_seconds
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=timeout)
+
+    candidate_ids = [
+        oid
+        for (oid,) in db.query(Order.id)
+        .filter(
+            or_(
+                and_(
+                    Order.status == "Rider Assigned",
+                    or_(Order.rider_assigned_at.is_(None), Order.rider_assigned_at < cutoff),
+                ),
+                and_(Order.status.in_(["Ready for Pickup", "Rejected"]), Order.rider_id.is_(None)),
+            )
+        )
+        .limit(50)
+        .all()
+    ]
+
+    expired = 0
+    assigned = 0
+    for order_id in candidate_ids:
+        try:
+            order = (
+                db.query(Order)
+                .filter(Order.id == order_id)
+                .with_for_update(skip_locked=True)
+                .first()
+            )
+            if order is None:
+                db.commit()  # nothing changed; releases the transaction
+                continue
+
+            previous_rider_id = None
+            if order.status == "Rider Assigned":
+                stale = order.rider_assigned_at is None or order.rider_assigned_at < cutoff
+                if not stale or order.rider_id is None:
+                    db.commit()  # answered/changed since the candidate query; release lock
+                    continue
+                previous_rider_id = order.rider_id
+                _exclude_rider(order.id, previous_rider_id)
+                order.status = "Rejected"
+                order.rider_id = None
+                # "Last offer activity": holds the exclusion list for one timeout
+                # window if nobody else is available (newcomers get priority).
+                order.rider_assigned_at = datetime.now(timezone.utc)
+                expired += 1
+            elif order.status not in ("Ready for Pickup", "Rejected") or order.rider_id is not None:
+                db.commit()  # picked up by someone else meanwhile; release lock
+                continue
+
+            restaurant = db.query(Restaurant).filter(Restaurant.id == order.restaurant_id).first()
+            lat = getattr(restaurant, "latitude", None)
+            lng = getattr(restaurant, "longitude", None)
+            nearest = None
+            if lat is not None and lng is not None:
+                excluded = _get_excluded_riders(order.id)
+                nearest = _find_nearest_rider(
+                    db, float(lat), float(lng),
+                    exclude_rider_ids=excluded,
+                    payment_method=order.payment_method,
+                )
+                last_offer = order.rider_assigned_at
+                if nearest is None and excluded and last_offer is not None and last_offer < cutoff:
+                    # Everyone eligible has passed and a full timeout window went by
+                    # with nobody new: restart the cycle (picked up by the next sweep).
+                    _clear_excluded_riders(order.id)
+
+            if nearest is not None:
+                order.rider_id = nearest.id
+                order.status = "Rider Assigned"
+                order.rider_assigned_at = datetime.now(timezone.utc)
+                assigned += 1
+
+            changed = previous_rider_id is not None or nearest is not None
+            db.commit()
+            if changed:
+                db.refresh(order)
+                if previous_rider_id is not None:
+                    order_notifications.notify_rider_offer_expired(previous_rider_id, order.id)
+                order_notifications.notify_order_progress(db, order)
+        except Exception:  # noqa: BLE001 - one bad order must not stop the sweep
+            db.rollback()
+            import logging
+
+            logging.getLogger(__name__).exception("Assignment sweep failed for order %s", order_id)
+
+    return {"expired": expired, "assigned": assigned, "checked": len(candidate_ids)}
+
+
+def reject_order_by_restaurant(
+    db: Session, restaurant_id: uuid.UUID, order_id: uuid.UUID, reason: str
+) -> dict:
+    """
+    Restaurant declines a just-placed order (before cooking starts): Accepted
+    -> Cancelled with cancelled_by="restaurant" and the stated reason. Later
+    statuses cannot be rejected here (food is already being made / a rider is
+    involved); support can still cancel those via the admin API.
+    """
+    from app.modules.food_delivery import order_notifications
+
+    order = _get_owned_order(db, restaurant_id, order_id)
+    if order.status != "Accepted":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Only a new order can be rejected; this order is '{order.status}'.",
+        )
+    order.status = "Cancelled"
+    order.cancellation_reason = reason
+    order.cancelled_by = "restaurant"
+    db.commit()
+    db.refresh(order)
+
+    order_notifications.notify_order_progress(db, order)
+    return get_restaurant_order(db, restaurant_id, order_id)
+
+
 def update_order_status(
     db: Session, restaurant_id: uuid.UUID, order_id: uuid.UUID, new_status: str
 ) -> dict:
@@ -705,9 +899,13 @@ def update_order_status(
             if nearest is not None:
                 order.rider_id = nearest.id
                 order.status = "Rider Assigned"
+                order.rider_assigned_at = datetime.now(timezone.utc)
 
     db.commit()
     db.refresh(order)
+
+    # Push AFTER commit; never raises (see order_notifications).
+    order_notifications.notify_order_progress(db, order)
 
     # Return the full updated view (same shape as GET detail).
     return get_restaurant_order(db, restaurant_id, order_id)
@@ -766,6 +964,9 @@ def rider_respond_to_assignment(
         # Reject: attempt re-assignment, excluding this rider.
         order.status = "Rejected"
         order.rider_id = None
+        # Remember every rider who passed on this order so a later re-offer
+        # (here or by the sweeper) never goes back to them.
+        _exclude_rider(order.id, rider_id)
         restaurant = db.query(Restaurant).filter(Restaurant.id == order.restaurant_id).first()
         if (
             restaurant is not None
@@ -776,15 +977,20 @@ def rider_respond_to_assignment(
                 db,
                 float(restaurant.latitude),
                 float(restaurant.longitude),
-                exclude_rider_ids={rider_id},
+                exclude_rider_ids=_get_excluded_riders(order.id) | {rider_id},
                 payment_method=order.payment_method,
             )
             if nearest is not None:
                 order.rider_id = nearest.id
                 order.status = "Rider Assigned"
+                order.rider_assigned_at = datetime.now(timezone.utc)
 
     db.commit()
     db.refresh(order)
+
+    # Push AFTER commit: customer status update, plus the next rider if the
+    # order was re-assigned after a rejection.
+    order_notifications.notify_order_progress(db, order)
 
     return {
         "id": order.id,
@@ -878,6 +1084,11 @@ def rider_advance_delivery_status(
     db.commit()
     db.refresh(order)
 
+    # Push AFTER commit (customer status; rider wallet reminder on delivery).
+    order_notifications.notify_order_progress(db, order)
+    if new_status == DELIVERED_STATUS:
+        order_notifications.notify_rider_low_wallet(db, rider_id)
+
     # Fetch location snapshot for response
     restaurant = db.query(Restaurant.latitude, Restaurant.longitude).filter(Restaurant.id == order.restaurant_id).first()
     address = db.query(Address.full_address, Address.latitude, Address.longitude).filter(Address.id == order.delivery_address_id).first()
@@ -895,6 +1106,22 @@ def rider_advance_delivery_status(
         "customer_lat": float(address[1]) if address and address[1] is not None else None,
         "customer_lng": float(address[2]) if address and address[2] is not None else None,
         "delivery_address": address[0] if address else None,
+    }
+
+
+def _order_tax_fields(order) -> dict:
+    """GST snapshot for read paths (tracking, restaurant detail, receipts).
+    Legacy orders (placed before the GST columns existed) have nulls and
+    read as "no tax": net == food_subtotal, gst 0."""
+    return {
+        "gst_rate": order.gst_rate if order.gst_rate is not None else Decimal("0"),
+        "prices_include_gst": (
+            order.prices_include_gst if order.prices_include_gst is not None else True
+        ),
+        "gst_amount": order.gst_amount if order.gst_amount is not None else Decimal("0.00"),
+        "net_subtotal": (
+            order.net_subtotal if order.net_subtotal is not None else order.food_subtotal
+        ),
     }
 
 
@@ -1404,8 +1631,13 @@ def _build_checkout_context(
 
     delivery_distance_km = Decimal(str(round(route["distance_km"], 2)))
     delivery_fee = calculate_delivery_fee(delivery_distance_km)
-    total = (food_subtotal + delivery_fee + PLATFORM_FEE).quantize(Decimal("0.01"))
-
+    # GST on food only, per the restaurant's CURRENT setting (frozen onto
+    # the order at placement). Exclusive: tax added on top. Inclusive: tax
+    # is already inside food_subtotal, so it adds nothing to the total.
+    tax = calculate_gst(food_subtotal, restaurant.gst_rate, restaurant.prices_include_gst)
+    total = (
+        tax["customer_food_total"] + delivery_fee + PLATFORM_FEE
+    ).quantize(Decimal("0.01"))
 
     return {
         "restaurant": restaurant,
@@ -1416,6 +1648,7 @@ def _build_checkout_context(
         "delivery_distance_km": delivery_distance_km,
         "delivery_fee": delivery_fee,
         "platform_fee": PLATFORM_FEE,
+        "tax": tax,
         "total": total,
         "route": route,
     }
@@ -1435,6 +1668,10 @@ def preview_checkout(
         "delivery_distance_km": ctx["delivery_distance_km"],
         "delivery_fee": ctx["delivery_fee"],
         "platform_fee": ctx["platform_fee"],
+        "gst_rate": ctx["tax"]["gst_rate"],
+        "prices_include_gst": ctx["tax"]["prices_include_gst"],
+        "gst_amount": ctx["tax"]["gst_amount"],
+        "net_subtotal": ctx["tax"]["net_subtotal"],
         "total": ctx["total"],
         "route": ctx["route"],
     }
@@ -1484,6 +1721,7 @@ def place_order(
     restaurant_id: uuid.UUID,
     address_id: uuid.UUID,
     payment_method: str,
+    expected_total: float | None = None,
 ) -> dict:
     """Convert the Redis cart into a real order (Step 6).
 
@@ -1510,6 +1748,12 @@ def place_order(
     ctx = _build_checkout_context(db, customer_id, restaurant_id, address_id)
     restaurant = ctx["restaurant"]
 
+    if expected_total is not None and abs(Decimal(str(expected_total)) - ctx["total"]) > Decimal("0.01"):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Order total has changed due to updated menu pricing or tax settings. Please review your checkout total and try again.",
+        )
+
     # Step 7: for Digital, "pay" BEFORE writing anything. Nothing has been
     # added to the session yet at this point, so a declined/failed payment
     # aborts with zero DB side effects — no order, no order_items, no
@@ -1526,7 +1770,14 @@ def place_order(
                 detail="Digital payment failed. Please try again or choose Cash on Delivery.",
             ) from exc
 
-    commission = calculate_commission(ctx["food_subtotal"], restaurant.commission_rate)
+    # Commission is charged on the EX-TAX food value: tax is the
+    # restaurant's liability to the tax authority, not platform revenue.
+    # Restaurant is paid net - commission + the tax collected on its food.
+    tax = ctx["tax"]
+    commission = calculate_commission(tax["net_subtotal"], restaurant.commission_rate)
+    restaurant_payable = (
+        commission["restaurant_payable"] + tax["gst_amount"]
+    ).quantize(Decimal("0.01"))
     # Rider earns 90% of the delivery fee; the platform keeps the other 10%
     # (settled on delivery by apply_delivery_commission). Frozen here so the
     # payout snapshot can never be rewritten later.
@@ -1544,7 +1795,11 @@ def place_order(
         delivery_fee=ctx["delivery_fee"],
         total_amount=ctx["total"],
         commission_amount=commission["commission_amount"],
-        restaurant_payable=commission["restaurant_payable"],
+        restaurant_payable=restaurant_payable,
+        gst_rate=tax["gst_rate"],
+        prices_include_gst=tax["prices_include_gst"],
+        gst_amount=tax["gst_amount"],
+        net_subtotal=tax["net_subtotal"],
         rider_earning=rider_earning,
         country_code=restaurant.country_code,
         currency=restaurant.currency,
@@ -1580,6 +1835,9 @@ def place_order(
     # Only after a successful commit: the cart's job is done.
     delete_cart(db, customer_id, restaurant_id)
 
+    # Alert the restaurant portal. Push AFTER commit; never raises.
+    order_notifications.notify_restaurant_new_order(db, order)
+
     return {
         "id": order.id,
         "status": order.status,
@@ -1589,6 +1847,7 @@ def place_order(
         "delivery_distance_km": order.delivery_distance_km,
         "delivery_fee": order.delivery_fee,
         "platform_fee": PLATFORM_FEE,
+        **_order_tax_fields(order),
         "total_amount": order.total_amount,
         "route": ctx["route"],
         "commission_amount": order.commission_amount,

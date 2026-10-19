@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { MapPin, NavigationArrow, Bicycle, Storefront, ChartPieSlice } from '@phosphor-icons/react';
 
 export interface RegionalZoneData {

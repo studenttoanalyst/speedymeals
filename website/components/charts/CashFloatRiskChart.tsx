@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Coins, ShieldWarning, CheckCircle, Warning, ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 
@@ -76,7 +76,7 @@ export function CashFloatRiskChart({ riders = [] }: CashFloatRiskChartProps) {
                   CAP: PKR 15,000 / RIDER
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Cash on delivery held by active couriers before daily reconciliation deposit</p>
+              <p className="text-xs text-slate-400">Cash on delivery held by active riders before daily reconciliation deposit</p>
             </div>
           </div>
 
@@ -123,7 +123,7 @@ export function CashFloatRiskChart({ riders = [] }: CashFloatRiskChartProps) {
                 <div>
                   <div className="text-xs font-semibold text-slate-800">{t.tier}</div>
                   <div className="text-[11px] font-mono text-slate-400">
-                    {t.courierCount} active couriers · PKR {t.totalCash.toLocaleString()}
+                    {t.courierCount} active riders · PKR {t.totalCash.toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -142,7 +142,7 @@ export function CashFloatRiskChart({ riders = [] }: CashFloatRiskChartProps) {
           <div className="flex items-center gap-1.5 text-rose-700">
             <ShieldWarning size={15} weight="bold" />
             <span className="font-semibold">
-              {breachedRiders.length} Courier{breachedRiders.length > 1 ? 's' : ''} ({breachedRiders[0].name}) exceeded PKR 15,000 float cap
+              {breachedRiders.length} Rider{breachedRiders.length > 1 ? 's' : ''} ({breachedRiders[0].name}) exceeded PKR 15,000 float cap
             </span>
           </div>
         ) : (

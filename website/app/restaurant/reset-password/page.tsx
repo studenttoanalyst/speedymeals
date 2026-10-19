@@ -85,7 +85,7 @@ function RestaurantResetPasswordForm() {
             href="/restaurant/login"
             className="inline-flex items-center justify-center gap-1.5 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-xs transition-colors"
           >
-            <span>Go to Restaurant Login</span>
+            <span>Go to Merchant Login</span>
             <ArrowRight size={13} weight="bold" />
           </Link>
         </div>
@@ -171,7 +171,7 @@ export default function RestaurantResetPasswordPage() {
           className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium"
         >
           <ArrowLeft size={13} weight="bold" />
-          <span>Back to Restaurant Login</span>
+          <span>Back to Merchant Login</span>
         </Link>
       </div>
 

@@ -96,10 +96,25 @@ def upgrade() -> None:
             .values(label=label, domain=domain, description=desc)
         )
 
-    # Mandatory AGENTS.md privileges maintenance
-    op.execute("GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;")
-    op.execute("GRANT ALL ON TABLE public.permissions TO anon, authenticated, service_role;")
-    op.execute("GRANT ALL ON TABLE public.admin_roles TO anon, authenticated, service_role;")
+    # Mandatory AGENTS.md privileges maintenance.
+    # Only on databases that have the Supabase roles: on plain PostgreSQL
+    # (docker-compose, CI, local) the roles do not exist and an unconditional
+    # GRANT would abort the whole migration.
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated')
+               AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+                GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+                GRANT ALL ON TABLE public.permissions TO anon, authenticated, service_role;
+                GRANT ALL ON TABLE public.admin_roles TO anon, authenticated, service_role;
+            END IF;
+        END
+        $$;
+        """
+    )
 
 
 def downgrade() -> None:

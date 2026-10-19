@@ -90,9 +90,9 @@ export default function AdminStaffAccountsPage() {
   const corporateEmailPreview = useMemo(() => {
     const f = firstName.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
     const l = lastName.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (f && l) return `${f}.${l}@speedymeals.pk`;
-    if (f) return `${f}@speedymeals.pk`;
-    return 'operator@speedymeals.pk';
+    if (f && l) return `${f}.${l}@speedymealservices.com`;
+    if (f) return `${f}@speedymealservices.com`;
+    return 'operator@speedymealservices.com';
   }, [firstName, lastName]);
 
   const handleOpenProvisionModal = () => {
@@ -498,7 +498,7 @@ export default function AdminStaffAccountsPage() {
                   </span>
                 </div>
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                  @speedymeals.pk
+                  @speedymealservices.com
                 </span>
               </div>
 
@@ -630,7 +630,7 @@ export default function AdminStaffAccountsPage() {
                 type="button"
                 onClick={() =>
                   copyToClipboard(
-                    `SpeedyMeals Staff Login Details\nURL: https://speedymeals.pk/admin/login\nEmail: ${provisionedResult.email}\nTemporary Password: ${provisionedResult.temporary_password}\nRole: ${provisionedResult.role_name}`,
+                    `SpeedyMeals Staff Login Details\nURL: https://speedymealservices.com/admin/login\nEmail: ${provisionedResult.email}\nTemporary Password: ${provisionedResult.temporary_password}\nRole: ${provisionedResult.role_name}`,
                     'all'
                   )
                 }

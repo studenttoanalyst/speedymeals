@@ -187,6 +187,9 @@ class RiderWalletProfileResponseSchema(BaseModel):
     has_cnic_photo: bool
     has_license_photo: bool
     has_vehicle_photo: bool
+    # Kit deposit & accessories handover
+    kit_completed: bool = False
+    kit_deposit_paid: bool = False
 
 
 class RiderAssignmentItemSchema(BaseModel):

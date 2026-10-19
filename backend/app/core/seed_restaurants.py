@@ -14,7 +14,7 @@ from app.modules.food_delivery.models import Restaurant, MenuItem
 SAMPLE_RESTAURANTS = [
     {
         "name": "Karachi Biryani House",
-        "email": "contact@karachibiryani.pk",
+        "email": "karachibiryani@speedymeals.com",
         "phone_number": "+923001112233",
         "address": "Shop # 4, Main Boat Basin, Clifton Block 5, Karachi",
         "latitude": 24.8234,
@@ -62,7 +62,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Burger Lab Clifton",
-        "email": "clifton@burgerlab.pk",
+        "email": "burgerlab@speedymeals.com",
         "phone_number": "+923004445566",
         "address": "Khayaban-e-Seher, Phase 6 DHA, Karachi",
         "latitude": 24.8142,
@@ -102,7 +102,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Ginsoy Extreme Chinese",
-        "email": "orders@ginsoy.pk",
+        "email": "ginsoy@speedymeals.com",
         "phone_number": "+923219998877",
         "address": "Shahrah-e-Jahangir, Block H, North Nazimabad, Karachi",
         "latitude": 24.9362,
@@ -142,7 +142,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Pizza Max Gulshan",
-        "email": "gulshan@pizzamax.com.pk",
+        "email": "pizzamax@speedymeals.com",
         "phone_number": "+923337776655",
         "address": "University Road, Block 13-D, Gulshan-e-Iqbal, Karachi",
         "latitude": 24.9180,
@@ -174,7 +174,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Kolachi Spirit of Karachi",
-        "email": "dine@kolachi.pk",
+        "email": "kolachi@speedymeals.com",
         "phone_number": "+923019992211",
         "address": "Do Darya, Phase 8, DHA Waterfront, Karachi",
         "latitude": 24.7701,
@@ -214,7 +214,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Zameer Ansari Kabab",
-        "email": "orders@zameeransari.pk",
+        "email": "zameeransari@speedymeals.com",
         "phone_number": "+923008282821",
         "address": "Sindhi Muslim Cooperative Housing Society (SMCHS), Karachi",
         "latitude": 24.8625,
@@ -254,7 +254,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Kababjees Fried Chicken (KFC)",
-        "email": "kfc@kababjees.com",
+        "email": "kababjees@speedymeals.com",
         "phone_number": "+923112224455",
         "address": "Rashid Minhas Road, Gulshan-e-Iqbal Block 10, Karachi",
         "latitude": 24.9085,
@@ -294,7 +294,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Chai Wala Chhotu",
-        "email": "chai@chaiwala.pk",
+        "email": "chaiwala@speedymeals.com",
         "phone_number": "+923005556677",
         "address": "Bukhari Commercial Area, Phase 6 DHA, Karachi",
         "latitude": 24.8115,
@@ -334,7 +334,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Al-Bustan Continental",
-        "email": "bustan@albustan.pk",
+        "email": "albustan@speedymeals.com",
         "phone_number": "+923332123456",
         "address": "Club Road, Civil Lines, Saddar, Karachi",
         "latitude": 24.8512,
@@ -366,7 +366,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Javed Nihari House",
-        "email": "javed@niharihouse.pk",
+        "email": "javednihari@speedymeals.com",
         "phone_number": "+923214567890",
         "address": "Dastagir Road, Federal B Area Block 9, Karachi",
         "latitude": 24.9311,
@@ -406,7 +406,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Subway Clifton Block 2",
-        "email": "subway.clifton@subway.pk",
+        "email": "subway@speedymeals.com",
         "phone_number": "+923001230011",
         "address": "Marine Drive, Block 2 Clifton, Karachi",
         "latitude": 24.8198,
@@ -438,7 +438,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Kaybees Fast Food",
-        "email": "info@kaybees.pk",
+        "email": "kaybees@speedymeals.com",
         "phone_number": "+923212345678",
         "address": "Tariq Road, PECHS Block 2, Karachi",
         "latitude": 24.8715,
@@ -470,7 +470,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Dunkin' Donuts DHA",
-        "email": "dha@dunkin.pk",
+        "email": "dunkin@speedymeals.com",
         "phone_number": "+923008989891",
         "address": "26th Street, Badar Commercial, Phase 5 DHA, Karachi",
         "latitude": 24.8175,
@@ -502,7 +502,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Hot N Spicy Roll Corner",
-        "email": "rolls@hotnspicy.pk",
+        "email": "hotnspicy@speedymeals.com",
         "phone_number": "+923334441122",
         "address": "Khayaban-e-Rahat, Phase 6 DHA, Karachi",
         "latitude": 24.8105,
@@ -534,7 +534,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Broadway Pizza Johar",
-        "email": "johar@broadwaypizza.com.pk",
+        "email": "broadwaypizza@speedymeals.com",
         "phone_number": "+923129876543",
         "address": "Kamran Chowrangi, Block 11 Gulistan-e-Johar, Karachi",
         "latitude": 24.9221,
@@ -566,7 +566,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Student Biryani Saddar",
-        "email": "saddar@studentbiryani.com",
+        "email": "studentbiryani@speedymeals.com",
         "phone_number": "+923009988776",
         "address": "Empress Market Area, Preedy Street, Saddar, Karachi",
         "latitude": 24.8611,
@@ -598,7 +598,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Red Apple Bahadurabad",
-        "email": "orders@redapple.pk",
+        "email": "redapple@speedymeals.com",
         "phone_number": "+923331122334",
         "address": "Bahadur Shah Zafar Road, Bahadurabad, Karachi",
         "latitude": 24.8821,
@@ -630,7 +630,7 @@ SAMPLE_RESTAURANTS = [
     },
     {
         "name": "Waheed Kabab House",
-        "email": "waheed@kababhouse.pk",
+        "email": "waheedkabab@speedymeals.com",
         "phone_number": "+923004455889",
         "address": "Burns Road Food Street, Saddar, Karachi",
         "latitude": 24.8560,
@@ -671,8 +671,15 @@ def seed_dummy_restaurants():
 
     try:
         for r_data in SAMPLE_RESTAURANTS:
-            restaurant = db.query(Restaurant).filter(Restaurant.email == r_data["email"]).first()
-            if not restaurant:
+            # Match by email or phone to allow updating existing records to the new domain
+            restaurant = db.query(Restaurant).filter(
+                (Restaurant.email == r_data["email"]) | (Restaurant.phone_number == r_data["phone_number"])
+            ).first()
+            if restaurant:
+                if restaurant.email != r_data["email"]:
+                    restaurant.email = r_data["email"]
+                    db.commit()
+            else:
                 restaurant = Restaurant(
                     name=r_data["name"],
                     email=r_data["email"],

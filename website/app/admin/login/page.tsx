@@ -21,6 +21,15 @@ export default function AdminLoginPage() {
     if (role === 'admin' && token) {
       router.replace('/admin/dashboard');
     }
+
+    const savedEmail = localStorage.getItem('sm_remembered_admin_email');
+    if (savedEmail) {
+      if (savedEmail === 'admin@speedymeals.com' || savedEmail === 'admin@speedymealservices.com') {
+        localStorage.removeItem('sm_remembered_admin_email');
+      } else {
+        setEmail(savedEmail);
+      }
+    }
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +101,10 @@ export default function AdminLoginPage() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError(null);
+                }}
                 placeholder="admin@speedymealservices.com"
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
               />
@@ -111,7 +123,10 @@ export default function AdminLoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError(null);
+                }}
                 placeholder="••••••••••••"
                 className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-mono"
               />
@@ -135,7 +150,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
           >
             <span>{isLoading ? 'Signing in...' : 'Log In to Admin Portal'}</span>
             <ArrowRight size={14} weight="bold" />
@@ -143,7 +158,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>Are you a Restaurant Partner?</span>
+          <span>Are you a Merchant Partner?</span>
           <Link
             href="/restaurant/login"
             className="text-rose-600 font-semibold hover:underline"

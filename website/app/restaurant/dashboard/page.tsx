@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { isInKitchen, isNewOrder } from '@/lib/orders/status';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -28,15 +29,18 @@ import {
   getRestaurantMetrics,
   updateRestaurantOrderStatus,
   listRestaurantMenuItems,
+  getRestaurantProfile,
 } from '@/lib/api/restaurant';
 import {
   RestaurantDashboardMetrics,
   RestaurantOrderSummary,
   MenuItem,
+  RestaurantProfile,
 } from '@/types/restaurant';
 
 export default function RestaurantDashboardPage() {
   const [metrics, setMetrics] = useState<RestaurantDashboardMetrics | null>(null);
+  const [profile, setProfile] = useState<RestaurantProfile | null>(null);
   const [orders, setOrders] = useState<RestaurantOrderSummary[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,14 +49,16 @@ export default function RestaurantDashboardPage() {
 
   const fetchData = async () => {
     try {
-      const [m, o, items] = await Promise.all([
+      const [m, o, items, prof] = await Promise.all([
         getRestaurantMetrics(),
         listRestaurantOrders(),
         listRestaurantMenuItems(),
+        getRestaurantProfile().catch(() => null),
       ]);
       setMetrics(m);
       setOrders(o);
       setMenuItems(items);
+      if (prof) setProfile(prof);
     } catch (err) {
       console.error('Failed to load restaurant dashboard data', err);
     } finally {
@@ -67,8 +73,7 @@ export default function RestaurantDashboardPage() {
 
   const handleAdvanceStatus = async (orderId: string, currentStatus: string) => {
     let nextStatus = '';
-    if (currentStatus === 'Placed') nextStatus = 'Accepted';
-    else if (currentStatus === 'Accepted') nextStatus = 'Preparing';
+    if (isNewOrder(currentStatus)) nextStatus = 'Preparing';
     else if (currentStatus === 'Preparing') nextStatus = 'Ready for Pickup';
     else return;
 
@@ -146,7 +151,7 @@ export default function RestaurantDashboardPage() {
       title: 'Kitchen Action',
       align: 'right',
       render: (o) => {
-        if (o.status === 'Placed') {
+        if (isNewOrder(o.status)) {
           return (
             <button
               onClick={(e) => {
@@ -159,7 +164,7 @@ export default function RestaurantDashboardPage() {
             </button>
           );
         }
-        if (o.status === 'Accepted' || o.status === 'Preparing') {
+        if (isInKitchen(o.status)) {
           return (
             <button
               onClick={(e) => {
@@ -169,7 +174,7 @@ export default function RestaurantDashboardPage() {
               className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1 ml-auto cursor-pointer"
             >
               <Check size={12} weight="bold" />
-              {o.status === 'Accepted' ? 'Start Prep' : 'Ready for Pickup'}
+              Ready for Pickup
             </button>
           );
         }
@@ -189,7 +194,7 @@ export default function RestaurantDashboardPage() {
   return (
     <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
       <Topbar
-        title="Restaurant Dashboard"
+        title="Merchant Dashboard"
         onRefresh={() => {
           setIsRefreshing(true);
           fetchData();
@@ -225,7 +230,7 @@ export default function RestaurantDashboardPage() {
         )}
 
         {/* Headline Operational KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
           <StatCard
             label="Today's Gross Sales"
             value={formatPKR(metrics?.today_sales_gross ?? 0)}
@@ -236,9 +241,9 @@ export default function RestaurantDashboardPage() {
           />
 
           <StatCard
-            label="Net Payable (90% Share)"
-            value={formatPKR(metrics?.net_payable_estimate ?? ((metrics?.today_sales_gross ?? 0) * 0.9))}
-            subValue="After 10% Platform Commission"
+            label={`Net Payable (${100 - (profile?.commission_rate ?? 10)}% Share)`}
+            value={formatPKR(metrics?.net_payable_estimate ?? ((metrics?.today_sales_gross ?? 0) * (1 - (profile?.commission_rate ?? 10) / 100)))}
+            subValue={`After ${profile?.commission_rate ?? 10}% Platform Commission`}
             accent="blue"
             icon={<Receipt size={18} weight="bold" />}
             targetBenchmark="Weekly Payout: Friday"
@@ -248,7 +253,7 @@ export default function RestaurantDashboardPage() {
             label="Active Kitchen Orders"
             value={metrics?.active_orders_count ?? 0}
             subValue={metrics ? `${metrics.today_orders_count ?? 0} orders today` : '0 orders today'}
-            accent="blue"
+            accent="slate"
             icon={<Clock size={18} weight="bold" />}
             targetBenchmark="Capacity: 8 orders"
           />
@@ -286,66 +291,68 @@ export default function RestaurantDashboardPage() {
 
           {/* Top Selling Dishes with Images */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                <Fire size={16} weight="bold" className="text-rose-600" />
-                Top Performing Dishes Today
-              </h2>
-              <Link
-                href="/restaurant/menu"
-                className="text-xs font-semibold text-rose-600 hover:underline"
-              >
-                View Menu
-              </Link>
-            </div>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
+                  <Fire size={16} weight="bold" className="text-rose-600" />
+                  Top Performing Dishes Today
+                </h2>
+                <Link
+                  href="/restaurant/menu"
+                  className="text-xs font-semibold text-rose-600 hover:underline"
+                >
+                  View Menu
+                </Link>
+              </div>
 
-            <div className="space-y-3">
-              {popularDishes.length === 0 ? (
-                <div className="p-6 text-center text-slate-400 text-xs">
-                  No menu items found. Add dishes to track top performers.
-                </div>
-              ) : (
-                popularDishes.map((dish, idx) => {
-                  const photo = dish.photo_url || dish.image_url;
-                  return (
-                    <div
-                      key={dish.id}
-                      className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
-                    >
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
-                        {photo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={photo}
-                            alt={dish.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <ForkKnife size={20} className="text-slate-400" />
-                        )}
-                        <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-slate-900/80 text-white text-[9px] font-bold flex items-center justify-center">
-                          #{idx + 1}
+              <div className="space-y-3">
+                {popularDishes.length === 0 ? (
+                  <div className="p-6 text-center text-slate-400 text-xs">
+                    No menu items found. Add dishes to track top performers.
+                  </div>
+                ) : (
+                  popularDishes.map((dish, idx) => {
+                    const photo = dish.photo_url || dish.image_url;
+                    return (
+                      <div
+                        key={dish.id}
+                        className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
+                          {photo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={photo}
+                              alt={dish.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <ForkKnife size={20} className="text-slate-400" />
+                          )}
+                          <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-slate-900/80 text-white text-[9px] font-bold flex items-center justify-center">
+                            #{idx + 1}
+                          </div>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xs font-semibold text-slate-900 truncate">
+                            {dish.name}
+                          </h3>
+                          <div className="text-[11px] text-slate-400 font-mono">
+                            {formatPKR(dish.price)} · {dish.category || 'Special'}
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="text-xs font-semibold text-slate-600 font-mono">
+                            {dish.is_popular ? 'Featured' : 'Active'}
+                          </span>
                         </div>
                       </div>
-
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xs font-semibold text-slate-900 truncate">
-                          {dish.name}
-                        </h3>
-                        <div className="text-[11px] text-slate-400 font-mono">
-                          {formatPKR(dish.price)} · {dish.category || 'Special'}
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <span className="text-xs font-semibold text-slate-600 font-mono">
-                          {dish.is_popular ? 'Featured' : 'Active'}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
@@ -386,8 +393,8 @@ export default function RestaurantDashboardPage() {
               o.customer_name.toLowerCase().includes(q.toLowerCase())
             }
             filterOptions={[
-              { label: 'Placed (New)', value: 'Placed', filterFn: (o) => o.status === 'Placed' },
-              { label: 'In Kitchen (Prep)', value: 'prep', filterFn: (o) => o.status === 'Accepted' || o.status === 'Preparing' },
+              { label: 'New', value: 'new', filterFn: (o) => isNewOrder(o.status) },
+              { label: 'In Kitchen (Prep)', value: 'prep', filterFn: (o) => isInKitchen(o.status) },
               { label: 'Ready for Pickup', value: 'Ready for Pickup', filterFn: (o) => o.status === 'Ready for Pickup' },
             ]}
           />

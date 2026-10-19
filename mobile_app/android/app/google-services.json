@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "64997733298",
+    "project_id": "speedymeals-84af9",
+    "storage_bucket": "speedymeals-84af9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:64997733298:android:da54a62bc287932d556aab",
+        "android_client_info": {
+          "package_name": "com.speedymealservices.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8nnh8UudcVjMtZ3NS3QTc_qm872B1-Vc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -328,7 +328,13 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     if (profile == null) return;
 
     if (value && !profile.canWork) {
-      _showError('Your account is not approved for deliveries yet.');
+      if (!profile.isApproved) {
+        _showError('Your account is not approved for deliveries yet.');
+      } else if (!profile.kitCompleted) {
+        _showError('Kit deposit and handover must be completed at an outlet before going online.');
+      } else {
+        _showError('Your account is currently inactive.');
+      }
       return;
     }
 
@@ -565,6 +571,8 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
             if (profile != null && !profile.isApproved) _buildApprovalBanner(profile),
             if (profile != null && !profile.hasAllDocuments)
               _buildDocumentsBanner(profile),
+            if (profile != null && profile.isApproved && !profile.kitCompleted)
+              _buildKitPendingBanner(profile),
             _buildOnlineBanner(online),
             const SizedBox(height: 24),
             const Text(
@@ -694,6 +702,45 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
             const Icon(Icons.chevron_right_rounded, color: Color(0xFF60A5FA)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildKitPendingBanner(RiderProfile profile) {
+    final depositPaid = profile.kitDepositPaid;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF78350F).withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.inventory_2_rounded, color: Color(0xFFFBBF24)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  depositPaid ? 'Kit Handover in Progress' : 'Kit Handover Required',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  depositPaid
+                      ? 'Rs. 5,000 security deposit received. Please collect your official uniform shirts (min. 2) and insulated delivery box from the hub to activate online deliveries.'
+                      : 'To go online and receive orders, submit the Rs. 5,000 refundable security deposit and collect your kit (uniform & delivery box) at any SpeedyMeals outlet.',
+                  style: const TextStyle(fontSize: 12.5, color: Color(0xFFCBD5E1), height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

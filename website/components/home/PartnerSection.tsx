@@ -27,6 +27,7 @@ import {
   TRANSLATIONS,
   getTypographySize,
 } from '@/lib/i18n/translations';
+import { scrollToSection } from '@/lib/scroll';
 
 interface PartnerSectionProps {
   activePersona: PersonaType;
@@ -343,14 +344,21 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
     },
   };
 
+  const handleCardSelect = (persona: PersonaType) => {
+    onSelectPersona(persona);
+    setTimeout(() => {
+      scrollToSection('registration-flow-panel', { gap: 16 });
+    }, 60);
+  };
+
   return (
     <section
       id="partner"
       className="relative z-10 py-24 sm:py-32 border-t border-[#E4E2DD] bg-[#FFFFFF]"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-12 sm:mb-16">
+        <div data-scroll-anchor className="mb-12 sm:mb-16">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center space-x-2 shrink-0">
               <span className="font-sans text-xs uppercase tracking-wider text-[#5B5F66] font-semibold whitespace-nowrap">
@@ -361,7 +369,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               </span>
             </div>
             <div className="hidden sm:block h-px flex-1 bg-[#E4E2DD] mx-3" />
-            <span className="font-sans text-[10px] sm:text-xs text-[#E23A2E] tracking-wider uppercase font-semibold whitespace-nowrap">
+            <span className="font-sans text-[10px] sm:text-xs text-red-accessible tracking-wider uppercase font-semibold whitespace-nowrap">
               ENROLLMENT OPEN
             </span>
           </div>
@@ -371,7 +379,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <span className="block">Direct Partnership.</span>
               <span
                 className="block transition-colors duration-300"
-                style={{ color: 'var(--dynamic-accent, #E23A2E)' }}
+                style={{ color: 'var(--dynamic-accent, #C92F24)' }}
               >
                 Transparent Economics.
               </span>
@@ -383,42 +391,57 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           </div>
         </div>
 
-        {/* Role Selection: Unboxed, Clean, Non-Jargon */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-16">
+        {/* Role Selection: Unboxed, Clean, Equal-Height Grid with Pinned Button Baselines */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-16 items-stretch">
           {/* Card 1: Rider */}
           <div
             id="persona-col-rider"
-            onClick={() => onSelectPersona('rider')}
-            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'rider'
+            role="button"
+            tabIndex={0}
+            aria-label="Select Rider Application"
+            aria-pressed={activePersona === 'rider'}
+            onClick={() => handleCardSelect('rider')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardSelect('rider');
+              }
+            }}
+            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red ${activePersona === 'rider'
               ? 'bg-paper-off ring-2 ring-red shadow-sm'
               : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full text-red flex items-center justify-center bg-red/10">
+                <div className="w-10 h-10 rounded-full text-red flex items-center justify-center bg-red/10 shrink-0">
                   <Bicycle size={22} weight="bold" />
                 </div>
-                <span className="font-sans text-xs font-bold uppercase tracking-wider text-red">
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-red-accessible">
                   For Riders
                 </span>
               </div>
               <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
                 Deliver
               </h3>
-              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-6">
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3">
                 Deliver meals on your own terms with transparent fees and regular weekly payouts straight to your account.
               </p>
             </div>
 
+            {/* Reserved empty meta slot matching Merchant and Customer height */}
+            <div className="min-h-[32px] my-3" aria-hidden="true" />
+
             <button
               type="button"
               id="btn-select-rider"
+              tabIndex={-1}
+              aria-hidden="true"
               onClick={(e) => {
                 e.stopPropagation();
-                onSelectPersona('rider');
+                handleCardSelect('rider');
               }}
-              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'rider'
+              className={`mt-auto w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'rider'
                 ? 'bg-red text-white'
                 : 'bg-black/5 text-ink hover:bg-ink hover:text-white'
                 }`}
@@ -431,15 +454,25 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
           {/* Card 2: Merchant */}
           <div
             id="persona-col-restaurant"
-            onClick={() => onSelectPersona('restaurant')}
-            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'restaurant'
+            role="button"
+            tabIndex={0}
+            aria-label="Select Merchant Application"
+            aria-pressed={activePersona === 'restaurant'}
+            onClick={() => handleCardSelect('restaurant')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardSelect('restaurant');
+              }
+            }}
+            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue ${activePersona === 'restaurant'
               ? 'bg-paper-off ring-2 ring-blue shadow-sm'
               : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full text-blue flex items-center justify-center bg-blue/10">
+                <div className="w-10 h-10 rounded-full text-blue flex items-center justify-center bg-blue/10 shrink-0">
                   <Storefront size={22} weight="bold" />
                 </div>
                 <span className="font-sans text-xs font-bold uppercase tracking-wider text-blue">
@@ -449,56 +482,68 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <h3 className="font-heading font-extrabold text-2xl text-ink tracking-tight mb-2">
                 List Your Store
               </h3>
-              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-6">
+              <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3">
                 Reach hungry customers across your city with easy order management and predictable, low commission rates.
               </p>
             </div>
 
-            <div>
-              <button
-                type="button"
-                id="btn-select-restaurant"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelectPersona('restaurant');
-                }}
-                className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'restaurant'
-                  ? 'bg-blue text-white'
-                  : 'bg-black/5 text-blue hover:bg-blue hover:text-white'
-                  }`}
+            {/* Meta slot: Merchant portal link positioned directly above button */}
+            <div className="min-h-[32px] my-3 flex items-center justify-center">
+              <Link
+                id="link-existing-restaurant-portal"
+                href="/restaurant"
+                onClick={(e) => e.stopPropagation()}
+                className="font-sans text-xs text-blue hover:underline inline-flex items-center gap-1 active:opacity-75"
               >
-                <span>{activePersona === 'restaurant' ? 'Active Form' : 'Partner as Merchant'}</span>
-                <ArrowRight size={13} weight="bold" />
-              </button>
-
-              <div className="mt-3 text-center">
-                <Link
-                  id="link-existing-restaurant-portal"
-                  href="/restaurant"
-                  className="font-sans text-xs text-blue hover:underline inline-flex items-center gap-1 active:opacity-75"
-                >
-                  <span>Already registered? Access Merchant Portal</span>
-                  <ArrowRight size={10} weight="bold" />
-                </Link>
-              </div>
+                <span>Already registered? Access Merchant Portal</span>
+                <ArrowRight size={10} weight="bold" />
+              </Link>
             </div>
+
+            <button
+              type="button"
+              id="btn-select-restaurant"
+              tabIndex={-1}
+              aria-hidden="true"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCardSelect('restaurant');
+              }}
+              className={`mt-auto w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'restaurant'
+                ? 'bg-blue text-white'
+                : 'bg-black/5 text-blue hover:bg-blue hover:text-white'
+                }`}
+            >
+              <span>{activePersona === 'restaurant' ? 'Active Form' : 'Partner as Merchant'}</span>
+              <ArrowRight size={13} weight="bold" />
+            </button>
           </div>
 
           {/* Card 3: Customer */}
           <div
             id="persona-col-customer"
-            onClick={() => onSelectPersona('customer')}
-            className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between ${activePersona === 'customer'
+            role="button"
+            tabIndex={0}
+            aria-label="Select Customer Early Access Application"
+            aria-pressed={activePersona === 'customer'}
+            onClick={() => handleCardSelect('customer')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardSelect('customer');
+              }
+            }}
+            className={`p-5 sm:p-8 rounded-2xl cursor-pointer transition-all duration-150 card-press active:scale-[0.985] select-none flex flex-col justify-between h-full min-w-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-tan ${activePersona === 'customer'
               ? 'bg-paper-off ring-2 ring-tan shadow-sm'
               : 'hover:bg-paper-off/60'
               }`}
           >
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full text-tan flex items-center justify-center bg-tan/10">
+                <div className="w-10 h-10 rounded-full text-tan flex items-center justify-center bg-tan/10 shrink-0">
                   <Users size={22} weight="bold" />
                 </div>
-                <span className="font-sans text-xs font-bold uppercase tracking-wider text-tan">
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-tan-accessible">
                   For Customers
                 </span>
               </div>
@@ -508,10 +553,13 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3">
                 Real food prices from beloved local kitchens. Be the first to order when SpeedyMeals launches in your area.
               </p>
-              {/* VIP promo badge */}
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-tan/15 border border-tan/30 rounded-full mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-tan inline-block" />
-                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-tan">
+            </div>
+
+            {/* Meta slot: VIP promo badge positioned directly above button */}
+            <div className="min-h-[32px] my-3 flex items-center justify-center">
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-tan/15 border border-tan/30 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-tan inline-block shrink-0" />
+                <span className="font-sans text-[10px] uppercase tracking-wider font-bold text-tan-accessible">
                   VIP: Up to 50% off your first 3 orders
                 </span>
               </div>
@@ -520,13 +568,15 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             <button
               type="button"
               id="btn-select-customer"
+              tabIndex={-1}
+              aria-hidden="true"
               onClick={(e) => {
                 e.stopPropagation();
-                onSelectPersona('customer');
+                handleCardSelect('customer');
               }}
-              className={`w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'customer'
+              className={`mt-auto w-full py-3 text-xs font-sans font-bold uppercase tracking-wider rounded-full transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-95 select-none ${activePersona === 'customer'
                 ? 'bg-tan text-ink'
-                : 'bg-tan/15 text-tan hover:bg-tan hover:text-ink'
+                : 'bg-tan/15 text-tan-accessible hover:bg-tan hover:text-ink'
                 }`}
             >
               <span>{activePersona === 'customer' ? 'Active Form' : 'Get VIP Access'}</span>
@@ -538,7 +588,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
         {/* REGISTRATION FORM PANEL: Styled - dark canvas for all personas */}
         <div
           id="registration-flow-panel"
-          className="rounded-3xl p-6 sm:p-10 lg:p-12 shadow-xl border bg-[#1A1D23] text-white border-white/5 transition-all duration-300"
+          className="rounded-3xl p-4 sm:p-10 lg:p-12 shadow-xl border bg-[#1A1D23] text-white border-white/5 transition-all duration-300 min-w-0 w-full"
         >
           {/* Top Panel Nav & Title */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 mb-8 border-b border-[#373C46]">
@@ -549,7 +599,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   style={{
                     backgroundColor:
                       activePersona === 'rider'
-                        ? '#E23A2E'
+                        ? '#C92F24'
                         : activePersona === 'restaurant'
                           ? '#1E5FA8'
                           : '#C7A874',
@@ -559,16 +609,16 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                   style={{
                     color:
                       activePersona === 'rider'
-                        ? '#E23A2E'
+                        ? '#FF6B5E'
                         : activePersona === 'restaurant'
-                          ? '#1E5FA8'
-                          : '#C7A874',
+                          ? '#60A5FA'
+                          : '#F3E8D0',
                   }}
                 >
                   {t.registrationGateway}
                 </span>
               </div>
-              <h3 className={`${getTypographySize(lang, 'heading')} uppercase text-white`}>
+              <h3 className={`${getTypographySize(lang, 'heading')} uppercase text-white break-words`}>
                 {activePersona === 'rider' && t.riderApplicationForm}
                 {activePersona === 'restaurant' && t.restaurantPartnerOnboarding}
                 {activePersona === 'customer' && t.customerEarlyAccessInvite}
@@ -576,7 +626,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
             </div>
 
             {/* Controls: Persona Switcher Tabs + Multilingual Language Switcher */}
-            <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start lg:self-auto min-w-0 max-w-full">
               {/* Persona Switcher Tabs inside panel */}
               <div className="relative flex p-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
                 {(['rider', 'restaurant', 'customer'] as const).map((persona) => {
@@ -593,7 +643,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       type="button"
                       id={`btn-tab-${persona}`}
                       onClick={() => onSelectPersona(persona)}
-                      className="relative px-3.5 sm:px-4 py-1.5 uppercase font-sans text-xs tracking-wider transition-colors z-10 cursor-pointer active:scale-95 select-none"
+                      className="relative px-2.5 sm:px-4 py-1.5 uppercase font-sans text-[11px] sm:text-xs tracking-wider transition-colors z-10 cursor-pointer active:scale-95 select-none"
                     >
                       {isActive && (
                         <motion.div
@@ -636,7 +686,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       type="button"
                       id={`lang-btn-${l}`}
                       onClick={() => setLang(l)}
-                      className={`relative px-3 py-1 font-sans transition-colors cursor-pointer active:scale-95 select-none ${l === 'ur' || l === 'ar' ? 'text-sm' : 'text-xs'
+                      className={`relative px-2 sm:px-3 py-1 font-sans transition-colors cursor-pointer active:scale-95 select-none ${l === 'ur' || l === 'ar' ? 'text-xs' : 'text-[11px] sm:text-xs'
                         }`}
                       title={l === 'en' ? 'English' : l === 'ur' ? 'اردو (Urdu)' : 'العربية (Arabic)'}
                     >
@@ -668,7 +718,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className={`border border-[#373C46] bg-[#2A2E37] p-8 max-w-2xl mx-auto font-sans text-left border-t-2 ${activePersona === 'rider'
+                className={`border border-[#373C46] bg-[#2A2E37] p-5 sm:p-8 max-w-2xl mx-auto font-sans text-left border-t-2 min-w-0 w-full ${activePersona === 'rider'
                   ? 'border-t-red'
                   : activePersona === 'restaurant'
                     ? 'border-t-blue'
@@ -1048,12 +1098,16 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         {currentRegion.flag} {currentRegion.country}
                       </span>
                     </div>
-                    <div className="flex relative">
+                    <div className="flex relative min-w-0 w-full">
+                      <label htmlFor="form-country-code" className="sr-only">
+                        Country dialing code
+                      </label>
                       <select
                         id="form-country-code"
+                        aria-label="Country dialing code"
                         value={formData.countryCode}
                         onChange={(e) => handleCountryCodeChange(e.target.value)}
-                        className="bg-[#262A32] border border-r-0 border-[#373C46] px-3 py-3.5 text-xs text-white font-sans focus:outline-none cursor-pointer"
+                        className="bg-[#262A32] border border-r-0 border-[#373C46] px-2 sm:px-3 py-3.5 text-xs text-white font-sans focus:outline-none cursor-pointer shrink-0 max-w-[110px] sm:max-w-none"
                       >
                         {Object.entries(SUPPORTED_REGIONS).map(([code, reg]) => (
                           <option key={code} value={code}>
@@ -1061,7 +1115,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                           </option>
                         ))}
                       </select>
-                      <div className="relative flex-1">
+                      <div className="relative flex-1 min-w-0">
                         <input
                           id="form-phone"
                           type="tel"
@@ -1069,7 +1123,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                           value={formData.phone}
                           onChange={(e) => handlePhoneChange(e.target.value)}
                           placeholder={currentRegion.placeholder}
-                          className={`w-full bg-[#1A1D23] border px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors font-sans ${fieldErrors.phone
+                          className={`w-full min-w-0 bg-[#1A1D23] border px-3 sm:px-4 py-3.5 pr-10 ${getTypographySize(lang, 'input')} text-white placeholder-[#5B5F66] focus:outline-none transition-colors font-sans ${fieldErrors.phone
                             ? 'border-[#E23A2E]'
                             : formData.phone.length > 0
                               ? phoneValidation.isValid
@@ -1103,7 +1157,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         </div>
                       )
                     ) : (
-                      <div className="text-xs font-sans text-[#5B5F66] pt-0.5">
+                      <div className="text-xs font-sans text-[#A0A4AB] pt-0.5">
                         Format: {currentRegion.helper}
                       </div>
                     )}
@@ -1150,7 +1204,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                       >
                         <label
                           htmlFor="form-custom-city"
-                          className="block font-sans text-xs uppercase tracking-wider text-tan font-bold"
+                          className="block font-sans text-xs uppercase tracking-wider text-[#F3E8D0] font-bold"
                         >
                           Please Specify Your City / Area *
                         </label>
@@ -1271,11 +1325,11 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
 
                 {/* Submit Action */}
                 <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-[#373C46]">
-                  <div className="font-sans text-xs text-[#8C9099]">
+                  <div className="font-sans text-xs text-[#A0A4AB]">
                     {activePersona === 'customer' ? (
                       <>
-                        <span className="uppercase text-[#9A7A4A] font-bold">VIP: </span>
-                        <span className="text-[#C7A874] font-bold uppercase">50% off your first 3 orders</span>
+                        <span className="uppercase text-[#E5D3B3] font-bold">VIP: </span>
+                        <span className="text-[#F3E8D0] font-bold uppercase">50% off your first 3 orders</span>
                       </>
                     ) : (
                       <>
@@ -1283,7 +1337,7 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                         <span
                           className="font-bold uppercase"
                           style={{
-                            color: activePersona === 'restaurant' ? '#1E5FA8' : '#E23A2E',
+                            color: activePersona === 'restaurant' ? '#60A5FA' : '#FF6B5E',
                           }}
                         >
                           {t.under24Hours}
@@ -1296,11 +1350,11 @@ export const PartnerSection: React.FC<PartnerSectionProps> = ({
                     type="submit"
                     id="btn-submit-registration"
                     disabled={submitting}
-                    className={`px-8 py-4 ${getTypographySize(lang, 'badge')} uppercase font-bold border transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] select-none ${activePersona === 'customer'
+                    className={`px-4 sm:px-8 py-3.5 sm:py-4 w-full sm:w-auto ${getTypographySize(lang, 'badge')} uppercase font-bold border transition-all duration-150 flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] select-none ${activePersona === 'customer'
                       ? 'bg-tan text-ink border-tan hover:bg-white hover:text-ink hover:border-white'
                       : activePersona === 'restaurant'
                         ? 'bg-blue text-white border-blue hover:bg-white hover:text-blue hover:border-white'
-                        : 'bg-red text-white border-red hover:bg-white hover:text-red hover:border-white'
+                        : 'bg-[#C92F24] text-white border-[#C92F24] hover:bg-white hover:text-[#C92F24] hover:border-white'
                       }`}
                   >
                     {submitting ? (

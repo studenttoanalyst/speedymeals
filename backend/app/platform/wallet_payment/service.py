@@ -135,6 +135,14 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Kit deposit and handover must be completed before going online.",
             )
+        if float(rider.wallet_balance) < MIN_WALLET_BALANCE_TO_GO_ONLINE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Minimum wallet balance of Rs. {MIN_WALLET_BALANCE_TO_GO_ONLINE} required to go online. "
+                    f"Current balance: Rs. {rider.wallet_balance}. Please recharge."
+                ),
+            )
         if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -635,6 +643,8 @@ def get_rider_wallet_profile(db: Session, rider_id: uuid.UUID) -> dict:
         "has_cnic_photo": rider.cnic_photo_url is not None,
         "has_license_photo": rider.license_photo_url is not None,
         "has_vehicle_photo": rider.vehicle_photo_url is not None,
+        "kit_completed": bool(rider.kit_completed),
+        "kit_deposit_paid": bool(rider.kit_deposit_paid),
     }
 
 

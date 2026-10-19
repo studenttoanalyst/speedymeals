@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Timer, CheckCircle, WarningCircle, ShieldCheck, Lightning } from '@phosphor-icons/react';
 
 interface SlaPercentile {

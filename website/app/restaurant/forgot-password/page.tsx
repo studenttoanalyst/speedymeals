@@ -39,7 +39,7 @@ export default function RestaurantForgotPasswordPage() {
           className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium"
         >
           <ArrowLeft size={13} weight="bold" />
-          <span>Back to Restaurant Login</span>
+          <span>Back to Merchant Login</span>
         </Link>
       </div>
 
@@ -50,7 +50,7 @@ export default function RestaurantForgotPasswordPage() {
               SPEEDY<span className="text-rose-600">MEALS</span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Reset Restaurant Password
+              Reset Merchant Password
             </p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -89,12 +89,12 @@ export default function RestaurantForgotPasswordPage() {
         {!success && (
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <p className="text-slate-600 text-xs leading-relaxed mb-4">
-              Enter your registered restaurant email address. We will generate a password reset link for you.
+              Enter your registered merchant email address. We will generate a password reset link for you.
             </p>
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Restaurant Email
+                Merchant Email
               </label>
               <div className="relative">
                 <EnvelopeSimple size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -103,7 +103,7 @@ export default function RestaurantForgotPasswordPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="partner@restaurant.com"
+                  placeholder="partner@speedymeals.com"
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-medium"
                 />
               </div>

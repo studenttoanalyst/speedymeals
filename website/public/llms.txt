@@ -1,0 +1,18 @@
+# SpeedyMeals
+
+SpeedyMeals is a hyper-efficient food delivery and merchant logistics platform operating in Pakistan and Saudi Arabia. It connects customers, beloved local restaurants and kitchens, and delivery riders through transparent economics, direct dispatch, and rapid SLA delivery.
+
+## Services & Core Ecosystem
+
+- **For Customers**: Real menu prices directly from authentic local kitchens, fast tracking, and up to 50% discount on first orders.
+- **For Delivery Riders**: Transparent per-delivery compensation, flexible schedules, direct support, and weekly payouts.
+- **For Merchants & Restaurants**: Low commission rates, integrated merchant portal, inventory management, and fast onboarding across South Asia and the Middle East.
+
+## Primary Links
+
+- [Home](https://speedymealservices.com/)
+- [Merchant Portal](https://speedymealservices.com/restaurant)
+- [Admin Console](https://speedymealservices.com/admin)
+- [Terms of Service](https://speedymealservices.com/terms)
+- [Privacy Policy](https://speedymealservices.com/privacy)
+- [Company Profile](https://speedymealservices.com/company)

@@ -15,36 +15,65 @@ import {
   Users,
 } from '@phosphor-icons/react';
 import { PersonaType } from '@/types/home';
+import { scrollToSection } from '@/lib/scroll';
 
 interface ServicesSectionProps {
   onSelectPersona?: (persona: PersonaType) => void;
 }
 
+interface StoryImageFrameProps {
+  src: string;
+  alt: string;
+  priority?: boolean;
+}
+
+const StoryImageFrame: React.FC<StoryImageFrameProps> = ({ src, alt, priority = false }) => {
+  return (
+    <div className="relative aspect-[4/3] w-full group select-none">
+      <div
+        tabIndex={0}
+        className="relative w-full h-full rounded-3xl transition-all duration-350 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-[1.07] [@media(hover:hover)_and_(pointer:fine)]:hover:z-20 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_24px_54px_-12px_rgba(0,0,0,0.22)] motion-reduce:hover:scale-100 motion-reduce:hover:shadow-lg focus-visible:scale-[1.05] focus-visible:z-20 outline-none"
+      >
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          priority={false}
+          quality={65}
+          sizes="(min-width: 1024px) 568px, 100vw"
+          className="object-cover rounded-3xl shadow-sm transition-transform duration-350 ease-out"
+        />
+        {/* Glassy edge rim layer: masked to outer ~16px only, fades in on hover */}
+        <div
+          className="pointer-events-none absolute inset-0 rounded-3xl border border-white/50 opacity-0 group-hover:opacity-100 transition-opacity duration-350 ease-out shadow-[inset_0_0_28px_rgba(255,255,255,0.45)] backdrop-blur-sm [mask-image:radial-gradient(ellipse_at_center,transparent_70%,black_92%)]"
+          aria-hidden="true"
+        />
+      </div>
+    </div>
+  );
+};
+
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPersona }) => {
   const handleAction = (persona: PersonaType) => {
     if (onSelectPersona) {
       onSelectPersona(persona);
-    } else {
-      const el = document.getElementById('partner');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
     }
+    scrollToSection('partner', { gap: 16 });
   };
 
   return (
     <section
       id="services"
-      className="relative z-10 py-20 sm:py-28 bg-[#FFFFFF] overflow-hidden"
+      className="relative z-10 py-20 sm:py-28 bg-[#FFFFFF] overflow-x-clip"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header: Clean, Human, DoorDash Style */}
-        <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
+        <div data-scroll-anchor className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
           <h2 className="font-display text-3xl sm:text-5xl tracking-[-0.03em] text-ink uppercase leading-tight mb-4 select-none">
-            Everything you crave, <span className="text-red">delivered.</span>
+            Everything you crave, <span className="text-red-accessible">delivered.</span>
           </h2>
           <p className="text-base sm:text-lg text-ink-soft leading-relaxed font-sans">
-            Connecting hungry diners, passionate kitchens, and dedicated riders on one fair, reliable platform.
+            Connecting hungry diners, passionate kitchens, and dedicated riders on one fair &amp; reliable platform.
           </p>
         </div>
 
@@ -55,7 +84,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Column: Value Proposition */}
             <div className="lg:col-span-6 flex flex-col justify-center">
-              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red mb-2">
+              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red-accessible mb-2">
                 For Food Lovers
               </span>
               <h3 className="font-heading font-extrabold text-2xl sm:text-4xl text-ink tracking-tight mb-4 leading-tight">
@@ -68,7 +97,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('customer')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-[#C92F24] hover:bg-[#A8241B] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Find food near you</span>
                   <ArrowRight size={15} weight="bold" />
@@ -78,16 +107,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
 
             {/* Right Column: Visual Imagery */}
             <div className="lg:col-span-6">
-              <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
-                <Image
-                  src="/assets/customer_food_spread.webp"
-                  alt="Delicious meal spread delivered fresh"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  priority
-                />
-              </div>
+              <StoryImageFrame
+                src="/assets/customer_food_spread.webp"
+                alt="Delicious meal spread delivered fresh"
+              />
             </div>
           </div>
 
@@ -95,16 +118,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Column: Visual Imagery */}
             <div className="lg:col-span-6 order-2 lg:order-1">
-              <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
-                <Image
-                  src="/assets/mascot_app.webp"
-                  alt="SpeedyMeals mascot and mobile application"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                />
-              </div>
+              <StoryImageFrame
+                src="/assets/mascot_app.webp"
+                alt="SpeedyMeals mascot and mobile application"
+              />
             </div>
 
             {/* Right Column: Value Proposition */}
@@ -135,7 +152,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
             {/* Left Column: Value Proposition */}
             <div className="lg:col-span-6 flex flex-col justify-center">
-              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red mb-2">
+              <span className="font-sans text-xs font-bold uppercase tracking-wider text-red-accessible mb-2">
                 For Delivery Riders
               </span>
               <h3 className="font-heading font-extrabold text-2xl sm:text-4xl text-ink tracking-tight mb-4 leading-tight">
@@ -148,7 +165,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('rider')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red hover:bg-[#C92F24] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-[#C92F24] hover:bg-[#A8241B] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Deliver with us</span>
                   <ArrowRight size={15} weight="bold" />
@@ -158,16 +175,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
 
             {/* Right Column: Visual Imagery */}
             <div className="lg:col-span-6">
-              <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden group">
-                <Image
-                  src="/assets/rider_delivery.webp"
-                  alt="SpeedyMeals courier delivering an order"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                />
-              </div>
+              <StoryImageFrame
+                src="/assets/rider_delivery.webp"
+                alt="SpeedyMeals courier delivering an order"
+              />
             </div>
           </div>
 
@@ -201,7 +212,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 Ride-hailing for passengers - safe, transparent fares for everyday city travel.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red border border-red/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
@@ -219,7 +230,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 Same-day parcel delivery for individuals and small businesses within the city.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red border border-red/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
@@ -237,7 +248,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 All services under one roof - a physical lifestyle mall with merchant shops, a food court, and Speedy express counters.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red border border-red/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>

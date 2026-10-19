@@ -53,7 +53,13 @@ export interface RestaurantOrderDetail {
   food_subtotal: number;
   delivery_distance_km: number;
   delivery_fee: number;
+  platform_fee?: number;
+  gst_rate?: number;
+  gst_amount?: number;
+  prices_include_gst?: boolean;
+  net_subtotal?: number | null;
   total_amount: number;
+  commission_rate?: number;
   commission_amount: number;
   restaurant_payable: number;
   rider_earning: number;
@@ -63,6 +69,7 @@ export interface RestaurantOrderDetail {
   customer_name: string;
   delivery_address?: DeliveryAddress | null;
   items: OrderItem[];
+  prep_time_minutes?: number;
 }
 
 export interface OrderStatusUpdatePayload {

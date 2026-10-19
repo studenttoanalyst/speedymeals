@@ -18,6 +18,7 @@ import { Topbar } from '@/components/dashboard/Topbar';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import { getRestaurantOrder, updateRestaurantOrderStatus } from '@/lib/api/restaurant';
 import { RestaurantOrderDetail } from '@/types/restaurant';
+import { isInKitchen, isNewOrder } from '@/lib/orders/status';
 
 export default function RestaurantOrderDetailPage({
   params,
@@ -160,12 +161,20 @@ export default function RestaurantOrderDetailPage({
                   <span>Food Merchandise Total</span>
                   <span className="font-mono">{formatPKR(order.food_subtotal)}</span>
                 </div>
+                {(order.gst_amount ?? 0) > 0 && (
+                  <div className="flex items-center justify-between text-slate-600">
+                    <span>
+                      GST ({order.gst_rate}%) {order.prices_include_gst ? '(included in prices)' : '(added to bill)'}
+                    </span>
+                    <span className="font-mono">{formatPKR(order.gst_amount ?? 0)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-rose-600">
-                  <span>Platform Commission (10%)</span>
+                  <span>Platform Commission ({order.commission_rate ?? (order.net_subtotal && order.commission_amount ? Math.round((order.commission_amount / order.net_subtotal) * 100) : (order.food_subtotal && order.commission_amount ? Math.round((order.commission_amount / order.food_subtotal) * 100) : 10))}%)</span>
                   <span className="font-mono">−{formatPKR(order.commission_amount)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-900 font-bold pt-3 border-t border-slate-200 text-sm">
-                  <span>Net Restaurant Share</span>
+                  <span>Net Merchant Share</span>
                   <span className="font-mono text-emerald-700 text-base">
                     {formatPKR(order.restaurant_payable)}
                   </span>
@@ -173,14 +182,14 @@ export default function RestaurantOrderDetailPage({
               </div>
             </div>
 
-            {/* Courier Dispatch Card */}
+            {/* Rider Dispatch Card */}
             <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                   <Bicycle size={20} weight="bold" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Assigned Courier: Tariq Mahmood</div>
+                  <div className="text-xs font-bold text-slate-900">Assigned Rider: Tariq Mahmood</div>
                   <div className="text-[11px] text-slate-400 font-mono">Motorcycle (KHI-7890) · Proximity: 1.2 km</div>
                 </div>
               </div>
@@ -191,19 +200,19 @@ export default function RestaurantOrderDetailPage({
 
             {/* Action Bar */}
             <div className="flex items-center justify-end gap-3 pt-2">
-              {order.status === 'Placed' && (
+              {isNewOrder(order.status) && (
                 <button
                   onClick={() => handleAdvanceStatus('Preparing')}
-                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs"
+                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs cursor-pointer"
                 >
-                  Accept Order & Start Prep (20m)
+                  Accept Order & Start Prep ({order.prep_time_minutes || 20}m)
                 </button>
               )}
 
-              {['Accepted', 'Preparing'].includes(order.status) && (
+              {isInKitchen(order.status) && (
                 <button
                   onClick={() => handleAdvanceStatus('Ready for Pickup')}
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <Check size={16} weight="bold" />
                   <span>Mark Ready for Pickup</span>

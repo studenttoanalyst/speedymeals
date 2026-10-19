@@ -36,6 +36,7 @@ from app.modules.food_delivery.schemas import (
     MenuItemUpdateSchema,
     OrderHistoryResponseSchema,
     OrderRiderLocationResponseSchema,
+    OrderRejectSchema,
     OrderStatusUpdateSchema,
     OrderTrackingResponseSchema,
     RatingCreateSchema,
@@ -211,7 +212,12 @@ def place_my_order(
         return json.loads(cached)
 
     result = service.place_order(
-        db, current_user.id, restaurant_id, payload.address_id, payload.payment_method
+        db,
+        current_user.id,
+        restaurant_id,
+        payload.address_id,
+        payload.payment_method,
+        payload.expected_total,
     )
     redis_client.setex(
         cache_key, IDEMPOTENCY_TTL_SECONDS, json.dumps(result, default=str)
@@ -348,6 +354,22 @@ def update_my_order_status(
     """
     rest_id = _resolve_restaurant_id(db, current_user.id)
     return service.update_order_status(db, rest_id, order_id, payload.status)
+
+
+@orders_router.post("/{order_id}/reject", response_model=RestaurantOrderDetailResponseSchema)
+def reject_my_order(
+    order_id: uuid.UUID,
+    payload: OrderRejectSchema,
+    current_user: CurrentUser = Depends(require_restaurant),
+    db: Session = Depends(get_db),
+):
+    """
+    Decline a new order (status "Accepted", before cooking starts). The order
+    becomes "Cancelled" with the stated reason and the customer is notified.
+    Any later status returns 400.
+    """
+    rest_id = _resolve_restaurant_id(db, current_user.id)
+    return service.reject_order_by_restaurant(db, rest_id, order_id, payload.reason)
 
 
 @customer_orders_router.get("/{order_id}/track", response_model=OrderTrackingResponseSchema)
@@ -547,9 +569,11 @@ def get_my_restaurant_profile(
         cover_photo_url=restaurant.cover_photo_url,
         opening_time=str(restaurant.opening_time) if restaurant.opening_time else "11:00",
         closing_time=str(restaurant.closing_time) if restaurant.closing_time else "23:30",
-        prep_time_minutes=20,
+        prep_time_minutes=int(restaurant.prep_time_minutes or 20),
         currency=restaurant.currency or "PKR",
         status=restaurant.status or "active",
+        gst_rate=float(restaurant.gst_rate or 0),
+        prices_include_gst=bool(restaurant.prices_include_gst),
     )
 
 
@@ -588,6 +612,14 @@ def update_my_restaurant_profile(
             restaurant.closing_time = datetime.time(parts[0], parts[1])
         except Exception:
             pass
+    if payload.prep_time_minutes is not None:
+        restaurant.prep_time_minutes = payload.prep_time_minutes
+
+    # GST setting: applies to NEW orders only (orders freeze their snapshot).
+    if payload.gst_rate is not None:
+        restaurant.gst_rate = payload.gst_rate
+    if payload.prices_include_gst is not None:
+        restaurant.prices_include_gst = payload.prices_include_gst
 
     db.commit()
     db.refresh(restaurant)
@@ -606,9 +638,11 @@ def update_my_restaurant_profile(
         cover_photo_url=restaurant.cover_photo_url,
         opening_time=str(restaurant.opening_time) if restaurant.opening_time else "11:00",
         closing_time=str(restaurant.closing_time) if restaurant.closing_time else "23:30",
-        prep_time_minutes=20,
+        prep_time_minutes=int(restaurant.prep_time_minutes or 20),
         currency=restaurant.currency or "PKR",
         status=restaurant.status or "active",
+        gst_rate=float(restaurant.gst_rate or 0),
+        prices_include_gst=bool(restaurant.prices_include_gst),
     )
 
 

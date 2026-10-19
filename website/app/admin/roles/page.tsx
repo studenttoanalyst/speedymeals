@@ -41,6 +41,10 @@ export default function AdminRolesPage() {
   const [formDescription, setFormDescription] = useState('');
   const [formIcon, setFormIcon] = useState('ShieldCheck');
   const [selectedPermissionKeys, setSelectedPermissionKeys] = useState<string[]>([]);
+  const selectedPermissionSet = useMemo(
+    () => new Set(selectedPermissionKeys),
+    [selectedPermissionKeys]
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -85,8 +89,20 @@ export default function AdminRolesPage() {
     return map;
   }, [permissions]);
 
+  const DOMAIN_ORDER = [
+    'restaurants',
+    'riders',
+    'orders',
+    'finance',
+    'customers',
+    'marketing',
+    'pricing',
+    'analytics',
+    'admins',
+  ];
+
   const domainLabels: Record<string, string> = {
-    restaurants: 'Restaurants & Food Partners',
+    restaurants: 'Merchants & Food Partners',
     riders: 'Riders & Deliveries',
     orders: 'Customer Orders & Tracking',
     finance: 'Money, Payouts & Cash Collections',
@@ -123,15 +139,21 @@ export default function AdminRolesPage() {
   };
 
   const handleTogglePermission = (key: string) => {
-    setSelectedPermissionKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+    setSelectedPermissionKeys((prev) => {
+      const s = new Set(prev);
+      if (s.has(key)) {
+        s.delete(key);
+      } else {
+        s.add(key);
+      }
+      return Array.from(s);
+    });
   };
 
   const handleToggleDomainAll = (domain: string) => {
     const domainPerms = permissionsByDomain[domain] || [];
     const domainKeys = domainPerms.map((p) => p.key);
-    const allSelected = domainKeys.every((k) => selectedPermissionKeys.includes(k));
+    const allSelected = domainKeys.every((k) => selectedPermissionSet.has(k));
 
     if (allSelected) {
       setSelectedPermissionKeys((prev) =>
@@ -466,7 +488,13 @@ export default function AdminRolesPage() {
 
                 {(() => {
                   const rolePermKeys = new Set(selectedRole.permissions.map((p) => p.key));
-                  const domainEntries = Object.entries(permissionsByDomain);
+                  const domainEntries = Object.entries(permissionsByDomain).sort(
+                    ([a], [b]) => {
+                      const idxA = DOMAIN_ORDER.indexOf(a);
+                      const idxB = DOMAIN_ORDER.indexOf(b);
+                      return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                    }
+                  );
 
                   const renderedDomains = domainEntries
                     .map(([domain, domainPerms]) => {
@@ -606,8 +634,8 @@ export default function AdminRolesPage() {
 
       {/* Create / Edit Role Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
+          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] isolate [transform:translateZ(0)]">
             <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50/75">
               <div>
                 <h3 className="font-bold text-lg text-slate-900">
@@ -633,7 +661,7 @@ export default function AdminRolesPage() {
             )}
 
             <form onSubmit={handleSaveRole} className="flex-1 flex flex-col overflow-hidden">
-              <div className="p-6 space-y-6 overflow-y-auto flex-1 text-xs">
+              <div className="p-6 space-y-6 overflow-y-auto flex-1 text-xs overscroll-contain [contain:content] [will-change:scroll-position] scroll-smooth">
                 {/* Basic Meta */}
                 <div>
                   <label className="block font-bold text-slate-800 text-xs mb-1.5">
@@ -661,7 +689,7 @@ export default function AdminRolesPage() {
                   </div>
 
                   {/* Symbol Grid */}
-                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl max-h-48 overflow-y-auto">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl max-h-48 overflow-y-auto overscroll-contain [contain:content]">
                     {ROLE_SYMBOLS.map((sym) => {
                       const IconComp = sym.Icon;
                       const isSelected = formIcon === sym.id;
@@ -671,7 +699,7 @@ export default function AdminRolesPage() {
                           type="button"
                           onClick={() => setFormIcon(sym.id)}
                           title={`${sym.label} (${sym.category})`}
-                          className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
+                          className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 transition-colors duration-100 cursor-pointer ${
                             isSelected
                               ? 'bg-slate-900 text-white border-slate-900 shadow-sm scale-105 ring-2 ring-rose-500/40'
                               : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
@@ -733,14 +761,23 @@ export default function AdminRolesPage() {
                   </div>
 
                   <div className="space-y-5">
-                    {Object.entries(permissionsByDomain).map(([domain, domainPerms]) => {
+                    {Object.entries(permissionsByDomain)
+                      .sort(([a], [b]) => {
+                        const idxA = DOMAIN_ORDER.indexOf(a);
+                        const idxB = DOMAIN_ORDER.indexOf(b);
+                        return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                      })
+                      .map(([domain, domainPerms]) => {
                       const domainKeys = domainPerms.map((p) => p.key);
                       const allSelected = domainKeys.every((k) =>
-                        selectedPermissionKeys.includes(k)
+                        selectedPermissionSet.has(k)
                       );
 
                       return (
-                        <div key={domain} className="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div
+                          key={domain}
+                          className="border border-slate-200 rounded-xl p-4 space-y-3 bg-white [content-visibility:auto] [contain-intrinsic-size:220px]"
+                        >
                           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                             <span className="font-bold text-slate-900 text-xs uppercase tracking-wider">
                               {domainLabels[domain] || domain}
@@ -756,17 +793,17 @@ export default function AdminRolesPage() {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                             {domainPerms.map((perm) => {
-                              const isChecked = selectedPermissionKeys.includes(perm.key);
+                              const isChecked = selectedPermissionSet.has(perm.key);
                               const isCritical = perm.risk_level === 'critical';
                               const isHigh = perm.risk_level === 'high';
 
                               return (
                                 <label
                                   key={perm.key}
-                                  className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
+                                  className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer select-none transition-colors duration-100 ${
                                     isChecked
-                                      ? 'border-emerald-300 bg-emerald-50/40 shadow-2xs text-slate-950 border-l-4 border-l-emerald-500'
-                                      : 'border-slate-200/80 bg-slate-50/30 hover:bg-white text-slate-600 opacity-60 hover:opacity-95'
+                                      ? 'border-emerald-300 bg-emerald-50/40 text-slate-950 border-l-4 border-l-emerald-500'
+                                      : 'border-slate-200 bg-slate-50/30 hover:bg-white text-slate-600 opacity-70 hover:opacity-100'
                                   }`}
                                 >
                                   <input

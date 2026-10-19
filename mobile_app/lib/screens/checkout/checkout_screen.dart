@@ -107,6 +107,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         request: PlaceOrderRequest(
           addressId: _address.id,
           paymentMethod: _paymentMethod,
+          expectedTotal: _preview?.total,
         ),
       );
 

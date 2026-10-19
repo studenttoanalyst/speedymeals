@@ -81,10 +81,12 @@ def test_set_online_blocks_without_kit(db_session, rider):
     assert "Kit" in exc_info.value.detail
 
 
-def test_set_online_allows_zero_wallet_balance(db_session):
+def test_set_online_blocks_below_min(db_session):
     rider = _make_active_rider(db_session, wallet=0)
-    updated = service.set_online_status(db_session, rider.id, True)
-    assert updated.is_online is True
+    with pytest.raises(HTTPException) as exc_info:
+        service.set_online_status(db_session, rider.id, True)
+    assert exc_info.value.status_code == 400
+    assert "wallet balance" in exc_info.value.detail.lower()
 
 
 def test_set_online_allows_above_min(db_session):
@@ -285,6 +287,8 @@ def test_profile_route_returns_200_for_rider(wallet_read_client, db_session, rid
         "has_cnic_photo": False,
         "has_license_photo": False,
         "has_vehicle_photo": False,
+        "kit_completed": False,
+        "kit_deposit_paid": False,
     }
 
 

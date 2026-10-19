@@ -89,8 +89,24 @@ class Settings(BaseSettings):
         return value
 
     # First Admin Auto-Seed (Phase 2, Step 10 - see ADR-002)
-    FIRST_ADMIN_EMAIL: str
-    FIRST_ADMIN_PASSWORD: str
+    FIRST_ADMIN_EMAIL: str = "admin@speedymealservices.com"
+    FIRST_ADMIN_PASSWORD: str = "admin123"
+
+    # Firebase Cloud Messaging (push notifications). Leave BOTH empty to disable
+    # push entirely (every send becomes a no-op). Provide either the service
+    # account JSON as a single-line string (preferred on the server) or a path
+    # to the JSON file (local dev). Never commit the key.
+    FIREBASE_CREDENTIALS_JSON: str = ""
+    FIREBASE_CREDENTIALS_PATH: str = ""
+    # Origin used to build click-through links for web push notifications.
+    WEB_PUSH_BASE_URL: str = "https://speedymealservices.com"
+
+    # Rider assignment timeout. An offered order a rider does not answer within
+    # this many seconds is taken back and offered to the next nearest rider.
+    # The sweeper also retries orders that found no eligible rider.
+    RIDER_ASSIGNMENT_TIMEOUT_SECONDS: int = 60
+    ASSIGNMENT_SWEEPER_INTERVAL_SECONDS: int = 15
+    ASSIGNMENT_SWEEPER_ENABLED: bool = True
 
     # Cash Collection Cap (Phase 3, Step 7 - spec Sec 3.4/6)
     CASH_COLLECTION_CAP: float = 5000

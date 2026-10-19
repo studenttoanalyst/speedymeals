@@ -44,7 +44,7 @@ export const mockRestaurants: RestaurantAdmin[] = [
   {
     id: 'b1f4c728-1122-48ea-8b43-982c7f0a1001',
     name: 'Karachi Biryani House',
-    email: 'contact@karachibiryani.pk',
+    email: 'karachibiryani@speedymeals.com',
     phone_number: '+923001112233',
     status: 'active',
     commission_rate: 10.0,
@@ -57,7 +57,7 @@ export const mockRestaurants: RestaurantAdmin[] = [
   {
     id: 'b1f4c728-1122-48ea-8b43-982c7f0a1002',
     name: 'Burger Lab Clifton',
-    email: 'clifton@burgerlab.pk',
+    email: 'burgerlab@speedymeals.com',
     phone_number: '+923004445566',
     status: 'active',
     commission_rate: 10.0,
@@ -70,7 +70,7 @@ export const mockRestaurants: RestaurantAdmin[] = [
   {
     id: 'b1f4c728-1122-48ea-8b43-982c7f0a1003',
     name: 'Ginsoy Extreme Chinese',
-    email: 'orders@ginsoy.pk',
+    email: 'ginsoy@speedymeals.com',
     phone_number: '+923219998877',
     status: 'pending',
     commission_rate: 10.0,
@@ -83,7 +83,7 @@ export const mockRestaurants: RestaurantAdmin[] = [
   {
     id: 'b1f4c728-1122-48ea-8b43-982c7f0a1004',
     name: 'Pizza Max Gulshan',
-    email: 'gulshan@pizzamax.com.pk',
+    email: 'pizzamax@speedymeals.com',
     phone_number: '+923337776655',
     status: 'active',
     commission_rate: 10.0,

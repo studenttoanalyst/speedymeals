@@ -108,7 +108,7 @@ export default function RestaurantReportsPage() {
     },
     {
       key: 'net_earnings',
-      title: 'Net Restaurant Payable',
+      title: 'Net Merchant Payable',
       align: 'right',
       sortable: true,
       render: (r) => (
@@ -141,7 +141,7 @@ export default function RestaurantReportsPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs font-bold font-mono tracking-widest text-rose-600 uppercase">
-                SpeedyMeals Restaurant Partner Portal
+                SpeedyMeals Merchant Partner Portal
               </div>
               <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
                 Sales Analytics & Revenue Performance

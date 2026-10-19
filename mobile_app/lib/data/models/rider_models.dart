@@ -31,6 +31,10 @@ class RiderProfile {
   final bool hasLicensePhoto;
   final bool hasVehiclePhoto;
 
+  // Kit deposit & accessories handover
+  final bool kitCompleted;
+  final bool kitDepositPaid;
+
   const RiderProfile({
     required this.id,
     required this.name,
@@ -47,6 +51,8 @@ class RiderProfile {
     this.hasCnicPhoto = false,
     this.hasLicensePhoto = false,
     this.hasVehiclePhoto = false,
+    this.kitCompleted = false,
+    this.kitDepositPaid = false,
   });
 
   factory RiderProfile.fromJson(Map<String, dynamic> json) => RiderProfile(
@@ -65,11 +71,19 @@ class RiderProfile {
         hasCnicPhoto: Json.asBool(json['has_cnic_photo']),
         hasLicensePhoto: Json.asBool(json['has_license_photo']),
         hasVehiclePhoto: Json.asBool(json['has_vehicle_photo']),
+        kitCompleted: Json.asBool(json['kit_completed']),
+        kitDepositPaid: Json.asBool(json['kit_deposit_paid']),
       );
 
   /// Copy with a changed online/wallet state (used after `PATCH /wallet/status`
   /// so the UI reflects the server's answer without a second round trip).
-  RiderProfile copyWith({bool? isOnline, double? walletBalance, double? pendingCashOwed}) =>
+  RiderProfile copyWith({
+    bool? isOnline,
+    double? walletBalance,
+    double? pendingCashOwed,
+    bool? kitCompleted,
+    bool? kitDepositPaid,
+  }) =>
       RiderProfile(
         id: id,
         name: name,
@@ -86,6 +100,8 @@ class RiderProfile {
         hasCnicPhoto: hasCnicPhoto,
         hasLicensePhoto: hasLicensePhoto,
         hasVehiclePhoto: hasVehiclePhoto,
+        kitCompleted: kitCompleted ?? this.kitCompleted,
+        kitDepositPaid: kitDepositPaid ?? this.kitDepositPaid,
       );
 
   bool get isApproved => approvalStatus == 'approved';
@@ -94,7 +110,7 @@ class RiderProfile {
 
   /// Whether the rider may take delivery work. Mirrors the server-side guard
   /// added to the assignment endpoints — the backend remains the real boundary.
-  bool get canWork => isApproved && isActive;
+  bool get canWork => isApproved && isActive && kitCompleted;
 
   /// True when every required document is on file.
   bool get hasAllDocuments =>

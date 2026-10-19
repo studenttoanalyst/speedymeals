@@ -136,7 +136,7 @@ export default function AdminOrdersPage() {
     },
     {
       key: 'rider_name',
-      title: 'Courier',
+      title: 'Rider',
       render: (o) => (
         <div className="flex items-center gap-1.5 text-xs text-slate-600">
           <Bicycle size={13} className="text-slate-400" />
@@ -212,7 +212,7 @@ export default function AdminOrdersPage() {
           isLoading={isLoading}
           enableCityFilter
           onRowClick={handleRowClick}
-          searchPlaceholder="Search order ID, restaurant, or courier..."
+          searchPlaceholder="Search order ID, restaurant, or rider..."
           searchFilter={(o, q) =>
             o.id.toLowerCase().includes(q.toLowerCase()) ||
             o.restaurant_name.toLowerCase().includes(q.toLowerCase()) ||
@@ -276,7 +276,7 @@ export default function AdminOrdersPage() {
                   </div>
                   <div className="flex items-center gap-2 text-slate-600">
                     <Bicycle size={14} className="text-slate-400" />
-                    <span>Courier: {selectedOrder.rider_name || 'Unassigned'}</span>
+                    <span>Rider: {selectedOrder.rider_name || 'Unassigned'}</span>
                   </div>
                 </div>
               </div>
@@ -299,7 +299,7 @@ export default function AdminOrdersPage() {
                   <span className="font-mono">{formatPKR(selectedOrder.restaurant_payable)}</span>
                 </div>
                 <div className="flex items-center justify-between text-blue-700 font-semibold">
-                  <span>Courier Retained Fee (90%)</span>
+                  <span>Rider Retained Fee (90%)</span>
                   <span className="font-mono">+{formatPKR(selectedOrder.rider_earning)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
@@ -330,7 +330,7 @@ export default function AdminOrdersPage() {
                   onClick={() => setReassignModalOpen(true)}
                   className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs cursor-pointer"
                 >
-                  Reassign Courier
+                  Reassign Rider
                 </button>
                 <button
                   type="button"
@@ -349,17 +349,17 @@ export default function AdminOrdersPage() {
       {reassignModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
-            <h3 className="text-base font-bold text-slate-900">Reassign Order Courier</h3>
+            <h3 className="text-base font-bold text-slate-900">Reassign Order Rider</h3>
             <form onSubmit={handleReassignRider} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Select Available Courier</label>
+                <label className="font-semibold text-slate-700">Select Available Rider</label>
                 <select
                   required
                   value={selectedRiderId}
                   onChange={(e) => setSelectedRiderId(e.target.value)}
                   className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800"
                 >
-                  <option value="">Select courier...</option>
+                  <option value="">Select rider...</option>
                   {availableRiders.map((r) => (
                     <option key={r.id} value={r.id}>
                       {r.name} ({r.vehicle_type || 'Motorcycle'}) - {r.phone_number}

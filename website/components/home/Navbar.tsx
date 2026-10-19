@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   List,
   X,
@@ -19,6 +20,7 @@ import {
 import { PersonaType } from '@/types/home';
 import { getStoredRole, getStoredUser, logout } from '@/lib/auth';
 import type { UserRole, AuthSessionUser } from '@/types/auth';
+import { scrollToSection } from '@/lib/scroll';
 
 interface NavbarProps {
   onSelectPersona?: (persona: PersonaType) => void;
@@ -46,41 +48,52 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
     };
     document.addEventListener('mousedown', handleClickOutside);
 
-    // Snap-not-fade behavior on scroll, throttled with requestAnimationFrame
-    let rafId: number | null = null;
+    // Scroll handler without forced layout reads
     const handleScroll = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        const scrollPos = window.scrollY;
-        setIsScrolled(scrollPos > 40);
-
-        // Section spy is desktop-only since the nav pill buttons are hidden on mobile (hidden md:flex)
-        if (window.innerWidth >= 768) {
-          const servicesEl = document.getElementById('services');
-          const partnerEl = document.getElementById('partner');
-
-          if (partnerEl && partnerEl.getBoundingClientRect().top <= 160) {
-            setActiveSection('partner');
-          } else if (servicesEl && servicesEl.getBoundingClientRect().top <= 160) {
-            setActiveSection('services');
-          } else {
-            setActiveSection('overview');
-          }
-        }
-      });
+      setIsScrolled(window.scrollY > 40);
     };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    // Section spy using IntersectionObserver to eliminate getBoundingClientRect reflow on every scroll frame
+    let observer: IntersectionObserver | null = null;
+    if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+      const sectionIds = ['overview', 'services', 'partner'];
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(entry.target.id as 'overview' | 'services' | 'partner');
+            }
+          });
+        },
+        {
+          rootMargin: '-88px 0px -50% 0px',
+          threshold: [0, 0.15],
+        }
+      );
+
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer?.observe(el);
+      });
+    }
 
     // Clean #overview from address bar immediately if present
     if (typeof window !== 'undefined' && window.location.hash === '#overview') {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    } else if (typeof window !== 'undefined' && window.location.hash) {
+      // Handle cross-page / initial hash navigation gracefully
+      const hashId = window.location.hash.replace('#', '');
+      setTimeout(() => {
+        scrollToSection(hashId, { gap: 16 });
+      }, 150);
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
     return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', handleScroll);
+      observer?.disconnect();
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
@@ -96,7 +109,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
   const isAboutPage = pathname === '/about';
 
   const handleNavClick = (sectionId: 'overview' | 'services' | 'partner' | 'about', persona?: PersonaType) => {
+    const wasDrawerOpen = mobileMenuOpen;
     setMobileMenuOpen(false);
+
     if (sectionId === 'about') {
       window.location.href = '/about';
       return;
@@ -115,71 +130,93 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
       }
       return;
     }
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+
+    if (pathname === '/') {
+      const performScroll = () => {
+        scrollToSection(sectionId, {
+          gap: 16,
+          onComplete: () => {
+            setActiveSection(sectionId);
+          },
+        });
+      };
+      if (wasDrawerOpen) {
+        setTimeout(performScroll, 120);
+      } else {
+        performScroll();
+      }
     } else {
       window.location.href = `/#${sectionId}`;
     }
   };
 
   return (
-    <header
-      id="main-navigation"
-      className="fixed top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-50 lg:top-5 lg:left-8 lg:right-8 [@media(max-height:760px)]:top-2 [@media(max-height:760px)]:left-4 [@media(max-height:760px)]:right-4"
-    >
+    <>
+      {/* Shaded overlay scrim behind header for layered glass contrast */}
       <div
-        className={`nav-pill mx-auto max-w-7xl flex items-center justify-between px-3 sm:px-6 h-15 sm:h-16 lg:h-[72px] [@media(max-height:760px)]:h-12 transition-all duration-200 border relative ${isScrolled
-          ? 'bg-white/80 backdrop-blur-2xl saturate-180 border-white/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_12px_36px_-6px_rgba(0,0,0,0.08)]'
-          : 'bg-white/75 backdrop-blur-xl saturate-180 border-white/50 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7),0_8px_24px_-4px_rgba(0,0,0,0.05)]'
-          }`}
-      >
-        {/* Brand Wordmark: Centered on mobile, left-aligned on desktop, strictly single-line */}
-        <Link
-          href="/"
-          id="brand-logo-link"
-          className="flex items-center space-x-2 sm:space-x-3 group shrink-0 py-1 whitespace-nowrap max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2"
-          onClick={(e) => {
-            if (pathname === '/') {
-              e.preventDefault();
-              handleNavClick('overview');
-            }
-          }}
-        >
-          <img
-            src="/favicon.webp"
-            alt="SpeedyMeals Logo"
-            className="h-8 sm:h-10 lg:h-12 [@media(max-height:760px)]:h-8 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105 drop-shadow-xs"
-          />
-          <span className="font-display text-base sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-base tracking-tight text-red uppercase whitespace-nowrap shrink-0">
-            SPEEDY MEALS
-          </span>
-        </Link>
+        className={`pointer-events-none fixed top-0 left-0 right-0 h-[120px] bg-gradient-to-b from-black/[0.12] via-black/[0.04] to-transparent z-45 transition-opacity duration-200 ${
+          isScrolled ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      />
 
-        {/* Desktop Anchor Navigation: How it works · Registration · About */}
-        <nav className="hidden md:flex items-center space-x-1 bg-white/50 backdrop-blur-xl border border-white/70 p-1 nav-pill shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_2px_8px_rgba(0,0,0,0.03)]">
-          {[
-            { id: 'services', label: 'How it works' },
-            { id: 'partner', label: 'Registration' },
-            { id: 'about', label: 'About' },
-          ].map((item, idx) => {
-            const isAboutActive = isAboutPage && item.id === 'about';
-            return (
-              <button
-                key={`${item.id}-${item.label}-${idx}`}
-                id={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                type="button"
-                onClick={() => handleNavClick(item.id as 'overview' | 'services' | 'partner' | 'about')}
-                className={`nav-pill relative px-3.5 py-2 font-sans font-medium text-sm tracking-wide transition-all duration-150 cursor-pointer active:scale-[0.96] select-none ${isAboutActive
-                  ? 'text-black font-bold bg-tan/20'
-                  : 'text-ink-soft hover:text-ink hover:bg-paper-off/50'
+      <header
+        id="main-navigation"
+        className="fixed top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-50 lg:top-5 lg:left-8 lg:right-8 [@media(max-height:760px)]:top-2 [@media(max-height:760px)]:left-4 [@media(max-height:760px)]:right-4"
+      >
+        <div
+          className="nav-pill mx-auto max-w-7xl flex items-center justify-between px-3 sm:px-6 h-15 sm:h-16 lg:h-[72px] [@media(max-height:760px)]:h-12 transition-all duration-200 apple-glass-pill relative"
+        >
+          {/* Brand Wordmark: Centered on mobile, left-aligned on desktop */}
+          <Link
+            href="/"
+            id="brand-logo-link"
+            className="flex items-center space-x-1.5 sm:space-x-3 group shrink-0 py-1 whitespace-nowrap max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2"
+            onClick={(e) => {
+              if (pathname === '/') {
+                e.preventDefault();
+                handleNavClick('overview');
+              }
+            }}
+          >
+            <Image
+              src="/assets/logo-112.webp"
+              alt="SpeedyMeals Logo"
+              width={48}
+              height={48}
+              priority
+              className="h-7 sm:h-10 lg:h-12 [@media(max-height:760px)]:h-8 w-auto object-contain shrink-0 transition-transform duration-150 group-hover:scale-105 drop-shadow-xs"
+            />
+            <span className="font-display text-[13px] sm:text-xl lg:text-2xl [@media(max-height:760px)]:text-base tracking-tight text-red-accessible uppercase whitespace-nowrap shrink-0">
+              SPEEDY MEALS
+            </span>
+          </Link>
+
+          {/* Desktop Anchor Navigation: Inset subtle tray, no nested backdrop-blur */}
+          <nav className="hidden md:flex items-center space-x-1 bg-black/[0.04] border border-black/[0.06] p-1 nav-pill shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
+            {[
+              { id: 'services', label: 'How it works' },
+              { id: 'partner', label: 'Registration' },
+              { id: 'about', label: 'About' },
+            ].map((item, idx) => {
+              const isAboutActive = isAboutPage && item.id === 'about';
+              return (
+                <button
+                  key={`${item.id}-${item.label}-${idx}`}
+                  id={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  type="button"
+                  onClick={() => handleNavClick(item.id as 'overview' | 'services' | 'partner' | 'about')}
+                  className={`nav-pill relative px-3.5 py-2 font-sans font-medium text-sm tracking-wide transition-all duration-150 cursor-pointer active:scale-[0.96] select-none ${
+                    (item.id === 'about' && isAboutPage) || (!isAboutPage && activeSection === item.id)
+                      ? 'text-black font-bold bg-white/70 shadow-xs'
+                      : 'text-ink-soft hover:text-ink hover:bg-black/[0.04]'
                   }`}
-              >
-                <span className="relative z-10">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+                >
+                  <span className="relative z-10">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
 
         {/* Right Action CTAs: One CTA "Get early access" + Portals Menu */}
         <div className="hidden lg:flex items-center space-x-2.5 shrink-0">
@@ -242,7 +279,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                     mass: 0.8,
                   }}
                   style={{ transformOrigin: 'top right' }}
-                  className="absolute right-0 top-full mt-2 w-56 bg-white/90 backdrop-blur-2xl saturate-180 border border-white/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_16px_40px_-6px_rgba(0,0,0,0.12)] py-2 z-50 rounded-2xl overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-56 apple-glass-panel py-2 z-50 rounded-2xl overflow-hidden"
                 >
                   <div className="px-3 pb-2 mb-1 border-b border-black/5">
                     <span className="font-sans text-[10px] uppercase tracking-wider text-ink-soft font-bold">
@@ -311,7 +348,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-mobile-toggle"
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="nav-pill p-2.5 border border-white/60 bg-white/80 backdrop-blur-xl text-ink hover:bg-white transition-all duration-150 cursor-pointer flex items-center justify-center active:scale-90 select-none shadow-xs"
+            className="nav-pill p-2.5 apple-glass-pill text-ink hover:bg-white transition-all duration-150 cursor-pointer flex items-center justify-center active:scale-90 select-none shadow-xs"
             aria-label="Toggle navigation"
           >
             {mobileMenuOpen ? <X size={20} weight="bold" /> : <List size={20} weight="bold" />}
@@ -319,7 +356,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
         </div>
       </div>
 
-      {/* Mobile Drawer Panel: floating card with nav-drawer styling */}
+      {/* Mobile Drawer Panel: floating card with apple-glass-panel styling */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -334,7 +371,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               mass: 0.8,
             }}
             style={{ transformOrigin: 'top right' }}
-            className="nav-drawer md:hidden mt-2 border border-white/60 bg-white/85 backdrop-blur-2xl saturate-180 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_20px_48px_-8px_rgba(0,0,0,0.15)] p-5 space-y-4"
+            className="nav-drawer md:hidden mt-2 apple-glass-panel p-5 space-y-4"
           >
             <div className="flex flex-col space-y-1 font-sans text-sm uppercase tracking-wider font-semibold">
               <button
@@ -395,7 +432,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               >
                 <div className="flex items-center space-x-2">
                   <Storefront size={16} weight="bold" />
-                  <span>Restaurant Portal</span>
+                  <span>Merchant Portal</span>
                 </div>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 border border-blue/30 bg-blue/10 text-blue">
                   {sessionRole === 'restaurant' ? 'DASHBOARD' : 'LOGIN'}
@@ -461,5 +498,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
         )}
       </AnimatePresence>
     </header>
+    </>
   );
 };

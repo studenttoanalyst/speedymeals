@@ -24,6 +24,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
 
+    <!-- Push notifications (FCM): runtime permission on Android 13+ (API 33+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:label="Speedy Meals"
         android:name="${applicationName}"
@@ -56,6 +59,12 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- FCM: channel used for notifications that do not name one. The app
+             creates this channel at startup (lib/services/push_service.dart). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="order_updates" />
 
         <!-- Google Maps Android SDK API Key (injected via manifestPlaceholders) -->
         <meta-data

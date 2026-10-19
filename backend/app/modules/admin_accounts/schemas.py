@@ -12,7 +12,7 @@ class AdminAccountCreateSchema(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=50, description="Staff last name")
     email: str | None = Field(
         default=None,
-        description="Custom email. If omitted, corporate email is auto-generated as firstname.lastname@speedymeals.pk",
+        description="Custom email. If omitted, corporate email is auto-generated as firstname.lastname@speedymealservices.com",
     )
     role_id: uuid.UUID = Field(..., description="Assigned role ID")
     phone: str | None = Field(default=None, max_length=20, description="Contact phone number")

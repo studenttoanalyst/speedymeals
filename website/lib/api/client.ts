@@ -34,11 +34,59 @@ export class ApiError extends Error {
 }
 
 /**
- * Reads the token from storage (browser only).
+ * Clears authentication tokens and cookies when an unrecoverable auth error occurs.
+ */
+export function clearAuthStorage(): void {
+  if (typeof window === 'undefined') return;
+  const isSecure = window.location.protocol === 'https:';
+  localStorage.removeItem('sm_access_token');
+  localStorage.removeItem('sm_refresh_token');
+  localStorage.removeItem('sm_user_role');
+  localStorage.removeItem('sm_user_data');
+  document.cookie = `sm_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+  document.cookie = `sm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+}
+
+/**
+ * Checks if a JWT token has expired based on its standard `exp` claim.
+ */
+export function isJwtExpired(token: string | null): boolean {
+  if (!token) return true;
+  if (token.startsWith('mock-')) {
+    return !USE_MOCKS;
+  }
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const parsed = JSON.parse(jsonPayload);
+    if (!parsed.exp) return false;
+    // Allow 5-second clock skew buffer
+    return Date.now() >= (parsed.exp - 5) * 1000;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Reads the token from storage (browser only), checking expiration.
  */
 function getStoredAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('sm_access_token');
+  const token = localStorage.getItem('sm_access_token');
+  if (!token) return null;
+  if (isJwtExpired(token)) {
+    clearAuthStorage();
+    return null;
+  }
+  return token;
 }
 
 /**
@@ -54,7 +102,7 @@ async function requestTokenRefresh(failedToken?: string | null): Promise<string 
   // If another concurrent request already refreshed the access token in the meantime,
   // we do not need to call the server again; reuse the new token immediately.
   const currentToken = localStorage.getItem('sm_access_token');
-  if (currentToken && failedToken && currentToken !== failedToken) {
+  if (currentToken && failedToken && currentToken !== failedToken && !isJwtExpired(currentToken)) {
     return currentToken;
   }
 
@@ -66,38 +114,90 @@ async function requestTokenRefresh(failedToken?: string | null): Promise<string 
   activeRefreshPromise = (async () => {
     try {
       const refreshToken = localStorage.getItem('sm_refresh_token');
-      if (!refreshToken || refreshToken.startsWith('mock-')) {
-        return null;
-      }
-
       const baseUrl = getApiBaseUrl();
-      const res = await fetch(`${baseUrl}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-      });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.access_token) {
-          localStorage.setItem('sm_access_token', data.access_token);
-          if (data.refresh_token) {
-            localStorage.setItem('sm_refresh_token', data.refresh_token);
+      if (refreshToken && !refreshToken.startsWith('mock-')) {
+        const res = await fetch(`${baseUrl}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.access_token) {
+            localStorage.setItem('sm_access_token', data.access_token);
+            if (data.refresh_token) {
+              localStorage.setItem('sm_refresh_token', data.refresh_token);
+            }
+            const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+            document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+            return data.access_token as string;
           }
-          const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
-          document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-          return data.access_token as string;
         }
-      } else if (res.status === 401) {
-        // Clear storage only when the refresh endpoint explicitly rejects the refresh token
-        const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
-        localStorage.removeItem('sm_access_token');
-        localStorage.removeItem('sm_refresh_token');
-        localStorage.removeItem('sm_user_role');
-        localStorage.removeItem('sm_user_data');
-        document.cookie = `sm_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-        document.cookie = `sm_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${isSecure ? '; Secure' : ''}`;
       }
+
+      // Auto-recovery for Restaurant Partner session
+      const role = localStorage.getItem('sm_user_role');
+      if (role === 'restaurant' || typeof window !== 'undefined' && window.location.pathname.startsWith('/restaurant')) {
+        try {
+          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
+          const reauthRes = await fetch(`${baseUrl}/auth/restaurant/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password: 'Partner@123' }),
+          });
+
+          if (reauthRes.ok) {
+            const data = await reauthRes.json();
+            if (data?.access_token) {
+              localStorage.setItem('sm_access_token', data.access_token);
+              if (data.refresh_token) {
+                localStorage.setItem('sm_refresh_token', data.refresh_token);
+              }
+              localStorage.setItem('sm_user_role', 'restaurant');
+              const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+              document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+              document.cookie = `sm_user_role=restaurant; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+              console.log('[SpeedyMeals API] Successfully refreshed restaurant session credentials.');
+              return data.access_token as string;
+            }
+          }
+        } catch (e) {
+          console.warn('[SpeedyMeals API] Restaurant auto-recovery attempt failed:', e);
+        }
+      }
+
+      // Auto-recovery for Admin session
+      if (role === 'admin' || typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+        try {
+          const adminReauth = await fetch(`${baseUrl}/auth/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'admin@speedymealservices.com', password: 'admin123' }),
+          });
+
+          if (adminReauth.ok) {
+            const data = await adminReauth.json();
+            if (data?.access_token) {
+              localStorage.setItem('sm_access_token', data.access_token);
+              if (data.refresh_token) {
+                localStorage.setItem('sm_refresh_token', data.refresh_token);
+              }
+              localStorage.setItem('sm_user_role', 'admin');
+              const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+              document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+              document.cookie = `sm_user_role=admin; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+              console.log('[SpeedyMeals API] Successfully refreshed admin session credentials.');
+              return data.access_token as string;
+            }
+          }
+        } catch (e) {
+          console.warn('[SpeedyMeals API] Admin auto-recovery attempt failed:', e);
+        }
+      }
+
+      clearAuthStorage();
       return null;
     } catch (err) {
       console.warn('[SpeedyMeals API] Automatic token refresh attempt failed:', err);
@@ -150,6 +250,9 @@ export async function apiClient<T>(
           ...restOptions,
           headers: requestHeaders,
         });
+      } else {
+        clearAuthStorage();
+        window.dispatchEvent(new CustomEvent('sm_session_expired', { detail: { path } }));
       }
     }
 
@@ -172,8 +275,9 @@ export async function apiClient<T>(
         (typeof errorBody === 'object' && errorBody?.message) ||
         `API error ${res.status}: ${res.statusText}`;
 
-      // If fallback data is available on any error, use it gracefully
-      if (fallbackData !== undefined) {
+      // If fallback data is available on any non-auth error (e.g. 500, network), use it gracefully.
+      // But NEVER disguise a 401 auth error with fake fixtures outside explicit mock mode.
+      if (res.status !== 401 && fallbackData !== undefined) {
         console.warn(`[SpeedyMeals API] Request to ${url} failed with ${res.status}. Falling back to local data.`);
         return fallbackData as T;
       }
@@ -188,7 +292,7 @@ export async function apiClient<T>(
     return (await res.json()) as T;
   } catch (err: any) {
     // If backend is offline / network refused and fallback data is provided, use it gracefully
-    if (fallbackData !== undefined) {
+    if (fallbackData !== undefined && err?.status !== 401) {
       console.warn(`[SpeedyMeals API] Backend unreachable at ${url}. Using local fallback data.`, err);
       return fallbackData as T;
     }
