@@ -902,3 +902,109 @@ patch passes `git apply --check` against this branch.
    accept the timing side channel?
 5. Backend test run is blocked on `pillow` + a migrated `DATABASE_URL` (3.5) — approve installing
    `pillow` in `backend/venv` and I will run the suite before/after applying.
+
+---
+
+## Phase 4: Fix everything found
+
+Scope rules honoured: `website/` never touched; local dev only (no production DB,
+keys or real SMS); nothing pushed and `main` untouched.
+
+### 4.1 Online payments are gated on a backend flag
+
+The digital path is a stub (`_process_digital_payment` returns
+`STUB-DIGITAL-...`), so "Pay Online" collected no money.
+
+- **Backend** (`backend-account-deletion`): new `ONLINE_PAYMENTS_ENABLED`
+  (default **false**). `checkout-preview` returns
+  `online_payments_enabled`; `place_order` rejects `payment_method=Digital`
+  with HTTP 400 ("Online payment is currently unavailable. Please choose Cash
+  on Delivery.") **before** any order row is written. COD is unaffected.
+  Tests: `test_preview_advertises_online_payments_disabled_by_default`,
+  `..._when_enabled`, `test_place_order_digital_rejected_with_400_when_disabled`
+  (asserts the cart is untouched), `test_place_order_cod_still_accepted_...`.
+- **Mobile**: `CheckoutPreview.onlinePaymentsEnabled` parses
+  `online_payments_enabled` and fails **safe to false** when the key is missing
+  (older backend). The screen renders the Digital card only when the preview
+  says true, snaps a stale Digital selection back to COD on refresh, and a
+  stale submit that still reaches the server falls back to COD with a friendly
+  message on 400. Nothing is hardcoded.
+  Tests: `test/online_payments_flag_test.dart` (3 parsing cases + a widget test
+  asserting COD shown and "Pay Online" hidden when the flag is off/unavailable).
+  The 400 fallback itself is not widget-tested because `CheckoutScreen`
+  constructs its own repository (no injection seam); the backend test covers
+  the rejection and the client branch is exercised only by review.
+
+### 4.2 Fragile settlement / payout / report tests
+
+`backend/app/tests/test_admin.py` no longer asserts whole-database totals:
+settlement and payout tests filter results to the restaurant/rider they created,
+cash-discrepancy tests assert by row id, the report trend tests pin their orders
+to a dedicated future UTC day, and the cash-discrepancy report uses a before/after
+delta. Assertions stayed exact (no `>=`, no tolerant ranges). Verified with the
+full backend suite **twice consecutively against the same local dev DB**:
+`511 passed` both times.
+
+### 4.3 Code quality
+
+- Removed 25 unused imports across backend models, routes, services,
+  migrations and tests. Model-registration imports in `migrations/env.py` and
+  `test_migration_drift.py` are intentional and kept (`# noqa: F401`).
+- Replaced deprecated FastAPI `@app.on_event("startup"/"shutdown")` with a
+  single `lifespan` context manager; seed order and background-job
+  cancellation are unchanged.
+- Replaced SQLAlchemy legacy `Query.get()` with `Session.get()` in tests.
+- Removed `print()` debug output from startup and admin provisioning/reset
+  (temporary passwords no longer reach stdout; the API response still returns
+  them). The password-reset link is now printed only outside production.
+- Mobile: every `debugPrint` in `lib/` is now a named `developer.log` call, so
+  handled-error diagnostics are structured and no ad-hoc debug prints remain.
+  Also fixed a stale "Mock data" header in `order_tracking_screen.dart`.
+- Null-safety review: rider GPS (`rider_location_service.dart`,
+  `rider_location_publisher.dart`), the socket, and checkout were checked for
+  force unwraps and swallowing. The remaining `!` uses are all guarded by a
+  preceding null/validity check; invalid coordinates, malformed frames and
+  closed controllers are rejected rather than thrown.
+
+### 4.4 WebSocket 4003 no-retry
+
+The fix is present on both sides and tested:
+
+- Backend (`backend-account-deletion`): the track socket accepts the handshake,
+  sends `{"event":"auth_failed"}`, then closes `4003`. `test_websocket_track_auth.py`
+  covers garbage token, wrong role, non-owner (identical detail, no order-existence
+  leak) and the owner happy path (4 tests).
+- Mobile (`release-audit`): `LiveLocationSocket` treats `auth_failed` as
+  terminal (`willReconnect: false`, no reconnect budget), falling back to REST
+  polling. Test C12 in `test/maps_backend_integration_test.dart` asserts a
+  denied session opens exactly one connection.
+
+The token-in-URL risk and the proposed ticket fix are documented separately in
+`docs/websocket-token-proposal.md` (proposal only, nothing implemented).
+
+### 4.5 Documentation
+
+- `docs/websocket-token-proposal.md` — risk, options, recommended single-use
+  ticket design, affected files, test plan, ~2 day estimate.
+- `docs/production-config-checklist.md` — every backend env var (names only),
+  which ones stop startup vs degrade silently, the `ONLINE_PAYMENTS_ENABLED`
+  default, the mobile `API_BASE_URL`, `google-services.json` handling, and the
+  requirement that Redis run continuously (the deleted-account denylist fails
+  open if it is down).
+
+### 4.6 Repository hygiene
+
+Root `.gitignore` now covers `dump.rdb` / `*.rdb`; `backend/.gitignore` covers
+`uploads/`, `logs/` and `*.log` in addition to the existing `.env`, `venv/`,
+`__pycache__`. `mobile_app/android/app/google-services.json` stays tracked on
+purpose (public Firebase client identifiers; required for the Android build) and
+is documented both in `.gitignore` and the production checklist.
+
+### 4.7 Phase 4 verification
+
+- `flutter analyze` -> **No issues found!**
+- `flutter test` -> **136/136 passed** (107 original + release-audit additions
+  incl. the new C12 and online-payments tests).
+- Backend full suite, two consecutive runs against the same local dev DB ->
+  **511 passed** / **511 passed**.
+- `git status --porcelain -- website` -> empty; `git diff --stat -- website` -> empty.
