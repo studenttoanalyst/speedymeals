@@ -26,10 +26,6 @@ class AppConstants {
   static const int baseEtaMinutes = 10;
   static const double etaPerKmFactor = 3.0;
 
-  /// Minimum rider wallet balance to go online (0.0 after commit 3a49219
-  /// removed the threshold from `wallet_payment/service.py`).
-  static const double riderMinWalletBalance = 0.0;
-
   /// Rider OTP resend cooldown enforced server-side
   /// (`auth/service.py`, surfaced as HTTP 429).
   static const Duration otpResendCooldown = Duration(seconds: 45);

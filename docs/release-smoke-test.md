@@ -49,7 +49,7 @@ run. Tick every row; anything failing blocks the Play submission.
 
 - [ ] Rider OTP registration/login; approval banner shown for a new account.
 - [ ] **Location disclosure** appears once, before the OS prompt; accept it.
-- [ ] Go online (Rs. 500 minimum enforced by the backend).
+- [ ] Go online (requires kit completion and kit deposit; no wallet minimum).
 - [ ] Accept an assignment; progress arrived → picked up → on the way → delivered.
 - [ ] **GPS while the screen is off / app backgrounded during an active
       delivery**: the customer's map keeps updating, and a persistent

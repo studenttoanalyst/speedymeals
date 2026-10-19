@@ -154,10 +154,6 @@ class RiderProfile {
         hasVehiclePhoto,
       ].where((has) => has).length;
 
-  /// Whether the wallet balance is negative (floor removed in backend).
-  bool get isBelowMinWallet =>
-      walletBalance < AppConstants.riderMinWalletBalance;
-
   String get displayName => name.trim().isEmpty ? 'Rider' : name.trim();
 
   String get initials {
@@ -436,12 +432,6 @@ class RiderWallet {
   String get pendingCashLabel => formatPkr(pendingCashOwed);
   String get earningsLabel => formatPkr(earningsBalance);
 
-  bool get isBelowMinWallet =>
-      walletBalance < AppConstants.riderMinWalletBalance;
-
-  /// Shortfall the rider must top up if balance is negative.
-  double get topUpNeeded =>
-      (AppConstants.riderMinWalletBalance - walletBalance).clamp(0, double.infinity);
 }
 
 /// `GET /wallet/cod-eligibility` (backend: `CODEligibilityResponseSchema`).
