@@ -244,6 +244,8 @@ def test_delivered_pushes_customer_and_low_wallet_reminder_to_rider(db_session):
     from app.modules.food_delivery import service as fd_service
 
     restaurant, customer, rider, order = _seed_order(db_session, "On the Way")
+    rider.wallet_balance = -100  # after 157.50 earning credit, balance is 57.50 < 100
+    db_session.commit()
     with patch("app.platform.notification.fcm.is_enabled", return_value=True), patch(
         "app.modules.food_delivery.order_notifications.dispatch_push"
     ) as push:

@@ -45,6 +45,7 @@ from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, 
 
 # Wallet thresholds
 KIT_DEPOSIT_AMOUNT = 5000
+WALLET_REMINDER_THRESHOLD = 100
 
 # Delivery-fee commission split (SpeedyMeals business model): the platform
 # keeps 10% of every delivery fee, the rider earns the remaining 90%.
@@ -134,14 +135,6 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Kit deposit and handover must be completed before going online.",
-            )
-        if float(rider.wallet_balance) < MIN_WALLET_BALANCE_TO_GO_ONLINE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Minimum wallet balance of Rs. {MIN_WALLET_BALANCE_TO_GO_ONLINE} required to go online. "
-                    f"Current balance: Rs. {rider.wallet_balance}. Please recharge."
-                ),
             )
         if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
             raise HTTPException(
