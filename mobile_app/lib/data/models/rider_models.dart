@@ -154,7 +154,7 @@ class RiderProfile {
         hasVehiclePhoto,
       ].where((has) => has).length;
 
-  /// Wallet is below the Rs. 500 floor required to go online.
+  /// Whether the wallet balance is negative (floor removed in backend).
   bool get isBelowMinWallet =>
       walletBalance < AppConstants.riderMinWalletBalance;
 
@@ -439,7 +439,7 @@ class RiderWallet {
   bool get isBelowMinWallet =>
       walletBalance < AppConstants.riderMinWalletBalance;
 
-  /// Shortfall the rider must top up before going online.
+  /// Shortfall the rider must top up if balance is negative.
   double get topUpNeeded =>
       (AppConstants.riderMinWalletBalance - walletBalance).clamp(0, double.infinity);
 }

@@ -136,6 +136,7 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Kit deposit and handover must be completed before going online.",
             )
+
         if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

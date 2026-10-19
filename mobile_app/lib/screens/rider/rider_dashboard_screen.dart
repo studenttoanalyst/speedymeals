@@ -21,7 +21,7 @@ import '../../widgets/skeleton/skeleton.dart';
 /// Backed entirely by the rider endpoints:
 ///   GET  /wallet/profile                  → approval state, wallet, docs
 ///   GET  /wallet/assignments              → the rider's job board
-///   PATCH /wallet/status                  → go online/offline (Rs. 500 floor)
+///   PATCH /wallet/status                  → go online/offline (requires kit completion)
 ///   PATCH /wallet/location                → push GPS (required to be assignable)
 ///   POST /wallet/assignments/{id}/respond → accept / reject
 ///   PATCH /wallet/deliveries/{id}/status/… → arrived → picked up → on the way → delivered
@@ -401,7 +401,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
         );
       }
     } on ApiException catch (error) {
-      // Going online below the Rs. 500 wallet floor is a 400 with a clear
+      // Going online without kit completion or above COD cash cap is a 400 with a clear
       // message — surface it verbatim.
       _showError(error.message);
     } finally {
@@ -890,10 +890,8 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
               child: _MetricCard(
                 title: 'WALLET BALANCE',
                 value: wallet?.walletBalanceLabel ?? '—',
-                // Mirrors backend `MIN_WALLET_BALANCE_TO_GO_ONLINE = 500`
-                // (`wallet_payment/service.py`); the shared constant is
-                // `AppConstants.riderMinWalletBalance`.
-                subtext: 'Min Rs. 500 to go online',
+                // Updated for teammate commit 3a49219: minimum balance threshold removed.
+                subtext: 'Active wallet balance',
                 icon: Icons.account_balance_wallet_rounded,
                 accentColor: _green,
                 cardColor: _card,

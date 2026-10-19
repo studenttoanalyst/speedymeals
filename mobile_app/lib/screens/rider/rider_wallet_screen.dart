@@ -12,10 +12,10 @@ import '../../widgets/skeleton/skeleton.dart';
 /// Backed by:
 ///   GET  /wallet/earnings       → earnings / wallet / cash owed
 ///   GET  /wallet/cod-eligibility → whether more cash work is allowed
-///   POST /wallet/recharge        → keep the wallet above the Rs. 500 floor
+///   POST /wallet/recharge        → top up the wallet balance
 ///   POST /wallet/cash-deposit    → submit collected COD cash
 ///
-/// The server owns the rules: the Rs. 500 minimum to go online, the 10%
+/// The server owns the rules: kit completion to go online, the 10%
 /// platform commission on each delivery fee, the COD cash cap and the
 /// expected-cash / discrepancy calculation. This screen only displays and
 /// submits.
@@ -234,7 +234,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
                   const SizedBox(height: 6),
                   Text(
                     belowMin
-                        ? 'Below the Rs. 500 minimum. Top up ${formatPkr(topUp)} to go online.'
+                        ? 'Negative balance. Top up ${formatPkr(topUp)} to restore wallet.'
                         : 'You can go online and receive deliveries.',
                     style: const TextStyle(fontSize: 12.5, color: Colors.white70, height: 1.4),
                   ),
