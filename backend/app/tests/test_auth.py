@@ -52,7 +52,7 @@ def auth_client(db_session):
 
 
 def _unique_phone(prefix="+92311"):
-    return f"{prefix}{uuid.uuid4().hex[:8]}"
+    return f"{prefix}{uuid.uuid4().int % 10_000_000:07d}"
 
 
 def _otp_for(phone_number: str) -> str:

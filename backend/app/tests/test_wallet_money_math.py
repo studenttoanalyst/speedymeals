@@ -16,7 +16,7 @@ from app.modules.food_delivery.models import Order, Restaurant
 from app.modules.food_delivery.service import calculate_delivery_fee
 from app.platform.users.models import Address, User
 from app.platform.wallet_payment import service
-from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout
+from app.platform.wallet_payment.models import RiderPayout
 
 
 def _make_restaurant(db):

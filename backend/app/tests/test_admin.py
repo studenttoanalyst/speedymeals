@@ -179,11 +179,12 @@ def test_restaurant_management_route_requires_admin_role(admin_client, db_sessio
 
 def test_create_restaurant_route_returns_201(admin_client, admin_token):
     unique = uuid.uuid4().hex[:8]
+    phone_digits = f"{uuid.uuid4().int % 10_000_000:07d}"
     response = admin_client.post(
         "/admin/restaurants",
         json={
-            "name": "Route Cafe", "email": f"route-{unique}@cafe.com",
-            "password": "password123", "phone_number": f"+92305{unique}",
+            "name": "Route Cafe", "email": f"route-{unique}@speedymeals.com",
+            "password": "password123", "phone_number": f"+92305{phone_digits}",
         },
         headers={"Authorization": f"Bearer {admin_token}"},
     )
@@ -372,6 +373,27 @@ def _period_around_today():
     return today - timedelta(days=1), today + timedelta(days=1)
 
 
+def _isolated_period(db, orders, *, day, month=None, year=2031):
+    """Pin the given orders into their own UTC day and return that window.
+
+    get_reports/settlements/payouts are whole-period aggregates over the shared
+    local dev database. Rather than weaken the assertions to "roughly right",
+    move this test's data into a window no other data occupies, so every value
+    stays exact regardless of what else has been ordered on this machine.
+
+    `day` (and optionally `month`/`year`) picks the window; tests use distinct
+    days so two of them can never collide.
+    """
+    from datetime import date, datetime, time, timezone
+
+    window = date(year, month or 1, day)
+    noon = datetime.combine(window, time(12), tzinfo=timezone.utc)
+    for order in orders:
+        order.placed_at = noon
+    db.commit()
+    return window, window
+
+
 def test_generate_settlements_computes_totals(db_session):
     customer = _make_customer(db_session)
     restaurant = _make_restaurant(db_session)
@@ -382,12 +404,14 @@ def test_generate_settlements_computes_totals(db_session):
 
     results = service.generate_settlements(db_session, period_start, period_end)
 
-    assert len(results) == 1
-    assert results[0]["restaurant_id"] == restaurant.id
-    assert results[0]["total_sales"] == 1000
-    assert results[0]["commission_deducted"] == 100
-    assert results[0]["net_payable"] == 900
-    assert results[0]["status"] == "Pending"
+    # Scoped to this test's restaurant: the endpoint is a whole-period
+    # generator, so other restaurants' rows are legitimately in the list.
+    mine = [row for row in results if row["restaurant_id"] == restaurant.id]
+    assert len(mine) == 1
+    assert mine[0]["total_sales"] == 1000
+    assert mine[0]["commission_deducted"] == 100
+    assert mine[0]["net_payable"] == 900
+    assert mine[0]["status"] == "Pending"
 
 
 def test_generate_settlements_is_idempotent_and_skips_settled(db_session):
@@ -399,16 +423,19 @@ def test_generate_settlements_is_idempotent_and_skips_settled(db_session):
     period_start, period_end = _period_around_today()
 
     first = service.generate_settlements(db_session, period_start, period_end)
-    service.mark_settlement_paid(db_session, first[0]["id"])
+    mine = [row for row in first if row["restaurant_id"] == restaurant.id]
+    assert len(mine) == 1
+    service.mark_settlement_paid(db_session, mine[0]["id"])
 
     # A second Delivered order in the same period should NOT reopen the
     # already-settled row.
     _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
     second = service.generate_settlements(db_session, period_start, period_end)
 
-    assert len(second) == 1
-    assert second[0]["status"] == "Settled"
-    assert second[0]["total_sales"] == 1000  # unchanged, not recomputed
+    mine = [row for row in second if row["restaurant_id"] == restaurant.id]
+    assert len(mine) == 1
+    assert mine[0]["status"] == "Settled"
+    assert mine[0]["total_sales"] == 1000  # unchanged, not recomputed
 
 
 def test_mark_settlement_paid_rejects_already_settled(db_session):
@@ -465,10 +492,12 @@ def test_generate_rider_payouts_computes_totals(db_session):
 
     results = service.generate_rider_payouts(db_session, period_start, period_end)
 
-    assert len(results) == 1
-    assert results[0]["rider_id"] == rider.id
-    assert results[0]["total_earning"] == 175
-    assert results[0]["status"] == "Pending"
+    # Scoped to this test's rider (whole-period generator, other riders may
+    # legitimately appear in the list).
+    mine = [row for row in results if row["rider_id"] == rider.id]
+    assert len(mine) == 1
+    assert mine[0]["total_earning"] == 175
+    assert mine[0]["status"] == "Pending"
 
 
 def test_generate_rider_payouts_is_idempotent_and_skips_paid(db_session):
@@ -480,14 +509,17 @@ def test_generate_rider_payouts_is_idempotent_and_skips_paid(db_session):
     period_start, period_end = _period_around_today()
 
     first = service.generate_rider_payouts(db_session, period_start, period_end)
-    service.mark_rider_payout_paid(db_session, first[0]["id"])
+    mine = [row for row in first if row["rider_id"] == rider.id]
+    assert len(mine) == 1
+    service.mark_rider_payout_paid(db_session, mine[0]["id"])
 
     _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
     second = service.generate_rider_payouts(db_session, period_start, period_end)
 
-    assert len(second) == 1
-    assert second[0]["status"] == "Paid"
-    assert second[0]["total_earning"] == 175  # unchanged, not recomputed
+    mine = [row for row in second if row["rider_id"] == rider.id]
+    assert len(mine) == 1
+    assert mine[0]["status"] == "Paid"
+    assert mine[0]["total_earning"] == 175  # unchanged, not recomputed
 
 
 def test_mark_rider_payout_paid_rejects_already_paid(db_session):
@@ -519,8 +551,12 @@ def test_list_cash_discrepancies_flags_shortfall_only(db_session):
 
     results = service.list_cash_discrepancies(db_session)
 
-    assert len(results) == 1
-    assert results[0]["discrepancy"] == -200
+    # Scoped to this test's rows: the local dev DB may already hold other
+    # deposits, so assert on the ids we just created instead of len(results).
+    by_id = {row["id"]: row for row in results}
+    assert short_deposit.id in by_id
+    assert by_id[short_deposit.id]["discrepancy"] == -200
+    assert ok_deposit.id not in by_id, "a balanced deposit is not a discrepancy"
 
 
 def test_rider_payouts_route_requires_admin_role(admin_client, db_session):
@@ -543,7 +579,8 @@ def test_cash_discrepancies_route_returns_200(admin_client, db_session, admin_to
         "/admin/cash-discrepancies", headers={"Authorization": f"Bearer {admin_token}"}
     )
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    returned_ids = [row["id"] for row in response.json()]
+    assert str(short_deposit.id) in returned_ids
 
 
 # --- Step 7: reports ---
@@ -554,8 +591,12 @@ def test_get_reports_computes_trends(db_session):
     restaurant = _make_restaurant(db_session)
     address = _make_address(db_session, customer)
     rider = _make_rider(db_session)
-    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
-    period_start, period_end = _period_around_today()
+    order = _make_order(
+        db_session, customer, restaurant, address, rider=rider, order_status="Delivered"
+    )
+    # Own UTC day -> the aggregate covers only this order, so every figure
+    # below stays exact even on a dev database full of other orders.
+    period_start, period_end = _isolated_period(db_session, [order], day=4)
 
     result = service.get_reports(db_session, period_start, period_end)
 
@@ -574,17 +615,31 @@ def test_get_reports_includes_cash_discrepancy_total(db_session):
     deposit = CashDeposit(
         rider_id=rider.id, amount_submitted=800, expected_amount=1000, discrepancy=-200,
     )
+    period_start, period_end = _period_around_today()
+    # The report total is DB-wide and the local dev DB may already contain
+    # other deposits, so measure the delta this deposit contributes.
+    before = service.get_reports(db_session, period_start, period_end)[
+        "cash_discrepancy_total"
+    ]
+
     db_session.add(deposit)
     db_session.commit()
-    period_start, period_end = _period_around_today()
 
-    result = service.get_reports(db_session, period_start, period_end)
+    after = service.get_reports(db_session, period_start, period_end)[
+        "cash_discrepancy_total"
+    ]
 
-    assert result["cash_discrepancy_total"] == -200
+    assert round(after - before, 2) == -200
 
 
 def test_get_reports_zero_orders_no_division_error(db_session):
-    period_start, period_end = _period_around_today()
+    from datetime import datetime, timedelta, timezone
+
+    # Pick a window that provably contains no orders (this year plus a year),
+    # so "no data" is a real condition rather than an assumption that the dev
+    # database happens to be empty today.
+    now = datetime.now(timezone.utc)
+    period_start, period_end = now + timedelta(days=365), now + timedelta(days=366)
 
     result = service.get_reports(db_session, period_start, period_end)
 
@@ -612,8 +667,11 @@ def test_reports_route_returns_200(admin_client, db_session, admin_token):
     restaurant = _make_restaurant(db_session)
     address = _make_address(db_session, customer)
     rider = _make_rider(db_session)
-    _make_order(db_session, customer, restaurant, address, rider=rider, order_status="Delivered")
-    period_start, period_end = _period_around_today()
+    order = _make_order(
+        db_session, customer, restaurant, address, rider=rider, order_status="Delivered"
+    )
+    # Own UTC day -> the whole-period counter is exact for this test alone.
+    period_start, period_end = _isolated_period(db_session, [order], day=5)
 
     response = admin_client.get(
         "/admin/reports",

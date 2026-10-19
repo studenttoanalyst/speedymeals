@@ -12,6 +12,7 @@ from app.core.database import Base, engine
 # Import every model module so Base.metadata is complete.
 from app.modules.admin_roles import models as _admin_roles  # noqa: F401
 from app.modules.food_delivery import models as _food  # noqa: F401
+from app.platform.account_deletion import models as _account_deletion  # noqa: F401
 from app.platform.auth import models as _auth  # noqa: F401
 from app.platform.notification import models as _notification  # noqa: F401
 from app.platform.users import models as _users  # noqa: F401

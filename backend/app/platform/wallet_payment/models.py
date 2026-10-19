@@ -14,7 +14,7 @@ are added here in Step 3d - both depend on tables that already exist
 """
 import uuid
 
-from sqlalchemy import String, Boolean, Integer, Numeric, Text, Date, DateTime, ForeignKey, JSON
+from sqlalchemy import String, Boolean, Integer, Numeric, Date, DateTime, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 

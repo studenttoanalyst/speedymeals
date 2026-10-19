@@ -80,15 +80,20 @@ def _send_otp_via_console(phone_number: str, otp_code: str) -> None:
     send_sms_via_sendpk(phone_number, message)
 
 
-def generate_and_send_otp(phone_number: str) -> None:
+def generate_and_send_otp(phone_number: str, *, respect_cooldown: bool = True) -> None:
     """
     Step 2 (with Step 4 cooldown guard) - generate a 6-digit OTP, store it in
     Redis with a 5-minute expiry, and send it via SendPK SMS gateway
     (or console mode fallback).
     Raises 429 if the caller is still inside the resend cooldown window.
     Raises 503 if the SMS provider fails to deliver the code.
+
+    `respect_cooldown=False` skips the shared login resend cooldown. Only the
+    account-deletion flow does this: it shares one OTP key per phone (so
+    verify_otp works) but has its own per-phone/per-IP rate limits, and
+    silently failing to send a deletion code is worse than the 45s guard.
     """
-    if redis_client.exists(_cooldown_key(phone_number)):
+    if respect_cooldown and redis_client.exists(_cooldown_key(phone_number)):
         ttl = redis_client.ttl(_cooldown_key(phone_number))
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -115,11 +120,15 @@ def generate_and_send_otp(phone_number: str) -> None:
         ) from exc
 
 
-async def generate_and_send_otp_async(phone_number: str) -> None:
+async def generate_and_send_otp_async(
+    phone_number: str, *, respect_cooldown: bool = True
+) -> None:
     """
     Asynchronous OTP generation and dispatch via SendPK SMS gateway.
+
+    See generate_and_send_otp for `respect_cooldown`.
     """
-    if redis_client.exists(_cooldown_key(phone_number)):
+    if respect_cooldown and redis_client.exists(_cooldown_key(phone_number)):
         ttl = redis_client.ttl(_cooldown_key(phone_number))
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -458,7 +467,13 @@ def request_password_reset(db: Session, email: str, role: str) -> dict:
 
     portal_path = "/admin/reset-password" if role == "admin" else "/restaurant/reset-password"
     reset_url = f"https://speedymeals.pk{portal_path}?token={raw_token}"
-    print(f"[AUTH-RESET] Password reset link for {role} <{email_clean}>: {reset_url}")
+    # No email gateway is wired in yet, so non-production keeps printing the
+    # link (local/staging/testing depend on it). Never write a live reset token
+    # to production logs: whoever can read journald could take over the account.
+    if settings.ENVIRONMENT == "production":
+        logger.info("Password reset token issued for %s <%s>", role, email_clean)
+    else:
+        print(f"[AUTH-RESET] Password reset link for {role} <{email_clean}>: {reset_url}")
 
     return {
         "message": "If an active account exists with that email, password reset instructions have been generated.",

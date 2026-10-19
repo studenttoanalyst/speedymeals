@@ -11,7 +11,6 @@ Seeds:
    - "Picked Up" / "On the Way" (In transit)
    - "Delivered" (Completed)
 """
-import uuid
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 
@@ -19,7 +18,7 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.modules.food_delivery.models import Restaurant, MenuItem, Order, OrderItem
 from app.platform.users.models import User, Address
-from app.platform.wallet_payment.models import Rider, WalletTransaction
+from app.platform.wallet_payment.models import Rider
 
 
 def seed_rich_dummy_data():

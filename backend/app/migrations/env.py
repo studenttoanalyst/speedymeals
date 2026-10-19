@@ -20,6 +20,7 @@ from app.platform.auth import models as auth_models  # noqa: F401
 from app.platform.users import models as users_models  # noqa: F401
 from app.platform.wallet_payment import models as wallet_models  # noqa: F401
 from app.platform.notification import models as notification_models  # noqa: F401
+from app.platform.account_deletion import models as account_deletion_models  # noqa: F401
 from app.modules.food_delivery import models as food_delivery_models  # noqa: F401
 
 # this is the Alembic Config object, which provides
