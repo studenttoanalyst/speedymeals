@@ -745,7 +745,6 @@ void main() {
         events.whereType<LiveLocationDisconnected>().single.willReconnect,
         isFalse,
       );
-
       await socket.dispose();
     });
 
@@ -799,6 +798,44 @@ void main() {
 
       await socket.dispose();
       await server.close(force: true);
+    });
+
+    test('C12. auth_failed frame means no reconnect (4003 no-retry)',
+        () async {
+      final connector = FakeConnector();
+      final socket = _buildSocket(
+        connector,
+        tokens: _tokens(UserRole.customer),
+      );
+      final events = <LiveLocationEvent>[];
+      socket.events.listen(events.add);
+
+      await socket.connect('ord-12');
+      await _flush();
+      expect(connector.urls, hasLength(1));
+
+      // Server denies the session: `auth_failed` frame, then it closes the
+      // socket with 4003. Retrying is pointless — the same token would be
+      // denied again — so the client must report the drop with
+      // willReconnect=false and never open a second connection.
+      connector.transports.single.emit({
+        'event': 'auth_failed',
+        'detail': 'Not authorised to track this order.',
+      });
+      await _flush();
+      connector.transports.single.drop();
+      await _flush();
+
+      final drops = events.whereType<LiveLocationDisconnected>().toList();
+      expect(drops, hasLength(1));
+      expect(drops.single.willReconnect, isFalse);
+
+      // Well past the reconnect delay: no further connect attempt happened.
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+      expect(connector.urls, hasLength(1));
+      expect(socket.isConnected, isFalse);
+
+      await socket.dispose();
     });
   });
 
