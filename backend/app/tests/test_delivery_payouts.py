@@ -2,9 +2,11 @@
 Post-paid rider COD ledger, 10% delivery commission & Rs. 15 platform fee.
 
 Covers the finalized SpeedyMeals business model:
-  - 10% platform / 90% rider split of the delivery fee on Delivered orders
-    (COD debits the 10% from the wallet; Digital credits the 90% share).
-  - COD cash tracking: pending_cash_owed accrues food + delivery fee.
+  - 10% platform / 90% rider split of the delivery fee on Delivered orders:
+    the rider's 90% share is credited to the wallet on every delivery (COD
+    and Digital alike); the platform retains the other 10%.
+  - COD cash tracking: pending_cash_owed accrues the full order total
+    (food_subtotal + delivery_fee + the Rs.15 platform fee).
   - Rs. 5,000 COD cap: assignment is blocked, the rider is forced offline,
     and going online is rejected until an admin approves their cash deposit.
 
@@ -124,8 +126,8 @@ def _cleanup(rider_id):
 # --- 10% commission split ---
 
 
-def test_cod_delivery_debits_platform_10_percent_from_wallet(db_session):
-    """COD: the platform's 10% delivery-fee cut comes out of the wallet."""
+def test_cod_delivery_credits_rider_90_percent_share(db_session):
+    """COD: the rider's 90% delivery-fee share is credited to the wallet."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -135,7 +137,7 @@ def test_cod_delivery_debits_platform_10_percent_from_wallet(db_session):
     food_service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
 
     db_session.refresh(rider)
-    assert float(rider.wallet_balance) == 982.50  # 1000 - 10% of 175
+    assert float(rider.wallet_balance) == 1157.50  # 1000 + 90% of 175
 
     txn = (
         db_session.query(WalletTransaction)
@@ -145,9 +147,9 @@ def test_cod_delivery_debits_platform_10_percent_from_wallet(db_session):
         )
         .one()
     )
-    assert txn.type == "deduction"
-    assert float(txn.amount) == 17.50
-    assert float(txn.balance_after) == 982.50
+    assert txn.type == "earning"
+    assert float(txn.amount) == 157.50
+    assert float(txn.balance_after) == 1157.50
 
 
 def test_digital_delivery_credits_rider_90_percent_share(db_session):
@@ -187,8 +189,8 @@ def test_delivery_commission_rates_sum_to_one():
 # --- COD cash ledger ---
 
 
-def test_cod_pending_cash_tracks_food_plus_delivery_only(db_session):
-    """pending_cash_owed accrues food + delivery fee, excluding the Rs.15 fee."""
+def test_cod_pending_cash_tracks_full_order_total(db_session):
+    """pending_cash_owed accrues the full collected total, incl. the Rs.15 fee."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -198,8 +200,8 @@ def test_cod_pending_cash_tracks_food_plus_delivery_only(db_session):
     food_service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
 
     db_session.refresh(rider)
-    # 100 + 500 (food) + 175 (delivery) — the 15 platform fee is NOT included.
-    assert float(rider.pending_cash_owed) == 775
+    # 100 + 500 (food) + 175 (delivery) + 15 (platform fee) — the full total.
+    assert float(rider.pending_cash_owed) == 790
 
 
 def test_digital_delivery_leaves_pending_cash_untouched(db_session):
@@ -230,7 +232,7 @@ def test_cod_delivery_forces_rider_offline_at_cap(db_session):
     food_service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
 
     db_session.refresh(rider)
-    assert float(rider.pending_cash_owed) == start + 675
+    assert float(rider.pending_cash_owed) == start + 690
     assert float(rider.pending_cash_owed) >= COD_CAP
     assert rider.is_online is False
 
@@ -245,7 +247,7 @@ def test_cod_delivery_below_cap_keeps_rider_online(db_session):
     food_service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
 
     db_session.refresh(rider)
-    assert float(rider.pending_cash_owed) == 1675
+    assert float(rider.pending_cash_owed) == 1690
     assert rider.is_online is True
 
 

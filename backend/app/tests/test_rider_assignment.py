@@ -2,10 +2,10 @@
 Phase 6 Step 3 — nearest rider assignment tests.
 
 Covers: single eligible rider, multiple riders (nearest selected),
-offline/insufficient-wallet/expired-location riders ignored, no eligible
-rider, correct restaurant coordinates, no double-assignment, and
-unauthorized manipulation rejection. Follows the same service-level
-+ route-level test pattern as test_food_delivery.py.
+offline/expired-location riders ignored, no eligible rider, correct
+restaurant coordinates, no double-assignment, and unauthorized manipulation
+rejection. Follows the same service-level + route-level test pattern as
+test_food_delivery.py.
 """
 import json
 import uuid
@@ -182,8 +182,10 @@ def test_offline_rider_ignored(db_session):
         _cleanup(rider.id)
 
 
-def test_insufficient_wallet_rider_ignored(db_session):
-    """Rider with wallet < 100 (auto-offline threshold) is not eligible."""
+def test_low_wallet_rider_still_eligible(db_session):
+    """Wallet balance does not gate assignment eligibility — a rider with
+    any wallet balance is eligible as long as they are online and have a
+    valid Redis location."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -194,9 +196,10 @@ def test_insufficient_wallet_rider_ignored(db_session):
         result = service.update_order_status(
             db_session, restaurant.id, order.id, "Ready for Pickup"
         )
-        assert result["status"] == "Ready for Pickup"
+        # Rider with wallet=50 is eligible (online + location valid)
+        assert result["status"] == "Rider Assigned"
         db_session.refresh(order)
-        assert order.rider_id is None
+        assert order.rider_id == rider.id
     finally:
         _cleanup(rider.id)
 
