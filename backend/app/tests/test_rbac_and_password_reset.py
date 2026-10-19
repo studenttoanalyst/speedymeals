@@ -10,9 +10,9 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.core.database import get_db
 from app.core.security import hash_password
-from app.platform.auth.models import Admin, RefreshToken
+from app.platform.auth.models import Admin
 from app.modules.food_delivery.models import Restaurant
-from app.modules.admin_roles.models import AdminRole, Permission
+from app.modules.admin_roles.models import AdminRole
 
 
 @pytest.fixture

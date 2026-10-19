@@ -467,7 +467,13 @@ def request_password_reset(db: Session, email: str, role: str) -> dict:
 
     portal_path = "/admin/reset-password" if role == "admin" else "/restaurant/reset-password"
     reset_url = f"https://speedymeals.pk{portal_path}?token={raw_token}"
-    print(f"[AUTH-RESET] Password reset link for {role} <{email_clean}>: {reset_url}")
+    # No email gateway is wired in yet, so non-production keeps printing the
+    # link (local/staging/testing depend on it). Never write a live reset token
+    # to production logs: whoever can read journald could take over the account.
+    if settings.ENVIRONMENT == "production":
+        logger.info("Password reset token issued for %s <%s>", role, email_clean)
+    else:
+        print(f"[AUTH-RESET] Password reset link for {role} <{email_clean}>: {reset_url}")
 
     return {
         "message": "If an active account exists with that email, password reset instructions have been generated.",

@@ -37,7 +37,7 @@ from app.platform.auth import service as auth_service
 from app.platform.auth.jwt_utils import create_access_token
 from app.platform.auth.models import Admin, RefreshToken
 from app.platform.notification.models import DeviceToken
-from app.platform.users.models import Address, User
+from app.platform.users.models import Address
 from app.platform.wallet_payment.models import Rider
 from app.tests.test_order_tracking import (
     _make_address,

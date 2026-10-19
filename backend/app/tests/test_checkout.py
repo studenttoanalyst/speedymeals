@@ -519,7 +519,7 @@ def test_place_order_spec_example_exact_numbers(db_session, customer, address, t
     assert result["payment_method"] == "COD"
 
     # Real rows, frozen values (re-read from the DB, not the return dict).
-    order = db_session.query(Order).get(result["id"])
+    order = db_session.get(Order, result["id"])
     assert order.user_id == customer.id and order.restaurant_id == restaurant.id
     assert order.delivery_address_id == address.id
     assert order.commission_amount == Decimal("100.00")
@@ -694,7 +694,7 @@ def test_place_order_snapshot_frozen_against_commission_change(db_session, custo
     restaurant.commission_rate = 25  # rate change after placement
     db_session.commit()
 
-    order = db_session.query(Order).get(result["id"])
+    order = db_session.get(Order, result["id"])
     assert order.delivery_fee == Decimal("175.00")
     assert order.commission_amount == Decimal("100.00")
     assert order.restaurant_payable == Decimal("900.00")

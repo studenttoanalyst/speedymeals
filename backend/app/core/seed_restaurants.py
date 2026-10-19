@@ -4,8 +4,6 @@ along with rich categorised menu items, pricing, and availability states.
 Enables end-to-end monitoring, testing, and display across customer and merchant interfaces.
 """
 import datetime
-import uuid
-from decimal import Decimal
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.core.security import hash_password

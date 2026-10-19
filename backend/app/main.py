@@ -40,10 +40,48 @@ from app.modules.food_delivery.routes import (
 
 import asyncio
 import os
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="SpeedyMeals API", version="0.1.0")
+_sweeper_task: "asyncio.Task | None" = None
+_deletion_review_task: "asyncio.Task | None" = None
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Application startup / shutdown (replaces deprecated @app.on_event).
+
+    Startup order matters: seed the first admin and demo restaurant before the
+    background loops start, so a fresh database is ready for traffic. Both loops
+    are best-effort and idempotent; cancelling them on shutdown is all the
+    cleanup they need.
+    """
+    global _sweeper_task, _deletion_review_task
+
+    # Sync DB work runs off the event loop, as Starlette did for sync on_event
+    # handlers, so a slow seed never delays the server binding its port.
+    await asyncio.to_thread(seed_bootstrap_data)
+
+    if settings.ASSIGNMENT_SWEEPER_ENABLED:
+        from app.core.assignment_sweeper import run_forever
+
+        _sweeper_task = asyncio.create_task(run_forever())
+    if settings.DELETION_REVIEW_JOB_ENABLED:
+        from app.core.deletion_review_job import run_forever
+
+        _deletion_review_task = asyncio.create_task(run_forever())
+
+    try:
+        yield
+    finally:
+        if _sweeper_task is not None:
+            _sweeper_task.cancel()
+        if _deletion_review_task is not None:
+            _deletion_review_task.cancel()
+
+
+app = FastAPI(title="SpeedyMeals API", version="0.1.0", lifespan=lifespan)
 
 # --- Production-ready CORS ---
 # Allowed browser origins come from settings.ALLOWED_ORIGINS (env-driven:
@@ -121,13 +159,14 @@ def robots():
     return Response(content="User-agent: *\nDisallow: /\n", media_type="text/plain")
 
 
-@app.on_event("startup")
-def seed_first_admin_on_startup() -> None:
+def seed_bootstrap_data() -> None:
     """
     Step 10: auto-seed the first admin and demo restaurant accounts. Uses its own
     short-lived DB session (not the get_db() request dependency, which only
     exists during a request) so this runs once, cleanly, before the app
     starts accepting traffic.
+
+    Called from the lifespan handler above, not from a route.
     """
     # ── SMS configuration banner ──────────────────────────────────────────────
     # Logged at every startup so `journalctl -u speedymeals` immediately shows
@@ -144,7 +183,6 @@ def seed_first_admin_on_startup() -> None:
         f"OS SMS_MODE override={os.environ.get('SMS_MODE', '<not set in OS env>')}"
     )
     logger.info(banner_msg)
-    print(banner_msg, flush=True)
     if sms_mode == "console":
         warn_msg = (
             "[CONFIG] WARNING: SMS is running in CONSOLE mode — OTPs will NOT be dispatched "
@@ -152,11 +190,9 @@ def seed_first_admin_on_startup() -> None:
             "systemd/OS Environment override is active."
         )
         logger.warning(warn_msg)
-        print(warn_msg, flush=True)
     else:
         active_msg = "[CONFIG] SMS gateway: SendPK live dispatch ACTIVE."
         logger.info(active_msg)
-        print(active_msg, flush=True)
     # ─────────────────────────────────────────────────────────────────────────
 
     db = SessionLocal()
@@ -165,44 +201,6 @@ def seed_first_admin_on_startup() -> None:
         auth_service.seed_demo_restaurant(db)
     finally:
         db.close()
-
-
-_sweeper_task: "asyncio.Task | None" = None
-_deletion_review_task: "asyncio.Task | None" = None
-
-
-@app.on_event("startup")
-async def start_assignment_sweeper() -> None:
-    """Expire ignored rider offers and retry unassigned orders (see core/assignment_sweeper.py)."""
-    global _sweeper_task
-    if settings.ASSIGNMENT_SWEEPER_ENABLED:
-        from app.core.assignment_sweeper import run_forever
-
-        _sweeper_task = asyncio.create_task(run_forever())
-
-
-@app.on_event("startup")
-async def start_deletion_review_job() -> None:
-    """Move expired deletion requests into the admin review queue.
-
-    Idempotent and destructive-free: it only flips `pending` ->
-    `ready_for_review` and notifies admins (see core/deletion_review_job.py).
-    Disable it (DELETION_REVIEW_JOB_ENABLED=false) when the sweep is scheduled
-    out of process instead.
-    """
-    global _deletion_review_task
-    if settings.DELETION_REVIEW_JOB_ENABLED:
-        from app.core.deletion_review_job import run_forever
-
-        _deletion_review_task = asyncio.create_task(run_forever())
-
-
-@app.on_event("shutdown")
-async def stop_background_jobs() -> None:
-    if _sweeper_task is not None:
-        _sweeper_task.cancel()
-    if _deletion_review_task is not None:
-        _deletion_review_task.cancel()
 
 
 @app.get("/health")

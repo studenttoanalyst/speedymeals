@@ -37,7 +37,6 @@ from app.platform.account_deletion.schemas import (
     PublicDeletionConfirmSchema,
     PublicDeletionRequestSchema,
     PublicDeletionRequestedResponseSchema,
-    RiderDeletionRequestedResponseSchema,
 )
 from app.platform.auth import service as auth_service
 from app.platform.auth.dependencies import (

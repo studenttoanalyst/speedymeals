@@ -11,9 +11,6 @@ asserts the Sec 11 money numbers hold at every stage including the
 final wallet/cash-owed side effects.
 """
 import uuid
-from datetime import datetime, timezone
-
-import pytest
 
 from app.core import maps_client
 from app.core.config import settings

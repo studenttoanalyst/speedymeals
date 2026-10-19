@@ -4,7 +4,6 @@ Phase 7, Step 3 (order history + reorder) and Step 4 (rating) tests.
 Reuses the same fixtures/helpers as test_order_tracking.py (same module,
 same ownership pattern) rather than redefining them.
 """
-import uuid
 
 import pytest
 from fastapi import FastAPI, HTTPException
@@ -12,7 +11,7 @@ from fastapi.testclient import TestClient
 
 from app.core.database import get_db
 from app.modules.food_delivery import service
-from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Rating
+from app.modules.food_delivery.models import OrderItem
 from app.modules.food_delivery.routes import customer_orders_router
 from app.platform.auth.jwt_utils import create_access_token
 from app.tests.test_order_tracking import (

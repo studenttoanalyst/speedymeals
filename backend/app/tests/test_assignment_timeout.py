@@ -3,7 +3,6 @@ Rider assignment timeout + retry sweeper, and restaurant order rejection.
 Push is mocked; Redis (rider locations, excluded-riders set) is real, like the
 other rider-assignment tests.
 """
-import uuid
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 

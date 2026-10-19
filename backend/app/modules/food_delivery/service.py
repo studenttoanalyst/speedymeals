@@ -28,7 +28,6 @@ from app.platform.users.models import Address
 from app.platform.wallet_payment.service import (
     DELIVERED_STATUS,
     RIDER_DELIVERY_SHARE,
-    WALLET_REMINDER_THRESHOLD,
     _rider_location_key,
     apply_delivery_commission,
     can_assign_cod,
