@@ -1,3 +1,4 @@
+# Xcode / build output
 **/dgph
 *.mode1v3
 *.mode2v3
@@ -10,10 +11,14 @@
 **/.vagrant/
 **/DerivedData/
 Icon?
+profile
+xcuserdata/
+**/*.xcuserstate
+build/
+
+# CocoaPods / Flutter generated
 **/Pods/
 **/.symlinks/
-profile
-xcuserdata
 **/.generated/
 Flutter/App.framework
 Flutter/Flutter.framework
@@ -26,6 +31,27 @@ Flutter/flutter_assets/
 Flutter/flutter_export_environment.sh
 ServiceDefinitions.json
 Runner/GeneratedPluginRegistrant.*
+
+# Signing material — never commit certificates or provisioning profiles
+*.p12
+*.mobileprovision
+*.cer
+key.properties
+*.jks
+*.keystore
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs / OS / IDE
+*.log
+logs/
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+*.swp
 
 # Exceptions to above rules.
 !default.mode1v3

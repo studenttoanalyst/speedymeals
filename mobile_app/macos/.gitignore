@@ -1,7 +1,22 @@
 # Flutter-related
 **/Flutter/ephemeral/
 **/Pods/
+**/Flutter/Generated.xcconfig
+**/Flutter/flutter_export_environment.sh
 
 # Xcode-related
 **/dgph
 **/xcuserdata/
+**/DerivedData/
+build/
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs / OS / IDE
+*.log
+logs/
+.DS_Store
+.idea/
+*.iml
