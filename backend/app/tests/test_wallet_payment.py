@@ -1,9 +1,8 @@
 """
 Unit tests for wallet_payment/service.py.
 
-Covers: first-recharge validation, recharge, go-online gates (kit + balance),
-delivery deduction (correct amount, auto-offline at Rs.100, negative balance
-prevention), cash-collection-cap boundary, and the GET /wallet/profile +
+Covers: recharge (any amount, any method), go-online gates (kit only),
+cash-collection-cap boundary, and the GET /wallet/profile +
 GET /wallet/assignments read views (service-level + route-level auth).
 """
 import uuid
@@ -56,24 +55,19 @@ def test_recharge_wallet_invalid_method_rejected(db_session, rider):
     assert exc_info.value.status_code == 400
 
 
-def test_first_recharge_must_be_exactly_500(db_session, rider):
-    with pytest.raises(HTTPException) as exc_info:
-        service.recharge_wallet(db_session, rider.id, 300, "bank_transfer")
-    assert exc_info.value.status_code == 400
-    assert "First wallet recharge" in exc_info.value.detail
-
-
-def test_first_recharge_exactly_500_succeeds(db_session, rider):
-    txn = service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
-    assert txn.amount == 500
-    assert float(rider.wallet_balance) == 500
+def test_first_recharge_any_amount_allowed(db_session, rider):
+    """No minimum or fixed amount is required for the first recharge."""
+    txn = service.recharge_wallet(db_session, rider.id, 300, "bank_transfer")
+    assert txn.amount == 300
+    db_session.refresh(rider)
+    assert float(rider.wallet_balance) == 300
 
 
 def test_subsequent_recharge_any_amount_allowed(db_session, rider):
-    service.recharge_wallet(db_session, rider.id, 500, "bank_transfer")
+    service.recharge_wallet(db_session, rider.id, 300, "bank_transfer")
     txn = service.recharge_wallet(db_session, rider.id, 200, "jazzcash")
     assert txn.amount == 200
-    assert float(rider.wallet_balance) == 700
+    assert float(rider.wallet_balance) == 500
 
 
 # --- Go-online: kit_completed gate ---

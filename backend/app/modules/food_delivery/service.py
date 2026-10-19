@@ -1019,9 +1019,11 @@ def rider_advance_delivery_status(
         On the Way -> Delivered
 
     On "Delivered" (Step 6), the following side effects fire atomically:
-      - Delivery-fee commission split: platform keeps 10%, rider earns 90%
-        (COD debits the 10% from the wallet; Digital credits the 90% share)
-      - COD: pending_cash_owed += food_subtotal + delivery_fee; the rider is
+      - Delivery-fee commission split: platform keeps 10%, rider earns 90%;
+        the rider's 90% share is credited to their wallet (COD and Digital
+        alike — the platform retains the other 10%)
+      - COD: pending_cash_owed += order.total_amount, the full cash the rider
+        collected (food_subtotal + delivery_fee + PLATFORM_FEE); the rider is
         forced offline once that reaches the COD cash cap
       - Digital: pending_cash_owed unchanged
 
@@ -1059,20 +1061,19 @@ def rider_advance_delivery_status(
         order.delivered_at = datetime.now(timezone.utc)
 
         # Delivery-fee commission split: platform keeps 10%, rider earns 90%.
-        # COD debits the platform's 10% from the rider wallet (the rider is
-        # already holding the cash); Digital credits the rider's 90% share.
+        # The rider's 90% share is credited to their wallet for every
+        # delivery; the platform retains its 10% and never credits it.
         apply_delivery_commission(db, rider_id, order)
 
-        # COD: the rider collects food + delivery fee in cash (the Rs.15
-        # platform fee is not collected by the rider), tracked under
+        # COD: the rider collects the FULL order total in cash (food_subtotal
+        # + delivery_fee + the Rs.15 PLATFORM_FEE), tracked under
         # pending_cash_owed. Digital: no cash changes hands.
         if order.payment_method == "COD":
             rider = db.query(Rider).filter(Rider.id == rider_id).with_for_update().first()
             if rider:
                 rider.pending_cash_owed = float(
                     Decimal(str(rider.pending_cash_owed))
-                    + Decimal(str(order.food_subtotal))
-                    + Decimal(str(order.delivery_fee))
+                    + Decimal(str(order.total_amount))
                 )
                 # At/over the cap -> force offline until an admin approves the
                 # rider's cash submission (approve_cash_deposit).
@@ -1731,7 +1732,7 @@ def place_order(
     Money NEVER comes from Redis or the client — _build_checkout_context
     re-reads authoritative prices from Postgres. All financial snapshot
     values (incl. commission via the Phase 4 calculate_commission helper
-    and rider_earning = 100% of the delivery fee, spec Sec 3.3) are FROZEN
+    and rider_earning = 90% of the delivery fee, spec Sec 3.3) are FROZEN
     on the order row at placement, so later changes to a restaurant's
     commission_rate or the fee formula cannot rewrite history.
 

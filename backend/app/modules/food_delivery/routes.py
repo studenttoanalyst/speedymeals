@@ -475,6 +475,11 @@ async def websocket_track_rider(
     Authenticates user via token query param (`?token=...`), verifies order ownership,
     subscribes to Redis Pub/Sub channel `order:location:{order_id}`, and streams
     live JSON location frames. Auto-disconnects on terminal status or client disconnect.
+
+    NFR-04 compliance: both synchronous blocking calls in the streaming loop
+    (Redis pubsub socket read and SQLAlchemy DB round-trip) are wrapped in
+    asyncio.to_thread() so they run in the ThreadPoolExecutor without ever
+    freezing the asyncio event loop.
     """
     # Accept the handshake BEFORE validating credentials. Closing pre-accept is
     # surfaced to clients as an opaque HTTP 403 handshake rejection, which looks
@@ -543,15 +548,21 @@ async def websocket_track_rider(
         )
     )
 
-    # Pub/Sub streaming loop using redis_client async channel listener
+    # Pub/Sub streaming loop — NFR-04 compliant.
+    # redis-py pubsub uses a blocking socket; SQLAlchemy uses a sync Session.
+    # Both are offloaded via asyncio.to_thread() so the event loop stays free.
     pubsub = redis_client.pubsub()
     channel_name = f"order:location:{order_id}"
-    pubsub.subscribe(channel_name)
+    await asyncio.to_thread(pubsub.subscribe, channel_name)
 
     try:
         while True:
-            # Non-blocking check for pubsub messages
-            message = pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
+            # NFR-04 fix 1: offload the blocking Redis socket read to a thread.
+            # get_message(timeout=1.0) holds the event loop for up to 1 s;
+            # asyncio.to_thread() lets other coroutines run during that wait.
+            message = await asyncio.to_thread(
+                pubsub.get_message, ignore_subscribe_messages=True, timeout=1.0
+            )
             if message and message["type"] == "message":
                 data = json.loads(message["data"])
                 await websocket.send_json({
@@ -559,10 +570,14 @@ async def websocket_track_rider(
                     "data": data,
                 })
 
-            # Check if order transitioned to a terminal status
+            # NFR-04 fix 2: offload the synchronous SQLAlchemy call to a thread.
+            # Each call involves a PostgreSQL network round-trip; without
+            # asyncio.to_thread() that I/O blocks the event loop entirely.
             db.expire_all()
             try:
-                current_status = service.get_order_rider_location(db, user_id, role, order_id)
+                await asyncio.to_thread(
+                    service.get_order_rider_location, db, user_id, role, order_id
+                )
             except HTTPException as exc:
                 if exc.status_code == 409:
                     await websocket.send_json({
@@ -577,9 +592,10 @@ async def websocket_track_rider(
     except WebSocketDisconnect:
         pass
     finally:
+        # Cleanup calls are also synchronous — offload so disconnect never blocks.
         try:
-            pubsub.unsubscribe(channel_name)
-            pubsub.close()
+            await asyncio.to_thread(pubsub.unsubscribe, channel_name)
+            await asyncio.to_thread(pubsub.close)
         except Exception:
             pass
 

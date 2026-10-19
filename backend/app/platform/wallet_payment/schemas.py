@@ -194,7 +194,7 @@ class RiderWalletProfileResponseSchema(BaseModel):
 
 class RiderAssignmentItemSchema(BaseModel):
     """One assigned order in GET /wallet/assignments — payout fields are
-    the frozen per-order snapshots (rider_earning = 100% of delivery fee,
+    the frozen per-order snapshots (rider_earning = 90% of delivery fee,
     spec Sec 3.3), never recomputed at read time. Includes location snapshot.
     """
     id: uuid.UUID

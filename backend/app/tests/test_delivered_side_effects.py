@@ -68,10 +68,10 @@ def _make_order(db, restaurant, customer, address, payment_method="COD", rider=N
         food_subtotal=500,
         delivery_distance_km=3,
         delivery_fee=delivery_fee,
-        total_amount=500 + delivery_fee,
+        total_amount=500 + delivery_fee + service.PLATFORM_FEE,
         commission_amount=50,
         restaurant_payable=450,
-        rider_earning=delivery_fee,
+        rider_earning=delivery_fee * wallet_service.RIDER_DELIVERY_SHARE,
         rider_id=rider.id if rider else None,
         country_code="+92",
         currency="PKR",
@@ -147,8 +147,8 @@ def test_delivered_digital_creates_wallet_transaction(db_session):
 # --- COD payment tests ---
 
 
-def test_delivered_cod_deducts_wallet_and_increases_cash_owed(db_session):
-    """COD: wallet - 10% delivery commission, pending_cash_owed + food+delivery."""
+def test_delivered_cod_credits_rider_share_and_increases_cash_owed(db_session):
+    """COD: wallet + 90% delivery share, pending_cash_owed + full order total."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -161,13 +161,14 @@ def test_delivered_cod_deducts_wallet_and_increases_cash_owed(db_session):
 
     assert result["status"] == "Delivered"
     db_session.refresh(rider)
-    # 10% of the 175.00 delivery fee -> -17.50
-    assert float(rider.wallet_balance) == 982.50
-    assert float(rider.pending_cash_owed) == 675  # food (500) + delivery (175)
+    # 90% of the 175.00 delivery fee -> +157.50
+    assert float(rider.wallet_balance) == 1157.50
+    # food (500) + delivery (175) + platform fee (15)
+    assert float(rider.pending_cash_owed) == 690
 
 
 def test_delivered_cod_cash_owed_uses_frozen_total(db_session):
-    """COD: pending_cash_owed accrues food_subtotal + delivery_fee (frozen)."""
+    """COD: pending_cash_owed accrues the frozen order.total_amount."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -177,7 +178,7 @@ def test_delivered_cod_cash_owed_uses_frozen_total(db_session):
     service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
 
     db_session.refresh(rider)
-    expected = float(order.food_subtotal) + float(order.delivery_fee)
+    expected = float(order.total_amount)
     assert float(rider.pending_cash_owed) == expected
 
 
@@ -195,8 +196,8 @@ def test_delivered_cod_accumulates_cash_owed(db_session):
     service.rider_advance_delivery_status(db_session, rider.id, order2.id, "Delivered")
 
     db_session.refresh(rider)
-    assert float(rider.pending_cash_owed) == 1350  # 675 + 675
-    assert float(rider.wallet_balance) == 965  # 1000 - 17.50 - 17.50
+    assert float(rider.pending_cash_owed) == 1380  # 690 + 690
+    assert float(rider.wallet_balance) == 1315  # 1000 + 157.50 + 157.50
 
 
 # --- Exactly-once / duplicate delivery tests ---
@@ -288,9 +289,9 @@ def test_cancelled_order_no_wallet_deduction(db_session):
 # --- Low balance: COD commission is still owed (may push wallet negative) ---
 
 
-def test_delivered_cod_commission_applies_on_low_balance(db_session):
-    """COD: the platform's 10% cut is a debt — it is debited even when the
-    wallet is below the commission, and the rider is forced offline."""
+def test_delivered_cod_credits_rider_share_on_low_balance(db_session):
+    """COD: the rider's 90% share is credited even from a near-empty wallet,
+    and a credit can never trip the auto-offline threshold."""
     restaurant = _make_restaurant(db_session)
     customer = _make_customer(db_session)
     address = _make_address(db_session, customer)
@@ -303,13 +304,40 @@ def test_delivered_cod_commission_applies_on_low_balance(db_session):
 
     assert result["status"] == "Delivered"
     db_session.refresh(rider)
-    assert float(rider.wallet_balance) == -12.50  # 5 - 17.50
-    assert rider.is_online is False  # below the auto-offline threshold
+    assert float(rider.wallet_balance) == 162.50  # 5 + 157.50
+    assert rider.is_online is True  # crediting never forces a rider offline
 
     txn = db_session.query(WalletTransaction).filter(
         WalletTransaction.rider_id == rider.id,
         WalletTransaction.order_id == order.id,
     ).first()
     assert txn is not None
-    assert txn.type == "deduction"
-    assert float(txn.amount) == 17.50
+    assert txn.type == "earning"
+    assert float(txn.amount) == 157.50
+
+
+# --- COD accrual and deposit expectation share one base (no Rs.15 mismatch) ---
+
+
+def test_cod_pending_cash_matches_deposit_expected_amount(db_session):
+    """The COD accrual and `_compute_expected_cash` use the SAME base
+    (order.total_amount), so an exact deposit reconciles to 0 discrepancy."""
+    restaurant = _make_restaurant(db_session)
+    customer = _make_customer(db_session)
+    address = _make_address(db_session, customer)
+    rider = _make_rider(db_session, wallet=1000)
+    order = _make_order(db_session, restaurant, customer, address, "COD", rider)
+
+    service.rider_advance_delivery_status(db_session, rider.id, order.id, "Delivered")
+    db_session.refresh(rider)
+
+    assert float(rider.pending_cash_owed) == float(order.total_amount)
+    assert float(rider.pending_cash_owed) == wallet_service._compute_expected_cash(
+        db_session, rider.id
+    )
+
+    deposit = wallet_service.create_cash_deposit(
+        db_session, rider.id, float(rider.pending_cash_owed), "bank_transfer"
+    )
+    assert deposit.expected_amount == float(order.total_amount)
+    assert deposit.discrepancy == 0

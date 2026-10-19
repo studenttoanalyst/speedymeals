@@ -1,11 +1,14 @@
 """
 Wallet business logic.
 Step 2: recharge + balance read.
-Step 3/4: go-online toggle with min-balance check + auto-force-offline.
+Step 3/4: go-online toggle (kit_completed gate only — no minimum balance
+requirement).
 Step 5: delivery-fee commission split — platform keeps 10%, rider earns 90%.
 Settled by `apply_delivery_commission()` from the order "Delivered" flow:
-COD debits the platform's 10% from the rider wallet (the rider holds the
-cash), Digital credits the rider's 90% share.
+the rider's 90% share is CREDITED to their wallet on every delivery (COD and
+Digital alike); the platform retains its 10% and never credits it. For COD
+the rider separately owes the full cash they collected from the customer
+(the whole order total, incl. the Rs. 15 platform fee) via `pending_cash_owed`.
 Step 6: cash deposit tracking (expected vs actual, discrepancy flag).
 Submitting cash only records an unverified deposit; `approve_cash_deposit()`
 (admin) is what reduces `pending_cash_owed`.
@@ -41,10 +44,6 @@ from app.platform.users.models import Address
 from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, WalletTransaction
 
 # Wallet thresholds
-MIN_WALLET_BALANCE_TO_GO_ONLINE = 500
-WALLET_REMINDER_THRESHOLD = 100
-WALLET_AUTO_OFFLINE_THRESHOLD = 100
-INITIAL_WALLET_RECHARGE = 500
 KIT_DEPOSIT_AMOUNT = 5000
 
 # Delivery-fee commission split (SpeedyMeals business model): the platform
@@ -91,15 +90,8 @@ def _get_rider_or_404(db: Session, rider_id: uuid.UUID, for_update: bool = False
     return rider
 
 
-def _force_offline_if_below_min(rider: Rider) -> None:
-    """Force rider offline when wallet balance drops below the auto-offline
-    threshold. Does not commit — caller controls the transaction."""
-    if float(rider.wallet_balance) < WALLET_AUTO_OFFLINE_THRESHOLD:
-        rider.is_online = False
-
-
 def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str) -> WalletTransaction:
-    """Recharge the rider's wallet. First recharge must be exactly Rs. 500."""
+    """Recharge the rider's wallet. Any positive amount is accepted on any recharge."""
     if method not in VALID_RECHARGE_METHODS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -107,17 +99,6 @@ def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str
         )
 
     rider = _get_rider_or_404(db, rider_id, for_update=True)
-
-    existing_recharges = db.query(WalletTransaction).filter(
-        WalletTransaction.rider_id == rider_id,
-        WalletTransaction.type == "recharge",
-    ).count()
-
-    if existing_recharges == 0 and amount != INITIAL_WALLET_RECHARGE:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"First wallet recharge must be exactly Rs. {INITIAL_WALLET_RECHARGE}.",
-        )
 
     new_balance = Decimal(str(rider.wallet_balance)) + Decimal(str(amount))
     rider.wallet_balance = float(new_balance)
@@ -182,12 +163,17 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
 def apply_delivery_commission(db: Session, rider_id: uuid.UUID, order) -> WalletTransaction:
     """Settle the delivery-fee commission split when an order is Delivered.
 
-    Platform commission = 10% of the delivery fee, rider earning = 90%.
-    The money movement depends on how the customer paid:
-      - COD: the rider already collected the cash, so the platform's 10%
-        cut is DEBITED from the rider's wallet balance.
-      - Digital: the platform received the money, so the rider's 90%
-        share is CREDITED to their wallet balance.
+    The rider earns 90% of the delivery fee on every delivery, regardless
+    of how the customer paid, so the wallet always matches the frozen
+    `order.rider_earning` snapshot. Only that 90% rider share is credited;
+    the platform's remaining 10% is kept and never added to the rider's
+    earnings:
+      - Digital: the platform received the money online, so it pays the
+        rider's 90% share out of that.
+      - COD: the rider collected the FULL order total in cash (see the
+        `pending_cash_owed` accrual in food_delivery/service.py); the
+        platform retains its 10% when that cash is deposited, so crediting
+        the 90% share here is what the rider actually earns.
 
     Does NOT commit — caller controls the transaction (same contract the
     previous flat-fee helper had), so the status change and every wallet
@@ -196,30 +182,18 @@ def apply_delivery_commission(db: Session, rider_id: uuid.UUID, order) -> Wallet
     rider = _get_rider_or_404(db, rider_id, for_update=True)
 
     delivery_fee = Decimal(str(order.delivery_fee))
-    platform_commission = (delivery_fee * DELIVERY_COMMISSION_RATE).quantize(Decimal("0.01"))
     rider_share = (delivery_fee * RIDER_DELIVERY_SHARE).quantize(Decimal("0.01"))
 
-    if order.payment_method == "COD":
-        rider.wallet_balance = float(
-            Decimal(str(rider.wallet_balance)) - platform_commission
-        )
-        _force_offline_if_below_min(rider)
-        txn_type = "deduction"
-        txn_amount = platform_commission
-    else:
-        rider.wallet_balance = float(
-            Decimal(str(rider.wallet_balance)) + rider_share
-        )
-        txn_type = "earning"
-        txn_amount = rider_share
-
+    rider.wallet_balance = float(
+        Decimal(str(rider.wallet_balance)) + rider_share
+    )
     db.add(rider)
 
     txn = WalletTransaction(
         rider_id=rider.id,
         order_id=order.id,
-        type=txn_type,
-        amount=float(txn_amount),
+        type="earning",
+        amount=float(rider_share),
         balance_after=rider.wallet_balance,
     )
     db.add(txn)
@@ -244,6 +218,11 @@ def _compute_expected_cash(db: Session, rider_id: uuid.UUID) -> float:
     """
     Step 6 helper — sum of COD `Delivered` order totals since the rider's
     last cash deposit (all-time if this is their first deposit ever).
+
+    Uses `Order.total_amount`, which is exactly what the rider collected
+    in cash (food_subtotal + delivery_fee + PLATFORM_FEE) — the same figure
+    the Delivered side effect accrues into `pending_cash_owed`, so an
+    honest, complete deposit reconciles to a zero discrepancy.
     """
     last_deposit = (
         db.query(CashDeposit)
@@ -458,14 +437,11 @@ def update_rider_location(
 
 
 def rider_eligible_for_assignment(db: Session, rider_id: uuid.UUID) -> bool:
-    """Three-gate eligibility: is_online, wallet above auto-offline threshold,
-    and valid Redis location."""
+    """Two-gate eligibility: is_online and valid Redis location.
+    No wallet balance threshold is enforced at assignment time."""
     rider = _get_rider_or_404(db, rider_id)
 
     if not rider.is_online:
-        return False
-
-    if float(rider.wallet_balance) < WALLET_AUTO_OFFLINE_THRESHOLD:
         return False
 
     if not redis_client.exists(_rider_location_key(rider_id)):

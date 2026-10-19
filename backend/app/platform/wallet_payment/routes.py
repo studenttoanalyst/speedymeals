@@ -62,8 +62,8 @@ def set_online_status(
     db: Session = Depends(get_db),
 ):
     """
-    Step 3 — go-online/offline toggle. Going online (is_online=true) is
-    rejected with 400 if wallet_balance < Rs. 500. Going offline
+    Step 3 — go-online/offline toggle. Going online (is_online=true) requires
+    kit_completed and pending_cash_owed below the COD cap. Going offline
     (is_online=false) is always allowed.
     """
     return service.set_online_status(db, current_user.id, payload.is_online)

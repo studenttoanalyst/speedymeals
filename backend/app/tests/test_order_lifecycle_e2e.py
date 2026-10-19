@@ -177,11 +177,11 @@ def test_full_lifecycle_cod(db_session, monkeypatch):
     assert order.status == "Delivered"
     assert order.delivered_at is not None
 
-    # COD: platform's 10% delivery commission debited once (10% of 175).
-    assert float(rider.wallet_balance) == 982.50  # started at 1000
+    # COD: the rider's 90% delivery share is credited (90% of 175).
+    assert float(rider.wallet_balance) == 1157.50  # started at 1000
 
-    # COD: food + delivery fee added to pending_cash_owed (1000 + 175).
-    assert float(rider.pending_cash_owed) == 1175
+    # COD: the full collected total is owed (food 1000 + delivery 175 + fee 15).
+    assert float(rider.pending_cash_owed) == 1190
 
 
 # --- Digital path ---
