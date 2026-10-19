@@ -13,6 +13,7 @@ are added here in Step 3d - both depend on tables that already exist
 (Restaurant, Rider), so no ordering issue.
 """
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import String, Boolean, Integer, Numeric, Text, Date, DateTime, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
@@ -31,14 +32,14 @@ class Rider(BaseModel, UpdatedAtMixin):
     license_photo_url: Mapped[str | None] = mapped_column(String, nullable=True)
     vehicle_photo_url: Mapped[str | None] = mapped_column(String, nullable=True)
     approval_status: Mapped[str] = mapped_column(String, nullable=False)  # pending/approved/rejected
-    wallet_balance: Mapped[float] = mapped_column(Numeric, default=0, nullable=False)
-    pending_cash_owed: Mapped[float] = mapped_column(Numeric, default=0, nullable=False)
+    wallet_balance: Mapped[Decimal] = mapped_column(Numeric, default=Decimal('0'), nullable=False)
+    pending_cash_owed: Mapped[Decimal] = mapped_column(Numeric, default=Decimal('0'), nullable=False)
     is_online: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     current_latitude: Mapped[float | None] = mapped_column(Numeric, nullable=True)
     current_longitude: Mapped[float | None] = mapped_column(Numeric, nullable=True)
     country_code: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    commission_rate: Mapped[float | None] = mapped_column(Numeric, default=None, nullable=True)
+    commission_rate: Mapped[Decimal | None] = mapped_column(Numeric, default=None, nullable=True)
     # Kit deposit & handover tracking
     kit_deposit_paid: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     kit_deposit_date: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -61,17 +62,17 @@ class WalletTransaction(BaseModel):
     )  # nullable: a wallet recharge has no order, only a per-delivery deduction does
     # "recharge", "deduction" (COD delivery commission) or "earning" (Digital rider share)
     type: Mapped[str] = mapped_column(String, nullable=False)
-    amount: Mapped[float] = mapped_column(Numeric, nullable=False)
-    balance_after: Mapped[float] = mapped_column(Numeric, nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    balance_after: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
 
 
 class CashDeposit(BaseModel):
     rider_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("riders.id"), nullable=False, index=True
     )  # last-deposit lookup before every deposit + expected-cash math
-    amount_submitted: Mapped[float] = mapped_column(Numeric, nullable=False)
-    expected_amount: Mapped[float] = mapped_column(Numeric, nullable=False)
-    discrepancy: Mapped[float] = mapped_column(Numeric, default=0, nullable=False)
+    amount_submitted: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    expected_amount: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    discrepancy: Mapped[Decimal] = mapped_column(Numeric, default=Decimal('0'), nullable=False)
     submission_method: Mapped[str | None] = mapped_column(String, nullable=True)
     verified_by_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
@@ -82,9 +83,10 @@ class Settlement(BaseModel):
     )
     period_start: Mapped[object] = mapped_column(Date, nullable=False)
     period_end: Mapped[object] = mapped_column(Date, nullable=False)
-    total_sales: Mapped[float] = mapped_column(Numeric, nullable=False)
-    commission_deducted: Mapped[float] = mapped_column(Numeric, nullable=False)
-    net_payable: Mapped[float] = mapped_column(Numeric, nullable=False)
+    total_sales: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    commission_deducted: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+    net_payable: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
+
     status: Mapped[str] = mapped_column(String, nullable=False)
     paid_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -95,6 +97,6 @@ class RiderPayout(BaseModel):
     )  # payout history + last-payout lookup in earnings summary
     period_start: Mapped[object] = mapped_column(Date, nullable=False)
     period_end: Mapped[object] = mapped_column(Date, nullable=False)
-    total_earning: Mapped[float] = mapped_column(Numeric, nullable=False)
+    total_earning: Mapped[Decimal] = mapped_column(Numeric, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
     paid_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -29,8 +29,11 @@ ever run out of strict chronological order.
 """
 import json
 import uuid
-from datetime import datetime, timezone
 from decimal import Decimal
+from datetime import datetime, timezone
+
+# Low wallet balance reminder threshold (Rs.)
+WALLET_REMINDER_THRESHOLD = Decimal('2000')
 
 from fastapi import HTTPException, status
 from sqlalchemy import func
@@ -90,7 +93,7 @@ def _get_rider_or_404(db: Session, rider_id: uuid.UUID, for_update: bool = False
     return rider
 
 
-def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str) -> WalletTransaction:
+def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: Decimal, method: str) -> WalletTransaction:
     """Recharge the rider's wallet. Any positive amount is accepted on any recharge."""
     if method not in VALID_RECHARGE_METHODS:
         raise HTTPException(
@@ -101,7 +104,7 @@ def recharge_wallet(db: Session, rider_id: uuid.UUID, amount: float, method: str
     rider = _get_rider_or_404(db, rider_id, for_update=True)
 
     new_balance = Decimal(str(rider.wallet_balance)) + Decimal(str(amount))
-    rider.wallet_balance = float(new_balance)
+    rider.wallet_balance = new_balance.quantize(Decimal('0.01'))
     db.add(rider)
 
     txn = WalletTransaction(
@@ -136,7 +139,7 @@ def set_online_status(db: Session, rider_id: uuid.UUID, is_online: bool) -> Ride
                 detail="Kit deposit and handover must be completed before going online.",
             )
 
-        if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
+        if rider.pending_cash_owed >= settings.CASH_COLLECTION_CAP:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
@@ -177,16 +180,14 @@ def apply_delivery_commission(db: Session, rider_id: uuid.UUID, order) -> Wallet
     delivery_fee = Decimal(str(order.delivery_fee))
     rider_share = (delivery_fee * RIDER_DELIVERY_SHARE).quantize(Decimal("0.01"))
 
-    rider.wallet_balance = float(
-        Decimal(str(rider.wallet_balance)) + rider_share
-    )
+    rider.wallet_balance = (Decimal(str(rider.wallet_balance)) + rider_share).quantize(Decimal('0.01'))
     db.add(rider)
 
     txn = WalletTransaction(
         rider_id=rider.id,
         order_id=order.id,
         type="earning",
-        amount=float(rider_share),
+        amount=rider_share,
         balance_after=rider.wallet_balance,
     )
     db.add(txn)
@@ -201,7 +202,7 @@ def enforce_cod_cash_cap(rider: Rider) -> bool:
     COD orders until an admin approves a cash deposit. Returns True when
     the rider was capped. Does NOT commit — caller controls the transaction.
     """
-    if float(rider.pending_cash_owed) >= settings.CASH_COLLECTION_CAP:
+    if rider.pending_cash_owed >= settings.CASH_COLLECTION_CAP:
         rider.is_online = False
         return True
     return False
@@ -233,11 +234,11 @@ def _compute_expected_cash(db: Session, rider_id: uuid.UUID) -> float:
         query = query.filter(Order.delivered_at > last_deposit.created_at)
 
     total = query.with_entities(func.coalesce(func.sum(Order.total_amount), 0)).scalar()
-    return float(total)
+    return total
 
 
 def create_cash_deposit(
-    db: Session, rider_id: uuid.UUID, amount_submitted: float, submission_method: str
+    db: Session, rider_id: uuid.UUID, amount_submitted: Decimal, submission_method: str
 ) -> CashDeposit:
     """
     Step 6 — rider submits daily COD cash. `expected_amount` is computed
@@ -302,7 +303,7 @@ def approve_cash_deposit(db: Session, deposit_id: uuid.UUID) -> CashDeposit:
         Decimal(str(rider.pending_cash_owed)) - Decimal(str(deposit.amount_submitted)),
         Decimal("0"),
     )
-    rider.pending_cash_owed = float(new_owed)
+    rider.pending_cash_owed = new_owed.quantize(Decimal('0.01'))
     deposit.verified_by_admin = True
     db.add_all([rider, deposit])
     db.commit()
@@ -318,7 +319,7 @@ def can_assign_cod(db: Session, rider_id: uuid.UUID) -> bool:
     side, not here.
     """
     rider = _get_rider_or_404(db, rider_id)
-    return float(rider.pending_cash_owed) < settings.CASH_COLLECTION_CAP
+    return rider.pending_cash_owed < settings.CASH_COLLECTION_CAP
 
 
 def get_cod_eligibility(db: Session, rider_id: uuid.UUID) -> dict:
@@ -327,8 +328,8 @@ def get_cod_eligibility(db: Session, rider_id: uuid.UUID) -> dict:
     directly instead of hitting this route)."""
     rider = _get_rider_or_404(db, rider_id)
     return {
-        "can_accept_cod": float(rider.pending_cash_owed) < settings.CASH_COLLECTION_CAP,
-        "pending_cash_owed": float(rider.pending_cash_owed),
+        "can_accept_cod": rider.pending_cash_owed < settings.CASH_COLLECTION_CAP,
+        "pending_cash_owed": rider.pending_cash_owed,
         "cap": settings.CASH_COLLECTION_CAP,
     }
 
@@ -357,9 +358,9 @@ def get_rider_earnings_summary(db: Session, rider_id: uuid.UUID) -> dict:
     earnings_balance = query.with_entities(func.coalesce(func.sum(Order.rider_earning), 0)).scalar()
 
     return {
-        "earnings_balance": float(earnings_balance),
-        "wallet_balance": float(rider.wallet_balance),
-        "pending_cash_owed": float(rider.pending_cash_owed),
+        "earnings_balance": earnings_balance,
+        "wallet_balance": rider.wallet_balance,
+        "pending_cash_owed": rider.pending_cash_owed,
     }
 
 
@@ -620,9 +621,9 @@ def get_rider_wallet_profile(db: Session, rider_id: uuid.UUID) -> dict:
     )
 
     return {
-        "total_earnings": float(total_earnings),
-        "current_balance": float(rider.wallet_balance),
-        "pending_payouts": float(pending_payouts),
+        "total_earnings": total_earnings,
+        "current_balance": rider.wallet_balance,
+        "pending_payouts": pending_payouts,
         "is_online": rider.is_online,
         "id": rider.id,
         "name": rider.name,
@@ -646,7 +647,7 @@ def _snapshot_or_live(snapshot: float | None, live: float | None) -> float | Non
     placed after the snapshot migration), else the live Restaurant/Address
     value (legacy orders), else None."""
     value = snapshot if snapshot is not None else live
-    return float(value) if value is not None else None
+    return value if value is not None else None
 
 
 def get_rider_assignments(db: Session, rider_id: uuid.UUID) -> dict:
@@ -685,10 +686,10 @@ def get_rider_assignments(db: Session, rider_id: uuid.UUID) -> dict:
             "id": order.id,
             "status": order.status,
             "payment_method": order.payment_method,
-            "delivery_distance_km": float(order.delivery_distance_km),
-            "delivery_fee": float(order.delivery_fee),
-            "total_amount": float(order.total_amount),
-            "rider_earning": float(order.rider_earning),
+            "delivery_distance_km": order.delivery_distance_km,
+            "delivery_fee": order.delivery_fee,
+            "total_amount": order.total_amount,
+            "rider_earning": order.rider_earning,
             "placed_at": order.placed_at,
             "delivered_at": order.delivered_at,
             "restaurant_lat": _snapshot_or_live(order.restaurant_lat, rest_lat),
