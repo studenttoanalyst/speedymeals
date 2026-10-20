@@ -1,4 +1,6 @@
 flutter/ephemeral/
+build/
+**/ephemeral/
 
 # Visual Studio user-specific files.
 *.suo
@@ -11,7 +13,17 @@ x64/
 x86/
 
 # Visual Studio cache files
-# files ending in .cache can be ignored
 *.[Cc]ache
-# but keep track of directories ending in .cache
 !*.[Cc]ache/
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs / OS / IDE
+*.log
+logs/
+Thumbs.db
+Desktop.ini
+.idea/
+*.iml

@@ -8,6 +8,7 @@ import '../../data/repositories/user_repository.dart';
 import '../../data/json_utils.dart';
 import '../../services/cart_service.dart';
 import '../checkout/checkout_screen.dart';
+import '../../widgets/gst_note.dart';
 import '../../widgets/skeleton/skeleton.dart';
 
 /// Cart screen backed by the backend's per-restaurant Redis cart.
@@ -397,12 +398,23 @@ class _CartBody extends StatelessWidget {
             top: false,
             child: Column(
               children: [
+                // Subtotal uses the backend preview's food figure once it
+                // resolves, so the rows sum exactly to `total`; until then the
+                // cart's own backend-supplied subtotal is shown.
                 _SummaryRow(
                   label: 'Subtotal',
-                  value: formatPkr(cart.subtotal),
+                  value: preview?.foodSubtotalLabel ?? formatPkr(cart.subtotal),
                 ),
                 const SizedBox(height: 6),
                 if (preview != null) ...[
+                  // Exclusive GST: added on top of the food subtotal.
+                  if (preview!.hasGst && !preview!.pricesIncludeGst) ...[
+                    _SummaryRow(
+                      label: preview!.gstRowLabel,
+                      value: preview!.gstAmountLabel,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
                   _SummaryRow(
                     label: 'Delivery Fee (${preview!.distanceLabel})',
                     value: preview!.deliveryFeeLabel,
@@ -413,6 +425,11 @@ class _CartBody extends StatelessWidget {
                     value: preview!.platformFeeLabel,
                   ),
                   const SizedBox(height: 6),
+                  // Inclusive GST: already inside food prices — note only.
+                  if (preview!.hasGst && preview!.pricesIncludeGst) ...[
+                    GstNote(text: preview!.gstIncludedNote),
+                    const SizedBox(height: 6),
+                  ],
                 ] else
                   _DeliveryFeePendingRow(
                     isLoading: isLoadingPreview,

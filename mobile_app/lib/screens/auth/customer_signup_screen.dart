@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
+import '../../widgets/legal_links.dart';
 import 'customer_login_screen.dart';
 import 'otp_verification_screen.dart';
 
@@ -18,11 +20,25 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
+
   bool _agreeToTerms = true;
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () => LegalUtils.openTerms(context);
+    _privacyRecognizer = TapGestureRecognizer()
+      ..onTap = () => LegalUtils.openPrivacy(context);
+  }
+
+  @override
   void dispose() {
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
@@ -102,16 +118,6 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
         });
       }
     }
-  }
-
-  void _showSocialComingSoon(String provider) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$provider Sign-Up coming soon!'),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
   }
 
   @override
@@ -205,7 +211,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Join Speedy Meals and get your favorite meals delivered fast',
+                        'Join SpeedyMeals and get your favorite meals delivered fast',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -308,22 +314,26 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                                   fontSize: 12,
                                   color: Color(0xFF64748B),
                                 ),
-                                children: const [
-                                  TextSpan(text: 'I agree to the '),
+                                children: [
+                                  const TextSpan(text: 'I agree to the '),
                                   TextSpan(
-                                    text: 'Terms of Service',
-                                    style: TextStyle(
+                                    text: 'Terms & Conditions',
+                                    style: const TextStyle(
                                       color: Color(0xFFDC2626),
                                       fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
                                     ),
+                                    recognizer: _termsRecognizer,
                                   ),
-                                  TextSpan(text: ' & '),
+                                  const TextSpan(text: ' and '),
                                   TextSpan(
                                     text: 'Privacy Policy',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Color(0xFFDC2626),
                                       fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
                                     ),
+                                    recognizer: _privacyRecognizer,
                                   ),
                                 ],
                               ),
@@ -381,8 +391,9 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                         ),
                       ),
 
-
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+                      const LegalConsentText(),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),

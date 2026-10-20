@@ -8,10 +8,12 @@ import '../../data/models/rider_models.dart';
 import '../../data/repositories/rider_repository.dart';
 import '../../services/auth_service.dart';
 import '../auth/register_as_screen.dart';
+import 'rider_account_screen.dart';
 import 'rider_documents_screen.dart';
 import 'rider_wallet_screen.dart';
 import '../../features/maps/maps.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../widgets/location_disclosure.dart';
 import '../../widgets/skeleton/skeleton.dart';
 
 /// Delivery Rider dashboard — the rider's real workspace.
@@ -19,7 +21,7 @@ import '../../widgets/skeleton/skeleton.dart';
 /// Backed entirely by the rider endpoints:
 ///   GET  /wallet/profile                  → approval state, wallet, docs
 ///   GET  /wallet/assignments              → the rider's job board
-///   PATCH /wallet/status                  → go online/offline (Rs. 500 floor)
+///   PATCH /wallet/status                  → go online/offline (requires kit completion)
 ///   PATCH /wallet/location                → push GPS (required to be assignable)
 ///   POST /wallet/assignments/{id}/respond → accept / reject
 ///   PATCH /wallet/deliveries/{id}/status/… → arrived → picked up → on the way → delivered
@@ -94,6 +96,11 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   /// True once active-delivery tracking has been started via the publisher.
   bool _activeTrackingRunning = false;
+
+  /// Set once the rider dismisses the location disclosure from the automatic
+  /// delivery-tracking path, so every reload does not re-open the dialog.
+  /// An explicit go-online still shows it again.
+  bool _riderDisclosureDeclined = false;
 
   /// Subscription to the live position stream for map marker updates.
   StreamSubscription<Position>? _positionMarkerSub;
@@ -195,6 +202,19 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
     if (_hasActiveDelivery && _isApproved && (_profile?.isOnline ?? false)) {
       if (!_activeTrackingRunning) {
+        // Automatic delivery tracking: never trigger the OS prompt without
+        // the disclosure first. Declining is remembered so the rider is not
+        // re-prompted on every reload; an explicit go-online still can.
+        if (!await LocationDisclosure.isRiderAcknowledged()) {
+          if (_riderDisclosureDeclined || !mounted) return;
+          final accepted =
+              await LocationDisclosure.ensureRiderAcknowledged(context);
+          if (!accepted || !mounted) {
+            _riderDisclosureDeclined = true;
+            setState(() => _locationStatus = 'Location sharing is off');
+            return;
+          }
+        }
         final result = await _locationPublisher.start();
         _activeTrackingRunning = result.isGranted;
 
@@ -257,6 +277,21 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   /// location the backend treats the rider as unavailable, so the UI says so
   /// instead of pretending they are online and reachable.
   Future<bool> _pushLocation({bool silent = false}) async {
+    if (!mounted) return false;
+
+    // Play policy: the prominent location disclosure must appear before the
+    // first OS permission prompt. The background timer never interrupts the
+    // rider — it skips until they have acknowledged it — while the explicit
+    // go-online action always gets the dialog.
+    if (silent) {
+      if (!await LocationDisclosure.isRiderAcknowledged()) return false;
+    } else if (!await LocationDisclosure.ensureRiderAcknowledged(context)) {
+      if (mounted) {
+        setState(() => _locationStatus = 'Location sharing is off');
+      }
+      return false;
+    }
+
     try {
       // M6: this online/TTL path now goes through the single injectable GPS
       // service (instead of calling Geolocator statics directly), so it shares
@@ -366,7 +401,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
         );
       }
     } on ApiException catch (error) {
-      // Going online below the Rs. 500 wallet floor is a 400 with a clear
+      // Going online without kit completion or above COD cash cap is a 400 with a clear
       // message — surface it verbatim.
       _showError(error.message);
     } finally {
@@ -493,6 +528,17 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
               selectedColor: const Color(0xFF064E3B),
               side: BorderSide(color: online ? _green : Colors.white24),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.manage_accounts_outlined, color: Colors.white70),
+            tooltip: 'Account & deletion',
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const RiderAccountScreen()),
+              );
+              // The account may have been deactivated or reactivated there.
+              if (mounted) _load();
+            },
           ),
           IconButton(
             icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white70),
@@ -732,6 +778,9 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
+                  // The Rs. 5,000 deposit amount mirrors the backend
+                  // (`wallet_payment/service.py`: KIT_DEPOSIT_AMOUNT = 5000) —
+                  // keep in sync manually; no endpoint exposes it.
                   depositPaid
                       ? 'Rs. 5,000 security deposit received. Please collect your official uniform shirts (min. 2) and insulated delivery box from the hub to activate online deliveries.'
                       : 'To go online and receive orders, submit the Rs. 5,000 refundable security deposit and collect your kit (uniform & delivery box) at any SpeedyMeals outlet.',
@@ -841,7 +890,8 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
               child: _MetricCard(
                 title: 'WALLET BALANCE',
                 value: wallet?.walletBalanceLabel ?? '—',
-                subtext: 'Min Rs. 500 to go online',
+                // Updated for teammate commit 3a49219: minimum balance threshold removed.
+                subtext: 'Active wallet balance',
                 icon: Icons.account_balance_wallet_rounded,
                 accentColor: _green,
                 cardColor: _card,

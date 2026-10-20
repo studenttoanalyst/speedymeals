@@ -4,6 +4,7 @@ import '../../core/constants/app_constants.dart';
 import '../../data/models/user_models.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/legal_links.dart';
 import '../auth/register_as_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../orders/order_history_screen.dart';
@@ -27,6 +28,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   /// Guards against double-taps while the logout dialog/navigation runs.
   bool _isLoggingOut = false;
+
+  /// True while `DELETE /users/me` is in flight, so the tile shows a spinner
+  /// and cannot be tapped twice.
+  bool _isDeletingAccount = false;
 
   /// The customer's real saved addresses (`GET /users/me/addresses`), used to
   /// show the current delivery location and to seed the address manager.
@@ -133,12 +138,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => _isLoggingOut = true);
 
-    AuthService.instance.logout();
+    // Same pattern as the rider dashboard's logout: complete the sign-out
+    // (server-side refresh-token revocation, push unregister, local session
+    // clear) BEFORE navigating, so a signed-out account shell can never be
+    // shown. [AuthService.logout] clears local state even if the network call
+    // fails, so a user who taps "log out" always ends up logged out.
+    await AuthService.instance.logout();
+    if (!mounted) return;
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const RegisterAsScreen()),
       (route) => false,
     );
+  }
+
+  /// Shows the deletion confirmation and, on confirm, permanently deletes the
+  /// account.
+  ///
+  /// The backend refuses while an order is still active (409), so the error is
+  /// surfaced verbatim and the user is told to try again later. On success the
+  /// local session/cart are already cleared by [AuthService.deleteAccount], so
+  /// this only has to return the user to the auth entry point.
+  Future<void> _confirmDeleteAccount() async {
+    if (_isDeletingAccount) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This permanently deletes your SpeedyMeals account and personal '
+          'data. Order and payment records are kept in anonymised form for '
+          'legal and accounting purposes. This cannot be undone.\n\n'
+          'You will need to sign up again to place orders.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isDeletingAccount = true);
+    try {
+      await AuthService.instance.deleteAccount();
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const RegisterAsScreen()),
+        (route) => false,
+      );
+    } on AuthException catch (error) {
+      if (!mounted) return;
+      setState(() => _isDeletingAccount = false);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(error.message),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isDeletingAccount = false);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Could not delete your account right now. Please try again.',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+    }
   }
 
   void _showComingSoon(String feature) {
@@ -246,13 +341,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              const _SectionHeader('Legal'),
+              const SizedBox(height: 8),
+              _OptionsCard(
+                children: [
+                  _ProfileMenuTile(
+                    icon: Icons.description_outlined,
+                    iconColor: const Color(0xFF64748B),
+                    title: 'Terms & Conditions',
+                    subtitle: 'Read our terms of service',
+                    onTap: () => LegalUtils.openTerms(context),
+                  ),
+                  const _MenuDivider(),
+                  _ProfileMenuTile(
+                    icon: Icons.privacy_tip_outlined,
+                    iconColor: const Color(0xFF64748B),
+                    title: 'Privacy Policy',
+                    subtitle: 'How we handle your data',
+                    onTap: () => LegalUtils.openPrivacy(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const _SectionHeader('Account'),
+              const SizedBox(height: 8),
+              _OptionsCard(
+                children: [
+                  _ProfileMenuTile(
+                    icon: Icons.delete_forever_rounded,
+                    iconColor: theme.colorScheme.error,
+                    title: _isDeletingAccount
+                        ? 'Deleting account…'
+                        : 'Delete Account',
+                    subtitle: 'Permanently delete your account and data',
+                    onTap:
+                        _isDeletingAccount ? () {} : _confirmDeleteAccount,
+                  ),
+                  const _MenuDivider(),
+                  // Mirrors the Play Store requirement that deletion must also be
+                  // possible outside the app. Opens the hosted deletion page.
+                  _ProfileMenuTile(
+                    icon: Icons.open_in_new_rounded,
+                    iconColor: const Color(0xFF64748B),
+                    title: 'Delete account on the web',
+                    subtitle: AppConstants.deleteAccountUrl,
+                    onTap: () => LegalUtils.openDeleteAccount(context),
+                  ),
+                ],
+              ),
               const SizedBox(height: 28),
               SizedBox(
                 height: 52,
                 child: OutlinedButton.icon(
-                  onPressed: _isLoggingOut ? null : _confirmLogout,
-                  icon: const Icon(Icons.logout_rounded, size: 18),
-                  label: const Text('Logout'),
+                  onPressed: (_isLoggingOut || _isDeletingAccount)
+                      ? null
+                      : _confirmLogout,
+                  icon: _isLoggingOut
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.colorScheme.error,
+                          ),
+                        )
+                      : const Icon(Icons.logout_rounded, size: 18),
+                  label: Text(_isLoggingOut ? 'Logging out…' : 'Logout'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                     side: BorderSide(

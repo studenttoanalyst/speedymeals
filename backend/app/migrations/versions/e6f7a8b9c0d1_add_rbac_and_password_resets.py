@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 
 revision: str = 'e6f7a8b9c0d1'

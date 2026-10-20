@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive icon background (Android 8.0+ / API 26). Uses the same brand red
+     as the native launch background (@color/speedy_red). -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/speedy_red"/>
+    <foreground android:drawable="@mipmap/launcher_icon"/>
+</adaptive-icon>

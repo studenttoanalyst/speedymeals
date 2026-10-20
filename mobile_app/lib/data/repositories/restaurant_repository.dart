@@ -66,8 +66,4 @@ class RestaurantRepository {
         .toList(growable: false);
   }
 
-  /// Flattens a menu into a single list of items (used for search and for
-  /// resolving cart lines).
-  static List<MenuItem> flatten(List<MenuCategory> menu) =>
-      [for (final category in menu) ...category.items];
 }

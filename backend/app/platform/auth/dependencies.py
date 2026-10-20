@@ -14,6 +14,7 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.redis_client import redis_client
 from app.platform.auth import jwt_utils
 from app.platform.auth.models import Admin
 
@@ -67,6 +68,35 @@ def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="A refresh token cannot be used to access this resource.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Redis access-token denylist for deleted accounts.
+    #
+    # HOW IT WORKS:
+    #   When an account is deleted (service.execute_deletion), the user's subject
+    #   ID is written to Redis as `deleted:<sub>` with a TTL equal to the
+    #   remaining access-token lifetime (JWT_EXPIRE_MINUTES).  Any request that
+    #   presents a token whose subject is in this set is rejected with 401
+    #   "This account has been deleted." regardless of JWT validity.
+    #
+    # FAILS OPEN:
+    #   If Redis is unavailable the except block sets is_deleted=False, so the
+    #   check is skipped and the request proceeds normally.  This is intentional:
+    #     - Refresh tokens are always revoked in the database (execute_deletion
+    #       marks them invalid), so a deleted user cannot obtain a new access token.
+    #     - The maximum exposure window is the JWT_EXPIRE_MINUTES TTL (default 30 m).
+    #     - Blocking all users when Redis is down would be a denial-of-service.
+    #   The ResilientRedisClient (core/redis_client.py) also provides an in-memory
+    #   fallback, further reducing the chance of a complete Redis outage in practice.
+    try:
+        is_deleted = redis_client.exists(f"deleted:{payload['sub']}")
+    except Exception:  # noqa: BLE001  - fail open, see note above
+        is_deleted = False
+    if is_deleted:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This account has been deleted.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

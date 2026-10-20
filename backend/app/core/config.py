@@ -112,6 +112,42 @@ class Settings(BaseSettings):
     # Cash Collection Cap (Phase 3, Step 7 - spec Sec 3.4/6)
     CASH_COLLECTION_CAP: Decimal = Decimal('5000')
 
+    # --- Online payments ------------------------------------------------------
+    # The backend's digital checkout path is a STUB: `_process_digital_payment`
+    # returns a fake reference and never charges anyone (no JazzCash/EasyPaisa/
+    # card gateway is wired in). Selling "Pay Online" while no money moves is a
+    # broken promise to the customer, so the feature is switched OFF by default:
+    #
+    #   * checkout-preview advertises `online_payments_enabled` so clients can
+    #     hide the option instead of discovering it at submit time, and
+    #   * `place_order` rejects payment_method=Digital with 400 as a defence in
+    #     depth for clients that ignore the flag.
+    #
+    # COD is unaffected by this setting and is always accepted. Set to true only
+    # once a real gateway is connected (replace _process_digital_payment).
+    ONLINE_PAYMENTS_ENABLED: bool = False
+
+    # --- Account deletion (Google Play compliance) ----------------------------
+    # A RIDER request never deletes data by itself: the account is deactivated
+    # immediately, the request waits RIDER_DELETION_GRACE_DAYS, and only an
+    # explicit admin approval executes the removal (see platform/account_deletion).
+    # Customers are deleted immediately (no grace, no review).
+    RIDER_DELETION_GRACE_DAYS: int = 7
+    # False (default): an admin may only approve once the grace period has
+    # ended. Set to true to allow approving early (still blocked by dues and
+    # active deliveries, which can never be overridden).
+    ALLOW_EARLY_ADMIN_APPROVAL: bool = False
+    # Admin SLA flag: a request sitting in ready_for_review for longer than
+    # this many days is returned as `is_overdue: true` in the admin list.
+    DELETION_REQUEST_OVERDUE_DAYS: int = 30
+    # The review job only moves pending -> ready_for_review and notifies admins;
+    # it NEVER deletes anything. It runs inside the API process (same pattern as
+    # the assignment sweeper); set DELETION_REVIEW_JOB_ENABLED=false when the
+    # scheduler is run out of process instead (cron: python -m
+    # app.core.deletion_review_job).
+    DELETION_REVIEW_JOB_ENABLED: bool = True
+    DELETION_REVIEW_JOB_INTERVAL_SECONDS: int = 3600
+
     # SMS Gateway (SendPK & Console fallback)
     # SMS_MODE: 'console' (dev/test default, logs OTP to server console) or 'sendpk' (live SMS gateway)
     SMS_MODE: str = "console"

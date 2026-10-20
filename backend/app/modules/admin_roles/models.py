@@ -3,9 +3,8 @@ Admin roles, permissions catalog, and administrative audit logging models.
 Follows the Discord-style dynamic role creation architecture.
 """
 import uuid
-from datetime import datetime, timezone
 
-from sqlalchemy import Column, ForeignKey, Table, String, Boolean, Text, DateTime, JSON
+from sqlalchemy import Column, ForeignKey, Table, String, Boolean, Text, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

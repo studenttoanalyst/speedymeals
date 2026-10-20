@@ -22,6 +22,11 @@ from app.platform.location.routes import router as location_router
 from app.platform.notification.routes import router as notification_router
 from app.platform.users.routes import router as users_router
 from app.platform.wallet_payment.routes import router as wallet_router
+from app.platform.account_deletion.routes import (
+    admin_router as deletion_admin_router,
+    public_router as deletion_public_router,
+    user_router as deletion_user_router,
+)
 from app.modules.admin.routes import router as admin_router
 from app.modules.admin_roles.routes import router as admin_roles_router
 from app.modules.admin_accounts.routes import router as admin_accounts_router
@@ -35,10 +40,48 @@ from app.modules.food_delivery.routes import (
 
 import asyncio
 import os
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="SpeedyMeals API", version="0.1.0")
+_sweeper_task: "asyncio.Task | None" = None
+_deletion_review_task: "asyncio.Task | None" = None
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Application startup / shutdown (replaces deprecated @app.on_event).
+
+    Startup order matters: seed the first admin and demo restaurant before the
+    background loops start, so a fresh database is ready for traffic. Both loops
+    are best-effort and idempotent; cancelling them on shutdown is all the
+    cleanup they need.
+    """
+    global _sweeper_task, _deletion_review_task
+
+    # Sync DB work runs off the event loop, as Starlette did for sync on_event
+    # handlers, so a slow seed never delays the server binding its port.
+    await asyncio.to_thread(seed_bootstrap_data)
+
+    if settings.ASSIGNMENT_SWEEPER_ENABLED:
+        from app.core.assignment_sweeper import run_forever
+
+        _sweeper_task = asyncio.create_task(run_forever())
+    if settings.DELETION_REVIEW_JOB_ENABLED:
+        from app.core.deletion_review_job import run_forever
+
+        _deletion_review_task = asyncio.create_task(run_forever())
+
+    try:
+        yield
+    finally:
+        if _sweeper_task is not None:
+            _sweeper_task.cancel()
+        if _deletion_review_task is not None:
+            _deletion_review_task.cancel()
+
+
+app = FastAPI(title="SpeedyMeals API", version="0.1.0", lifespan=lifespan)
 
 # --- Production-ready CORS ---
 # Allowed browser origins come from settings.ALLOWED_ORIGINS (env-driven:
@@ -85,6 +128,12 @@ app.include_router(customer_orders_router)
 app.include_router(admin_router)
 app.include_router(admin_roles_router)
 app.include_router(admin_accounts_router)
+# Account deletion (Play Store requirement): holder endpoints (/users/...),
+# the signed-out web form (/account-deletion/...) and the staff review queue
+# (/admin/deletion-requests, permission `manage_deletion_requests`).
+app.include_router(deletion_user_router)
+app.include_router(deletion_public_router)
+app.include_router(deletion_admin_router)
 
 
 @app.get("/", tags=["system"])
@@ -110,13 +159,14 @@ def robots():
     return Response(content="User-agent: *\nDisallow: /\n", media_type="text/plain")
 
 
-@app.on_event("startup")
-def seed_first_admin_on_startup() -> None:
+def seed_bootstrap_data() -> None:
     """
     Step 10: auto-seed the first admin and demo restaurant accounts. Uses its own
     short-lived DB session (not the get_db() request dependency, which only
     exists during a request) so this runs once, cleanly, before the app
     starts accepting traffic.
+
+    Called from the lifespan handler above, not from a route.
     """
     # ── SMS configuration banner ──────────────────────────────────────────────
     # Logged at every startup so `journalctl -u speedymeals` immediately shows
@@ -133,7 +183,6 @@ def seed_first_admin_on_startup() -> None:
         f"OS SMS_MODE override={os.environ.get('SMS_MODE', '<not set in OS env>')}"
     )
     logger.info(banner_msg)
-    print(banner_msg, flush=True)
     if sms_mode == "console":
         warn_msg = (
             "[CONFIG] WARNING: SMS is running in CONSOLE mode — OTPs will NOT be dispatched "
@@ -141,11 +190,9 @@ def seed_first_admin_on_startup() -> None:
             "systemd/OS Environment override is active."
         )
         logger.warning(warn_msg)
-        print(warn_msg, flush=True)
     else:
         active_msg = "[CONFIG] SMS gateway: SendPK live dispatch ACTIVE."
         logger.info(active_msg)
-        print(active_msg, flush=True)
     # ─────────────────────────────────────────────────────────────────────────
 
     db = SessionLocal()
@@ -154,25 +201,6 @@ def seed_first_admin_on_startup() -> None:
         auth_service.seed_demo_restaurant(db)
     finally:
         db.close()
-
-
-_sweeper_task: "asyncio.Task | None" = None
-
-
-@app.on_event("startup")
-async def start_assignment_sweeper() -> None:
-    """Expire ignored rider offers and retry unassigned orders (see core/assignment_sweeper.py)."""
-    global _sweeper_task
-    if settings.ASSIGNMENT_SWEEPER_ENABLED:
-        from app.core.assignment_sweeper import run_forever
-
-        _sweeper_task = asyncio.create_task(run_forever())
-
-
-@app.on_event("shutdown")
-async def stop_assignment_sweeper() -> None:
-    if _sweeper_task is not None:
-        _sweeper_task.cancel()
 
 
 @app.get("/health")

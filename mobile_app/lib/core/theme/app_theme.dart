@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
 
-/// Speedy Meals Material 3-aligned theme assembly.
+/// SpeedyMeals Material 3-aligned theme assembly.
 ///
 /// Branded tokens are intentionally explicit here so screens remain
 /// pixel-aligned with the Stitch design mockups without relying on a

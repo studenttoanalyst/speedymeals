@@ -81,12 +81,11 @@ def test_set_online_blocks_without_kit(db_session, rider):
     assert "Kit" in exc_info.value.detail
 
 
-def test_set_online_blocks_below_min(db_session):
+def test_set_online_allowed_with_zero_balance(db_session):
+    """Zero wallet balance does not block going online — only kit_completed is required."""
     rider = _make_active_rider(db_session, wallet=0)
-    with pytest.raises(HTTPException) as exc_info:
-        service.set_online_status(db_session, rider.id, True)
-    assert exc_info.value.status_code == 400
-    assert "wallet balance" in exc_info.value.detail.lower()
+    updated = service.set_online_status(db_session, rider.id, True)
+    assert updated.is_online is True
 
 
 def test_set_online_allows_above_min(db_session):
@@ -270,10 +269,16 @@ def test_profile_route_returns_200_for_rider(wallet_read_client, db_session, rid
     )
     assert response.status_code == 200
     body = response.json()
-    assert body == {
-        "total_earnings": 0.0,
-        "current_balance": 500.0,
-        "pending_payouts": 0.0,
+    # Rider.wallet_balance / pending_cash_owed / earnings are Mapped[Decimal]
+    # after WAL-06; Pydantic v2 serialises Decimal as a string by default.
+    # Compare the three money fields as Decimal so the test is precision-safe.
+    from decimal import Decimal as D
+    assert D(body["total_earnings"]) == D("0")
+    assert D(body["current_balance"]) == D("500")
+    assert D(body["pending_payouts"]) == D("0")
+    non_money = {k: v for k, v in body.items()
+                 if k not in ("total_earnings", "current_balance", "pending_payouts")}
+    assert non_money == {
         "is_online": True,
         "id": str(rider.id),
         "name": "Test Rider",

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -138,7 +139,8 @@ class CartService extends ChangeNotifier {
         restaurantName: prefs.getString(_scopeKeyRestaurantName),
       );
     } catch (error) {
-      debugPrint('Could not restore the previous cart scope: $error');
+      developer.log('Could not restore the previous cart scope: $error',
+          name: 'CartService');
     }
   }
 
@@ -148,7 +150,8 @@ class CartService extends ChangeNotifier {
       await prefs.setString(_scopeKeyRestaurantId, restaurantId);
       await prefs.setString(_scopeKeyRestaurantName, restaurantName);
     } catch (error) {
-      debugPrint('Could not persist the cart scope: $error');
+      developer.log('Could not persist the cart scope: $error',
+          name: 'CartService');
     }
   }
 
@@ -341,6 +344,32 @@ class CartService extends ChangeNotifier {
   void clearError() {
     if (_error == null) return;
     _error = null;
+    notifyListeners();
+  }
+
+  /// Forgets the cart entirely and erases the remembered restaurant scope.
+  ///
+  /// Used on logout / account deletion: the server-side cart is already gone
+  /// (or about to be), so keeping the local view or the persisted restaurant id
+  /// would let the next account on this device inherit the previous one's cart
+  /// screen. This is a LOCAL reset only — it never calls the backend, so it is
+  /// safe to run after the session/token has already been cleared.
+  Future<void> purgeLocal() async {
+    _restaurantId = null;
+    _restaurantName = '';
+    _menu = const [];
+    _cart = ResolvedCart.empty;
+    _pendingItemIds.clear();
+    _error = null;
+    _isLoading = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_scopeKeyRestaurantId);
+      await prefs.remove(_scopeKeyRestaurantName);
+    } catch (error) {
+      developer.log('Could not clear the persisted cart scope: $error',
+          name: 'CartService');
+    }
     notifyListeners();
   }
 

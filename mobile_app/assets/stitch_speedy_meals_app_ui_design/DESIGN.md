@@ -141,6 +141,10 @@ spacing:
   touch-target-min: 2.75rem
 ---
 
+<!-- Design reference only: this file describes visual tokens supplied by the
+     Stitch design export. It is not implementation state; see mobile_app/README.md
+     and mobile_app/RELEASE_AUDIT.md for the current code and audit record. -->
+
 ## Brand & Style
 
 This design system delivers an energetic, ultra-responsive, and appetite-inducing mobile experience tailored for on-the-go food delivery across iOS and Android Material 3 platforms. The visual language blends the agility of rapid courier movement with the reassuring clarity required for fast checkout, dynamic order tracking, and culinary discovery.

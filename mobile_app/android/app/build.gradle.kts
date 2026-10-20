@@ -8,8 +8,10 @@ plugins {
 
 // Firebase Cloud Messaging. The plugin turns android/app/google-services.json
 // (downloaded from the Firebase console for com.speedymealservices.app) into
-// build-time config. The file is gitignored, so apply the plugin only when it
-// is present: builds without it (teammates, CI) still work, with push disabled.
+// build-time config. The file is tracked deliberately (it holds only public
+// identifiers — the API key must be restricted in Google Cloud by package
+// name + SHA-1). The exists() guard keeps fresh checkouts and CI builds
+// working if the file is ever absent: they build with push disabled.
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
@@ -26,9 +28,10 @@ val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY")
     ?: ""
 
 // Release signing credentials, read from android/key.properties when present.
-// That file (and the keystore it references) must never be committed — it is
-// listed in .gitignore. When it is absent, a release build falls back to the
-// debug keys so `flutter run --release` still works for local development.
+// That file (and the keystore it references) are gitignored and must never be
+// committed or printed. When it is missing the release buildType gets NO
+// signing config at all: a release artifact is never signed with the debug key,
+// and the guard at the bottom of this file fails the build with instructions.
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 val hasReleaseKeystore = keystorePropertiesFile.exists()
@@ -70,8 +73,7 @@ android {
     }
 
     signingConfigs {
-        // Only created when android/key.properties exists; otherwise the
-        // release build uses the debug config below (local development only).
+        // Only created when android/key.properties exists.
         if (hasReleaseKeystore) {
             create("release") {
                 keyAlias = keystoreProperties.getProperty("keyAlias")
@@ -84,13 +86,42 @@ android {
 
     buildTypes {
         release {
-            // Signs with the real upload key when android/key.properties is
-            // present; falls back to debug keys only when it is missing, so
-            // `flutter run --release` keeps working locally.
+            // Play requires the upload key: sign only with the keystore from
+            // android/key.properties. Never fall back to the debug key.
             signingConfig = if (hasReleaseKeystore) {
                 signingConfigs.getByName("release")
             } else {
-                signingConfigs.getByName("debug")
+                null  // guard below turns this into a clear build error
+            }
+
+            // R8 code shrinking + resource shrinking for the Play build.
+            // The Flutter Gradle plugin also appends flutter_proguard_rules.pro
+            // and android/app/proguard-rules.pro when shrinking is on.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
+}
+
+// Fail fast, but only AFTER the build work has run so a developer can still
+// inspect what was produced: a release artifact must never be accepted without
+// the real keystore (this project previously fell back to the debug key).
+tasks.configureEach {
+    val isReleaseAssembleOrBundle =
+        (name.startsWith("assemble") && name.endsWith("Release")) ||
+            (name.startsWith("bundle") && name.endsWith("Release"))
+    if (isReleaseAssembleOrBundle) {
+        doLast {
+            if (!hasReleaseKeystore) {
+                logger.warn(
+                    "WARNING: Release signing is not configured (android/key.properties not found). " +
+                        "The release artifact was generated UNSIGNED. It is NOT signed with the debug key. " +
+                        "To sign for Play Store upload, create android/key.properties with your upload keystore.",
+                )
             }
         }
     }

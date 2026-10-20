@@ -458,6 +458,7 @@ def rate_my_order(
 
 import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
+from decimal import Decimal
 from jose import JWTError
 from app.platform.auth.jwt_utils import decode_token
 
@@ -480,31 +481,72 @@ async def websocket_track_rider(
     asyncio.to_thread() so they run in the ThreadPoolExecutor without ever
     freezing the asyncio event loop.
     """
+    # Accept the handshake BEFORE validating credentials. Closing pre-accept is
+    # surfaced to clients as an opaque HTTP 403 handshake rejection, which looks
+    # identical to a server glitch and makes clients retry a token that can never
+    # work. Post-accept we can send a structured `auth_failed` frame and then
+    # close with 4003 — an ordered sequence every transport can observe (the
+    # dart:io WebSocket used by the mobile app never exposes close codes).
+    # Nothing about the order is streamed before both checks pass.
+    await websocket.accept()
+
+    async def _deny_auth() -> None:
+        """Tell the client this session can never succeed, then close 4003.
+
+        The frame is what tells the client NOT to retry (its token is bad or
+        it does not own this order); 4003 is kept as the documented close code.
+        A generic detail: the answer is identical whether the token is invalid
+        or the order belongs to someone else (no existence leak).
+        """
+        try:
+            await websocket.send_json(
+                {
+                    "event": "auth_failed",
+                    "detail": "Not authorised to track this order.",
+                }
+            )
+        except Exception:
+            # The peer may already be gone — the close below is what matters.
+            pass
+        await websocket.close(code=4003)
+
     try:
         payload = decode_token(token)
         user_id = uuid.UUID(payload.get("sub"))
         role = payload.get("role")
         if payload.get("type") != "access" or role not in ("customer", "admin"):
-            await websocket.close(code=4003)
+            await _deny_auth()
             return
     except (JWTError, ValueError, TypeError):
-        await websocket.close(code=4003)
+        await _deny_auth()
         return
 
     try:
         # Initial tracking read & order ownership validation
         order_tracking = service.get_order_rider_location(db, user_id, role, order_id)
     except HTTPException:
-        await websocket.close(code=4003)
-        return
+        await _deny_auth()
+        return    # Initial frame. `order_tracking` comes straight from the service and can
+    # carry uuid.UUID / date / Decimal values; plain `send_json` (json.dumps
+    # with no default) raises TypeError on them, which crashed the connection
+    # before a single frame ever reached a real client — surfaced by the new
+    # websocket tests. Serialize once with converters for all JSON-foreign types
+    # (UUID → str, date/datetime → ISO-8601, Decimal → float).
+    def _ws_default(obj):
+        if isinstance(obj, uuid.UUID):
+            return str(obj)
+        if isinstance(obj, date):
+            return obj.isoformat()
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return str(obj)
 
-    await websocket.accept()
-
-    # Initial frame
-    await websocket.send_json({
-        "event": "location_update",
-        "data": order_tracking,
-    })
+    await websocket.send_text(
+        json.dumps(
+            {"event": "location_update", "data": order_tracking},
+            default=_ws_default,
+        )
+    )
 
     # Pub/Sub streaming loop — NFR-04 compliant.
     # redis-py pubsub uses a blocking socket; SQLAlchemy uses a sync Session.

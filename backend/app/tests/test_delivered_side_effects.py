@@ -337,8 +337,10 @@ def test_cod_pending_cash_matches_deposit_expected_amount(db_session):
         db_session, rider.id
     )
 
+    # create_cash_deposit now expects Decimal (WAL-06 — no float() on money)
+    from decimal import Decimal
     deposit = wallet_service.create_cash_deposit(
-        db_session, rider.id, float(rider.pending_cash_owed), "bank_transfer"
+        db_session, rider.id, Decimal(str(rider.pending_cash_owed)), "bank_transfer"
     )
-    assert deposit.expected_amount == float(order.total_amount)
-    assert deposit.discrepancy == 0
+    assert float(deposit.expected_amount) == float(order.total_amount)
+    assert float(deposit.discrepancy) == 0

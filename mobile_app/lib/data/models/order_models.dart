@@ -85,11 +85,26 @@ String shortOrderId(String id) {
   return compact.substring(0, 8).toUpperCase();
 }
 
+/// Formats a backend GST percentage plainly: `13` / `12.5` (never `13.0`).
+String formatGstRate(double rate) {
+  final rounded = rate.roundToDouble();
+  return rate == rounded ? rounded.toStringAsFixed(0) : rate.toStringAsFixed(2);
+}
+
+/// Row label for an ADDED GST line, e.g. `GST (13%)`.
+String formatGstRowLabel(double rate) => 'GST (${formatGstRate(rate)}%)';
+
+/// Note shown when GST is already inside menu prices (`prices_include_gst`),
+/// e.g. `GST (13%): Rs. 175.50 included in food prices`.
+String formatGstIncludedNote(double rate, double amount) =>
+    'GST (${formatGstRate(rate)}%): ${formatPkr(amount)} included in food prices';
+
 /// Response of `GET /orders/{order_id}/track` (backend:
 /// `OrderTrackingResponseSchema`).
 ///
-/// This is the poll target while an order is in flight — the backend has no
-/// WebSockets or push notifications (spec §14).
+/// REST polling target while an order is in flight. It complements — and acts
+/// as the fallback for — the live `WS /orders/{id}/track` stream
+/// (`services/live_location_socket.dart`).
 class OrderTracking {
   final String id;
   final OrderStatus status;
@@ -99,6 +114,17 @@ class OrderTracking {
   final double deliveryFee;
   final double platformFee;
   final double totalAmount;
+
+  /// GST / sales-tax snapshot (backend `gst_*`). [gstAmount] is tax on FOOD
+  /// only; when [pricesIncludeGst] is true it is already inside [foodSubtotal]
+  /// (disclosed as a note), otherwise it is added on top so
+  /// `foodSubtotal + gstAmount + deliveryFee + platformFee == totalAmount`.
+  final double gstRate;
+  final bool pricesIncludeGst;
+  final double gstAmount;
+
+  /// Pre-tax food amount (`net_subtotal`); null on legacy orders.
+  final double? netSubtotal;
 
   /// Name of the restaurant the order is coming from.
   ///
@@ -156,6 +182,10 @@ class OrderTracking {
     this.deliveryFee = 0,
     this.platformFee = 0,
     this.totalAmount = 0,
+    this.gstRate = 0,
+    this.pricesIncludeGst = true,
+    this.gstAmount = 0,
+    this.netSubtotal,
     this.riderName,
     this.riderPhone,
     this.restaurantLatitude,
@@ -184,6 +214,10 @@ class OrderTracking {
         deliveryFee: Json.asDouble(json['delivery_fee']),
         platformFee: Json.asDouble(json['platform_fee']),
         totalAmount: Json.asDouble(json['total_amount']),
+        gstRate: Json.asDouble(json['gst_rate']),
+        pricesIncludeGst: Json.asBool(json['prices_include_gst'], fallback: true),
+        gstAmount: Json.asDouble(json['gst_amount']),
+        netSubtotal: Json.asDoubleOrNull(json['net_subtotal']),
         riderName: Json.asStringOrNull(json['rider_name']),
         riderPhone: Json.asStringOrNull(json['rider_phone']),
         restaurantLatitude: Json.asDoubleOrNull(json['restaurant_lat']),
@@ -207,6 +241,12 @@ class OrderTracking {
   String get deliveryFeeLabel => formatPkr(deliveryFee);
   String get platformFeeLabel => formatPkr(platformFee);
   String get distanceLabel => '${deliveryDistanceKm.toStringAsFixed(1)} km';
+
+  /// True when the backend charged GST on this order.
+  bool get hasGst => gstRate > 0 && gstAmount > 0;
+  String get gstRowLabel => formatGstRowLabel(gstRate);
+  String get gstAmountLabel => formatPkr(gstAmount);
+  String get gstIncludedNote => formatGstIncludedNote(gstRate, gstAmount);
 
   /// True when a rider has been attached to this order.
   bool get hasRider => riderName != null;
@@ -244,10 +284,15 @@ class RouteDetail {
 /// Response of `GET /restaurants/{id}/cart/checkout-preview`
 /// (backend: `CheckoutPreviewResponseSchema`).
 ///
-/// This is the ONLY authority for what the customer will be charged:
-/// `food_subtotal + delivery_fee + platform_fee = total`, where
-/// `delivery_fee = 100 + (km × 25)` and `platform_fee` is a flat Rs. 15
-/// charge added by the backend.
+/// This is the ONLY authority for what the customer will be charged. The rows
+/// sum to `total` exactly:
+///  - exclusive GST (`prices_include_gst = false`): `food_subtotal + gst_amount
+///    + delivery_fee + platform_fee = total`;
+///  - inclusive GST (`prices_include_gst = true`): GST is already inside
+///    `food_subtotal`, so `food_subtotal + delivery_fee + platform_fee = total`
+///    and the tax is disclosed as a note only.
+/// `delivery_fee = 100 + (km × 25)` and `platform_fee` is a flat Rs. 15 — both
+/// computed by the backend, never by the client.
 class CheckoutPreview {
   final double foodSubtotal;
   final double deliveryDistanceKm;
@@ -255,9 +300,22 @@ class CheckoutPreview {
   final double platformFee;
   final double total;
 
+  /// GST breakdown from the preview (same `gst_*` keys as tracking). `total`
+  /// already accounts for it exactly as the backend computed it.
+  final double gstRate;
+  final bool pricesIncludeGst;
+  final double gstAmount;
+  final double? netSubtotal;
+
   /// Point 3 route parameters (distance, duration, ETA, polyline); null when
   /// the backend could not compute a route.
   final RouteDetail? route;
+
+  /// Whether the backend currently accepts `payment_method=Digital`
+  /// (`ONLINE_PAYMENTS_ENABLED`, default false — the gateway is still a stub
+  /// that never charges anyone). The backend is the ONLY authority for this;
+  /// the checkout screen hides "Pay Online" when false and defaults to COD.
+  final bool onlinePaymentsEnabled;
 
   const CheckoutPreview({
     required this.foodSubtotal,
@@ -265,7 +323,12 @@ class CheckoutPreview {
     required this.deliveryFee,
     this.platformFee = 0,
     required this.total,
+    this.gstRate = 0,
+    this.pricesIncludeGst = true,
+    this.gstAmount = 0,
+    this.netSubtotal,
     this.route,
+    this.onlinePaymentsEnabled = false,
   });
 
   factory CheckoutPreview.fromJson(Map<String, dynamic> json) => CheckoutPreview(
@@ -274,7 +337,14 @@ class CheckoutPreview {
         deliveryFee: Json.asDouble(json['delivery_fee']),
         platformFee: Json.asDouble(json['platform_fee']),
         total: Json.asDouble(json['total']),
+        gstRate: Json.asDouble(json['gst_rate']),
+        pricesIncludeGst: Json.asBool(json['prices_include_gst'], fallback: true),
+        gstAmount: Json.asDouble(json['gst_amount']),
+        netSubtotal: Json.asDoubleOrNull(json['net_subtotal']),
         route: _routeOrNull(json['route']),
+        // Missing key (older backend) ⇒ false ⇒ option hidden. Fail-safe.
+        onlinePaymentsEnabled:
+            Json.asBool(json['online_payments_enabled'], fallback: false),
       );
 
   String get foodSubtotalLabel => formatPkr(foodSubtotal);
@@ -282,6 +352,12 @@ class CheckoutPreview {
   String get platformFeeLabel => formatPkr(platformFee);
   String get totalLabel => formatPkr(total);
   String get distanceLabel => '${deliveryDistanceKm.toStringAsFixed(1)} km';
+
+  /// True when the backend charged GST on this preview.
+  bool get hasGst => gstRate > 0 && gstAmount > 0;
+  String get gstRowLabel => formatGstRowLabel(gstRate);
+  String get gstAmountLabel => formatPkr(gstAmount);
+  String get gstIncludedNote => formatGstIncludedNote(gstRate, gstAmount);
 }
 
 /// Response of `POST /restaurants/{id}/cart/checkout`
@@ -301,6 +377,13 @@ class PlacedOrder {
   final double deliveryDistanceKm;
   final double deliveryFee;
   final double totalAmount;
+
+  /// GST snapshot frozen at placement (same `gst_*` keys as tracking).
+  final double gstRate;
+  final bool pricesIncludeGst;
+  final double gstAmount;
+  final double? netSubtotal;
+
   final double commissionAmount;
   final double restaurantPayable;
   final double riderEarning;
@@ -320,6 +403,10 @@ class PlacedOrder {
     this.deliveryDistanceKm = 0,
     this.deliveryFee = 0,
     this.totalAmount = 0,
+    this.gstRate = 0,
+    this.pricesIncludeGst = true,
+    this.gstAmount = 0,
+    this.netSubtotal,
     this.commissionAmount = 0,
     this.restaurantPayable = 0,
     this.riderEarning = 0,
@@ -337,6 +424,10 @@ class PlacedOrder {
         deliveryDistanceKm: Json.asDouble(json['delivery_distance_km']),
         deliveryFee: Json.asDouble(json['delivery_fee']),
         totalAmount: Json.asDouble(json['total_amount']),
+        gstRate: Json.asDouble(json['gst_rate']),
+        pricesIncludeGst: Json.asBool(json['prices_include_gst'], fallback: true),
+        gstAmount: Json.asDouble(json['gst_amount']),
+        netSubtotal: Json.asDoubleOrNull(json['net_subtotal']),
         commissionAmount: Json.asDouble(json['commission_amount']),
         restaurantPayable: Json.asDouble(json['restaurant_payable']),
         riderEarning: Json.asDouble(json['rider_earning']),
@@ -347,6 +438,10 @@ class PlacedOrder {
 
   String get shortId => shortOrderId(id);
   String get totalLabel => formatPkr(totalAmount);
+  bool get hasGst => gstRate > 0 && gstAmount > 0;
+  String get gstRowLabel => formatGstRowLabel(gstRate);
+  String get gstAmountLabel => formatPkr(gstAmount);
+  String get gstIncludedNote => formatGstIncludedNote(gstRate, gstAmount);
 }
 
 /// Parses a nested `route` object, tolerating a missing/null/non-object value.

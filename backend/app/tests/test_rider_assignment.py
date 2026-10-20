@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 from app.core.database import get_db
 from app.core.redis_client import redis_client
 from app.modules.food_delivery import service
-from app.modules.food_delivery.models import MenuItem, Order, OrderItem, Restaurant
+from app.modules.food_delivery.models import Order, Restaurant
 from app.modules.food_delivery.routes import orders_router
 from app.platform.auth.jwt_utils import create_access_token
 from app.platform.users.models import Address, User

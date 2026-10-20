@@ -1,14 +1,35 @@
+# Gradle
+.gradle/
+/build/
 gradle-wrapper.jar
-/.gradle
-/captures/
-/gradlew
-/gradlew.bat
-/local.properties
-GeneratedPluginRegistrant.java
+gradlew
+gradlew.bat
+captures/
+local.properties
 .cxx/
 
-# Remember to never publicly share your keystore.
-# See https://flutter.dev/to/reference-keystore
+# Generated plugin registration
+GeneratedPluginRegistrant.java
+
+# Release signing material — never commit the keystore or its passwords.
 key.properties
 **/*.keystore
 **/*.jks
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs and crash dumps
+*.log
+hs_err_pid*.log
+logs/
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Firebase client config is deliberately tracked (public identifiers only).
+!app/google-services.json

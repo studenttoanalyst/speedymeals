@@ -1,1 +1,14 @@
-flutter/ephemeral
+flutter/ephemeral/
+build/
+**/ephemeral/
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs / OS / IDE
+*.log
+logs/
+.DS_Store
+.idea/
+*.iml

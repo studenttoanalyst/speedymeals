@@ -14,7 +14,6 @@ from app.platform.wallet_payment.schemas import (
     CashDepositRequestSchema,
     CashDepositResponseSchema,
     CODEligibilityResponseSchema,
-    DeliveryStatusUpdateSchema,
     DeliveryStatusResponseSchema,
     OnlineStatusToggleSchema,
     RiderAssignmentActionSchema,

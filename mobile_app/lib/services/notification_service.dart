@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -110,9 +112,11 @@ class NotificationService extends ChangeNotifier {
       _items = _buildFeed(orders);
     } on ApiException catch (error) {
       // Unauthenticated (rider/guest) or offline: keep whatever we had.
-      debugPrint('Notification refresh skipped: ${error.kind.name}');
+      developer.log('Notification refresh skipped: ${error.kind.name}',
+          name: 'NotificationService');
     } catch (error) {
-      debugPrint('Notification refresh failed: $error');
+      developer.log('Notification refresh failed: $error',
+          name: 'NotificationService');
     } finally {
       _isLoading = false;
       _hasLoaded = true;
@@ -238,7 +242,8 @@ class NotificationService extends ChangeNotifier {
           ..addAll(dismissed);
       }
     } catch (error) {
-      debugPrint('Could not read notification state: $error');
+      developer.log('Could not read notification state: $error',
+          name: 'NotificationService');
     }
   }
 
@@ -248,7 +253,8 @@ class NotificationService extends ChangeNotifier {
       await prefs.setStringList(_prefsReadKey, _readIds.toList());
       await prefs.setStringList(_prefsDismissedKey, _dismissedIds.toList());
     } catch (error) {
-      debugPrint('Could not persist notification state: $error');
+      developer.log('Could not persist notification state: $error',
+          name: 'NotificationService');
     }
   }
 }

@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/network/api_exception.dart';
 import '../../data/json_utils.dart';
 import '../../data/models/catalog_models.dart';
 import '../../data/repositories/restaurant_repository.dart';
-import '../../models/restaurant.dart';
 import '../../services/cart_service.dart';
 import '../../services/notification_service.dart';
 import '../cart/cart_screen.dart';
@@ -89,10 +89,10 @@ class SearchFilters {
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
-/// Speedy Meals home dashboard screen.
+/// SpeedyMeals home dashboard screen.
 ///
 /// Matches the Stitch home mockup: solid red header, compact location/ETA pill in Royal Blue,
-/// search bar, auto-swapping promo hero carousel, category carousel with food images, live order snippet,
+/// search bar, category carousel with food images, live order snippet,
 /// cloud kitchen restaurant cards with bright yellow rating badges, popular items grid, and sticky cart bar.
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -342,7 +342,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Speedy Meals',
+                AppConstants.appName,
                 style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -443,10 +443,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               )
             else ...[
-              SliverToBoxAdapter(
-                child: _PromoHeroBanner(restaurants: _restaurants),
-              ),
-
               SliverToBoxAdapter(
                 child: _CategorySection(
                   theme: theme,
@@ -1166,322 +1162,6 @@ class _SearchRestaurantTile extends StatelessWidget {
   }
 }
 
-// ----------------------------- Auto-Swapping Hero Promo Carousel -----------------------------
-
-class _PromoItem {
-  final String title;
-  final String tag;
-  final String code;
-  final String subtitle;
-  final String buttonText;
-  final IconData buttonIcon;
-
-  const _PromoItem({
-    required this.title,
-    required this.tag,
-    required this.code,
-    required this.subtitle,
-    required this.buttonText,
-    this.buttonIcon = Icons.bolt,
-  });
-}
-
-final List<_PromoItem> _promoCards = const [
-  _PromoItem(
-    title: 'Get 30% OFF\nFirst Order!',
-    tag: 'Ends in 2h 14m',
-    code: 'SPEEDY30',
-    subtitle: 'Use code at checkout • Min spend Rs. 999',
-    buttonText: 'Claim & Order',
-    buttonIcon: Icons.bolt,
-  ),
-  _PromoItem(
-    title: 'Free Delivery on\nCloud Kitchens!',
-    tag: 'Exclusive Deal',
-    code: 'FREESHIP',
-    subtitle: 'No minimum order required • Limited time offer',
-    buttonText: 'Explore Kitchens',
-    buttonIcon: Icons.storefront,
-  ),
-  _PromoItem(
-    title: 'Flat Rs. 250 Cashback\nMidnight Cravings!',
-    tag: 'Late Night Special',
-    code: 'NIGHT250',
-    subtitle: 'Valid on orders placed between 10 PM - 3 AM',
-    buttonText: 'Order Late Night',
-    buttonIcon: Icons.nightlife,
-  ),
-];
-
-class _PromoHeroBanner extends StatefulWidget {
-  /// Real restaurants, so each promo card's call-to-action opens a storefront
-  /// that actually exists rather than a hardcoded sample.
-  final List<Restaurant> restaurants;
-
-  const _PromoHeroBanner({required this.restaurants});
-
-  @override
-  State<_PromoHeroBanner> createState() => _PromoHeroBannerState();
-}
-
-class _PromoHeroBannerState extends State<_PromoHeroBanner> {
-  late final PageController _pageController;
-  Timer? _carouselTimer;
-  int _currentPage = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: 0);
-    _startAutoSwipe();
-  }
-
-  void _startAutoSwipe() {
-    _carouselTimer?.cancel();
-    _carouselTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_pageController.hasClients) {
-        _currentPage = (_currentPage + 1) % _promoCards.length;
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _carouselTimer?.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SizedBox(
-      height: 195,
-      child: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentPage = index;
-          });
-        },
-        itemCount: _promoCards.length,
-        itemBuilder: (context, index) {
-          final promo = _promoCards[index];
-          return _buildPromoCard(context, theme, promo);
-        },
-      ),
-    );
-  }
-
-  Widget _buildPromoCard(BuildContext context, ThemeData theme, _PromoItem promo) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [const Color(0xFFDC2626), theme.colorScheme.primaryContainer, theme.colorScheme.primaryContainer],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Stack(
-        children: [
-          // Soft glow
-          Positioned(
-            right: -40,
-            bottom: -40,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.12), shape: BoxShape.circle),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Column(
-              children: List.generate(
-                4,
-                (index) => Container(
-                  width: 60 - index * 12,
-                  height: 3,
-                  color: Colors.white.withValues(alpha: 0.25),
-                  margin: const EdgeInsets.only(left: 20, top: 6),
-                  transform: Matrix4.skewX(-0.2),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.timer, color: Colors.white, size: 14),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                promo.tag,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerLowest.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        promo.code,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  promo.title,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  promo.subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.85)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerLowest,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-                              // NOTE: the promo *copy* is presentational - the
-                              // backend has no promotions/promo-code system
-                              // (spec Sec 14 excludes loyalty/referral). The
-                              // button therefore only browses real restaurants.
-                              final restaurants = widget.restaurants;
-                              if (restaurants.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('No restaurants available right now.'),
-                                  ),
-                                );
-                                return;
-                              }
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => RestaurantDetailScreen(restaurant: restaurants.first),
-                                ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      promo.buttonText,
-                                      style: theme.textTheme.labelLarge?.copyWith(
-                                        color: const Color(0xFFDC2626),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(promo.buttonIcon, color: const Color(0xFFDC2626), size: 16),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Animated Dots indicator
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(
-                        _promoCards.length,
-                        (dotIndex) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                          width: dotIndex == _currentPage ? 16 : 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: dotIndex == _currentPage ? Colors.white : Colors.white.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CategorySection extends StatelessWidget {
   final ThemeData theme;
   final ValueChanged<String> onCategorySelected;
@@ -1553,22 +1233,10 @@ class _CategorySection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Image.network(
-                            item.imageUrl,
-                            width: 64,
-                            height: 64,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return Container(
-                                color: theme.colorScheme.surfaceContainerHigh,
-                                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.fastfood, color: Colors.white, size: 28),
-                            ),
+                          child: Icon(
+                            item.icon,
+                            color: theme.colorScheme.primary,
+                            size: 30,
                           ),
                         ),
                       ),
@@ -1963,10 +1631,10 @@ class _PopularItemsSection extends StatelessWidget {
 // ----------------------------- Data models -----------------------------
 
 class _Category {
-  final String imageUrl;
+  final IconData icon;
   final String label;
 
-  const _Category({required this.imageUrl, required this.label});
+  const _Category({required this.icon, required this.label});
 }
 
 /// One real dish on the "popular" rail, paired with the restaurant it belongs
@@ -1986,35 +1654,17 @@ class _PopularItem {
 
 // ----------------------------- Static data -----------------------------
 
+// Category chips use bundled Material icons — the previous build shipped
+// placeholder photos hotlinked from Unsplash, which is test content in a
+// release build and an external dependency we do not control.
 final List<_Category> _categories = const [
-  _Category(
-    label: 'Pizza',
-    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Burgers',
-    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Cloud Hub',
-    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Fast Food',
-    imageUrl: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Shawarma',
-    imageUrl: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Desserts',
-    imageUrl: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=200&auto=format&fit=crop&q=80',
-  ),
-  _Category(
-    label: 'Drinks',
-    imageUrl: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=200&auto=format&fit=crop&q=80',
-  ),
+  _Category(label: 'Pizza', icon: Icons.local_pizza),
+  _Category(label: 'Burgers', icon: Icons.lunch_dining),
+  _Category(label: 'Cloud Hub', icon: Icons.cloud),
+  _Category(label: 'Fast Food', icon: Icons.fastfood),
+  _Category(label: 'Shawarma', icon: Icons.restaurant),
+  _Category(label: 'Desserts', icon: Icons.icecream),
+  _Category(label: 'Drinks', icon: Icons.local_bar),
 ];
 
 // Removed: the former hardcoded `_popularItems` list (fake dishes, fake ratings,

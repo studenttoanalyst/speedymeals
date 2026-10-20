@@ -5,6 +5,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/models/user_models.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../features/address/address.dart';
+import '../../widgets/location_disclosure.dart';
 import '../../widgets/skeleton/skeleton.dart';
 
 /// Manage the customer's saved delivery addresses
@@ -444,6 +445,9 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
   /// user can always type coordinates instead.
   Future<void> _useCurrentLocation() async {
     if (_isLocating) return;
+    if (!mounted) return;
+    // Disclosure before the OS location prompt.
+    if (!await LocationDisclosure.ensureCustomerAcknowledged(context)) return;
     setState(() {
       _isLocating = true;
       _locationError = null;

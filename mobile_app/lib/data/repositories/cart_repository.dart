@@ -1,5 +1,4 @@
 import '../../core/network/api_client.dart';
-import '../../core/network/api_exception.dart';
 import '../models/cart_models.dart';
 import '../models/catalog_models.dart';
 import 'restaurant_repository.dart';
@@ -31,29 +30,6 @@ class CartRepository {
   /// into renderable lines always needs the menu alongside.
   Future<List<MenuCategory>> menuFor(String restaurantId) =>
       _restaurants.menu(restaurantId);
-
-  /// Cart plus the menu it refers to, resolved into renderable lines.
-  ///
-  /// The menu is only fetched when there is something in the cart, so an empty
-  /// cart costs one request instead of two.
-  Future<ResolvedCart> getResolvedCart(String restaurantId) async {
-    final cart = await getCart(restaurantId);
-    if (cart.isEmpty) {
-      return ResolvedCart(restaurantId: restaurantId);
-    }
-
-    try {
-      final menu = await _restaurants.menu(restaurantId);
-      return ResolvedCart.resolve(cart: cart, menu: menu);
-    } on ApiException {
-      // The restaurant went inactive (menu 404s) while the cart still exists.
-      // Surface the lines as unresolved instead of blanking the cart screen.
-      return ResolvedCart(
-        restaurantId: restaurantId,
-        unresolvedItemIds: [for (final line in cart.items) line.itemId],
-      );
-    }
-  }
 
   /// `POST /restaurants/{id}/cart/items`
   ///

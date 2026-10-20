@@ -106,6 +106,14 @@ class ApiException implements Exception {
           message: detail ?? 'That conflicts with the current state.',
           detail: body,
         );
+      case 413:
+        return ApiException(
+          kind: ApiErrorKind.badRequest,
+          statusCode: statusCode,
+          message: detail ??
+              'That file is too large. Please choose a smaller one and try again.',
+          detail: body,
+        );
       case 422:
         return ApiException(
           kind: ApiErrorKind.validation,

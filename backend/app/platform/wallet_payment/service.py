@@ -48,6 +48,7 @@ from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, 
 
 # Wallet thresholds
 KIT_DEPOSIT_AMOUNT = 5000
+WALLET_REMINDER_THRESHOLD = 100
 
 # Delivery-fee commission split (SpeedyMeals business model): the platform
 # keeps 10% of every delivery fee, the rider earns the remaining 90%.

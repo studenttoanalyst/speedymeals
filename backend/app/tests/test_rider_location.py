@@ -379,15 +379,15 @@ def test_not_eligible_offline(db_session, rider):
         _cleanup_location(rider.id)
 
 
-def test_not_eligible_insufficient_wallet(db_session, rider):
+def test_eligible_regardless_of_wallet_balance(db_session, rider):
+    """Wallet balance does not gate assignment eligibility."""
     try:
-        # Go online + push location, but wallet_balance = 0 (below 500)
-        # set_online_status would reject this, so set the field directly
+        # Go online + push location, with wallet_balance = 0
         rider.is_online = True
         db_session.add(rider)
         db_session.commit()
         service.update_rider_location(db_session, rider.id, 24.8607, 67.0011)
-        assert service.rider_eligible_for_assignment(db_session, rider.id) is False
+        assert service.rider_eligible_for_assignment(db_session, rider.id) is True
     finally:
         _cleanup_location(rider.id)
 

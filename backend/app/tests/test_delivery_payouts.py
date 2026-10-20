@@ -23,7 +23,6 @@ from fastapi import HTTPException
 from app.core.redis_client import redis_client
 from app.modules.food_delivery import service as food_service
 from app.modules.food_delivery.models import Order, Restaurant
-from app.modules.food_delivery.schemas import CartAddItemSchema
 from app.platform.users.models import Address, User
 from app.platform.wallet_payment import service as wallet_service
 from app.platform.wallet_payment.models import Rider, WalletTransaction

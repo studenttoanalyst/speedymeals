@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +10,7 @@ import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/home_navigation.dart';
+import '../../widgets/legal_links.dart';
 import '../rider/rider_dashboard_screen.dart';
 
 /// Step 2 of the phone+OTP login flow: enter the 6-digit code.
@@ -160,7 +163,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     } on ApiException catch (error) {
       // e.g. the email is already taken by another account — the login itself
       // still succeeded, so surface it without undoing the session.
-      debugPrint('Could not save signup profile details: ${error.message}');
+      developer.log(
+        'Could not save signup profile details: ${error.message}',
+        name: 'OtpVerificationScreen',
+      );
     }
   }
 
@@ -400,6 +406,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 20),
+                    const LegalConsentText(),
                     const SizedBox(height: 32),
                   ],
                 ),

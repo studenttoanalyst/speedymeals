@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 
@@ -9,6 +10,7 @@ import '../core/storage/token_storage.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/rider_repository.dart';
 import '../data/repositories/user_repository.dart';
+import 'cart_service.dart';
 import 'push_service.dart';
 
 // Re-exported so screens keep importing only this file for their auth types.
@@ -127,7 +129,7 @@ class AuthException implements Exception {
         return AuthException(error.message);
       case ApiErrorKind.network:
         return const AuthException(
-          'Cannot reach Speedy Meals. Check your internet connection.',
+          'Cannot reach ${AppConstants.appName}. Check your internet connection.',
           isRetryable: true,
         );
       case ApiErrorKind.timeout:
@@ -223,10 +225,13 @@ class AuthService extends ChangeNotifier {
     } on ApiException catch (error) {
       // A dead/revoked session is normal (30-day refresh window) and must not
       // block startup; anything else is also non-fatal here.
-      debugPrint('Session restore failed (${error.kind.name}); signed out.');
+      developer.log(
+        'Session restore failed (${error.kind.name}); signed out.',
+        name: 'AuthService',
+      );
       await _clearSession();
     } catch (error) {
-      debugPrint('Session restore failed: $error');
+      developer.log('Session restore failed: $error', name: 'AuthService');
       await _clearSession();
     } finally {
       _isBootstrapping = false;
@@ -358,6 +363,34 @@ class AuthService extends ChangeNotifier {
     if (refreshToken != null) {
       await _auth.logout(refreshToken: refreshToken);
     }
+    // Drop the local cart view and its remembered restaurant scope so the next
+    // account to sign in on this device does not inherit this one's cart tab.
+    await CartService.instance.purgeLocal();
+    await _clearSession();
+  }
+
+  /// Permanently deletes the signed-in account (`DELETE /users/me`).
+  ///
+  /// Destructive and irreversible — the caller MUST confirm with the user
+  /// first. The backend soft-deletes/anonymizes the account, revokes every
+  /// refresh token and drops this device's push registrations; the client then
+  /// only has to discard its own local state (FCM token, cart, secure storage).
+  ///
+  /// Throws [AuthException] when the backend refuses — notably 409 while an
+  /// order is still active/pending, or while a rider's wallet/cash is
+  /// unsettled. The exception message is already user-safe.
+  Future<void> deleteAccount() async {
+    try {
+      await _users.deleteAccount();
+    } on ApiException catch (error) {
+      throw AuthException.fromApi(error);
+    }
+
+    // The account is gone server-side, so this device's FCM token must not keep
+    // routing to it: drop it locally (no network — the backend already removed
+    // its device rows), then clear the cart and the session.
+    await PushService.instance.forgetDeviceToken();
+    await CartService.instance.purgeLocal();
     await _clearSession();
   }
 

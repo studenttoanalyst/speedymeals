@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../services/auth_service.dart';
-import 'customer_forgot_password_screen.dart';
 import 'customer_signup_screen.dart';
 import 'otp_verification_screen.dart';
+import '../../widgets/legal_links.dart';
 
 /// Customer Login Screen matching Stitch design (`speedy_meals_customer_login`).
 class CustomerLoginScreen extends StatefulWidget {
@@ -74,16 +74,6 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
         });
       }
     }
-  }
-
-  void _showSocialComingSoon(String provider) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$provider Sign-In coming soon!'),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
   }
 
   @override
@@ -183,7 +173,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Login to order your favorite food from Speedy Meals',
+                        'Login to order your favorite food from SpeedyMeals',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -196,43 +186,19 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
 
                       // Phone Number Field
                       //
-                      // Speedy Meals authenticates by phone + OTP — the backend
+                      // SpeedyMeals authenticates by phone + OTP — the backend
                       // has no password column on `users`, so there is nothing
                       // else to collect here.
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Phone Number',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF334155),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const CustomerForgotPasswordScreen(),
-                                    ),
-                                  );
-                                },
-                                child: const Text(
-                                  'Trouble signing in?',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFFDC2626),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          const Text(
+                            'Phone Number',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF334155),
+                            ),
                           ),
                           const SizedBox(height: 6),
                           TextFormField(
@@ -396,8 +362,9 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                         ),
                       ),
 
-
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+                      const LegalConsentText(),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -555,43 +522,6 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Color(0xFFDC2626)),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required String label,
-    required IconData icon,
-    required Color iconColor,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF334155),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

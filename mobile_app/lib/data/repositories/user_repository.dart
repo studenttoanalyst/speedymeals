@@ -87,4 +87,19 @@ class UserRepository {
   Future<void> deleteAddress(String addressId) async {
     await _client.delete('/users/me/addresses/$addressId');
   }
+
+  /// `DELETE /users/me` — permanent account deletion (Play Store requirement).
+  ///
+  /// The backend soft-deletes/anonymizes the account, revokes every refresh
+  /// token, and removes the registered device (FCM) tokens. It refuses with
+  /// 409 while the customer still has an active or pending order, and the
+  /// 409 detail is surfaced verbatim so the UI can explain why.
+  ///
+  /// This is a destructive, irreversible call — the caller must show a
+  /// confirmation before invoking it, and must clear the local session on
+  /// success. `DELETE /users/me` is also the rider deletion path (the backend
+  /// branches on the token role and blocks while cash/wallet is unsettled).
+  Future<void> deleteAccount() async {
+    await _client.delete('/users/me');
+  }
 }

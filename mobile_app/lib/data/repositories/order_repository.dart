@@ -30,10 +30,11 @@ class OrderRepository {
 
   /// `GET /restaurants/{id}/cart/checkout-preview?address_id=…`
   ///
-  /// `address_id` is mandatory. Distance comes from the Google Maps Distance
-  /// Matrix (restaurant → address) and the fee is `50 + (km × 20)`. If Maps is
-  /// unavailable the backend returns 503, surfaced here as
-  /// [ApiErrorKind.unavailable].
+  /// `address_id` is mandatory. The backend computes distance, the delivery
+  /// fee (`100 + (km × 25)`), the `Rs. 15` platform fee and GST — never the
+  /// client. If the Maps route cannot be fetched the backend degrades to a
+  /// Haversine estimate rather than failing; only a genuinely unavailable
+  /// dependency surfaces as [ApiErrorKind.unavailable].
   Future<CheckoutPreview> previewCheckout({
     required String restaurantId,
     required String addressId,
@@ -55,7 +56,11 @@ class OrderRepository {
     required PlaceOrderRequest request,
   }) async {
     // Same attempt -> reuse the key across retries (timeout / network error);
-    // a different checkout -> mint a new one.
+    // a different checkout -> mint a new one. A 409 (expected_total mismatch)
+    // also keeps the key: the backend caches only SUCCESSFUL placements
+    // (routes.py: "Failed placements are never cached, so a rejected order can
+    // be retried with the same key"), so no new key is needed after a price
+    // update — the next attempt re-prices and places fresh.
     final attempt =
         '$restaurantId|${request.addressId}|${request.paymentMethod.wireValue}';
     if (_checkoutKey == null || _checkoutAttempt != attempt) {

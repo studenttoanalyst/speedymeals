@@ -2,6 +2,7 @@
 Business logic for Admin Account Provisioning and Staff Management.
 Zero em-dash compliant.
 """
+import logging
 import re
 import secrets
 import string
@@ -18,6 +19,8 @@ from app.modules.admin_accounts.schemas import (
     AdminAccountCreateSchema,
     AdminAccountUpdateSchema,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _generate_high_entropy_password(length: int = 16) -> str:
@@ -167,7 +170,7 @@ def provision_admin_account(
     db.commit()
 
     invitation_url = f"https://speedymealservices.com/admin/setup-password?token={invitation_token}"
-    print(f"[ADMIN-ONBOARDING] Account provisioned for <{final_email}>. Temp pass: {temp_password}, Invite URL: {invitation_url}")
+    logger.info("Admin account provisioned for <%s>", final_email)
 
     return {
         "admin": _format_admin_response(new_admin),
@@ -310,7 +313,7 @@ def reset_admin_credentials(
     db.add(audit)
     db.commit()
 
-    print(f"[ADMIN-RESET] Credentials force-reset for <{admin.email}>. New temp pass: {new_temp_password}")
+    logger.info("Admin credentials force-reset for <%s>", admin.email)
 
     return {
         "admin_id": admin.id,

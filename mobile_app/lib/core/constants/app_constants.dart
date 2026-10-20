@@ -1,4 +1,4 @@
-/// Speedy Meals application constants and backend-aligned enums.
+/// SpeedyMeals application constants and backend-aligned enums.
 ///
 /// This file is the single source of truth for the vocabulary shared between
 /// the Flutter UI and the FastAPI backend. Every wire string here was copied
@@ -12,40 +12,46 @@
 library;
 
 class AppConstants {
-  /// Delivery fee rule — mirrors backend
-  /// `food_delivery/service.py: DELIVERY_FEE_BASE / DELIVERY_FEE_PER_KM`:
-  /// `fee = 50 + (km x 20)`.
-  ///
-  /// Display fallback only; never used to compute an order total.
-  static const double deliveryFeeBase = 50.0;
-  static const double deliveryFeePerKm = 20.0;
+  // NOTE: no delivery-fee / rider-deduction constants live here. The backend is
+  // authoritative for every amount (`food_delivery/service.py`:
+  // `DELIVERY_FEE_BASE = 100`, `DELIVERY_FEE_PER_KM = 25`, `PLATFORM_FEE = 15`),
+  // and the only correct source in the app is the API response
+  // (`GET /restaurants/{id}/cart/checkout-preview`). A duplicated client copy
+  // inevitably drifts from the server, so money values are never mirrored here.
 
   /// ETA shown before a real estimate is available (base + per-km factor).
+  ///
+  /// Display estimate only; whenever the backend supplies an ETA (`eta` or
+  /// `duration_mins` on tracking) that value wins over this fallback.
   static const int baseEtaMinutes = 10;
   static const double etaPerKmFactor = 3.0;
-
-  /// Flat fee the backend deducts from a rider's wallet per completed delivery
-  /// (`wallet_payment/service.py: DELIVERY_DEDUCTION_AMOUNT`).
-  static const double riderDeliveryDeduction = 10.0;
-
-  /// Minimum rider wallet balance required to go online
-  /// (`wallet_payment/service.py: MIN_WALLET_BALANCE`).
-  static const double riderMinWalletBalance = 500.0;
 
   /// Rider OTP resend cooldown enforced server-side
   /// (`auth/service.py`, surfaced as HTTP 429).
   static const Duration otpResendCooldown = Duration(seconds: 45);
 
-  /// How often an in-flight order is re-polled. The backend has no WebSockets
-  /// or push (spec §14) — the client polls `GET /orders/{id}/track` instead.
+  /// How often an in-flight order is re-polled as a fallback. Live updates are
+  /// primarily streamed over `WS /orders/{id}/track`
+  /// (`services/live_location_socket.dart`); this REST poll
+  /// (`GET /orders/{id}/track`) is the safety net when the socket is unavailable.
   static const Duration orderPollInterval = Duration(seconds: 15);
 
-  // App info
-  static const String appName = 'Speedy Meals';
-  static const String appTagline = 'Fast & Fresh Delivery';
+  // App info — single source of truth for the brand name and tagline.
+  // Every screen (splash, dashboards, notifications, network errors) reads
+  // these instead of hardcoding the strings, so the name can never drift.
+  static const String appName = 'SpeedyMeals';
+  static const String appTagline = 'Lightning Fast Delights';
 
   /// Placeholder shown when a customer has no saved address yet.
   static const String noAddressLabel = 'Add a delivery address';
+
+  /// Support contact shown in the app and in the published policy pages.
+  static const String supportEmail = 'support@speedymealservices.com';
+
+  // Legal & Support URLs
+  static const String termsUrl = 'https://speedymealservices.com/terms';
+  static const String privacyUrl = 'https://speedymealservices.com/privacy';
+  static const String deleteAccountUrl = 'https://speedymealservices.com/delete-account';
 }
 
 /// User roles, matching the `role` claim the backend embeds in every JWT and
@@ -256,8 +262,11 @@ enum PaymentMethod {
   /// Cash on delivery — cash changes hands when the rider delivers.
   cod('COD', 'Cash on Delivery'),
 
-  /// Simulated online payment (no real gateway in the MVP).
-  digital('Digital', 'Pay Online (demo)');
+  /// Online payment. The backend accepts it and completes the order; the
+  /// gateway itself is an MVP stub that records a reference and moves on
+  /// (`food_delivery/service.py: _process_digital_payment`), so no
+  /// customer-facing screen should label it as a demo/test payment.
+  digital('Digital', 'Pay Online');
 
   const PaymentMethod(this.wireValue, this.label);
 

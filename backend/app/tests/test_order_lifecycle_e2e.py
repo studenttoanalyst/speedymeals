@@ -11,11 +11,9 @@ asserts the Sec 11 money numbers hold at every stage including the
 final wallet/cash-owed side effects.
 """
 import uuid
-from datetime import datetime, timezone
-
-import pytest
 
 from app.core import maps_client
+from app.core.config import settings
 from app.core.redis_client import redis_client
 from app.modules.food_delivery import service as food_service
 from app.modules.food_delivery.models import MenuItem, Restaurant
@@ -190,6 +188,10 @@ def test_full_lifecycle_cod(db_session, monkeypatch):
 
 
 def test_full_lifecycle_digital(db_session, monkeypatch):
+    # Online payments default to OFF (the gateway is still a stub), so the
+    # Digital lifecycle needs the flag switched on for this test only.
+    monkeypatch.setattr(settings, "ONLINE_PAYMENTS_ENABLED", True)
+
     order, rider = _run_full_lifecycle(db_session, monkeypatch, "Digital")
 
     assert order.status == "Delivered"

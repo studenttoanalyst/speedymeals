@@ -19,8 +19,28 @@ class RiderProfile {
 
   final bool isOnline;
   final bool isActive;
+
+  /// `current_balance` — wallet balance from `GET /wallet/profile`
+  /// (backend `RiderWalletProfileResponseSchema.current_balance`, the same
+  /// `rider.wallet_balance` column that `/wallet/balance` reports as
+  /// `wallet_balance`).
   final double walletBalance;
+
+  /// `total_earnings` — lifetime sum of `rider_earning` on Delivered orders.
+  final double totalEarnings;
+
+  /// `pending_payouts` — generated `RiderPayout` rows still Pending, i.e.
+  /// money the platform owes the rider. NOT cash the rider is holding, so it
+  /// must never be shown as cash owed.
+  final double pendingPayouts;
+
+  /// COD cash collected from customers and not yet deposited.
+  ///
+  /// `/wallet/profile` has no such key; `pending_cash_owed` only exists on
+  /// `GET /wallet/balance` (and `/wallet/cod-eligibility`), so
+  /// [RiderRepository.profile] fetches it from there and passes it in.
   final double pendingCashOwed;
+
   final String? vehicleType;
   final String? vehicleRegistration;
   final String? cnicNumber;
@@ -44,6 +64,8 @@ class RiderProfile {
     this.isOnline = false,
     this.isActive = true,
     this.walletBalance = 0,
+    this.totalEarnings = 0,
+    this.pendingPayouts = 0,
     this.pendingCashOwed = 0,
     this.vehicleType,
     this.vehicleRegistration,
@@ -55,7 +77,13 @@ class RiderProfile {
     this.kitDepositPaid = false,
   });
 
-  factory RiderProfile.fromJson(Map<String, dynamic> json) => RiderProfile(
+  /// [pendingCashOwed] is a required parameter because it is not part of the
+  /// `/wallet/profile` payload — see the field doc for where it comes from.
+  factory RiderProfile.fromJson(
+    Map<String, dynamic> json, {
+    required double pendingCashOwed,
+  }) =>
+      RiderProfile(
         id: Json.asString(json['id']),
         name: Json.asString(json['name'], fallback: 'Rider'),
         phoneNumber: Json.asString(json['phone_number']),
@@ -63,8 +91,10 @@ class RiderProfile {
         approvalStatus: Json.asString(json['approval_status'], fallback: 'pending'),
         isOnline: Json.asBool(json['is_online']),
         isActive: Json.asBool(json['is_active'], fallback: true),
-        walletBalance: Json.asDouble(json['wallet_balance']),
-        pendingCashOwed: Json.asDouble(json['pending_cash_owed']),
+        walletBalance: Json.asDouble(json['current_balance']),
+        totalEarnings: Json.asDouble(json['total_earnings']),
+        pendingPayouts: Json.asDouble(json['pending_payouts']),
+        pendingCashOwed: pendingCashOwed,
         vehicleType: Json.asStringOrNull(json['vehicle_type']),
         vehicleRegistration: Json.asStringOrNull(json['vehicle_registration']),
         cnicNumber: Json.asStringOrNull(json['cnic_number']),
@@ -93,6 +123,8 @@ class RiderProfile {
         isOnline: isOnline ?? this.isOnline,
         isActive: isActive,
         walletBalance: walletBalance ?? this.walletBalance,
+        totalEarnings: totalEarnings,
+        pendingPayouts: pendingPayouts,
         pendingCashOwed: pendingCashOwed ?? this.pendingCashOwed,
         vehicleType: vehicleType,
         vehicleRegistration: vehicleRegistration,
@@ -121,10 +153,6 @@ class RiderProfile {
         hasLicensePhoto,
         hasVehiclePhoto,
       ].where((has) => has).length;
-
-  /// Wallet is below the Rs. 500 floor required to go online.
-  bool get isBelowMinWallet =>
-      walletBalance < AppConstants.riderMinWalletBalance;
 
   String get displayName => name.trim().isEmpty ? 'Rider' : name.trim();
 
@@ -404,12 +432,6 @@ class RiderWallet {
   String get pendingCashLabel => formatPkr(pendingCashOwed);
   String get earningsLabel => formatPkr(earningsBalance);
 
-  bool get isBelowMinWallet =>
-      walletBalance < AppConstants.riderMinWalletBalance;
-
-  /// Shortfall the rider must top up before going online.
-  double get topUpNeeded =>
-      (AppConstants.riderMinWalletBalance - walletBalance).clamp(0, double.infinity);
 }
 
 /// `GET /wallet/cod-eligibility` (backend: `CODEligibilityResponseSchema`).

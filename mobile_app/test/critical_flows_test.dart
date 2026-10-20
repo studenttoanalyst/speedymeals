@@ -87,7 +87,7 @@ void main() {
     expect(find.textContaining('No results'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    // Dispose the tree so the promo carousel timer is cancelled.
+    // Dispose the tree so the dashboard's timers (search debounce) are cancelled.
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
   });

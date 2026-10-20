@@ -103,6 +103,12 @@ class LiveLocationSocket {
   int _reconnectAttempts = 0;
   bool _disposed = false;
   bool _completed = false;
+
+  /// True once the server has explicitly rejected this session
+  /// (`auth_failed` frame / close 4003). A denied token or a missing
+  /// ownership grant can never succeed on a retry, so the reconnect budget
+  /// is bypassed entirely — the caller falls straight back to REST polling.
+  bool _denied = false;
   bool _connecting = false;
 
   /// True while a usable socket is open.
@@ -126,6 +132,7 @@ class LiveLocationSocket {
     }
     _orderId = orderId;
     _completed = false;
+    _denied = false;
     _reconnectAttempts = 0;
     await _open();
   }
@@ -234,6 +241,17 @@ class LiveLocationSocket {
         // budget for any later drop.
         _reconnectAttempts = 0;
         _emit(LiveLocationUpdated(location));
+      case 'auth_failed':
+        // The server rejected this session (bad/expired token or this user
+        // does not own the order) and follows this frame with close 4003.
+        // Retrying is pointless and, before this guard, the client burned its
+        // full reconnect budget on a token that can never work.
+        _denied = true;
+        _emit(LiveLocationDisconnected(
+          reason: decoded['detail'] as String? ?? 'not authorised',
+          willReconnect: false,
+        ));
+        unawaited(close());
       case 'order_completed':
         _completed = true;
         _emit(LiveLocationCompleted(decoded['detail'] as String?));
@@ -251,7 +269,7 @@ class LiveLocationSocket {
     _subscription = null;
     _transport = null;
 
-    if (_disposed || _completed) return;
+    if (_disposed || _completed || _denied) return;
 
     final canRetry = _reconnectAttempts < maxReconnectAttempts;
     if (!canRetry) {

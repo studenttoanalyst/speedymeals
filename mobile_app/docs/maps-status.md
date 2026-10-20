@@ -1,5 +1,20 @@
 # Google Maps Platform — Mobile App Status
 
+> **Current status (2026-10-19).** This file is a phase-by-phase record; some
+> early notes are historical and are superseded by Phase M7 (bottom of file):
+>
+> - `GET /orders/{order_id}/rider-location` and `WS /orders/{order_id}/track`
+>   are implemented in the backend (the M3/M6 "blocked" notes are historical).
+> - Address autocomplete now goes through the backend Places proxy
+>   (`/api/v1/location/places/*`); `google_places_flutter` and the
+>   `PLACES_API_KEY` dart-define are no longer used.
+> - Live tracking treats an `auth_failed` frame / close 4003 as terminal and
+>   falls back to REST polling without retrying a rejected token.
+> - `flutter test` currently runs **136 tests**, all passing.
+> - Map tiles still require native keys (`MAPS_API_KEY` on Android,
+>   `GOOGLE_MAPS_API_KEY` on iOS); the app renders its fallback panel without
+>   them.
+
 ## Audit & Integration Date
 
 2026-09-26
@@ -281,7 +296,7 @@ Phase M1 Map Rendering is fully implemented in code. The reusable `MapView` comp
 
 ### M3 STATUS
 
-**BLOCKED — BACKEND LOCATION CONTRACT REQUIRED**
+**SUPERSEDED by Phase M7 — the backend contract now exists and the client uses it.**
 
 ### Backend Audit & Findings
 - **Audit Performed:** Exhaustive codebase audit of `backend/app` covering routes, schemas, models, services, and tests.

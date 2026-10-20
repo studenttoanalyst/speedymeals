@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/network/api_exception.dart';
 import '../../data/json_utils.dart';
 import '../../data/models/rider_models.dart';
@@ -12,12 +11,13 @@ import '../../widgets/skeleton/skeleton.dart';
 /// Backed by:
 ///   GET  /wallet/earnings       → earnings / wallet / cash owed
 ///   GET  /wallet/cod-eligibility → whether more cash work is allowed
-///   POST /wallet/recharge        → keep the wallet above the Rs. 500 floor
+///   POST /wallet/recharge        → top up the wallet balance
 ///   POST /wallet/cash-deposit    → submit collected COD cash
 ///
-/// The server owns the rules: the Rs. 500 minimum to go online, the Rs. 10
-/// deduction per delivery, the Rs. 10,000 cash cap and the expected-cash /
-/// discrepancy calculation. This screen only displays and submits.
+/// The server owns the rules: kit completion to go online, the 10%
+/// platform commission on each delivery fee, the COD cash cap and the
+/// expected-cash / discrepancy calculation. This screen only displays and
+/// submits.
 class RiderWalletScreen extends StatefulWidget {
   const RiderWalletScreen({super.key});
 
@@ -191,8 +191,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
 
     final wallet = _wallet;
     final cod = _cod;
-    final belowMin = wallet?.isBelowMinWallet ?? false;
-    final topUp = wallet?.topUpNeeded ?? 0;
+    final isNegative = (wallet?.walletBalance ?? 0) < 0;
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -207,7 +206,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: belowMin
+                  colors: isNegative
                       ? [const Color(0xFF7F1D1D), const Color(0xFF991B1B)]
                       : [const Color(0xFF065F46), const Color(0xFF047857)],
                 ),
@@ -232,8 +231,8 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    belowMin
-                        ? 'Below the Rs. 500 minimum. Top up ${formatPkr(topUp)} to go online.'
+                    isNegative
+                        ? 'Negative balance. Please top up your wallet.'
                         : 'You can go online and receive deliveries.',
                     style: const TextStyle(fontSize: 12.5, color: Colors.white70, height: 1.4),
                   ),
@@ -306,15 +305,15 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            // Commission split mirrors the backend
+            // (`wallet_payment/service.py`: DELIVERY_COMMISSION_RATE = 0.10,
+            // RIDER_DELIVERY_SHARE = 0.90) — keep in sync if it changes.
             const Text(
-              'Deliveries deduct a flat Rs. 10 from the wallet. Cash on Delivery '
-              'orders add the order total to cash owed, which must be submitted.',
+              'On Cash on Delivery the platform keeps 10% of the delivery fee, '
+              'deducted from your wallet; on digital payments your 90% share is '
+              'credited. Cash on Delivery orders also add the order total to '
+              'cash owed, which must be submitted.',
               style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8), height: 1.5),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Minimum wallet to go online: ${formatPkr(AppConstants.riderMinWalletBalance)}',
-              style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
             ),
           ],
         ),
@@ -420,7 +419,7 @@ class _RechargeSheetState extends State<_RechargeSheet> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
-              labelText: 'Amount (PKR)',
+              labelText: 'Amount (Rs.)',
               labelStyle: TextStyle(color: Color(0xFF94A3B8)),
               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF334155))),
               focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
@@ -524,7 +523,7 @@ class _CashDepositSheetState extends State<_CashDepositSheet> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
-              labelText: 'Amount submitted (PKR)',
+              labelText: 'Amount submitted (Rs.)',
               labelStyle: TextStyle(color: Color(0xFF94A3B8)),
               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF334155))),
               focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
