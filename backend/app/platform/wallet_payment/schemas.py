@@ -117,9 +117,12 @@ class RiderAssignmentResponseSchema(BaseModel):
     rider_id: uuid.UUID | None
     payment_method: str
     delivery_distance_km: float
-    delivery_fee: Decimal
-    total_amount: Decimal
-    rider_earning: Decimal
+    # Order.delivery_fee / total_amount / rider_earning are still Mapped[float]
+    # on the Order model; keep float here until food_delivery/models.py is
+    # updated to Mapped[Decimal] in a follow-up WAL-06 sweep.
+    delivery_fee: float
+    total_amount: float
+    rider_earning: float
 
 
 # --- Phase 6, Step 5: delivery status flow ---
@@ -138,9 +141,12 @@ class DeliveryStatusResponseSchema(BaseModel):
     rider_id: uuid.UUID | None
     payment_method: str
     delivery_distance_km: float
-    delivery_fee: Decimal
-    total_amount: Decimal
-    rider_earning: Decimal
+    # Order.delivery_fee / total_amount / rider_earning are still Mapped[float]
+    # on the Order model; keep float here until food_delivery/models.py is
+    # updated to Mapped[Decimal] in a follow-up WAL-06 sweep.
+    delivery_fee: float
+    total_amount: float
+    rider_earning: float
     # New location fields
     restaurant_lat: float | None = None
     restaurant_lng: float | None = None
@@ -197,14 +203,18 @@ class RiderAssignmentItemSchema(BaseModel):
     """One assigned order in GET /wallet/assignments — payout fields are
     the frozen per-order snapshots (rider_earning = 90% of delivery fee,
     spec Sec 3.3), never recomputed at read time. Includes location snapshot.
+
+    NOTE: delivery_fee / total_amount / rider_earning remain float until
+    food_delivery/models.py Order fields are migrated to Mapped[Decimal]
+    in the follow-up WAL-06 sweep.
     """
     id: uuid.UUID
     status: str
     payment_method: str
     delivery_distance_km: float
-    delivery_fee: Decimal
-    total_amount: Decimal
-    rider_earning: Decimal
+    delivery_fee: float
+    total_amount: float
+    rider_earning: float
     placed_at: datetime | None
     delivered_at: datetime | None
     # New location fields

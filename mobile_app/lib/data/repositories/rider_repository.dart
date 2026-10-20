@@ -86,8 +86,8 @@ class RiderRepository {
 
   /// `PATCH /wallet/status`
   ///
-  /// Going online is refused with 400 while the wallet is below Rs. 500; going
-  /// offline is always allowed.
+  /// Going online requires kit completion and kit deposit; no wallet minimum.
+  /// Going offline is always allowed.
   Future<RiderWallet> setOnline(bool isOnline) async {
     final json = await _client.patchJson(
       '/wallet/status',

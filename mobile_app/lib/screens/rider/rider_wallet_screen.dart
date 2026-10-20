@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/network/api_exception.dart';
 import '../../data/json_utils.dart';
 import '../../data/models/rider_models.dart';
@@ -192,8 +191,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
 
     final wallet = _wallet;
     final cod = _cod;
-    final belowMin = wallet?.isBelowMinWallet ?? false;
-    final topUp = wallet?.topUpNeeded ?? 0;
+    final isNegative = (wallet?.walletBalance ?? 0) < 0;
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -208,7 +206,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: belowMin
+                  colors: isNegative
                       ? [const Color(0xFF7F1D1D), const Color(0xFF991B1B)]
                       : [const Color(0xFF065F46), const Color(0xFF047857)],
                 ),
@@ -233,8 +231,8 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    belowMin
-                        ? 'Negative balance. Top up ${formatPkr(topUp)} to restore wallet.'
+                    isNegative
+                        ? 'Negative balance. Please top up your wallet.'
                         : 'You can go online and receive deliveries.',
                     style: const TextStyle(fontSize: 12.5, color: Colors.white70, height: 1.4),
                   ),
@@ -316,11 +314,6 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               'credited. Cash on Delivery orders also add the order total to '
               'cash owed, which must be submitted.',
               style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8), height: 1.5),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Minimum wallet to go online: ${formatPkr(AppConstants.riderMinWalletBalance)}',
-              style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
             ),
           ],
         ),
