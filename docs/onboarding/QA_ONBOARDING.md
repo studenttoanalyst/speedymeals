@@ -67,7 +67,7 @@ cd mobile_app
 flutter run                                                        # emulator → http://10.0.2.2:8000
 flutter run --dart-define=API_BASE_URL=http://<your-LAN-IP>:8000   # physical device
 ```
-Release builds **require** `--dart-define=API_BASE_URL=...` or they throw (`lib/core/config/api_config.dart`). Which URL the official release APK uses: **ask dev** (AGENT_MAP §7 Q3).
+Release builds **require** `--dart-define=API_BASE_URL=...` or they throw (`lib/core/config/api_config.dart`). The official release APK is built with `--dart-define=API_BASE_URL=https://…`: HTTPS, **no `:8000`** (owner-confirmed 2026-10-23). Use the `:8000` form only for local or LAN testing.
 
 ## 3. Test data and seeding
 
@@ -305,6 +305,6 @@ Add these for backend and website releases:
 - A **separate dev or staging database and backend** so QA never touches prod. This blocks safe testing.
 - A complete local `backend/app/.env` template (the `.env.example` is missing about 15 vars) and a seed script for riders, customers and orders.
 - Decisions on the "ask dev" items: customer cancel, opening hours, suspended-restaurant login, intended admin RBAC, rider double pay, wallet recharge policy, prod OTP test numbers.
-- The exact release build command and `API_BASE_URL` for each APK; build numbers in release notes.
+- Build numbers in release notes, and the exact `API_BASE_URL` host for each APK (always HTTPS, no port).
 - Backend tests wired into CI (against a throwaway Postgres), plus website lint and typecheck in CI.
 - A heads-up on any change to fees, GST, the commission formula or the status machine, so §5 and §7 stay current.

@@ -343,7 +343,7 @@ WebSocket `/orders/{id}/track?token=`: events `location_update` and `order_compl
 | SEC-19 ★ | Restaurant password login ignores `status`. Restaurant and admin `is_active` not checked per request | P1 |
 | SEC-20 ★ | Refresh drops `permissions` and `must_change_password` (`auth/service.py:344`) | P0 |
 | SEC-21 ★ | Production MUST set `ENVIRONMENT=production` (today unset → demo seed, reset links logged) | P0 |
-| SEC-22 ★ | Port 8000 is publicly open on Lightsail, bypassing nginx and TLS | P1 |
+| SEC-22 ★ | Port 8000 is publicly open on Lightsail, bypassing nginx and TLS. The mobile app uses HTTPS on 443 only (owner-confirmed 2026-10-23), so the rule MUST be closed and the container bound to loopback | P1 |
 | SEC-23 ★ | Website writes to Supabase with a service-role key (`web/app/api/register/route.ts`) | P1 |
 
 ## 13. Deployment and infrastructure
@@ -437,7 +437,7 @@ Testing and quality (QA-01..09 from v1) remain as written. QA-01 (pytest gating 
 10. **Targets:** confirm or replace the proposed NFR-01..03 and RPO/RTO values.
 11. **Architecture (INF-12):** keep the monolith for the pilot (v1 recommendation) or split?
 12. **Supabase:** has the Pro upgrade happened before the 18 Nov 2026 restriction? Who owns the Supabase org?
-13. **Mobile release URL:** which `API_BASE_URL` do release APKs use (this decides closing port 8000)?
+13. **Mobile release URL: resolved 2026-10-23.** Release APKs use `API_BASE_URL=https://…` with no port, so port 8000 can be closed (SEC-22). Remaining: record the exact host string.
 14. **Promotions (ADM-05):** keep the UI hidden until a DB-backed engine exists, or build FUT-08 for launch?
 15. **Settlement periods:** should overlapping settlement and payout periods be blocked?
 16. **Leftover draft tables and columns in prod:** drop them or keep them?

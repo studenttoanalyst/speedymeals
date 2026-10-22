@@ -48,7 +48,7 @@ flowchart LR
   API --> ST
   API --> EXT
   GH -- "SSH: git pull, compose up, alembic" --> LS
-  MA -. "public port 8000 also open (bypasses nginx/TLS)" .-> API
+  INET["Internet"] -. "port 8000 open in the firewall: unused by the app, close it" .-> API
 ```
 
 ### 2.1 Services and where they run
@@ -62,13 +62,13 @@ flowchart LR
 | Database | Postgres | Supabase (pooler host, port 5432) | Alembic (`backend/app/migrations/versions/`, 17 revisions) | RLS and grant history in `supabase/migrations/` |
 | File storage | Supabase Storage via the S3 API | Supabase | — | Selected by `S3_ENDPOINT_URL` (`backend/app/core/storage.py`) |
 | Website | Next.js 16, Bun | Vercel (Git integration) | Vercel | `website/Dockerfile` exists (standalone build) but is unused in prod |
-| Mobile | Flutter | Play Store (Android) | built manually by the mobile dev | `--dart-define=API_BASE_URL` is required for release builds; **ASK** which URL is used |
+| Mobile | Flutter | Play Store (Android) | built manually by the mobile dev | Release builds use `flutter build apk --dart-define=API_BASE_URL=https://…`: HTTPS on 443 via nginx, **no `:8000`** (owner-confirmed 2026-10-23). **ASK** the mobile dev for the exact host string |
 | Maps | Google Directions, Distance Matrix, Geocode, Places | external | — | Daily call budget counter in Redis (`MAPS_DAILY_CALL_BUDGET`) |
 | SMS / OTP | SendPK | external | — | `SMS_MODE=console` (log only) or `sendpk` |
 | Push | Firebase Cloud Messaging | external | — | Service-account JSON file on the server (`FIREBASE_CREDENTIALS_PATH`) |
 | CI/CD | GitHub Actions | GitHub | — | Only one workflow: `.github/workflows/deploy-backend.yaml` |
 
-Firewall (AGENT_MAP §4): open 22, 80, 443 **and 8000 (public)**; closed 5432 and 6379.
+Firewall (AGENT_MAP §4): open 22, 80, 443 **and 8000 (public, but no client needs it: close it, Task 4)**; closed 5432 and 6379.
 Root `docker-compose.yml` and `README.md` are **0 bytes**. The real compose file is `backend/docker-compose.yml`.
 
 ## 3. Environment variables and secret ownership
@@ -230,7 +230,7 @@ Agree the order with the project lead on day 1. Suggested order: **cost estimate
   - jobs safe under N instances (already Redis-locked; verify)
   - no local files except the Firebase key, which moves to a secret
   - configure the uvicorn worker count
-- [ ] Close public port 8000 once the mobile `API_BASE_URL` is confirmed (**ASK**, AGENT_MAP §7 Q3).
+- [ ] Close public port 8000 now: the mobile app uses HTTPS on 443 only (owner-confirmed 2026-10-23, AGENT_MAP §7 Q3). Also publish the container on loopback only (`127.0.0.1:8000:8000` in `backend/docker-compose.yml`). Check first that Vercel's `NEXT_PUBLIC_API_BASE_URL` is the HTTPS host and that no older APK or script calls `:8000`.
 - [ ] Region strategy: Pakistan has no AWS region. Compare Singapore (current), Mumbai and Middle East regions on latency from Karachi, Lahore, Riyadh and Jeddah, and on Saudi data-residency requirements (PDPL). Propose one primary region plus a DR plan.
 - [ ] Set `ENVIRONMENT=production` in prod (it stops demo seeding and log leaks). Validate with the devs first.
 - **Accept when:** a reviewed design doc and IaC can stand up staging. Staging survives killing one instance with no failed requests and working WebSockets. A load test hits the agreed target. Propose RPO/RTO with backups configured to meet them.
@@ -276,7 +276,7 @@ Agree the order with the project lead on day 1. Suggested order: **cost estimate
 | Domain and DNS | Registrar or DNS provider access for `speedymealservices.com` (`api.` record, ACM validation) | **ASK** |
 | Third-party consoles | Google Cloud (Maps keys, quotas, billing), Firebase `speedymeals-84af9`, SendPK | read access, **ASK** |
 | Load and SLA targets | Expected users, orders per day, peak; availability and RPO/RTO wishes | **ASK** |
-| Mobile release URL | Exact `flutter build` command and `API_BASE_URL` | **ASK** |
+| Mobile release URL | `flutter build apk --dart-define=API_BASE_URL=https://…` (HTTPS, no `:8000`; confirmed 2026-10-23). The exact host string still needs recording | Confirmed; host string **ASK** |
 | Change windows | When prod deploys and migrations are allowed; who approves | **ASK** |
 
 ### Secrets handling policy (applies to everyone)
@@ -294,7 +294,7 @@ Agree the order with the project lead on day 1. Suggested order: **cost estimate
 ## 13. Known risks to review first
 1. Prod DB on the Supabase Free plan, over quota (18 Nov 2026 restriction), with no restorable backup.
 2. Auto-migrations on deploy and container start; no test gate or rollback.
-3. Single $12 instance: API, Redis and jobs on one host. Public port 8000.
+3. Single $12 instance: API, Redis and jobs on one host. Public port 8000, which no client needs.
 4. Redis silently falls back to memory; the rate limiter fails open.
 5. Prod runs with `ENVIRONMENT` unset (development behaviour).
 6. Rider identity documents (privacy, compliance) and the URL rewrite during the storage move.

@@ -38,7 +38,7 @@ Paths are relative to the repo root (`speedymeals/`). Line numbers are for `6b04
 
 ### mobile_app (Flutter; customer + rider) — `mobile_app/`
 - **Entry:** `lib/main.dart` → `PushService.init()` → `SplashScreen`. Layers: `lib/screens/**` → `lib/data/repositories/**` → `lib/core/network/api_client.dart`. Tokens are in `flutter_secure_storage` (`lib/core/storage/token_storage.dart`).
-- **Backend URL:** compile-time `--dart-define=API_BASE_URL` (`lib/core/config/api_config.dart:27`). Release builds throw without it. **No value in the repo.**
+- **Backend URL:** compile-time `--dart-define=API_BASE_URL` (`lib/core/config/api_config.dart:27`). Release builds throw without it. **No value in the repo.** Owner-confirmed 2026-10-23: release APKs are built with `flutter build apk --dart-define=API_BASE_URL=https://…`, an HTTPS URL on 443 through nginx with **no `:8000`**. The exact host string isn't recorded here (the only nginx `server_name` is `api.speedymealservices.com`).
 - **Rider screens:** `lib/screens/rider/` (dashboard, wallet, documents, account). Location goes to `PATCH /wallet/location`.
 - **Live tracking:** WebSocket `?token=`. The account deletion link is `lib/core/constants/app_constants.dart:54`.
 
@@ -121,7 +121,7 @@ Paths are relative to the repo root (`speedymeals/`). Line numbers are for `6b04
   - **Gotcha:** under systemd, `app/.env` wins, so `REDIS_URL=redis://redis…` is unresolvable on the host and Redis silently falls back to memory.
   - **Push:** `backend/serviceAccountKey.json` was empty. It was replaced with a key for Firebase project `speedymeals-84af9` and verified with an FCM `dry_run` send from the `api` container (2026-10-22). End-to-end delivery to a device has **not** been tested.
   - **Uncommitted:** `backend/docker-compose.yml` was hand-edited on the server, then reset by mistake.
-- **Firewall:** open 22, 80, 443 (IPv4 only) and 8000 (public). Closed 5432 and 6379.
+- **Firewall:** open 22, 80, 443 (IPv4 only) and 8000 (public). Closed 5432 and 6379. Port 8000 is **not needed by any client**: the mobile app uses HTTPS on 443 (§1) and nginx reaches the API on `127.0.0.1:8000`. It can be closed (§6 #10).
 
 ## 5. Code vs code mismatches (trust the "Truth" column)
 | # | Where | Claim | Truth |
@@ -164,10 +164,12 @@ Paths are relative to the repo root (`speedymeals/`). Line numbers are for `6b04
    - `anon` and `authenticated` hold ALL on all 24 public tables (verified 2026-10-22).
    - RLS is on everywhere, and only `partner_registrations` has policies (anon INSERT). Nothing is exposed today, but one permissive policy exposes a table.
    - Revoke the grants and fix the `AGENTS.md` rule.
-10. **MEDIUM: port 8000 is publicly open on Lightsail.** Once the API runs, it's reachable over plain HTTP, bypassing nginx and TLS. nginx only needs `127.0.0.1:8000`, so close the firewall rule (after confirming §7 Q3).
+10. **MEDIUM: port 8000 is publicly open on Lightsail, and no client needs it.** The API is reachable over plain HTTP, bypassing nginx and TLS. The mobile app's release URL is HTTPS without a port (owner-confirmed 2026-10-23), and nginx only needs `127.0.0.1:8000`.
+    - Fix: delete the Custom TCP 8000 rule in Lightsail → Networking → Firewall, and publish the API on loopback only (`"127.0.0.1:8000:8000"` in `backend/docker-compose.yml`; `healthcheck.sh` and nginx still work).
+    - Check first that Vercel's `NEXT_PUBLIC_API_BASE_URL` is the HTTPS host, and that no older test APK or script calls `:8000`.
 
 ## 7. Open questions (owner/team to answer; agents must not assume)
 1. **Rider pay:** riders get 90% of each delivery fee credited to their wallet on delivery (`wallet_payment/service.py:160`), and admins also generate `rider_payouts` from the same `rider_earning` (`modules/admin/service.py:602`). Is the wallet the payout, or are payouts paid on top? If both, riders are paid twice.
 2. **Wallet recharge:** until a payment gateway exists, should recharges stay instant, or become pending until an admin confirms them (like COD deposits)?
-3. **Mobile backend URL — PENDING confirmation (owner, 2026-10-22):** which `API_BASE_URL` does the mobile developer build release APKs with (`https://api.speedymealservices.com` or `http://<ip>:8000`)? Ask for their exact `flutter build` command. This decides whether port 8000 can be closed.
+3. **Mobile backend URL — RESOLVED (owner, 2026-10-23):** release APKs use `--dart-define=API_BASE_URL=https://…` with no `:8000`, so port 8000 can be closed (§6 #10). Still to record: the exact host string from the mobile developer's build command.
 4. **Settlement periods:** generation is idempotent only for an identical period (`modules/admin/service.py:468,602`). Should overlapping periods be blocked?
