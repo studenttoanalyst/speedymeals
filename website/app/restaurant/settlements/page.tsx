@@ -172,10 +172,10 @@ export default function RestaurantSettlementsPage() {
       sortable: true,
       render: (s) => (
         <div>
-          <div className="font-mono text-xs font-semibold text-slate-900">
+          <div className="font-mono text-xs font-semibold text-ink-900">
             {s.period_start} → {s.period_end}
           </div>
-          <div className="text-[11px] text-slate-400 font-mono">Batch #{s.id.slice(0, 8)}</div>
+          <div className="text-2xs text-ink-400 font-mono">Batch #{s.id.slice(0, 8)}</div>
         </div>
       ),
     },
@@ -185,7 +185,7 @@ export default function RestaurantSettlementsPage() {
       align: 'right',
       sortable: true,
       render: (s) => (
-        <span className="font-mono font-semibold text-slate-900">
+        <span className="font-mono font-semibold text-ink-900">
           {formatPKR(s.total_sales)}
         </span>
       ),
@@ -196,7 +196,7 @@ export default function RestaurantSettlementsPage() {
       align: 'right',
       sortable: true,
       render: (s) => (
-        <span className="font-mono font-medium text-slate-600">
+        <span className="font-mono font-medium text-ink-600">
           −{formatPKR(s.commission_deducted)}
         </span>
       ),
@@ -207,7 +207,7 @@ export default function RestaurantSettlementsPage() {
       align: 'right',
       sortable: true,
       render: (s) => (
-        <span className="font-mono font-bold text-emerald-700">
+        <span className="font-mono font-bold text-green-700">
           {formatPKR(s.net_payable)}
         </span>
       ),
@@ -221,7 +221,7 @@ export default function RestaurantSettlementsPage() {
       key: 'paid_at',
       title: 'Payout Date',
       render: (s) => (
-        <span className="text-xs text-slate-500 font-mono">
+        <span className="text-xs text-ink-500 font-mono">
           {s.paid_at ? new Date(s.paid_at).toLocaleDateString() : 'Scheduled Friday'}
         </span>
       ),
@@ -234,7 +234,7 @@ export default function RestaurantSettlementsPage() {
         <button
           type="button"
           onClick={() => window.print()}
-          className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 inline-flex items-center gap-1 text-xs cursor-pointer"
+          className="p-1.5 rounded-sm border border-ink-200 hover:bg-ink-50 text-ink-600 inline-flex items-center gap-1 text-xs cursor-pointer"
           title="Download Receipt"
         >
           <DownloadSimple size={13} weight="bold" />
@@ -245,7 +245,7 @@ export default function RestaurantSettlementsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Weekly Payouts & Earnings"
         onRefresh={() => {
@@ -257,7 +257,7 @@ export default function RestaurantSettlementsPage() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs font-semibold bg-white border border-ink-200 text-ink-700 hover:bg-ink-50 rounded-sm shadow-1 flex items-center gap-1.5"
           >
             <DownloadSimple size={14} weight="bold" />
             <span>Export Financial Ledger</span>
@@ -268,32 +268,32 @@ export default function RestaurantSettlementsPage() {
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6 print:p-0 print:max-w-none print:space-y-4">
         {/* Live Ping Notification Toast */}
         {pingSuccess && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center justify-between animate-in fade-in">
+          <div className="p-3 bg-green-50 border border-green-200 rounded-md text-xs font-semibold text-green-800 flex items-center justify-between animate-in fade-in">
             <div className="flex items-center gap-2">
-              <CheckCircle size={16} weight="bold" className="text-emerald-600" />
+              <CheckCircle size={16} weight="bold" className="text-green-600" />
               <span>
                 1Link / Raast Gateway ping successful: Verified live routing to {bankAccount?.bankName} ({bankAccount ? maskIban(bankAccount.iban) : ''})
               </span>
             </div>
-            <span className="text-[10px] font-mono text-emerald-600 uppercase">Audit Ref #PK-RAAST-9281</span>
+            <span className="text-2xs font-mono text-green-600 uppercase">Audit Ref #PK-RAAST-9281</span>
           </div>
         )}
 
         {/* Document Header (Clean Print Version) */}
-        <div className="hidden print:block pb-4 border-b-2 border-slate-900">
+        <div className="hidden print:block pb-4 border-b-2 border-ink-900">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-bold font-mono tracking-widest text-rose-600 uppercase">
+              <div className="text-xs font-bold font-mono tracking-widest text-red-600 uppercase">
                 SpeedyMeals Partner Financial Ledger
               </div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+              <h1 className="text-xl font-bold text-ink-900 tracking-tight mt-0.5">
                 Weekly Settlement & Commission Statement
               </h1>
-              <p className="text-xs text-slate-500 font-mono mt-1">
+              <p className="text-xs text-ink-500 font-mono mt-1">
                 Net 90% Payable Transfers & Disbursed Bank References
               </p>
             </div>
-            <div className="text-right text-[11px] font-mono text-slate-400">
+            <div className="text-right text-2xs font-mono text-ink-400">
               Generated: {new Date().toLocaleDateString()}
             </div>
           </div>
@@ -330,42 +330,42 @@ export default function RestaurantSettlementsPage() {
         </div>
 
         {/* Bank Account Info Card with Functional Pairing & Authentication */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-5 rounded-md bg-white border border-ink-200 shadow-1 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${bankAccount ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'}`}>
+            <div className={`w-12 h-12 rounded-md flex items-center justify-center shrink-0 shadow-1 ${bankAccount ? 'bg-ink-900 text-white' : 'bg-ink-100 text-ink-500'}`}>
               <Bank size={24} weight="bold" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-900">
+                <span className="text-sm font-bold text-ink-900">
                   {bankAccount ? bankAccount.bankName : 'No Direct Payout Route Linked'}
                 </span>
                 {bankAccount ? (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 flex items-center gap-1">
-                    <ShieldCheck size={12} weight="bold" className="text-emerald-600" />
+                  <span className="text-2xs font-semibold px-2 py-0.5 rounded-xs bg-green-50 text-green-700 ring-1 ring-green-200 flex items-center gap-1">
+                    <ShieldCheck size={12} weight="bold" className="text-green-600" />
                     Verified Payout Route
                   </span>
                 ) : (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 flex items-center gap-1">
+                  <span className="text-2xs font-semibold px-2 py-0.5 rounded-xs bg-amber-50 text-amber-700 ring-1 ring-amber-200 flex items-center gap-1">
                     Action Required
                   </span>
                 )}
               </div>
-              <div className="text-xs text-slate-500 font-mono mt-0.5 flex flex-wrap items-center gap-2">
+              <div className="text-xs text-ink-500 font-mono mt-0.5 flex flex-wrap items-center gap-2">
                 {bankAccount ? (
                   <>
                     <span>IBAN: {maskIban(bankAccount.iban)}</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="text-slate-600 font-sans">Title: <strong>{bankAccount.accountTitle}</strong></span>
+                    <span className="text-ink-300">|</span>
+                    <span className="text-ink-600 font-sans">Title: <strong>{bankAccount.accountTitle}</strong></span>
                     {bankAccount.branchCode && (
                       <>
-                        <span className="text-slate-300">|</span>
+                        <span className="text-ink-300">|</span>
                         <span>Branch: #{bankAccount.branchCode}</span>
                       </>
                     )}
                   </>
                 ) : (
-                  <span className="font-sans text-slate-500">
+                  <span className="font-sans text-ink-500">
                     Connect your commercial bank account to enable automated Friday disbursements.
                   </span>
                 )}
@@ -378,7 +378,7 @@ export default function RestaurantSettlementsPage() {
               <button
                 type="button"
                 onClick={handleTestPing}
-                className="px-3 py-1.5 text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg shadow-2xs flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold bg-ink-50 hover:bg-ink-100 text-ink-700 border border-ink-200 rounded-sm shadow-1 flex items-center gap-1.5 transition-colors"
               >
                 <ArrowsClockwise size={13} weight="bold" />
                 <span>Ping Gateway</span>
@@ -387,7 +387,7 @@ export default function RestaurantSettlementsPage() {
             <button
               type="button"
               onClick={handleOpenPairing}
-              className="px-3.5 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-sm shadow-1 flex items-center gap-1.5 transition-colors"
             >
               <Lock size={13} weight="bold" />
               <span>{bankAccount ? 'Pair / Update Account' : 'Connect Bank Account'}</span>
@@ -412,42 +412,42 @@ export default function RestaurantSettlementsPage() {
 
       {/* Production-Grade Bank Pairing & 2FA Authentication Modal */}
       {isPairingModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-ink-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full shadow-3 border border-ink-200 overflow-hidden animate-in fade-in zoom-in-95">
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="p-5 border-b border-ink-100 flex items-center justify-between bg-ink-50/50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-md bg-red-50 text-red-600 flex items-center justify-center">
                   <ShieldCheck size={20} weight="bold" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Direct Deposit Pairing & Verification</h3>
-                  <p className="text-[11px] text-slate-500 font-mono">1Link / SBP Raast Real-Time Settlement Protocol</p>
+                  <h3 className="text-sm font-bold text-ink-900">Direct Deposit Pairing & Verification</h3>
+                  <p className="text-2xs text-ink-500 font-mono">1Link / SBP Raast Real-Time Settlement Protocol</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPairingModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="p-1 rounded-sm text-ink-400 hover:text-ink-600 hover:bg-ink-100"
               >
                 <X size={18} weight="bold" />
               </button>
             </div>
 
             {/* Stepper Indicator */}
-            <div className="px-6 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[11px] font-mono">
-              <span className={`font-bold flex items-center gap-1.5 ${pairingStep >= 1 ? 'text-rose-600' : 'text-slate-400'}`}>
-                <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-[10px]">1</span>
+            <div className="px-6 py-2.5 bg-ink-50 border-b border-ink-100 flex items-center justify-between text-2xs font-mono">
+              <span className={`font-bold flex items-center gap-1.5 ${pairingStep >= 1 ? 'text-red-600' : 'text-ink-400'}`}>
+                <span className="w-5 h-5 rounded-full bg-red-100 text-red-700 flex items-center justify-center text-2xs">1</span>
                 Bank Details
               </span>
-              <span className="text-slate-300">&rarr;</span>
-              <span className={`font-bold flex items-center gap-1.5 ${pairingStep >= 2 ? 'text-rose-600' : 'text-slate-400'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${pairingStep >= 2 ? 'bg-rose-100 text-rose-700' : 'bg-slate-200 text-slate-500'}`}>2</span>
+              <span className="text-ink-300">&rarr;</span>
+              <span className={`font-bold flex items-center gap-1.5 ${pairingStep >= 2 ? 'text-red-600' : 'text-ink-400'}`}>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-2xs ${pairingStep >= 2 ? 'bg-red-100 text-red-700' : 'bg-ink-200 text-ink-500'}`}>2</span>
                 2FA Security PIN
               </span>
-              <span className="text-slate-300">&rarr;</span>
-              <span className={`font-bold flex items-center gap-1.5 ${pairingStep === 3 ? 'text-emerald-600' : 'text-slate-400'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${pairingStep === 3 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>3</span>
+              <span className="text-ink-300">&rarr;</span>
+              <span className={`font-bold flex items-center gap-1.5 ${pairingStep === 3 ? 'text-green-600' : 'text-ink-400'}`}>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-2xs ${pairingStep === 3 ? 'bg-green-100 text-green-700' : 'bg-ink-200 text-ink-500'}`}>3</span>
                 Active Pairing
               </span>
             </div>
@@ -457,11 +457,11 @@ export default function RestaurantSettlementsPage() {
               {pairingStep === 1 && (
                 <form onSubmit={handleStep1Submit} className="space-y-4 text-xs">
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Financial Institution (Bank)</label>
+                    <label className="font-semibold text-ink-700">Financial Institution (Bank)</label>
                     <select
                       value={formBank}
                       onChange={(e) => setFormBank(e.target.value)}
-                      className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-medium focus:ring-2 focus:ring-rose-500/20"
+                      className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-medium focus:ring-2 focus:ring-blue-600/20"
                     >
                       {SUPPORTED_BANKS.map((b) => (
                         <option key={b} value={b}>
@@ -472,21 +472,21 @@ export default function RestaurantSettlementsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Registered Beneficiary Account Title</label>
+                    <label className="font-semibold text-ink-700">Registered Beneficiary Account Title</label>
                     <input
                       type="text"
                       required
                       value={formTitle}
                       onChange={(e) => setFormTitle(e.target.value)}
                       placeholder="e.g. Restaurant Business Title (Pvt) Ltd"
-                      className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-rose-500/20"
+                      className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 focus:ring-2 focus:ring-blue-600/20"
                     />
-                    <p className="text-[11px] text-slate-400">Must strictly match official commercial registration and tax profile.</p>
+                    <p className="text-2xs text-ink-400">Must strictly match official commercial registration and tax profile.</p>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <div className="col-span-2 space-y-1">
-                      <label className="font-semibold text-slate-700">IBAN (24 Characters)</label>
+                      <label className="font-semibold text-ink-700">IBAN (24 Characters)</label>
                       <input
                         type="text"
                         required
@@ -494,22 +494,22 @@ export default function RestaurantSettlementsPage() {
                         value={formIban}
                         onChange={(e) => setFormIban(e.target.value.toUpperCase())}
                         placeholder="PK00XXXX0000000000000000"
-                        className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold tracking-wider focus:ring-2 focus:ring-rose-500/20 uppercase"
+                        className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono font-bold tracking-wider focus:ring-2 focus:ring-blue-600/20 uppercase"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-semibold text-slate-700">Branch Code</label>
+                      <label className="font-semibold text-ink-700">Branch Code</label>
                       <input
                         type="text"
                         value={formBranch}
                         onChange={(e) => setFormBranch(e.target.value)}
                         placeholder="0000"
-                        className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono"
+                        className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono"
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-2xs flex items-start gap-2">
                     <WarningCircle size={16} weight="bold" className="text-amber-600 shrink-0 mt-0.5" />
                     <span>
                       Weekly disbursement funds will automatically deposit every Friday at 12:00 AM PKT into this account.
@@ -520,13 +520,13 @@ export default function RestaurantSettlementsPage() {
                     <button
                       type="button"
                       onClick={() => setIsPairingModalOpen(false)}
-                      className="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg font-medium"
+                      className="px-4 py-2 border border-ink-200 text-ink-600 hover:bg-ink-50 rounded-sm font-medium"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-xs flex items-center gap-1.5"
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-sm font-semibold shadow-1 flex items-center gap-1.5"
                     >
                       <span>Proceed to Security Authorization</span>
                       <span>&rarr;</span>
@@ -538,11 +538,11 @@ export default function RestaurantSettlementsPage() {
               {pairingStep === 2 && (
                 <form onSubmit={handleStep2Authorize} className="space-y-5 text-xs">
                   <div className="text-center space-y-2 py-2">
-                    <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+                    <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto">
                       <Key size={24} weight="bold" />
                     </div>
-                    <h4 className="text-sm font-bold text-slate-900">Partner Security Authorization PIN</h4>
-                    <p className="text-slate-500 text-[11px] max-w-xs mx-auto">
+                    <h4 className="text-sm font-bold text-ink-900">Partner Security Authorization PIN</h4>
+                    <p className="text-ink-500 text-2xs max-w-xs mx-auto">
                       Enter the 6-digit administrative security PIN to confirm bank destination routing.
                     </p>
                   </div>
@@ -555,21 +555,21 @@ export default function RestaurantSettlementsPage() {
                       value={authPin}
                       onChange={(e) => setAuthPin(e.target.value)}
                       placeholder="······"
-                      className="w-full p-3 text-center rounded-xl border border-slate-300 bg-slate-50 text-slate-900 font-mono text-2xl font-bold tracking-[0.4em] focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:outline-hidden"
+                      className="w-full p-3 text-center rounded-sm border border-ink-300 bg-ink-50 text-ink-900 font-mono text-2xl font-bold tracking-[0.4em] focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 focus:outline-hidden"
                     />
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono px-1">
+                    <div className="flex items-center justify-between text-2xs text-ink-400 font-mono px-1">
                       <span>Hint PIN: <strong>842190</strong></span>
-                      <span className="text-slate-400">Expires in 01:45</span>
+                      <span className="text-ink-400">Expires in 01:45</span>
                     </div>
-                    {pinError && <p className="text-rose-600 text-[11px] font-semibold">{pinError}</p>}
+                    {pinError && <p className="text-red-600 text-2xs font-semibold">{pinError}</p>}
                   </div>
 
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-[11px]">
-                    <div className="text-slate-700 font-semibold flex items-center gap-1.5">
-                      <Lock size={13} weight="bold" className="text-slate-500" />
+                  <div className="p-3 bg-ink-50 border border-ink-200 rounded-md space-y-1 text-2xs">
+                    <div className="text-ink-700 font-semibold flex items-center gap-1.5">
+                      <Lock size={13} weight="bold" className="text-ink-500" />
                       Pending Destination Target:
                     </div>
-                    <div className="font-mono text-slate-600 pl-5">
+                    <div className="font-mono text-ink-600 pl-5">
                       {formBank} · {maskIban(formIban)} ({formTitle})
                     </div>
                   </div>
@@ -578,14 +578,14 @@ export default function RestaurantSettlementsPage() {
                     <button
                       type="button"
                       onClick={() => setPairingStep(1)}
-                      className="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg font-medium"
+                      className="px-4 py-2 border border-ink-200 text-ink-600 hover:bg-ink-50 rounded-sm font-medium"
                     >
                       Back
                     </button>
                     <button
                       type="submit"
                       disabled={isVerifying}
-                      className="px-5 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-lg font-semibold shadow-xs flex items-center gap-2"
+                      className="px-5 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-sm font-semibold shadow-1 flex items-center gap-2"
                     >
                       {isVerifying ? (
                         <>
@@ -605,39 +605,39 @@ export default function RestaurantSettlementsPage() {
 
               {pairingStep === 3 && (
                 <div className="text-center space-y-4 py-4">
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                  <div className="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto">
                     <CheckCircle size={32} weight="bold" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-slate-900">Bank Pairing Successfully Authorized!</h4>
-                    <p className="text-slate-500 text-xs mt-1">
+                    <h4 className="text-base font-bold text-ink-900">Bank Pairing Successfully Authorized!</h4>
+                    <p className="text-ink-500 text-xs mt-1">
                       Account has been linked and certified for automated weekly Friday settlements.
                     </p>
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left font-mono text-xs space-y-1.5 max-w-sm mx-auto">
-                    <div className="flex justify-between text-slate-500">
+                  <div className="bg-ink-50 border border-ink-200 rounded-md p-4 text-left font-mono text-xs space-y-1.5 max-w-sm mx-auto">
+                    <div className="flex justify-between text-ink-500">
                       <span>Bank:</span>
-                      <strong className="text-slate-800">{bankAccount?.bankName}</strong>
+                      <strong className="text-ink-800">{bankAccount?.bankName}</strong>
                     </div>
-                    <div className="flex justify-between text-slate-500">
+                    <div className="flex justify-between text-ink-500">
                       <span>Account Title:</span>
-                      <strong className="text-slate-800">{bankAccount?.accountTitle}</strong>
+                      <strong className="text-ink-800">{bankAccount?.accountTitle}</strong>
                     </div>
-                    <div className="flex justify-between text-slate-500">
+                    <div className="flex justify-between text-ink-500">
                       <span>IBAN:</span>
-                      <strong className="text-slate-800">{bankAccount ? maskIban(bankAccount.iban) : ''}</strong>
+                      <strong className="text-ink-800">{bankAccount ? maskIban(bankAccount.iban) : ''}</strong>
                     </div>
-                    <div className="flex justify-between text-slate-500">
+                    <div className="flex justify-between text-ink-500">
                       <span>Status:</span>
-                      <span className="text-emerald-700 font-bold">1Link Production Ready</span>
+                      <span className="text-green-700 font-bold">1Link Production Ready</span>
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setIsPairingModalOpen(false)}
-                    className="px-6 py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
+                    className="px-6 py-2.5 bg-ink-900 hover:bg-black text-white text-xs font-semibold rounded-sm shadow-1 transition-colors"
                   >
                     Done & Return to Ledger
                   </button>

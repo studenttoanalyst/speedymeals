@@ -172,15 +172,15 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+    <div className="bg-white border border-ink-200 rounded-md overflow-hidden shadow-1">
       {/* Controls Header: Search, Filters, and Bulk Actions */}
-      <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+      <div className="p-4 border-b border-ink-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
         <div className="flex flex-1 items-center gap-2 max-w-md">
           <div className="relative w-full">
             <MagnifyingGlass
               size={16}
               weight="bold"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"
             />
             <input
               ref={searchInputRef}
@@ -191,17 +191,17 @@ export function DataTable<T>({
                 setCurrentPage(1);
               }}
               placeholder={searchPlaceholder}
-              className="w-full pl-9 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors"
+              className="w-full pl-9 pr-8 py-1.5 text-xs text-ink-800 placeholder-ink-400 bg-ink-50 border border-ink-200 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-ink-900/10 focus:border-ink-400 transition-colors"
             />
             {searchQuery ? (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 cursor-pointer"
               >
                 <X size={14} weight="bold" />
               </button>
             ) : enableSearchHotkey ? (
-              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-200/60 rounded border border-slate-300 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
+              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-2xs font-mono text-ink-400 bg-ink-200/60 rounded border border-ink-300 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
                 /
               </span>
             ) : null}
@@ -215,7 +215,7 @@ export function DataTable<T>({
                   setSelectedFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="appearance-none pl-8 pr-7 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 cursor-pointer"
+                className="appearance-none pl-8 pr-7 py-1.5 text-xs font-medium text-ink-700 bg-ink-50 border border-ink-200 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-ink-900/10 focus:border-ink-400 cursor-pointer"
               >
                 <option value="all">All Records</option>
                 {filterOptions.map((opt) => (
@@ -227,7 +227,7 @@ export function DataTable<T>({
               <Funnel
                 size={14}
                 weight="bold"
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none"
               />
             </div>
           )}
@@ -238,9 +238,9 @@ export function DataTable<T>({
 
       {/* Multi-City Quick Filter Pills */}
       {enableCityFilter && (
-        <div className="px-4 py-2 bg-slate-50/80 border-b border-slate-200/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mr-1.5 flex items-center gap-1 shrink-0">
-            <Buildings size={13} weight="bold" className="text-slate-400" />
+        <div className="px-4 py-2 bg-ink-50/80 border-b border-ink-200/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <span className="text-2xs font-semibold text-ink-500 uppercase tracking-wider mr-1.5 flex items-center gap-1 shrink-0">
+            <Buildings size={13} weight="bold" className="text-ink-400" />
             City:
           </span>
           <button
@@ -249,10 +249,10 @@ export function DataTable<T>({
               setSelectedCity('all');
               setCurrentPage(1);
             }}
-            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 cursor-pointer ${
+            className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-colors shrink-0 cursor-pointer ${
               selectedCity === 'all'
-                ? 'bg-slate-900 text-white shadow-2xs font-semibold'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-ink-900 text-white shadow-1 font-semibold'
+                : 'bg-white text-ink-600 border border-ink-200 hover:bg-ink-100 hover:text-ink-900'
             }`}
           >
             All Cities
@@ -267,10 +267,10 @@ export function DataTable<T>({
                   setSelectedCity(city);
                   setCurrentPage(1);
                 }}
-                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors shrink-0 cursor-pointer ${
+                className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-colors shrink-0 cursor-pointer ${
                   isSelected
-                    ? 'bg-slate-900 text-white shadow-2xs font-semibold'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-ink-900 text-white shadow-1 font-semibold'
+                    : 'bg-white text-ink-600 border border-ink-200 hover:bg-ink-100 hover:text-ink-900'
                 }`}
               >
                 {city}
@@ -284,7 +284,7 @@ export function DataTable<T>({
                 setSelectedCity('all');
                 setCurrentPage(1);
               }}
-              className="text-[11px] text-slate-400 hover:text-slate-700 ml-1 underline decoration-slate-300 underline-offset-2 shrink-0 cursor-pointer"
+              className="text-2xs text-ink-400 hover:text-ink-700 ml-1 underline decoration-ink-300 underline-offset-2 shrink-0 cursor-pointer"
             >
               Clear
             </button>
@@ -296,7 +296,7 @@ export function DataTable<T>({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <tr className="border-b border-ink-200 bg-ink-50/75 text-2xs font-semibold uppercase tracking-wider text-ink-500">
               {columns.map((col) => {
                 const isSorted = sortColumn === col.key;
                 return (
@@ -312,7 +312,7 @@ export function DataTable<T>({
                         : 'text-left'
                     } ${
                       col.sortable
-                        ? 'cursor-pointer hover:bg-slate-100/75 transition-colors'
+                        ? 'cursor-pointer hover:bg-ink-100/75 transition-colors'
                         : ''
                     }`}
                   >
@@ -327,12 +327,12 @@ export function DataTable<T>({
                     >
                       <span>{col.title}</span>
                       {col.sortable && (
-                        <span className="text-slate-400">
+                        <span className="text-ink-400">
                           {isSorted ? (
                             sortDirection === 'asc' ? (
-                              <CaretUp size={12} weight="bold" className="text-slate-900" />
+                              <CaretUp size={12} weight="bold" className="text-ink-900" />
                             ) : (
-                              <CaretDown size={12} weight="bold" className="text-slate-900" />
+                              <CaretDown size={12} weight="bold" className="text-ink-900" />
                             )
                           ) : (
                             <CaretUpDown size={12} />
@@ -346,14 +346,14 @@ export function DataTable<T>({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+          <tbody className="divide-y divide-ink-100 text-xs text-ink-700">
             {isLoading ? (
               // Skeleton loading rows
               Array.from({ length: pageSize > 6 ? 6 : pageSize }).map((_, i) => (
                 <tr key={`skeleton-${i}`} className="animate-pulse">
                   {columns.map((col, cIdx) => (
                     <td key={`skeleton-col-${cIdx}`} className="px-4 py-3.5">
-                      <div className="h-4 bg-slate-100 rounded-md w-3/4" />
+                      <div className="h-4 bg-ink-100 rounded-md w-3/4" />
                     </td>
                   ))}
                 </tr>
@@ -363,8 +363,8 @@ export function DataTable<T>({
               <tr>
                 <td colSpan={columns.length} className="px-6 py-12 text-center">
                   <div className="max-w-xs mx-auto space-y-1">
-                    <p className="text-sm font-semibold text-slate-800">{emptyMessage}</p>
-                    <p className="text-xs text-slate-400">{emptySubtext}</p>
+                    <p className="text-sm font-semibold text-ink-800">{emptyMessage}</p>
+                    <p className="text-xs text-ink-400">{emptySubtext}</p>
                   </div>
                 </td>
               </tr>
@@ -376,8 +376,8 @@ export function DataTable<T>({
                   onClick={() => onRowClick && onRowClick(item)}
                   className={`transition-colors ${
                     onRowClick
-                      ? 'cursor-pointer hover:bg-slate-50/80 active:bg-slate-100/60'
-                      : 'hover:bg-slate-50/50'
+                      ? 'cursor-pointer hover:bg-ink-50/80 active:bg-ink-100/60'
+                      : 'hover:bg-ink-50/50'
                   }`}
                 >
                   {columns.map((col) => (
@@ -403,35 +403,35 @@ export function DataTable<T>({
 
       {/* Pagination Footer */}
       {!isLoading && filteredData.length > 0 && (
-        <div className="p-3.5 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
+        <div className="p-3.5 border-t border-ink-200 bg-ink-50/50 flex items-center justify-between text-xs text-ink-500">
           <div>
             Showing{' '}
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold text-ink-700">
               {(currentPage - 1) * pageSize + 1}
             </span>{' '}
             to{' '}
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold text-ink-700">
               {Math.min(currentPage * pageSize, filteredData.length)}
             </span>{' '}
             of{' '}
-            <span className="font-semibold text-slate-700">{filteredData.length}</span> entries
+            <span className="font-semibold text-ink-700">{filteredData.length}</span> entries
           </div>
 
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-sm border border-ink-200 bg-white text-ink-600 hover:bg-ink-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <CaretLeft size={14} weight="bold" />
             </button>
-            <span className="px-2.5 text-xs font-medium text-slate-700">
+            <span className="px-2.5 text-xs font-medium text-ink-700">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded-sm border border-ink-200 bg-white text-ink-600 hover:bg-ink-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <CaretRight size={14} weight="bold" />
             </button>

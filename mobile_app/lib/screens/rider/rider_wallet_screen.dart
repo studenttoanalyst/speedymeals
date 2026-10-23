@@ -5,6 +5,7 @@ import '../../data/json_utils.dart';
 import '../../data/models/rider_models.dart';
 import '../../data/repositories/rider_repository.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Rider wallet, earnings and COD cash — every figure from the backend.
 ///
@@ -26,11 +27,11 @@ class RiderWalletScreen extends StatefulWidget {
 }
 
 class _RiderWalletScreenState extends State<RiderWalletScreen> {
-  static const Color _bg = Color(0xFF0F172A);
-  static const Color _card = Color(0xFF1E293B);
-  static const Color _border = Color(0xFF334155);
-  static const Color _green = Color(0xFF10B981);
-  static const Color _red = Color(0xFFDC2626);
+  static const Color _bg = AppColors.ink900;
+  static const Color _card = AppColors.ink800;
+  static const Color _border = AppColors.ink700;
+  static const Color _green = AppColors.green600;
+  static const Color _red = AppColors.cta;
 
   final RiderRepository _repository = RiderRepository();
 
@@ -74,7 +75,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
       isScrollControlled: true,
       backgroundColor: _card,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
       builder: (context) => const _RechargeSheet(),
     );
@@ -96,7 +97,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
       isScrollControlled: true,
       backgroundColor: _card,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
       builder: (context) => _CashDepositSheet(
         suggestedAmount: _wallet?.pendingCashOwed ?? 0,
@@ -174,7 +175,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               const SizedBox(height: 8),
               Text(
                 failure.message,
-                style: const TextStyle(color: Color(0xFF94A3B8)),
+                style: const TextStyle(color: AppColors.ink400),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -207,10 +208,10 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isNegative
-                      ? [const Color(0xFF7F1D1D), const Color(0xFF991B1B)]
-                      : [const Color(0xFF065F46), const Color(0xFF047857)],
+                      ? [AppColors.red900, AppColors.red800]
+                      : [AppColors.green800, AppColors.green700],
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,7 +257,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
                   child: _StatCard(
                     label: 'Cash owed',
                     value: wallet?.pendingCashLabel ?? '—',
-                    color: const Color(0xFFF59E0B),
+                    color: AppColors.amber500,
                     cardColor: _card,
                     borderColor: _border,
                   ),
@@ -283,7 +284,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
                 style: FilledButton.styleFrom(
                   backgroundColor: _green,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
                 ),
                 icon: const Icon(Icons.add_rounded, size: 18),
                 label: const Text('Top up wallet', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -298,7 +299,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: _border),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
                 ),
                 icon: const Icon(Icons.point_of_sale_rounded, size: 18),
                 label: const Text('Submit COD cash', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -313,7 +314,7 @@ class _RiderWalletScreenState extends State<RiderWalletScreen> {
               'deducted from your wallet; on digital payments your 90% share is '
               'credited. Cash on Delivery orders also add the order total to '
               'cash owed, which must be submitted.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8), height: 1.5),
+              style: TextStyle(fontSize: 12, color: AppColors.ink400, height: 1.5),
             ),
           ],
         ),
@@ -346,7 +347,7 @@ class _StatCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: borderColor),
       ),
       child: Column(
@@ -354,7 +355,7 @@ class _StatCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF94A3B8)),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.ink400),
           ),
           const SizedBox(height: 6),
           Text(
@@ -365,7 +366,7 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subtitle!,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+              style: const TextStyle(fontSize: 11, color: AppColors.ink400),
             ),
           ],
         ],
@@ -420,9 +421,9 @@ class _RechargeSheetState extends State<_RechargeSheet> {
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: 'Amount (Rs.)',
-              labelStyle: TextStyle(color: Color(0xFF94A3B8)),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF334155))),
-              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
+              labelStyle: TextStyle(color: AppColors.ink400),
+              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.ink700)),
+              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.green600)),
             ),
           ),
           const SizedBox(height: 12),
@@ -436,8 +437,8 @@ class _RechargeSheetState extends State<_RechargeSheet> {
                     selected: _method == entry.key,
                     onSelected: (_) => setState(() => _method = entry.key),
                     labelStyle: const TextStyle(color: Colors.white),
-                    selectedColor: const Color(0xFF065F46),
-                    backgroundColor: const Color(0xFF0F172A),
+                    selectedColor: AppColors.green800,
+                    backgroundColor: AppColors.ink900,
                   ),
                 )
                 .toList(),
@@ -452,8 +453,8 @@ class _RechargeSheetState extends State<_RechargeSheet> {
                 Navigator.of(context).pop((amount, _method));
               },
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                backgroundColor: AppColors.green600,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
               ),
               child: const Text('Confirm top up', style: TextStyle(fontWeight: FontWeight.w700)),
             ),
@@ -515,7 +516,7 @@ class _CashDepositSheetState extends State<_CashDepositSheet> {
           const SizedBox(height: 6),
           Text(
             'Cash owed: ${formatPkr(widget.suggestedAmount)}',
-            style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+            style: const TextStyle(fontSize: 12, color: AppColors.ink400),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -524,9 +525,9 @@ class _CashDepositSheetState extends State<_CashDepositSheet> {
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: 'Amount submitted (Rs.)',
-              labelStyle: TextStyle(color: Color(0xFF94A3B8)),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF334155))),
-              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
+              labelStyle: TextStyle(color: AppColors.ink400),
+              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.ink700)),
+              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.green600)),
             ),
           ),
           const SizedBox(height: 12),
@@ -540,8 +541,8 @@ class _CashDepositSheetState extends State<_CashDepositSheet> {
                     selected: _method == entry.key,
                     onSelected: (_) => setState(() => _method = entry.key),
                     labelStyle: const TextStyle(color: Colors.white),
-                    selectedColor: const Color(0xFF065F46),
-                    backgroundColor: const Color(0xFF0F172A),
+                    selectedColor: AppColors.green800,
+                    backgroundColor: AppColors.ink900,
                   ),
                 )
                 .toList(),
@@ -556,8 +557,8 @@ class _CashDepositSheetState extends State<_CashDepositSheet> {
                 Navigator.of(context).pop((amount, _method));
               },
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                backgroundColor: AppColors.green600,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
               ),
               child: const Text('Submit deposit', style: TextStyle(fontWeight: FontWeight.w700)),
             ),

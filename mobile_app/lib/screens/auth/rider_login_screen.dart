@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../services/auth_service.dart';
 import 'otp_verification_screen.dart';
 import 'rider_signup_screen.dart';
 import '../../widgets/legal_links.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../core/input/input_formatters.dart';
 
 /// Delivery Rider Login Screen matching clean design system & Stitch guidelines.
 class RiderLoginScreen extends StatefulWidget {
@@ -59,10 +60,10 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
     } catch (_) {
@@ -70,10 +71,10 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('An unexpected error occurred. Please try again.'),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
     } finally {
@@ -90,7 +91,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.ink50,
       body: SafeArea(
         child: Column(
           children: [
@@ -102,17 +103,17 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                 children: [
                   InkWell(
                     onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     child: Container(
                       width: 40,
                       height: 40,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFF1F5F9),
+                        color: AppColors.ink100,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.arrow_back_rounded,
-                        color: Color(0xFF334155),
+                        color: AppColors.ink700,
                         size: 20,
                       ),
                     ),
@@ -123,9 +124,9 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFDBEAFE)),
+                      color: AppColors.blue50,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(color: AppColors.blue100),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -133,7 +134,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                         Icon(
                           Icons.delivery_dining_rounded,
                           size: 16,
-                          color: Color(0xFF1D4ED8),
+                          color: AppColors.blue600,
                         ),
                         SizedBox(width: 6),
                         Text(
@@ -141,7 +142,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1D4ED8),
+                            color: AppColors.blue600,
                           ),
                         ),
                       ],
@@ -175,7 +176,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                         style: theme.textTheme.displayLarge?.copyWith(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
+                          color: AppColors.ink900,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -185,7 +186,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF64748B),
+                          color: AppColors.ink500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -197,9 +198,9 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          color: AppColors.ink100,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(color: AppColors.ink200),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -208,15 +209,15 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                             Container(
                                 width: 1,
                                 height: 24,
-                                color: const Color(0xFFCBD5E1)),
+                                color: AppColors.ink300),
                             Expanded(child: _buildStatItem('FLEXIBILITY', 'Instant Cashout')),
                             Container(
                                 width: 1,
                                 height: 24,
-                                color: const Color(0xFFCBD5E1)),
+                                color: AppColors.ink300),
                             Expanded(
                               child: _buildStatItem('INCENTIVE', '+100% Tips',
-                                  valueColor: const Color(0xFF10B981)),
+                                  valueColor: AppColors.green600),
                             ),
                           ],
                         ),
@@ -234,7 +235,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF334155),
+                              color: AppColors.ink700,
                             ),
                           ),
                       const SizedBox(height: 6),
@@ -242,11 +243,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         autofillHints: const [AutofillHints.telephoneNumber],
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'[0-9\s\-()+ ]'),
-                          ),
-                        ],
+                        inputFormatters: const [PkMobileInputFormatter()],
                         decoration: _inputDecoration(
                           hint: '300 1234567',
                           prefixIcon: Icons.phone_iphone_rounded,
@@ -255,7 +252,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                           prefixStyle: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF334155),
+                            color: AppColors.ink700,
                           ),
                         ),
                         validator: (val) {
@@ -290,9 +287,9 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                                   height: 24,
                                   child: Checkbox(
                                     value: _rememberMe,
-                                    activeColor: const Color(0xFFDC2626),
+                                    activeColor: AppColors.cta,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: BorderRadius.circular(AppRadius.xs),
                                     ),
                                     onChanged: (val) {
                                       setState(() {
@@ -307,7 +304,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF475569),
+                                    color: AppColors.ink600,
                                   ),
                                 ),
                               ],
@@ -318,7 +315,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                               Icon(
                                 Icons.shield_outlined,
                                 size: 14,
-                                color: Color(0xFF10B981),
+                                color: AppColors.green600,
                               ),
                               SizedBox(width: 4),
                               Text(
@@ -326,7 +323,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF10B981),
+                                  color: AppColors.green600,
                                 ),
                               ),
                             ],
@@ -343,13 +340,13 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleRiderLogin,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFDC2626),
-                            disabledBackgroundColor: const Color(0xFFCBD5E1),
+                            backgroundColor: AppColors.cta,
+                            disabledBackgroundColor: AppColors.ink300,
                             elevation: _isLoading ? 0 : 4,
                             shadowColor:
-                                const Color(0xFFDC2626).withValues(alpha: 0.35),
+                                AppColors.cta.withValues(alpha: 0.35),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
                             ),
                           ),
                           child: _isLoading
@@ -399,7 +396,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
               decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
-                  top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
+                  top: BorderSide(color: AppColors.ink100, width: 1),
                 ),
               ),
               child: Row(
@@ -410,7 +407,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      color: AppColors.ink500,
                     ),
                   ),
                   GestureDetector(
@@ -427,7 +424,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFDC2626),
+                        color: AppColors.cta,
                       ),
                     ),
                   ),
@@ -452,11 +449,11 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
               padding: const EdgeInsets.all(11),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.ink100, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.ink900.withValues(alpha: 0.05),
                     blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
@@ -475,7 +472,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
               child: Container(
                 padding: const EdgeInsets.all(5),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -491,21 +488,21 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
           decoration: BoxDecoration(
-            color: const Color(0xFFFEF3C7),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFFDE68A)),
+            color: AppColors.amber100,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: AppColors.amber200),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: const [
-              Icon(Icons.bolt_rounded, size: 12, color: Color(0xFFD97706)),
+              Icon(Icons.bolt_rounded, size: 12, color: AppColors.amber600),
               SizedBox(width: 4),
               Text(
                 'PARTNER APP',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFFB45309),
+                  color: AppColors.amber700,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -524,9 +521,9 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
           child: Text(
             label,
             style: const TextStyle(
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF94A3B8),
+              color: AppColors.ink400,
               letterSpacing: 0.5,
             ),
           ),
@@ -539,7 +536,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: valueColor ?? const Color(0xFF1E293B),
+              color: valueColor ?? AppColors.ink800,
             ),
           ),
         ),
@@ -557,28 +554,28 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
       hintStyle: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w400,
-        color: Color(0xFF94A3B8),
+        color: AppColors.ink400,
       ),
-      prefixIcon: Icon(prefixIcon, color: const Color(0xFF94A3B8), size: 20),
+      prefixIcon: Icon(prefixIcon, color: AppColors.ink400, size: 20),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626), width: 2),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta),
       ),
     );
   }

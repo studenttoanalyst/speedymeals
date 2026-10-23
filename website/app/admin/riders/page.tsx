@@ -148,19 +148,19 @@ export default function AdminRidersPage() {
       sortable: true,
       render: (r) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs uppercase shrink-0">
+          <div className="w-9 h-9 rounded-md bg-ink-100 border border-ink-200 flex items-center justify-center text-ink-700 font-bold text-xs uppercase shrink-0">
             {r.name.charAt(0)}
           </div>
           <div>
-            <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+            <div className="font-bold text-ink-900 text-xs flex items-center gap-1.5">
               <span>{r.name}</span>
               {r.is_online ? (
-                <span className="w-2 h-2 rounded-full bg-emerald-500" title="Online" />
+                <span className="w-2 h-2 rounded-full bg-green-500" title="Online" />
               ) : (
-                <span className="w-2 h-2 rounded-full bg-slate-300" title="Offline" />
+                <span className="w-2 h-2 rounded-full bg-ink-300" title="Offline" />
               )}
             </div>
-            <div className="text-[11px] text-slate-400 font-mono">
+            <div className="text-2xs text-ink-400 font-mono">
               {r.phone_number} · CNIC: {r.cnic_number}
             </div>
           </div>
@@ -172,8 +172,8 @@ export default function AdminRidersPage() {
       title: 'Vehicle & Plate',
       render: (r) => (
         <div className="text-xs">
-          <div className="font-medium text-slate-800">{r.vehicle_type || 'Motorcycle'}</div>
-          <div className="text-[11px] text-slate-400 font-mono">
+          <div className="font-medium text-ink-800">{r.vehicle_type || 'Motorcycle'}</div>
+          <div className="text-2xs text-ink-400 font-mono">
             {r.vehicle_registration || 'KHI-0000'}
           </div>
         </div>
@@ -191,15 +191,15 @@ export default function AdminRidersPage() {
           <div className="flex flex-col items-center gap-1.5">
             <button
               onClick={() => handleOpenCommissionModal(r)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold tracking-tight border transition-all hover:scale-105 cursor-pointer shadow-2xs ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs font-bold tracking-tight border transition-all hover:scale-105 cursor-pointer shadow-1 ${
                 isPromo
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                  ? 'bg-green-50 text-green-700 border-green-300 hover:bg-green-100'
                   : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
               }`}
               title="Click to adjust commission percentage"
             >
               {isPromo ? (
-                <Sparkle size={12} weight="fill" className="text-emerald-500" />
+                <Sparkle size={12} weight="fill" className="text-green-500" />
               ) : (
                 <Percent size={12} weight="bold" className="text-amber-600" />
               )}
@@ -207,7 +207,7 @@ export default function AdminRidersPage() {
             </button>
             <button
               onClick={() => handleOpenCommissionModal(r)}
-              className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold inline-flex items-center gap-1 transition-colors"
+              className="text-2xs text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center gap-1 transition-colors"
             >
               <Sliders size={11} weight="bold" />
               <span>Adjust Rate</span>
@@ -227,13 +227,13 @@ export default function AdminRidersPage() {
           <div className="text-right">
             <span
               className={`font-mono font-bold text-xs ${
-                isBreached ? 'text-rose-600' : 'text-slate-800'
+                isBreached ? 'text-red-600' : 'text-ink-800'
               }`}
             >
               {formatPKR(r.pending_cash_owed)}
             </span>
             {isBreached && (
-              <div className="text-[10px] font-bold text-rose-600 flex items-center justify-end gap-0.5">
+              <div className="text-2xs font-bold text-red-600 flex items-center justify-end gap-0.5">
                 <ShieldWarning size={11} weight="bold" />
                 <span>Limit Exceeded</span>
               </div>
@@ -248,7 +248,7 @@ export default function AdminRidersPage() {
       align: 'right',
       sortable: true,
       render: (r) => (
-        <span className="font-mono font-semibold text-emerald-700 text-xs">
+        <span className="font-mono font-semibold text-green-700 text-xs">
           {formatPKR(r.wallet_balance)}
         </span>
       ),
@@ -265,7 +265,7 @@ export default function AdminRidersPage() {
       render: (r) => {
         if (r.kit_completed) {
           return (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xs text-2xs font-bold bg-green-50 text-green-700 border border-green-200">
               <CheckCircle size={12} weight="bold" />
               <span>Kit Verified</span>
             </span>
@@ -273,14 +273,14 @@ export default function AdminRidersPage() {
         }
         if (r.kit_deposit_paid) {
           return (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xs text-2xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
               <Package size={12} weight="bold" />
               <span>Deposit Paid</span>
             </span>
           );
         }
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xs text-2xs font-bold bg-ink-100 text-ink-500 border border-ink-200">
             <ShieldWarning size={12} weight="bold" />
             <span>Kit Pending</span>
           </span>
@@ -295,7 +295,7 @@ export default function AdminRidersPage() {
         <div className="flex items-center justify-end gap-1.5">
           <Link
             href={`/admin/riders/${r.id}#kit`}
-            className="px-2.5 py-1 text-xs font-semibold bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg shadow-2xs inline-flex items-center gap-1 transition-colors"
+            className="px-2.5 py-1 text-xs font-semibold bg-green-50 border border-green-200 hover:bg-green-100 text-green-700 rounded-sm shadow-1 inline-flex items-center gap-1 transition-colors"
             title="Inspect & approve rider kit, deposit and inventory handover"
           >
             <Package size={12} weight="bold" />
@@ -304,7 +304,7 @@ export default function AdminRidersPage() {
 
           <button
             onClick={() => handleOpenCommissionModal(r)}
-            className="px-2.5 py-1 text-xs font-semibold bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 rounded-lg shadow-2xs inline-flex items-center gap-1 transition-colors"
+            className="px-2.5 py-1 text-xs font-semibold bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 rounded-sm shadow-1 inline-flex items-center gap-1 transition-colors"
             title="Adjust commission rate"
           >
             <Sliders size={12} weight="bold" />
@@ -313,7 +313,7 @@ export default function AdminRidersPage() {
 
           <Link
             href={`/admin/riders/${r.id}`}
-            className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs"
+            className="px-2.5 py-1 text-xs font-semibold bg-white border border-ink-200 hover:bg-ink-50 text-ink-700 rounded-sm shadow-1"
           >
             KYC Docs
           </Link>
@@ -321,7 +321,7 @@ export default function AdminRidersPage() {
           {r.approval_status === 'pending' && (
             <button
               onClick={() => setActionTarget({ rider: r, action: 'approve' })}
-              className="px-2.5 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs"
+              className="px-2.5 py-1 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white rounded-sm shadow-1"
             >
               Approve
             </button>
@@ -332,7 +332,7 @@ export default function AdminRidersPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Riders Management"
         onRefresh={() => {
@@ -345,35 +345,35 @@ export default function AdminRidersPage() {
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
         {/* SUCCESS NOTIFICATION */}
         {commissionSuccessMsg && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2 animate-in fade-in duration-200">
-            <CheckCircle size={18} weight="fill" className="text-emerald-600 shrink-0" />
+          <div className="p-4 rounded-md bg-green-50 border border-green-200 text-green-800 text-xs font-medium flex items-center gap-2 animate-in fade-in duration-200">
+            <CheckCircle size={18} weight="fill" className="text-green-600 shrink-0" />
             <span>{commissionSuccessMsg}</span>
           </div>
         )}
 
         {/* SIMPLIFIED COMMISSION POLICY BAR (NO SUBHEADING DESCRIPTION) */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white rounded-md border border-ink-200/80 p-4 shadow-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+            <div className="w-10 h-10 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
               <Percent size={20} weight="bold" />
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-sm font-bold text-slate-900">Rider Commission Policy</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <h2 className="text-sm font-bold text-ink-900">Rider Commission Policy</h2>
+              <span className="px-2 py-0.5 rounded-xs text-2xs font-bold bg-green-50 text-green-700 border border-green-200">
                 Active Strategy: 0% Launch Promo
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-            <div className="text-[11px] font-semibold text-slate-400 mr-1 hidden md:inline">Quick Adjust:</div>
+            <div className="text-2xs font-semibold text-ink-400 mr-1 hidden md:inline">Quick Adjust:</div>
             <button
               onClick={() => {
                 if (riders.length > 0) handleOpenCommissionModal(riders[0]);
               }}
-              className="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold bg-ink-100 hover:bg-ink-200 text-ink-700 rounded-sm transition-colors inline-flex items-center gap-1.5 cursor-pointer"
             >
-              <Sliders size={13} weight="bold" className="text-slate-500" />
+              <Sliders size={13} weight="bold" className="text-ink-500" />
               <span>Change Rates</span>
             </button>
           </div>
@@ -423,21 +423,21 @@ export default function AdminRidersPage() {
 
       {/* COMMISSION RATE ADJUSTMENT MODAL */}
       {commissionTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-lg max-w-md w-full shadow-3 border border-ink-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 border-b border-ink-100 flex items-center justify-between bg-ink-50/50">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-md bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold">
                   <Percent size={18} weight="bold" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Rider Commission Rate</h3>
-                  <p className="text-[11px] text-slate-500 font-medium">{commissionTarget.name} ({commissionTarget.phone_number})</p>
+                  <h3 className="font-bold text-ink-900 text-sm">Rider Commission Rate</h3>
+                  <p className="text-2xs text-ink-500 font-medium">{commissionTarget.name} ({commissionTarget.phone_number})</p>
                 </div>
               </div>
               <button
                 onClick={() => setCommissionTarget(null)}
-                className="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
+                className="p-1 rounded-sm hover:bg-ink-200 text-ink-400 hover:text-ink-600 transition-colors"
               >
                 <X size={18} weight="bold" />
               </button>
@@ -445,10 +445,10 @@ export default function AdminRidersPage() {
 
             <div className="p-5 space-y-4">
               {/* CRITICAL RISK LEVEL NOTICE */}
-              <div className="p-3 bg-rose-50 border border-rose-200/80 rounded-xl flex items-start gap-2.5">
-                <ShieldWarning size={20} weight="fill" className="text-rose-600 shrink-0 mt-0.5" />
-                <div className="text-xs text-rose-900">
-                  <span className="font-bold uppercase tracking-wider text-[10px] bg-rose-200/80 text-rose-800 px-1.5 py-0.5 rounded mr-1">
+              <div className="p-3 bg-red-50 border border-red-200/80 rounded-md flex items-start gap-2.5">
+                <ShieldWarning size={20} weight="fill" className="text-red-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-red-900">
+                  <span className="font-bold uppercase tracking-wider text-2xs bg-red-200/80 text-red-800 px-1.5 py-0.5 rounded mr-1">
                     Critical Risk Scale
                   </span>
                   Modifying delivery commissions directly impacts rider wallet auto-deductions on delivered orders. Restricted to Superadmin.
@@ -457,24 +457,24 @@ export default function AdminRidersPage() {
 
               {/* QUICK PRESET TOGGLES */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">
+                <label className="block text-xs font-semibold text-ink-700 mb-2">
                   Commission Strategy Preset
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
                   <button
                     type="button"
                     onClick={() => setCommissionValue(0)}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded-sm border text-left transition-all ${
                       commissionValue === 0
-                        ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-500/20'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
+                        ? 'bg-green-50 border-green-300 ring-2 ring-green-500/20'
+                        : 'bg-white border-ink-200 hover:border-ink-300'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-slate-900">0% Promotional</span>
-                      {commissionValue === 0 && <Check size={14} weight="bold" className="text-emerald-600" />}
+                      <span className="text-xs font-bold text-ink-900">0% Promotional</span>
+                      {commissionValue === 0 && <Check size={14} weight="bold" className="text-green-600" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 leading-snug">
+                    <p className="text-2xs text-ink-500 leading-snug">
                       No commission taken. Attract riders during launch phase.
                     </p>
                   </button>
@@ -482,17 +482,17 @@ export default function AdminRidersPage() {
                   <button
                     type="button"
                     onClick={() => setCommissionValue(10)}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded-sm border text-left transition-all ${
                       commissionValue === 10
                         ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-500/20'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
+                        : 'bg-white border-ink-200 hover:border-ink-300'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-slate-900">10% Standard</span>
+                      <span className="text-xs font-bold text-ink-900">10% Standard</span>
                       {commissionValue === 10 && <Check size={14} weight="bold" className="text-amber-600" />}
                     </div>
-                    <p className="text-[11px] text-slate-500 leading-snug">
+                    <p className="text-2xs text-ink-500 leading-snug">
                       10% per delivery fee. Operating post-1 month phase.
                     </p>
                   </button>
@@ -501,7 +501,7 @@ export default function AdminRidersPage() {
 
               {/* CUSTOM PERCENTAGE INPUT */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-ink-700 mb-1.5">
                   Custom Percentage (%)
                 </label>
                 <div className="relative">
@@ -512,21 +512,21 @@ export default function AdminRidersPage() {
                     step="0.5"
                     value={commissionValue}
                     onChange={(e) => setCommissionValue(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-hidden focus:border-indigo-500 focus:bg-white pr-8"
+                    className="w-full px-3 py-2 bg-ink-50 border border-ink-200 rounded-sm text-xs font-mono font-bold text-ink-800 focus:outline-hidden focus:border-blue-500 focus:bg-white pr-8"
                   />
-                  <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-bold">%</span>
+                  <span className="absolute right-3 top-2.5 text-xs text-ink-400 font-bold">%</span>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="text-2xs text-ink-400 mt-1">
                   Value must be between 0.0% and 100.0%. E.g., at 10%, a Rs. 100 delivery fee deducts Rs. 10 from rider wallet.
                 </p>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="p-4 bg-ink-50 border-t border-ink-100 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setCommissionTarget(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition-colors"
+                className="px-4 py-2 text-xs font-semibold text-ink-600 hover:text-ink-800 hover:bg-ink-200/60 rounded-sm transition-colors"
               >
                 Cancel
               </button>
@@ -534,7 +534,7 @@ export default function AdminRidersPage() {
                 type="button"
                 onClick={handleSaveCommission}
                 disabled={isUpdatingCommission}
-                className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-sm shadow-1 transition-colors flex items-center gap-1.5 disabled:opacity-50"
               >
                 {isUpdatingCommission ? (
                   <span>Updating...</span>

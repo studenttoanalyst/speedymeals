@@ -224,7 +224,7 @@ export default function RestaurantMenuPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Menu & Media Catalog"
         onRefresh={() => {
@@ -235,7 +235,7 @@ export default function RestaurantMenuPage() {
         actions={
           <button
             onClick={handleOpenCreate}
-            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-ink-900 hover:bg-ink-800 text-white rounded-sm text-xs font-semibold shadow-1 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus size={15} weight="bold" />
             <span>Add New Dish</span>
@@ -247,23 +247,23 @@ export default function RestaurantMenuPage() {
         {/* Real-time synchronization feedback alert */}
         {feedbackMessage && (
           <div
-            className={`p-3.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all ${
+            className={`p-3.5 rounded-md border text-xs font-medium flex items-center justify-between transition-all ${
               feedbackMessage.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                : 'bg-rose-50 border-rose-200 text-rose-800'
+                ? 'bg-green-50 border-green-200 text-green-800'
+                : 'bg-red-50 border-red-200 text-red-800'
             }`}
           >
             <div className="flex items-center gap-2">
               {feedbackMessage.type === 'success' ? (
-                <Check size={16} weight="bold" className="text-emerald-600" />
+                <Check size={16} weight="bold" className="text-green-600" />
               ) : (
-                <Warning size={16} weight="bold" className="text-rose-600" />
+                <Warning size={16} weight="bold" className="text-red-600" />
               )}
               <span>{feedbackMessage.text}</span>
             </div>
             <button
               onClick={() => setFeedbackMessage(null)}
-              className="text-slate-400 hover:text-slate-600 p-1"
+              className="text-ink-400 hover:text-ink-600 p-1"
             >
               <X size={14} weight="bold" />
             </button>
@@ -276,10 +276,10 @@ export default function RestaurantMenuPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-sm text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-ink-900 text-white shadow-1'
+                  : 'bg-white border border-ink-200 text-ink-600 hover:bg-ink-50'
               }`}
             >
               {cat}
@@ -291,18 +291,18 @@ export default function RestaurantMenuPage() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 animate-pulse">
-                <div className="aspect-[4/3] bg-slate-100 rounded-xl" />
-                <div className="h-4 bg-slate-100 rounded w-2/3" />
-                <div className="h-3 bg-slate-100 rounded w-full" />
+              <div key={i} className="bg-white border border-ink-200 rounded-md p-4 space-y-3 animate-pulse">
+                <div className="aspect-[4/3] bg-ink-100 rounded-md" />
+                <div className="h-4 bg-ink-100 rounded w-2/3" />
+                <div className="h-3 bg-ink-100 rounded w-full" />
               </div>
             ))}
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl p-6">
-            <ForkKnife size={36} className="text-slate-300 mx-auto mb-2" />
-            <h3 className="text-sm font-bold text-slate-800">No dishes found</h3>
-            <p className="text-xs text-slate-400 mt-1">Get started by adding your first restaurant dish photo and pricing.</p>
+          <div className="text-center py-16 bg-white border border-ink-200 rounded-md p-6">
+            <ForkKnife size={36} className="text-ink-300 mx-auto mb-2" />
+            <h3 className="text-sm font-bold text-ink-800">No dishes found</h3>
+            <p className="text-xs text-ink-400 mt-1">Get started by adding your first restaurant dish photo and pricing.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -311,13 +311,13 @@ export default function RestaurantMenuPage() {
               return (
                 <div
                   key={dish.id}
-                  className={`bg-white border rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between ${
-                    dish.is_available ? 'border-slate-200' : 'border-slate-200 bg-slate-50/50 opacity-75'
+                  className={`bg-white border rounded-md overflow-hidden shadow-1 hover:shadow-2 transition-all flex flex-col justify-between ${
+                    dish.is_available ? 'border-ink-200' : 'border-ink-200 bg-ink-50/50 opacity-75'
                   }`}
                 >
                   <div>
                     {/* Dish Photo Container */}
-                    <div className="relative aspect-[4/3] w-full bg-slate-100 overflow-hidden flex items-center justify-center">
+                    <div className="relative aspect-[4/3] w-full bg-ink-100 overflow-hidden flex items-center justify-center">
                       {photo ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -328,36 +328,36 @@ export default function RestaurantMenuPage() {
                           }`}
                         />
                       ) : (
-                        <ForkKnife size={36} className="text-slate-300" />
+                        <ForkKnife size={36} className="text-ink-300" />
                       )}
 
                       {/* Top Badges */}
                       <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-white backdrop-blur-xs">
+                        <span className="text-2xs font-bold px-2 py-0.5 rounded-xs bg-ink-900/80 text-white backdrop-blur-xs">
                           {dish.category || 'Special'}
                         </span>
                         {dish.dietary_type === 'veg' ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white flex items-center gap-1">
+                          <span className="text-2xs font-bold px-2 py-0.5 rounded-xs bg-green-600 text-white flex items-center gap-1">
                             <Leaf size={11} weight="bold" />
                             Veg
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/80 text-white">
+                          <span className="text-2xs font-bold px-2 py-0.5 rounded-xs bg-ink-900/80 text-white">
                             Halal
                           </span>
                         )}
                       </div>
 
                       {dish.is_popular && (
-                        <div className="absolute top-2.5 right-2.5 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                        <div className="absolute top-2.5 right-2.5 bg-amber-500 text-white text-2xs font-bold px-2 py-0.5 rounded-xs flex items-center gap-1 shadow-1">
                           <Star size={11} weight="fill" />
                           Best Seller
                         </div>
                       )}
 
                       {!dish.is_available && (
-                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-2xs flex items-center justify-center">
-                          <span className="px-3 py-1 bg-slate-900/90 text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md">
+                        <div className="absolute inset-0 bg-ink-900/40 backdrop-blur-2xs flex items-center justify-center">
+                          <span className="px-3 py-1 bg-ink-900/90 text-white font-bold text-xs uppercase tracking-wider rounded-md shadow-2">
                             Sold Out
                           </span>
                         </div>
@@ -367,25 +367,25 @@ export default function RestaurantMenuPage() {
                     {/* Dish Content */}
                     <div className="p-4 space-y-2">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-bold text-sm text-slate-900 leading-snug line-clamp-1">
+                        <h3 className="font-bold text-sm text-ink-900 leading-snug line-clamp-1">
                           {dish.name}
                         </h3>
-                        <span className="font-mono font-bold text-sm text-slate-900 shrink-0">
+                        <span className="font-mono font-bold text-sm text-ink-900 shrink-0">
                           {formatPKR(dish.price)}
                         </span>
                       </div>
 
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-ink-500 line-clamp-2 leading-relaxed">
                         {dish.description || 'No description provided.'}
                       </p>
 
                       {/* Modifier Groups Preview */}
                       {dish.modifier_groups && dish.modifier_groups.length > 0 && (
-                        <div className="pt-2 flex flex-wrap gap-1 text-[10px] text-slate-500">
+                        <div className="pt-2 flex flex-wrap gap-1 text-2xs text-ink-500">
                           {dish.modifier_groups.map((g) => (
                             <span
                               key={g.id}
-                              className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 font-medium"
+                              className="px-2 py-0.5 bg-ink-100 rounded-md border border-ink-200 font-medium"
                             >
                               {g.name} ({g.options.length})
                             </span>
@@ -396,21 +396,21 @@ export default function RestaurantMenuPage() {
                   </div>
 
                   {/* Card Actions Footer */}
-                  <div className="p-3.5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                  <div className="p-3.5 border-t border-ink-100 bg-ink-50/50 flex items-center justify-between">
                     {/* Instant Availability (In Stock / NA) Switch */}
                     <button
                       type="button"
                       onClick={() => handleToggleAvailability(dish)}
                       className={`text-xs font-semibold flex items-center gap-1.5 transition-colors ${
                         dish.is_available
-                          ? 'text-emerald-700 hover:text-emerald-800'
-                          : 'text-rose-600 hover:text-rose-700'
+                          ? 'text-green-700 hover:text-green-800'
+                          : 'text-red-600 hover:text-red-700'
                       }`}
                     >
                       {dish.is_available ? (
-                        <ToggleRight size={22} weight="fill" className="text-emerald-600" />
+                        <ToggleRight size={22} weight="fill" className="text-green-600" />
                       ) : (
-                        <ToggleLeft size={22} weight="fill" className="text-slate-400" />
+                        <ToggleLeft size={22} weight="fill" className="text-ink-400" />
                       )}
                       <span>{dish.is_available ? 'In Stock' : 'NA (Not Available)'}</span>
                     </button>
@@ -418,14 +418,14 @@ export default function RestaurantMenuPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleOpenEdit(dish)}
-                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors"
+                        className="p-1.5 rounded-sm border border-ink-200 bg-white hover:bg-ink-50 text-ink-600 transition-colors"
                         title="Edit Dish"
                       >
                         <PencilSimple size={14} weight="bold" />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(dish)}
-                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-400 transition-colors"
+                        className="p-1.5 rounded-sm border border-ink-200 bg-white hover:bg-red-50 hover:text-red-600 text-ink-400 transition-colors"
                         title="Delete Dish"
                       >
                         <Trash size={14} weight="bold" />
@@ -441,20 +441,20 @@ export default function RestaurantMenuPage() {
 
       {/* ADD / EDIT DISH MODAL WITH IMAGE UPLOADER */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-ink-100 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-ink-900">
                   {editingItem ? 'Edit Dish & Media' : 'Add New Menu Item'}
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-ink-400">
                   Upload food photography and set portion modifier options.
                 </p>
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-ink-400 hover:text-ink-600 rounded-sm"
               >
                 <X size={18} weight="bold" />
               </button>
@@ -474,24 +474,24 @@ export default function RestaurantMenuPage() {
               {/* Title & Price */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2 space-y-1">
-                  <label className="font-semibold text-slate-700">Dish Name</label>
+                  <label className="font-semibold text-ink-700">Dish Name</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Special Chicken Biryani"
-                    className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-rose-500/20"
+                    className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 focus:ring-2 focus:ring-blue-600/20"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Price (PKR)</label>
+                  <label className="font-semibold text-ink-700">Price (PKR)</label>
                   <input
                     type="number"
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                    className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold"
+                    className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono font-bold"
                   />
                 </div>
               </div>
@@ -499,21 +499,21 @@ export default function RestaurantMenuPage() {
               {/* Category & Dietary */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Category</label>
+                  <label className="font-semibold text-ink-700">Category</label>
                   <input
                     type="text"
                     value={formData.category || ''}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     placeholder="e.g. Rice & Biryani"
-                    className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                    className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Dietary Profile</label>
+                  <label className="font-semibold text-ink-700">Dietary Profile</label>
                   <select
                     value={formData.dietary_type || 'non-veg'}
                     onChange={(e) => setFormData({ ...formData, dietary_type: e.target.value })}
-                    className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                    className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                   >
                     <option value="non-veg">Non-Veg (Halal)</option>
                     <option value="veg">Vegetarian</option>
@@ -524,51 +524,51 @@ export default function RestaurantMenuPage() {
 
               {/* Description */}
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Description</label>
+                <label className="font-semibold text-ink-700">Description</label>
                 <textarea
                   rows={2}
                   value={formData.description || ''}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Describe ingredients, marinades, or allergen details..."
-                  className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 focus:ring-2 focus:ring-rose-500/20"
+                  className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 focus:ring-2 focus:ring-blue-600/20"
                 />
               </div>
 
               {/* Toggles */}
               <div className="flex items-center gap-4 pt-1">
-                <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-ink-700">
                   <input
                     type="checkbox"
                     checked={formData.is_available ?? true}
                     onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
-                    className="rounded text-rose-600 focus:ring-rose-500"
+                    className="rounded-sm text-red-600 focus:ring-blue-600"
                   />
                   <span>Available for Online Orders</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-ink-700">
                   <input
                     type="checkbox"
                     checked={formData.is_popular ?? false}
                     onChange={(e) => setFormData({ ...formData, is_popular: e.target.checked })}
-                    className="rounded text-amber-500 focus:ring-amber-400"
+                    className="rounded-sm text-amber-500 focus:ring-amber-400"
                   />
                   <span>Featured Best Seller</span>
                 </label>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-sm shadow-1 flex items-center gap-1.5 cursor-pointer"
                 >
                   {isSaving ? 'Saving & Syncing...' : editingItem ? 'Save Changes' : 'Create Dish'}
                 </button>

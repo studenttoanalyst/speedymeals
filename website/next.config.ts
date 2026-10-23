@@ -70,6 +70,8 @@ const swSecurityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Dev-only "N" button: keep it off the sidebar's account card (bottom-left).
+  devIndicators: { position: 'bottom-right' },
   poweredByHeader: false,
   ...(process.env.DOCKER_BUILD === 'true' ? { output: 'standalone' } : {}),
   images: {

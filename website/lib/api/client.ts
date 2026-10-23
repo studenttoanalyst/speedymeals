@@ -137,66 +137,8 @@ async function requestTokenRefresh(failedToken?: string | null): Promise<string 
         }
       }
 
-      // Auto-recovery for Restaurant Partner session
-      const role = localStorage.getItem('sm_user_role');
-      if (role === 'restaurant' || typeof window !== 'undefined' && window.location.pathname.startsWith('/restaurant')) {
-        try {
-          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
-          const reauthRes = await fetch(`${baseUrl}/auth/restaurant/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password: 'Partner@123' }),
-          });
-
-          if (reauthRes.ok) {
-            const data = await reauthRes.json();
-            if (data?.access_token) {
-              localStorage.setItem('sm_access_token', data.access_token);
-              if (data.refresh_token) {
-                localStorage.setItem('sm_refresh_token', data.refresh_token);
-              }
-              localStorage.setItem('sm_user_role', 'restaurant');
-              const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
-              document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-              document.cookie = `sm_user_role=restaurant; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-              console.log('[SpeedyMeals API] Successfully refreshed restaurant session credentials.');
-              return data.access_token as string;
-            }
-          }
-        } catch (e) {
-          console.warn('[SpeedyMeals API] Restaurant auto-recovery attempt failed:', e);
-        }
-      }
-
-      // Auto-recovery for Admin session
-      if (role === 'admin' || typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
-        try {
-          const adminReauth = await fetch(`${baseUrl}/auth/admin/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: 'admin@speedymealservices.com', password: 'admin123' }),
-          });
-
-          if (adminReauth.ok) {
-            const data = await adminReauth.json();
-            if (data?.access_token) {
-              localStorage.setItem('sm_access_token', data.access_token);
-              if (data.refresh_token) {
-                localStorage.setItem('sm_refresh_token', data.refresh_token);
-              }
-              localStorage.setItem('sm_user_role', 'admin');
-              const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
-              document.cookie = `sm_access_token=${encodeURIComponent(data.access_token)}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-              document.cookie = `sm_user_role=admin; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-              console.log('[SpeedyMeals API] Successfully refreshed admin session credentials.');
-              return data.access_token as string;
-            }
-          }
-        } catch (e) {
-          console.warn('[SpeedyMeals API] Admin auto-recovery attempt failed:', e);
-        }
-      }
-
+      // Refresh failed: the session is over. Never fall back to stored or
+      // hard-coded credentials — the caller signals sm_session_expired.
       clearAuthStorage();
       return null;
     } catch (err) {
@@ -253,6 +195,12 @@ export async function apiClient<T>(
       } else {
         clearAuthStorage();
         window.dispatchEvent(new CustomEvent('sm_session_expired', { detail: { path } }));
+        // With the auth cookie cleared, reloading lets proxy.ts send the user to
+        // the matching login page with ?redirect= back to where they were.
+        const here = window.location.pathname;
+        if (/^\/(admin|restaurant)(\/|$)/.test(here) && !here.endsWith('/login')) {
+          window.location.reload();
+        }
       }
     }
 

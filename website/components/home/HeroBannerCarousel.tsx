@@ -186,7 +186,7 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
                     <button
                       type="button"
                       onClick={() => handleCtaClick(activeSlide.overlay?.persona)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-red hover:bg-[#C92F24] text-white font-sans text-xs sm:text-sm font-bold uppercase tracking-wider rounded-none shadow-md transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-red hover:bg-red-600 text-white font-sans text-xs sm:text-sm font-bold uppercase tracking-wider rounded-none shadow-2 transition-colors cursor-pointer"
                     >
                       <span>{activeSlide.overlay.ctaLabel}</span>
                       <ArrowRight size={14} weight="bold" />
@@ -205,7 +205,7 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
               type="button"
               onClick={handlePrev}
               aria-label="Previous slide"
-              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-none items-center justify-center transition-colors cursor-pointer shadow-md"
+              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-none items-center justify-center transition-colors cursor-pointer shadow-2"
             >
               <CaretLeft size={22} weight="bold" />
             </button>
@@ -213,7 +213,7 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
               type="button"
               onClick={handleNext}
               aria-label="Next slide"
-              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-none items-center justify-center transition-colors cursor-pointer shadow-md"
+              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-none items-center justify-center transition-colors cursor-pointer shadow-2"
             >
               <CaretRight size={22} weight="bold" />
             </button>
@@ -264,7 +264,7 @@ const SlideArt: React.FC<{ slide: BannerSlide; isFirst: boolean }> = ({ slide, i
     <div className="absolute inset-0 w-full h-full overflow-hidden">
       {/* Backdrop: CSS gradient fill */}
       <div
-        className="absolute inset-0 bg-gradient-to-r from-red-950/70 via-[#15171A] to-red-950/70 pointer-events-none select-none"
+        className="absolute inset-0 bg-gradient-to-r from-red-950/70 via-ink-900 to-red-950/70 pointer-events-none select-none"
         aria-hidden="true"
       />
       {/* Foreground: full-quality, responsive sizes */}

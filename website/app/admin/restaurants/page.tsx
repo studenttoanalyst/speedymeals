@@ -133,7 +133,7 @@ export default function AdminRestaurantsPage() {
       sortable: true,
       render: (r) => (
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
+          <div className="relative w-10 h-10 rounded-md overflow-hidden bg-ink-100 border border-ink-200 shrink-0 flex items-center justify-center">
             {r.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -142,12 +142,12 @@ export default function AdminRestaurantsPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Storefront size={20} className="text-slate-400" />
+              <Storefront size={20} className="text-ink-400" />
             )}
           </div>
           <div>
-            <div className="font-bold text-slate-900 text-xs">{r.name}</div>
-            <div className="text-[11px] text-slate-400 font-mono">#{r.id.slice(0, 8)}</div>
+            <div className="font-bold text-ink-900 text-xs">{r.name}</div>
+            <div className="text-2xs text-ink-400 font-mono">#{r.id.slice(0, 8)}</div>
           </div>
         </div>
       ),
@@ -157,8 +157,8 @@ export default function AdminRestaurantsPage() {
       title: 'Contact Credentials',
       render: (r) => (
         <div className="space-y-0.5 text-xs">
-          <div className="text-slate-800">{r.email}</div>
-          <div className="text-slate-400 font-mono text-[11px]">{r.phone_number}</div>
+          <div className="text-ink-800">{r.email}</div>
+          <div className="text-ink-400 font-mono text-2xs">{r.phone_number}</div>
         </div>
       ),
     },
@@ -173,7 +173,7 @@ export default function AdminRestaurantsPage() {
             setCommissionTarget(r);
             setNewCommission(r.commission_rate);
           }}
-          className="inline-flex items-center gap-1 font-mono font-bold text-xs px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors border border-rose-200"
+          className="inline-flex items-center gap-1 font-mono font-bold text-xs px-2.5 py-1 rounded-sm bg-red-50 text-red-700 hover:bg-red-100 transition-colors border border-red-200"
           title="Click to adjust commission override"
         >
           <span>{r.commission_rate}%</span>
@@ -190,7 +190,7 @@ export default function AdminRestaurantsPage() {
       key: 'created_at',
       title: 'Onboarded',
       render: (r) => (
-        <span className="text-xs text-slate-500 font-mono">
+        <span className="text-xs text-ink-500 font-mono">
           {new Date(r.created_at).toLocaleDateString()}
         </span>
       ),
@@ -202,10 +202,10 @@ export default function AdminRestaurantsPage() {
       render: (r) => (
         <button
           onClick={() => setStatusTarget(r)}
-          className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors ${
+          className={`text-xs font-semibold px-2.5 py-1 rounded-sm border transition-colors ${
             r.status === 'active'
-              ? 'border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              ? 'border-ink-200 text-ink-600 hover:bg-red-50 hover:text-red-600'
+              : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
           }`}
         >
           {r.status === 'active' ? 'Suspend' : 'Activate'}
@@ -215,7 +215,7 @@ export default function AdminRestaurantsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Restaurant Partners Directory"
         onRefresh={() => {
@@ -226,7 +226,7 @@ export default function AdminRestaurantsPage() {
         actions={
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-ink-900 hover:bg-ink-800 text-white rounded-sm text-xs font-semibold shadow-1 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus size={15} weight="bold" />
             <span>Onboard Restaurant</span>
@@ -257,18 +257,18 @@ export default function AdminRestaurantsPage() {
 
       {/* ONBOARD RESTAURANT MODAL WITH LOGO & BANNER UPLOAD */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-ink-100 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Onboard New Restaurant Partner</h3>
-                <p className="text-xs text-slate-400">
+                <h3 className="text-base font-bold text-ink-900">Onboard New Restaurant Partner</h3>
+                <p className="text-xs text-ink-400">
                   Provide credentials, storefront branding media, and default commission.
                 </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-ink-400 hover:text-ink-600 rounded-sm"
               >
                 <X size={18} weight="bold" />
               </button>
@@ -296,18 +296,18 @@ export default function AdminRestaurantsPage() {
               {/* Basic Fields */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Restaurant Name</label>
+                  <label className="font-semibold text-ink-700">Restaurant Name</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Ginsoy Chinese"
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Commission Rate (%)</label>
+                  <label className="font-semibold text-ink-700">Commission Rate (%)</label>
                   <input
                     type="number"
                     required
@@ -316,7 +316,7 @@ export default function AdminRestaurantsPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, commission_rate: parseFloat(e.target.value) || 10.0 })
                     }
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono font-bold"
                   />
                 </div>
               </div>
@@ -324,8 +324,8 @@ export default function AdminRestaurantsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="font-semibold text-slate-700">Login Email</label>
-                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                    <label className="font-semibold text-ink-700">Login Email</label>
+                    <span className="text-2xs text-ink-400 font-semibold uppercase tracking-wider">
                       @speedymeals.com
                     </span>
                   </div>
@@ -335,46 +335,46 @@ export default function AdminRestaurantsPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="store@speedymeals.com"
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Initial Password</label>
+                  <label className="font-semibold text-ink-700">Initial Password</label>
                   <input
                     type="password"
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="••••••••"
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Phone Number (OTP Verification)</label>
+                <label className="font-semibold text-ink-700">Phone Number (OTP Verification)</label>
                 <input
                   type="text"
                   required
                   value={formData.phone_number}
                   onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                   placeholder="+923001234567"
-                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono"
+                  className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
+                  className="px-5 py-2 text-xs font-semibold bg-ink-900 hover:bg-ink-800 text-white rounded-sm shadow-1 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {isSubmitting ? 'Creating Partner...' : 'Complete Onboarding'}
                 </button>
@@ -386,39 +386,39 @@ export default function AdminRestaurantsPage() {
 
       {/* COMMISSION OVERRIDE MODAL */}
       {commissionTarget && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95">
             <div>
-              <h3 className="text-base font-bold text-slate-900">Adjust Platform Commission</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <h3 className="text-base font-bold text-ink-900">Adjust Platform Commission</h3>
+              <p className="text-xs text-ink-500 mt-0.5">
                 {commissionTarget.name} (Default: 10.0%)
               </p>
             </div>
 
             <form onSubmit={handleUpdateCommission} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">New Commission Percentage (%)</label>
+                <label className="font-semibold text-ink-700">New Commission Percentage (%)</label>
                 <input
                   type="number"
                   step="0.1"
                   required
                   value={newCommission}
                   onChange={(e) => setNewCommission(parseFloat(e.target.value) || 0)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold text-base"
+                  className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono font-bold text-base"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setCommissionTarget(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold bg-ink-900 hover:bg-ink-800 text-white rounded-sm shadow-1 transition-colors cursor-pointer"
                 >
                   Update Commission
                 </button>

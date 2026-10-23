@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../widgets/home_navigation.dart';
 import 'auth/register_as_screen.dart';
 import 'rider/rider_dashboard_screen.dart';
+import '../core/theme/app_tokens.dart';
 
 /// Splash screen and session restoration for SpeedyMeals.
 class SplashScreen extends StatefulWidget {
@@ -82,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
 class _SplashContent extends StatelessWidget {
   const _SplashContent();
 
-  static const Color _splashRed = Color(0xFFE53935);
+  static const Color _splashRed = AppColors.red600;
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +98,17 @@ class _SplashContent extends StatelessWidget {
               height: 160,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(36),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
+                    color: AppColors.ink900.withValues(alpha: 0.18),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(36),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
                 child: Image.asset(
                   'assets/images/new logo.png',
                   fit: BoxFit.cover,

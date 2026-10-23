@@ -10,6 +10,7 @@ import '../../features/maps/maps.dart';
 import '../../widgets/location_disclosure.dart';
 import 'address_search_field.dart';
 import 'selected_location.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Full-screen location picker for Phase M2.
 ///
@@ -369,7 +370,7 @@ class _PickerAppBar extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.ink900.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -414,12 +415,12 @@ class _CurrentLocationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(AppRadius.sm),
       elevation: 3,
       shadowColor: Colors.black26,
       child: InkWell(
         onTap: isLocating ? null : onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
@@ -466,7 +467,7 @@ class _TapHintBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: SpeedyMealsColors.onSurface.withValues(alpha: 0.75),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
@@ -552,7 +553,7 @@ class _ConfirmationBar extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppColors.ink900.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -570,7 +571,7 @@ class _ConfirmationBar extends StatelessWidget {
                 const Icon(
                   Icons.location_on_rounded,
                   size: 18,
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -616,11 +617,11 @@ class _ConfirmationBar extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onConfirm,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFDC2626),
+                backgroundColor: AppColors.cta,
                 disabledBackgroundColor:
                     SpeedyMealsColors.surfaceContainerHigh,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
               icon: Icon(

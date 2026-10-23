@@ -68,7 +68,7 @@ export default function RestaurantReportsPage() {
       title: 'Date',
       sortable: true,
       render: (r) => (
-        <span className="font-mono text-xs font-semibold text-slate-800">
+        <span className="font-mono text-xs font-semibold text-ink-800">
           {r.date}
         </span>
       ),
@@ -79,7 +79,7 @@ export default function RestaurantReportsPage() {
       align: 'center',
       sortable: true,
       render: (r) => (
-        <span className="font-mono text-xs font-semibold text-slate-800 px-2 py-0.5 rounded-md bg-slate-100">
+        <span className="font-mono text-xs font-semibold text-ink-800 px-2 py-0.5 rounded-md bg-ink-100">
           {r.order_count}
         </span>
       ),
@@ -90,7 +90,7 @@ export default function RestaurantReportsPage() {
       align: 'right',
       sortable: true,
       render: (r) => (
-        <span className="font-mono text-xs font-medium text-slate-800">
+        <span className="font-mono text-xs font-medium text-ink-800">
           {formatPKR(r.gross_sales)}
         </span>
       ),
@@ -101,7 +101,7 @@ export default function RestaurantReportsPage() {
       align: 'right',
       sortable: true,
       render: (r) => (
-        <span className="font-mono text-xs font-medium text-slate-600">
+        <span className="font-mono text-xs font-medium text-ink-600">
           −{formatPKR(r.commission)}
         </span>
       ),
@@ -112,7 +112,7 @@ export default function RestaurantReportsPage() {
       align: 'right',
       sortable: true,
       render: (r) => (
-        <span className="font-mono text-xs font-bold text-emerald-700">
+        <span className="font-mono text-xs font-bold text-green-700">
           {formatPKR(r.net_earnings)}
         </span>
       ),
@@ -120,14 +120,14 @@ export default function RestaurantReportsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Sales Analytics & Trends"
         actions={
           <button
             type="button"
             onClick={() => window.print()}
-            className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs font-semibold bg-white border border-ink-200 text-ink-700 hover:bg-ink-50 rounded-sm shadow-1 flex items-center gap-1.5"
           >
             <DownloadSimple size={14} weight="bold" />
             <span>Export Analytics</span>
@@ -137,20 +137,20 @@ export default function RestaurantReportsPage() {
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6 print:p-0 print:max-w-none print:space-y-4">
         {/* Document Header (Clean Print Version) */}
-        <div className="hidden print:block pb-4 border-b-2 border-slate-900">
+        <div className="hidden print:block pb-4 border-b-2 border-ink-900">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-bold font-mono tracking-widest text-rose-600 uppercase">
+              <div className="text-xs font-bold font-mono tracking-widest text-red-600 uppercase">
                 SpeedyMeals Merchant Partner Portal
               </div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+              <h1 className="text-xl font-bold text-ink-900 tracking-tight mt-0.5">
                 Sales Analytics & Revenue Performance
               </h1>
-              <p className="text-xs text-slate-500 font-mono mt-1">
+              <p className="text-xs text-ink-500 font-mono mt-1">
                 Kitchen Turnover, Platform Commission & Settlement Breakdown
               </p>
             </div>
-            <div className="text-right text-[11px] font-mono text-slate-400">
+            <div className="text-right text-2xs font-mono text-ink-400">
               Export Date: {new Date().toLocaleDateString()}
             </div>
           </div>
@@ -187,8 +187,8 @@ export default function RestaurantReportsPage() {
 
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-slate-400" />
-            <h2 className="font-bold text-sm text-slate-900">
+            <Calendar size={16} className="text-ink-400" />
+            <h2 className="font-bold text-sm text-ink-900">
               Daily Breakdown History
             </h2>
           </div>

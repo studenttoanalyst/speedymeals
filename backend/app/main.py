@@ -90,10 +90,15 @@ app = FastAPI(title="SpeedyMeals API", version="0.1.0", lifespan=lifespan)
 # dev we drop credentials instead (browsers reject "*" + credentials, and
 # shipping that combo would be an auth-continuation hazard).
 _wildcard_origins = any(o.strip() == "*" for o in settings.ALLOWED_ORIGINS)
+_origin_regex = r"https://(www\.)?speedymealservices\.com|https://(www\.)?speedymeals\.pk|https://speedymeals(-[a-zA-Z0-9_-]+)?\.vercel\.app"
+if settings.ENVIRONMENT == "development":
+    # Local dev only: `flutter run -d chrome` serves from a random localhost
+    # port, so a fixed list can't cover it. Never active in production.
+    _origin_regex += r"|http://(localhost|127\.0\.0\.1)(:\d+)?"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"] if _wildcard_origins else settings.ALLOWED_ORIGINS,
-    allow_origin_regex=r"https://(www\.)?speedymealservices\.com|https://(www\.)?speedymeals\.pk|https://speedymeals(-[a-zA-Z0-9_-]+)?\.vercel\.app",
+    allow_origin_regex=_origin_regex,
     allow_credentials=not _wildcard_origins,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],

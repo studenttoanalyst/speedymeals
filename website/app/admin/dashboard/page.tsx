@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ChartLineUp,
@@ -26,7 +26,7 @@ import { Topbar } from '@/components/dashboard/Topbar';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { DataTable, Column } from '@/components/dashboard/DataTable';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
-import { FlowingVelocityChart } from '@/components/charts/FlowingVelocityChart';
+import ProgressMetricCard from '@/components/ui/progress-metric-card';
 import { RegionalDistributionChart } from '@/components/charts/RegionalDistributionChart';
 import { SlaLatencyChart } from '@/components/charts/SlaLatencyChart';
 import { CashFloatRiskChart } from '@/components/charts/CashFloatRiskChart';
@@ -43,6 +43,9 @@ import {
 } from '@/types/admin';
 import { RiderAdmin } from '@/types/rider';
 import { isInKitchen, isNewOrder } from '@/lib/orders/status';
+import { hourlyThroughput, HOURLY_PERIODS } from '@/lib/orders/hourly';
+import { useDevSeedOrders } from '@/lib/dev/useDevSeedOrders';
+import { tokens } from '@/lib/design-tokens';
 
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null);
@@ -89,6 +92,12 @@ export default function AdminDashboardPage() {
     (r) => (r.pending_cash_owed || 0) > (r.max_cash_float_limit || 15000)
   );
 
+  const seedOrders = useDevSeedOrders('admin');
+  const throughput = useMemo(
+    () => hourlyThroughput([...recentOrders, ...seedOrders]),
+    [recentOrders, seedOrders],
+  );
+
   const placedCount = recentOrders.filter((o) => isNewOrder(o.status)).length;
   const prepCount = recentOrders.filter((o) => isInKitchen(o.status)).length;
   const handoverCount = recentOrders.filter((o) => o.status === 'Ready for Pickup').length;
@@ -102,7 +111,7 @@ export default function AdminDashboardPage() {
       title: 'Order ID',
       sortable: true,
       render: (o) => (
-        <span className="font-mono text-xs font-semibold text-slate-900">
+        <span className="font-mono text-xs font-semibold text-ink-900">
           #{o.id.slice(0, 8)}
         </span>
       ),
@@ -111,13 +120,13 @@ export default function AdminDashboardPage() {
       key: 'restaurant_name',
       title: 'Restaurant',
       sortable: true,
-      render: (o) => <span className="font-medium text-slate-800">{o.restaurant_name}</span>,
+      render: (o) => <span className="font-medium text-ink-800">{o.restaurant_name}</span>,
     },
     {
       key: 'rider_name',
       title: 'Assigned Rider',
       render: (o) => (
-        <span className="text-xs text-slate-600 font-medium">
+        <span className="text-xs text-ink-600 font-medium">
           {o.rider_name || <span className="text-amber-600 italic">Unassigned</span>}
         </span>
       ),
@@ -132,10 +141,10 @@ export default function AdminDashboardPage() {
       title: 'Method',
       render: (o) => (
         <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+          className={`text-2xs font-semibold px-2 py-0.5 rounded-md ${
             o.payment_method === 'COD'
               ? 'bg-amber-50 text-amber-800 border border-amber-200'
-              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : 'bg-green-50 text-green-800 border border-green-200'
           }`}
         >
           {o.payment_method}
@@ -148,7 +157,7 @@ export default function AdminDashboardPage() {
       align: 'right',
       sortable: true,
       render: (o) => (
-        <span className="font-mono font-bold text-slate-900">
+        <span className="font-mono font-bold text-ink-900">
           {formatPKR(o.total_amount)}
         </span>
       ),
@@ -160,7 +169,7 @@ export default function AdminDashboardPage() {
       render: (o) => (
         <Link
           href={`/admin/orders/${o.id}`}
-          className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs"
+          className="px-2.5 py-1 text-xs font-semibold bg-white border border-ink-200 hover:bg-ink-50 text-ink-700 rounded-sm shadow-1"
         >
           Inspect
         </Link>
@@ -169,7 +178,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Admin Dashboard"
         onRefresh={() => {
@@ -181,13 +190,13 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/admin/promotions"
-              className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-semibold bg-white border border-ink-200 text-ink-700 hover:bg-ink-50 rounded-sm shadow-1 flex items-center gap-1.5"
             >
               <span>Offers & Discounts</span>
             </Link>
             <Link
               href="/admin/restaurants"
-              className="px-3.5 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 text-xs font-semibold bg-ink-900 hover:bg-ink-800 text-white rounded-sm shadow-1 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus size={14} weight="bold" />
               <span>Add Restaurant</span>
@@ -238,59 +247,45 @@ export default function AdminDashboardPage() {
 
         {/* LEVEL 2: Contextual Trends & Order Dispatch Funnel */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Order Velocity Flowing Wave Chart */}
+          {/* Platform order throughput, last 24 completed hours */}
           <div className="lg:col-span-2">
-            <FlowingVelocityChart
-              data={(() => {
-                // Generate 2-hour interval time series based on live recentOrders today
-                const slots = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '00:00'];
-                return slots.map((slotTime) => {
-                  const hour = parseInt(slotTime.split(':')[0], 10);
-                  const matchingOrders = recentOrders.filter((o) => {
-                    const orderDate = new Date(o.placed_at);
-                    const orderHour = orderDate.getHours();
-                    return Math.abs(orderHour - hour) <= 1;
-                  });
-                  const ordersCount = matchingOrders.length;
-                  const gmv = matchingOrders.reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
-                  return {
-                    time: slotTime,
-                    orders: ordersCount,
-                    gmv: gmv,
-                    peak: ordersCount > 3,
-                    prepTimeMinutes: ordersCount > 0 ? 16 : 0,
-                    slaPercent: 100,
-                  };
-                });
-              })()}
+            <ProgressMetricCard
+              title="Platform orders per hour"
+              unit="orders"
+              data={throughput.series}
+              period="Last 24 hours"
+              periodOptions={HOURLY_PERIODS}
+              delta={String(throughput.currentHourCount)}
+              deltaLabel={`so far this hour (${throughput.currentHourLabel})`}
+              loading={isLoading}
             />
           </div>
 
           {/* 5-Stage Live Dispatch Pipeline Funnel */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+          <div className="bg-white border border-ink-200 rounded-md p-6 shadow-1 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                  <Funnel size={16} weight="bold" className="text-slate-700" />
+                <h2 className="text-sm font-bold text-ink-900 tracking-tight flex items-center gap-1.5">
+                  <Funnel size={16} weight="bold" className="text-ink-700" />
                   Live Dispatch Funnel
                 </h2>
-                <span className="text-xs font-mono text-slate-400">Real-time</span>
+                <span className="text-xs font-mono text-ink-400">Real-time</span>
               </div>
 
               <div className="space-y-3.5">
                 {[
-                  { stage: '1. Placed (Pending Accept)', count: placedCount, color: 'bg-indigo-500', pct: `${recentOrders.length > 0 ? Math.round((placedCount / recentOrders.length) * 100) : 0}%` },
+                  { stage: '1. Placed (Pending Accept)', count: placedCount, color: 'bg-blue-500', pct: `${recentOrders.length > 0 ? Math.round((placedCount / recentOrders.length) * 100) : 0}%` },
                   { stage: '2. Kitchen Prep', count: prepCount, color: 'bg-amber-500', pct: `${recentOrders.length > 0 ? Math.round((prepCount / recentOrders.length) * 100) : 0}%` },
                   { stage: '3. Ready for Rider Handover', count: handoverCount, color: 'bg-blue-500', pct: `${recentOrders.length > 0 ? Math.round((handoverCount / recentOrders.length) * 100) : 0}%` },
-                  { stage: '4. Out for Delivery (In-Transit)', count: transitCount, color: 'bg-sky-500', pct: `${recentOrders.length > 0 ? Math.round((transitCount / recentOrders.length) * 100) : 0}%` },
-                  { stage: '5. Completed / Delivered', count: deliveredCount, color: 'bg-emerald-600', pct: `${recentOrders.length > 0 ? Math.round((deliveredCount / recentOrders.length) * 100) : 0}%` },
+                  { stage: '4. Out for Delivery (In-Transit)', count: transitCount, color: 'bg-blue-400', pct: `${recentOrders.length > 0 ? Math.round((transitCount / recentOrders.length) * 100) : 0}%` },
+                  { stage: '5. Completed / Delivered', count: deliveredCount, color: 'bg-green-600', pct: `${recentOrders.length > 0 ? Math.round((deliveredCount / recentOrders.length) * 100) : 0}%` },
                 ].map((s) => (
                   <div key={s.stage} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-slate-700">{s.stage}</span>
-                      <span className="font-mono font-bold text-slate-900">{s.count}</span>
+                      <span className="font-medium text-ink-700">{s.stage}</span>
+                      <span className="font-mono font-bold text-ink-900">{s.count}</span>
                     </div>
-                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div className="h-2 rounded-xs bg-ink-100 overflow-hidden">
                       <div className={`h-full rounded-full ${s.color}`} style={{ width: s.count > 0 ? s.pct : '0%' }} />
                     </div>
                   </div>
@@ -298,9 +293,9 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-              <span>Avg Cook: <strong className="text-slate-800 font-mono">{recentOrders.length > 0 ? '16.4m' : '0m'}</strong></span>
-              <span>Avg Transit: <strong className="text-slate-800 font-mono">{recentOrders.length > 0 ? '11.8m' : '0m'}</strong></span>
+            <div className="pt-4 mt-4 border-t border-ink-100 flex items-center justify-between text-xs text-ink-500">
+              <span>Avg Cook: <strong className="text-ink-800 font-mono">{recentOrders.length > 0 ? '16.4m' : '0m'}</strong></span>
+              <span>Avg Transit: <strong className="text-ink-800 font-mono">{recentOrders.length > 0 ? '11.8m' : '0m'}</strong></span>
             </div>
           </div>
         </div>
@@ -321,9 +316,9 @@ export default function AdminDashboardPage() {
                 avgSlaMins: cliftonCount > 0 ? 18.2 : 0,
                 activeCouriers: allRiders.filter((r) => r.is_online).length,
                 activeRestaurants: 1,
-                color: '#E23A2E',
-                bgLight: 'bg-rose-50',
-                borderColor: 'border-rose-200',
+                color: tokens.red500,
+                bgLight: 'bg-red-50',
+                borderColor: 'border-red-200',
               },
               {
                 id: 'gulshan',
@@ -333,9 +328,9 @@ export default function AdminDashboardPage() {
                 avgSlaMins: gulshanCount > 0 ? 25.6 : 0,
                 activeCouriers: allRiders.filter((r) => r.is_online).length,
                 activeRestaurants: 1,
-                color: '#059669',
-                bgLight: 'bg-emerald-50',
-                borderColor: 'border-emerald-200',
+                color: tokens.green600,
+                bgLight: 'bg-green-50',
+                borderColor: 'border-green-200',
               },
               {
                 id: 'central',
@@ -345,7 +340,7 @@ export default function AdminDashboardPage() {
                 avgSlaMins: otherCount > 0 ? 22.0 : 0,
                 activeCouriers: allRiders.filter((r) => r.is_online).length,
                 activeRestaurants: 1,
-                color: '#2563EB',
+                color: tokens.blue600,
                 bgLight: 'bg-blue-50',
                 borderColor: 'border-blue-200',
               },
@@ -364,44 +359,44 @@ export default function AdminDashboardPage() {
 
         {/* LEVEL 3: Actionable Operational Queues */}
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-ink-200 pb-2">
             <div>
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+              <h2 className="text-sm font-bold text-ink-900 tracking-tight">
                 Operational Action Queues
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-ink-400">
                 Direct intervention for delayed orders, partner onboarding, and cash limit risks.
               </p>
             </div>
 
             {/* Queue Filter Tabs */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 p-1 rounded-md bg-ink-100 text-xs font-semibold">
               <button
                 onClick={() => setActiveQueueTab('orders')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
+                className={`px-3 py-1.5 rounded-sm transition-all ${
                   activeQueueTab === 'orders'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-ink-900 shadow-1'
+                    : 'text-ink-500 hover:text-ink-800'
                 }`}
               >
                 Live Orders ({recentOrders.length})
               </button>
               <button
                 onClick={() => setActiveQueueTab('riders')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
+                className={`px-3 py-1.5 rounded-sm transition-all ${
                   activeQueueTab === 'riders'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-ink-900 shadow-1'
+                    : 'text-ink-500 hover:text-ink-800'
                 }`}
               >
                 Rider KYC ({pendingRiders.length})
               </button>
               <button
                 onClick={() => setActiveQueueTab('float')}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer ${
                   activeQueueTab === 'float'
-                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-ink-900 shadow-1 font-bold'
+                    : 'text-ink-500 hover:text-ink-800'
                 }`}
               >
                 Float Breaches (3)
@@ -424,27 +419,27 @@ export default function AdminDashboardPage() {
           )}
 
           {activeQueueTab === 'riders' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+            <div className="bg-white border border-ink-200 rounded-md p-6 shadow-1">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-slate-900">Pending Rider Onboarding Approvals</h3>
-                <Link href="/admin/riders" className="text-xs text-slate-700 font-semibold hover:underline">
+                <h3 className="text-sm font-bold text-ink-900">Pending Rider Onboarding Approvals</h3>
+                <Link href="/admin/riders" className="text-xs text-ink-700 font-semibold hover:underline">
                   View All Riders
                 </Link>
               </div>
 
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-ink-100">
                 {pendingRiders.map((r) => (
                   <div key={r.id} className="py-3 flex items-center justify-between text-xs">
                     <div>
-                      <div className="font-bold text-slate-900">{r.name}</div>
-                      <div className="text-slate-400 font-mono text-[11px]">
+                      <div className="font-bold text-ink-900">{r.name}</div>
+                      <div className="text-ink-400 font-mono text-2xs">
                         CNIC: {r.cnic_number} · Vehicle: {r.vehicle_type}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/riders/${r.id}`}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs"
+                        className="px-3 py-1.5 bg-ink-100 hover:bg-ink-200 text-ink-700 font-semibold rounded-sm text-xs"
                       >
                         Inspect KYC Docs
                       </Link>
@@ -452,7 +447,7 @@ export default function AdminDashboardPage() {
                   </div>
                 ))}
                 {pendingRiders.length === 0 && (
-                  <div className="text-center py-6 text-xs text-slate-400">
+                  <div className="text-center py-6 text-xs text-ink-400">
                     No pending rider approvals in queue
                   </div>
                 )}
@@ -461,27 +456,27 @@ export default function AdminDashboardPage() {
           )}
 
           {activeQueueTab === 'float' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-white border border-ink-200 rounded-md p-6 shadow-1 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
                   <ShieldWarning size={22} weight="bold" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="text-sm font-bold text-ink-900">
                     Cash-on-Delivery (COD) Float Limit Breaches
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-ink-500">
                     Riders holding unremitted cash above PKR 15,000 threshold. Automatic dispatch is blocked until cash deposit is reconciled.
                   </p>
                 </div>
               </div>
 
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+              <div className="divide-y divide-ink-100 border border-ink-200 rounded-md overflow-hidden">
                 {floatBreachedRiders.map((r) => (
                   <div key={r.id} className="p-4 bg-white flex items-center justify-between text-xs">
                     <div>
-                      <div className="font-bold text-slate-900">{r.name} ({r.phone_number})</div>
-                      <div className="text-[11px] text-slate-400 font-mono">
+                      <div className="font-bold text-ink-900">{r.name} ({r.phone_number})</div>
+                      <div className="text-2xs text-ink-400 font-mono">
                         Plate: {r.vehicle_registration || 'KHI-9988'} · Deliveries: 142
                       </div>
                     </div>
@@ -491,12 +486,12 @@ export default function AdminDashboardPage() {
                         <div className="font-mono font-bold text-amber-800 text-sm">
                           {formatPKR(r.pending_cash_owed)}
                         </div>
-                        <div className="text-[10px] text-slate-400">Limit: PKR 15,000</div>
+                        <div className="text-2xs text-ink-400">Limit: PKR 15,000</div>
                       </div>
 
                       <Link
                         href={`/admin/riders/${r.id}`}
-                        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+                        className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 text-white font-semibold rounded-sm text-xs shadow-1 transition-colors cursor-pointer"
                       >
                         Reconcile Cash
                       </Link>

@@ -16,6 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import { PersonaType } from '@/types/home';
 import { scrollToSection } from '@/lib/scroll';
+import { tokens } from '@/lib/design-tokens';
 
 interface ServicesSectionProps {
   onSelectPersona?: (persona: PersonaType) => void;
@@ -32,7 +33,7 @@ const StoryImageFrame: React.FC<StoryImageFrameProps> = ({ src, alt, priority = 
     <div className="relative aspect-[4/3] w-full group select-none">
       <div
         tabIndex={0}
-        className="relative w-full h-full rounded-3xl transition-all duration-350 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-[1.07] [@media(hover:hover)_and_(pointer:fine)]:hover:z-20 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_24px_54px_-12px_rgba(0,0,0,0.22)] motion-reduce:hover:scale-100 motion-reduce:hover:shadow-lg focus-visible:scale-[1.05] focus-visible:z-20 outline-none"
+        className="relative w-full h-full rounded-md transition-all duration-350 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-[1.07] [@media(hover:hover)_and_(pointer:fine)]:hover:z-20 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_24px_54px_-12px_rgba(0,0,0,0.22)] motion-reduce:hover:scale-100 motion-reduce:hover:shadow-2 focus-visible:scale-[1.05] focus-visible:z-20 outline-none"
       >
         <Image
           src={src}
@@ -41,11 +42,11 @@ const StoryImageFrame: React.FC<StoryImageFrameProps> = ({ src, alt, priority = 
           priority={false}
           quality={65}
           sizes="(min-width: 1024px) 568px, 100vw"
-          className="object-cover rounded-3xl shadow-sm transition-transform duration-350 ease-out"
+          className="object-cover rounded-md shadow-1 transition-transform duration-350 ease-out"
         />
         {/* Glassy edge rim layer: masked to outer ~16px only, fades in on hover */}
         <div
-          className="pointer-events-none absolute inset-0 rounded-3xl border border-white/50 opacity-0 group-hover:opacity-100 transition-opacity duration-350 ease-out shadow-[inset_0_0_28px_rgba(255,255,255,0.45)] backdrop-blur-sm [mask-image:radial-gradient(ellipse_at_center,transparent_70%,black_92%)]"
+          className="pointer-events-none absolute inset-0 rounded-md border border-white/50 opacity-0 group-hover:opacity-100 transition-opacity duration-350 ease-out shadow-[inset_0_0_28px_rgba(255,255,255,0.45)] backdrop-blur-sm [mask-image:radial-gradient(ellipse_at_center,transparent_70%,black_92%)]"
           aria-hidden="true"
         />
       </div>
@@ -64,7 +65,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
   return (
     <section
       id="services"
-      className="relative z-10 py-20 sm:py-28 bg-[#FFFFFF] overflow-x-clip"
+      className="relative z-10 py-20 sm:py-28 bg-white overflow-x-clip"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header: Clean, Human, DoorDash Style */}
@@ -97,7 +98,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('customer')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-[#C92F24] hover:bg-[#A8241B] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white font-sans text-sm font-bold rounded-sm shadow-1 hover:shadow-2 transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Find food near you</span>
                   <ArrowRight size={15} weight="bold" />
@@ -139,7 +140,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('restaurant')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-blue hover:bg-[#184C86] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-blue hover:bg-blue-700 text-white font-sans text-sm font-bold rounded-sm shadow-1 hover:shadow-2 transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Sign up your store</span>
                   <ArrowRight size={15} weight="bold" />
@@ -165,7 +166,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
                 <button
                   type="button"
                   onClick={() => handleAction('rider')}
-                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-[#C92F24] hover:bg-[#A8241B] text-white font-sans text-sm font-bold rounded-full shadow-xs hover:shadow-md transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
+                  className="inline-flex items-center space-x-2 px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white font-sans text-sm font-bold rounded-sm shadow-1 hover:shadow-2 transition-all duration-150 ease-out cursor-pointer active:scale-95 select-none"
                 >
                   <span>Deliver with us</span>
                   <ArrowRight size={15} weight="bold" />
@@ -212,7 +213,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 Ride-hailing for passengers - safe, transparent fares for everyday city travel.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-2xs uppercase tracking-widest font-bold px-2 py-1 rounded-xs bg-red-50 text-red-accessible border border-red-600/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
@@ -230,15 +231,15 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 Same-day parcel delivery for individuals and small businesses within the city.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-2xs uppercase tracking-widest font-bold px-2 py-1 rounded-xs bg-red-50 text-red-accessible border border-red-600/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
 
             {/* Speedy Mall */}
             <div className="group flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="w-10 h-10 rounded-full bg-[#C7A874]/15 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-5 h-5" style={{ fill: '#9A7A4A' }} aria-hidden>
+              <div className="w-10 h-10 rounded-full bg-tan-400/15 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-5 h-5" style={{ fill: tokens.tan700 }} aria-hidden>
                   <path d="M223.94,128.29A16,16,0,0,0,224,127.28V48H232a8,8,0,0,0,0-16H24a8,8,0,0,0,0,16h8v79.28A16,16,0,0,0,16,144v16a16,16,0,0,0,16,16h8v24a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V176h8a16,16,0,0,0,16-16V144A16,16,0,0,0,223.94,128.29ZM200,200H56V176H200Zm16-40H40V144H216ZM48,48H208v79H48Z" />
                 </svg>
               </div>
@@ -248,15 +249,15 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 All services under one roof - a physical lifestyle mall with merchant shops, a food court, and Speedy express counters.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red-accessible border border-[#C92F24]/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-2xs uppercase tracking-widest font-bold px-2 py-1 rounded-xs bg-red-50 text-red-accessible border border-red-600/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>
 
             {/* Technical Services */}
             <div className="group flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="w-10 h-10 rounded-full bg-[#10B981]/10 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-5 h-5 fill-[#10B981]" aria-hidden>
+              <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="w-5 h-5 fill-green-500" aria-hidden>
                   <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z" />
                 </svg>
               </div>
@@ -266,7 +267,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectPerson
               <p className="text-sm text-ink-soft leading-relaxed font-sans mb-3 max-w-sm mx-auto lg:mx-0">
                 On-demand technicians for home repairs, appliance fixes, and everyday maintenance needs.
               </p>
-              <span className="mt-auto inline-flex items-center font-mono text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full bg-[#FEF2F0] text-red border border-red/20 w-fit mx-auto lg:mx-0">
+              <span className="mt-auto inline-flex items-center font-mono text-2xs uppercase tracking-widest font-bold px-2 py-1 rounded-xs bg-red-50 text-red border border-red/20 w-fit mx-auto lg:mx-0">
                 Coming Soon
               </span>
             </div>

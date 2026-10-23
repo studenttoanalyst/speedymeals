@@ -53,16 +53,19 @@ Map<String, dynamic> _requestJson({
   String? holdReason,
   bool canCancel = true,
   int daysUntilReview = 7,
-  String graceEndsAt = '2026-10-23T12:00:00Z',
-  String requestedAt = '2026-10-16T12:00:00Z',
+  // Relative to now: a fixed date here silently fails once it passes.
+  String? graceEndsAt,
+  String? requestedAt,
   String? reviewedAt,
 }) =>
     {
       'id': 'req-1',
       'role': 'rider',
       'status': status,
-      'requested_at': requestedAt,
-      'grace_ends_at': graceEndsAt,
+      'requested_at': requestedAt ??
+          DateTime.now().toUtc().subtract(const Duration(days: 1)).toIso8601String(),
+      'grace_ends_at': graceEndsAt ??
+          DateTime.now().toUtc().add(Duration(days: daysUntilReview)).toIso8601String(),
       'requested_via': 'app',
       'reviewed_at': reviewedAt,
       'admin_note': null,

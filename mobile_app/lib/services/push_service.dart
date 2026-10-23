@@ -51,6 +51,20 @@ class PushService {
   /// True once Firebase initialised successfully on this build.
   bool get isAvailable => _available;
 
+  final StreamController<Map<String, String>> _dataEvents =
+      StreamController<Map<String, String>>.broadcast();
+
+  /// The `data` payload of every push received while the app is running
+  /// (foreground, or opened from a notification). Screens listen for their
+  /// event type — e.g. `rider_account` — and refetch, so admin changes show
+  /// up live.
+  Stream<Map<String, String>> get dataEvents => _dataEvents.stream;
+
+  void _emitData(RemoteMessage message) {
+    if (message.data.isEmpty) return;
+    _dataEvents.add(message.data.map((k, v) => MapEntry(k, '$v')));
+  }
+
   // ------------------------------------------------------------------ setup
 
   Future<void> init() async {
@@ -67,7 +81,10 @@ class PushService {
       await _setUpLocalNotifications();
 
       FirebaseMessaging.onMessage.listen(_onForegroundMessage);
-      FirebaseMessaging.onMessageOpenedApp.listen((_) => _refreshInbox());
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        _emitData(message);
+        _refreshInbox();
+      });
 
       // iOS does not show notifications while the app is open unless asked to.
       await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
@@ -203,6 +220,7 @@ class PushService {
   Future<void> _onForegroundMessage(RemoteMessage message) async {
     // Keep the in-app feed and any open order screens current.
     _refreshInbox();
+    _emitData(message);
 
     // iOS presents foreground notifications natively (see init); only Android
     // needs a local notification to make the message visible while the app is open.

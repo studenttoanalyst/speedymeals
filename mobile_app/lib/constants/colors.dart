@@ -1,64 +1,71 @@
 import 'package:flutter/material.dart';
 
-/// SpeedyMeals Design System - Brand Colors
-/// Primary Red: #DC2626, Royal Blue: #1D4ED8, Accent Orange: #F59E0B, Pure White: #FFFFFF
+import '../core/theme/app_tokens.dart';
+
+/// SpeedyMeals Material 3 color roles, mapped onto the shared design tokens
+/// (design-tokens/tokens.json → AppColors). Prefer [AppColors] in new code;
+/// these role names remain for ColorScheme assembly and existing widgets.
+///
+/// Brand: red for the primary action, blue for trust, tan used sparingly,
+/// ink on paper for everything else. See docs/DESIGN_TOKENS.md.
 class SpeedyMealsColors {
-  // Primary Colors
-  static const Color primary = Color(0xFFDC2626);
-  static const Color primaryContainer = Color(0xFFB70011);
-  static const Color onPrimary = Color(0xFFFFFFFF);
-  static const Color onPrimaryContainer = Color(0xFFFFF6F5);
+  // Primary — CTA red (white text 5.36:1)
+  static const Color primary = AppColors.cta;
+  static const Color primaryContainer = AppColors.red50;
+  static const Color onPrimary = AppColors.onCta;
+  static const Color onPrimaryContainer = AppColors.red700;
 
-  // Secondary Colors - Royal Blue
-  static const Color secondary = Color(0xFF1D4ED8);
-  static const Color secondaryContainer = Color(0xFF4069F2);
-  static const Color onSecondary = Color(0xFFFFFFFF);
-  static const Color onSecondaryContainer = Color(0xFFFFFBFF);
-  static const Color secondaryFixed = Color(0xFFDCE1FF);
+  // Secondary — trust blue
+  static const Color secondary = AppColors.blue600;
+  static const Color secondaryContainer = AppColors.blue50;
+  static const Color onSecondary = AppColors.paper;
+  static const Color onSecondaryContainer = AppColors.blue700;
+  static const Color secondaryFixed = AppColors.blue100;
 
-  // Tertiary Colors - Accent Orange
-  static const Color tertiary = Color(0xFFF59E0B);
-  static const Color tertiaryContainer = Color(0xFFA06500);
-  static const Color onTertiary = Color(0xFFFFFFFF);
-  static const Color onTertiaryContainer = Color(0xFFFFF7F1);
-  static const Color tertiaryFixed = Color(0xFFFFDBB8);
-  static const Color tertiaryFixedDim = Color(0xFFFFB95F);
+  // Tertiary — tan premium accent (sparing; text uses tan700 for contrast)
+  static const Color tertiary = AppColors.tan700;
+  static const Color tertiaryContainer = AppColors.tan100;
+  static const Color onTertiary = AppColors.paper;
+  static const Color onTertiaryContainer = AppColors.tan700;
+  static const Color tertiaryFixed = AppColors.tan100;
+  static const Color tertiaryFixedDim = AppColors.tan400;
 
-  // Surface & Background Colors
-  static const Color surface = Color(0xFFFAF8FF);
-  static const Color surfaceVariant = Color(0xFFDAE2FD);
-  static const Color background = Color(0xFFFAF8FF);
-  static const Color onBackground = Color(0xFF131B2E);
-  static const Color onSurface = Color(0xFF131B2E);
-  static const Color onSurfaceVariant = Color(0xFF5C403C);
+  // Surface & background — white cards on a warm ink-50 canvas
+  static const Color surface = AppColors.surface;
+  static const Color surfaceVariant = AppColors.ink100;
+  static const Color background = AppColors.canvas;
+  static const Color onBackground = AppColors.text;
+  static const Color onSurface = AppColors.text;
+  static const Color onSurfaceVariant = AppColors.textSecondary;
 
-  // Surface Container Levels (Elevation-based)
-  static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
-  static const Color surfaceContainerLow = Color(0xFFF2F3FF);
-  static const Color surfaceContainer = Color(0xFFEAEDFF);
-  static const Color surfaceContainerHigh = Color(0xFFE2E7FF);
-  static const Color surfaceContainerHighest = Color(0xFFDAE2FD);
+  // Surface container levels
+  static const Color surfaceContainerLowest = AppColors.paper;
+  static const Color surfaceContainerLow = AppColors.ink50;
+  static const Color surfaceContainer = AppColors.ink100;
+  static const Color surfaceContainerHigh = AppColors.ink200;
+  static const Color surfaceContainerHighest = AppColors.ink200;
 
-  // Dark Mode / Inverse
-  static const Color inverseSurface = Color(0xFF283044);
-  static const Color inverseOnSurface = Color(0xFFEEF0FF);
-  static const Color surfaceDim = Color(0xFFD2D9F4);
-  static const Color surfaceTint = Color(0xFFBF0715);
+  // Inverse
+  static const Color inverseSurface = AppColors.surfaceInverse;
+  static const Color inverseOnSurface = AppColors.ink50;
+  static const Color surfaceDim = AppColors.ink100;
+  // Transparent: stops Material 3 tinting elevated surfaces pink.
+  static const Color surfaceTint = Color(0x00000000);
 
-  // Typography Colors
-  static const Color outline = Color(0xFF916F6B);
-  static const Color outlineVariant = Color(0xFFE6BDB8);
+  // Outlines
+  static const Color outline = AppColors.borderControl;
+  static const Color outlineVariant = AppColors.line;
 
-  // Status Colors
-  static const Color error = Color(0xFFBA1A1A);
-  static const Color errorContainer = Color(0xFFFFDAD6);
-  static const Color onError = Color(0xFFFFFFFF);
-  static const Color onErrorContainer = Color(0xFF93000A);
+  // Status
+  static const Color error = AppColors.error;
+  static const Color errorContainer = AppColors.errorBg;
+  static const Color onError = AppColors.paper;
+  static const Color onErrorContainer = AppColors.red700;
 
-  // White & Transparent
-  static const Color white = Color(0xFFFFFFFF);
+  // White & transparent
+  static const Color white = AppColors.paper;
   static const Color transparent = Color(0x00000000);
 
-  // Shadow/utility colors
-  static const Color surfaceContainerLow2 = Color(0x1A131B2E); // For alpha overlays
+  // Ink-tinted overlay (10%)
+  static const Color surfaceContainerLow2 = Color(0x1A15171A);
 }

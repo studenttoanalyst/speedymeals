@@ -16,6 +16,8 @@ import '../../data/models/user_models.dart';
 import '../../data/repositories/user_repository.dart';
 import '../profile/saved_addresses_screen.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../widgets/horizontal_scroll_rail.dart';
 
 // ─── Sort & Filter data model ────────────────────────────────────────────────
 
@@ -319,9 +321,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       extendBodyBehindAppBar: false,
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFDC2626),
+        backgroundColor: AppColors.cta,
         elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.2),
+        shadowColor: AppColors.ink900.withValues(alpha: 0.2),
         automaticallyImplyLeading: false,
         title: Row(
           children: [
@@ -335,7 +337,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   width: 28,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.fastfood, size: 20, color: Color(0xFFDC2626)),
+                      const Icon(Icons.fastfood, size: 20, color: AppColors.cta),
                 ),
               ),
             ),
@@ -369,7 +371,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                           constraints: const BoxConstraints(minWidth: 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1D4ED8),
+                            color: AppColors.blue600,
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(color: Colors.white, width: 1.5),
                           ),
@@ -378,7 +380,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -399,7 +401,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _loadRestaurants(),
           ]);
         },
-        color: const Color(0xFFDC2626),
+        color: AppColors.cta,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -493,12 +495,9 @@ class _LocationSearchPill extends StatelessWidget {
   String get _addressDisplayText {
     if (isLoading) return 'Loading address...';
     if (activeAddress == null) return 'Select delivery address';
-    final title = activeAddress!.displayTitle;
-    final subtitle = activeAddress!.displaySubtitle;
-    if (title == subtitle || subtitle.isEmpty) {
-      return title;
-    }
-    return '$title • $subtitle';
+    // Label only ("Home", "Office"); displayTitle falls back to the street
+    // address, never to raw coordinates.
+    return activeAddress!.displayTitle;
   }
 
   @override
@@ -516,13 +515,13 @@ class _LocationSearchPill extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(color: const Color(0xFF1D4ED8), borderRadius: BorderRadius.circular(8)),
+                    decoration: BoxDecoration(color: AppColors.blue600, borderRadius: BorderRadius.circular(AppRadius.md)),
                     child: const Icon(Icons.location_on, color: Colors.white, size: 18),
                   ),
                   const SizedBox(width: 6),
@@ -563,7 +562,7 @@ class _LocationSearchPill extends StatelessWidget {
           flex: 2,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            decoration: BoxDecoration(color: const Color(0xFF1D4ED8), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.blue600, borderRadius: BorderRadius.circular(AppRadius.md)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -611,14 +610,14 @@ class _SearchBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        boxShadow: [BoxShadow(color: AppColors.ink900.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Row(
         children: [
           const Padding(
             padding: EdgeInsets.only(left: 14),
-            child: Icon(Icons.search, color: Color(0xFF5C403C), size: 20),
+            child: Icon(Icons.search, color: AppColors.ink600, size: 20),
           ),
           Expanded(
             // Rebuilds just this field so the clear button appears/disappears.
@@ -662,7 +661,7 @@ class _SearchBar extends StatelessWidget {
                   Container(
                     width: 36,
                     height: 36,
-                    decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(AppRadius.md)),
                     child: const Icon(Icons.tune, color: Colors.white, size: 18),
                   ),
                   // Active-filter indicator dot
@@ -672,7 +671,7 @@ class _SearchBar extends StatelessWidget {
                       right: -3,
                       child: CircleAvatar(
                         radius: 5,
-                        backgroundColor: Color(0xFF1D4ED8),
+                        backgroundColor: AppColors.blue600,
                       ),
                     ),
                 ],
@@ -992,7 +991,7 @@ class _SearchResultsView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Column(
             children: [
@@ -1026,7 +1025,7 @@ class _SearchResultsView extends StatelessWidget {
                   icon: const Icon(Icons.filter_alt_off, size: 18),
                   label: const Text('Clear filters'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFDC2626),
+                    backgroundColor: AppColors.cta,
                     foregroundColor: Colors.white,
                   ),
                 )
@@ -1065,9 +1064,9 @@ class _SearchRestaurantTile extends StatelessWidget {
 
     return Material(
       color: theme.colorScheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: () {
           Navigator.push(
             context,
@@ -1081,7 +1080,7 @@ class _SearchRestaurantTile extends StatelessWidget {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 child: SizedBox(
                   width: 68,
                   height: 68,
@@ -1132,7 +1131,7 @@ class _SearchRestaurantTile extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFF59E0B), size: 13),
+                        const Icon(Icons.star, color: AppColors.amber500, size: 13),
                         const SizedBox(width: 3),
                         Text(
                           restaurant.rating.toString(),
@@ -1171,6 +1170,71 @@ class _CategorySection extends StatelessWidget {
     required this.onCategorySelected,
   });
 
+  /// "Explore All": every category in a grid; picking one runs the same
+  /// search as tapping it in the rail.
+  void _showAllCategories(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('All categories', style: theme.textTheme.headlineMedium),
+              const SizedBox(height: 16),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  itemCount: _categories.length,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 104,
+                    mainAxisExtent: 100,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = _categories[index];
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      onTap: () {
+                        Navigator.of(sheetContext).pop();
+                        onCategorySelected(item.label);
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                            ),
+                            child: Icon(item.icon, color: theme.colorScheme.primary, size: 30),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            item.label,
+                            style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1189,7 +1253,7 @@ class _CategorySection extends StatelessWidget {
                 ),
               ),
               TextButton(
-                onPressed: () => onCategorySelected(''),
+                onPressed: () => _showAllCategories(context),
                 child: Text(
                   'Explore All',
                   style: theme.textTheme.labelMedium?.copyWith(
@@ -1202,57 +1266,54 @@ class _CategorySection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
+        HorizontalScrollRail(
           height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _categories.length,
-            itemBuilder: (context, index) {
-              final item = _categories[index];
-              return Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () => onCategorySelected(item.label),
-                  child: Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            item.icon,
-                            color: theme.colorScheme.primary,
-                            size: 30,
-                          ),
+          semanticLabel: 'categories',
+          itemCount: _categories.length,
+          itemBuilder: (context, index) {
+            final item = _categories[index];
+            return Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                onTap: () => onCategorySelected(item.label),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.ink900.withValues(alpha: 0.06),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          item.icon,
+                          color: theme.colorScheme.primary,
+                          size: 30,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item.label,
-                        style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.label,
+                      style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -1288,14 +1349,14 @@ class _LiveOrderSnippet extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6, offset: const Offset(0, 2))],
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        boxShadow: [BoxShadow(color: AppColors.ink900.withValues(alpha: 0.05), blurRadius: 6, offset: const Offset(0, 2))],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(AppRadius.md)),
             child: const Icon(Icons.local_fire_department, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 12),
@@ -1311,7 +1372,7 @@ class _LiveOrderSnippet extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.person, size: 14, color: Color(0xFF5C403C)),
+                    const Icon(Icons.person, size: 14, color: AppColors.ink600),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -1328,7 +1389,7 @@ class _LiveOrderSnippet extends StatelessWidget {
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(AppRadius.md)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1420,7 +1481,7 @@ class _CloudKitchenSection extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Column(
             children: [
@@ -1482,7 +1543,7 @@ class _CloudKitchenSection extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Column(
             children: [
@@ -1511,20 +1572,17 @@ class _CloudKitchenSection extends StatelessWidget {
       );
     }
 
-    return SizedBox(
+    return HorizontalScrollRail(
       height: 236,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: restaurants.length,
-        itemBuilder: (context, index) {
-          final restaurant = restaurants[index];
-          return Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: SizedBox(width: 280, child: _RestaurantCard(restaurant: restaurant)),
-          );
-        },
-      ),
+      semanticLabel: 'restaurants',
+      itemCount: restaurants.length,
+      itemBuilder: (context, index) {
+        final restaurant = restaurants[index];
+        return Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: SizedBox(width: 280, child: _RestaurantCard(restaurant: restaurant)),
+        );
+      },
     );
   }
 }
@@ -1592,7 +1650,7 @@ class _PopularItemsSection extends StatelessWidget {
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(AppRadius.md)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -1731,7 +1789,7 @@ class _RestaurantCard extends StatelessWidget {
                       height: 60,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.5)],
+                          colors: [Colors.transparent, AppColors.ink900.withValues(alpha: 0.5)],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
@@ -1747,7 +1805,7 @@ class _RestaurantCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -1774,7 +1832,7 @@ class _RestaurantCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Text(
                           'FREE DELIVERY',
@@ -1790,7 +1848,7 @@ class _RestaurantCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerLowest.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1865,7 +1923,7 @@ class _RatingBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(color: const Color(0xFFF59E0B), borderRadius: BorderRadius.circular(6)),
+      decoration: BoxDecoration(color: AppColors.amber500, borderRadius: BorderRadius.circular(AppRadius.md)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1910,9 +1968,9 @@ class _PopularItemCardState extends State<_PopularItemCard> {
       child: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6, offset: const Offset(0, 2)),
+            BoxShadow(color: AppColors.ink900.withValues(alpha: 0.05), blurRadius: 6, offset: const Offset(0, 2)),
           ],
         ),
         child: Column(
@@ -1926,8 +1984,8 @@ class _PopularItemCardState extends State<_PopularItemCard> {
                     children: [
                       ClipRRect(
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
+                          topLeft: Radius.circular(AppRadius.md),
+                          topRight: Radius.circular(AppRadius.md),
                         ),
                         child: AspectRatio(
                           aspectRatio: 16 / 9,
@@ -1965,11 +2023,11 @@ class _PopularItemCardState extends State<_PopularItemCard> {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.error,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                             child: const Text(
                               'Sold out',
-                              style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -1992,7 +2050,7 @@ class _PopularItemCardState extends State<_PopularItemCard> {
                               child: Text(
                                 item.restaurant.name,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
@@ -2053,8 +2111,8 @@ class _PopularItemCardState extends State<_PopularItemCard> {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: _isAdding ? theme.colorScheme.secondary : const Color(0xFFDC2626),
-                        borderRadius: BorderRadius.circular(10),
+                        color: _isAdding ? theme.colorScheme.secondary : AppColors.cta,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
                       child: Icon(_isAdding ? Icons.check : Icons.add, color: Colors.white, size: 18),
                     ),
@@ -2123,9 +2181,9 @@ class _StickyCartBarDelegate extends SliverPersistentHeaderDelegate {
         return Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.onSurface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, -4)),
+              BoxShadow(color: AppColors.ink900.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, -4)),
             ],
           ),
           child: SafeArea(
@@ -2137,7 +2195,7 @@ class _StickyCartBarDelegate extends SliverPersistentHeaderDelegate {
                   // Bag icon with badge
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: AppColors.cta, borderRadius: BorderRadius.circular(AppRadius.md)),
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
@@ -2149,14 +2207,14 @@ class _StickyCartBarDelegate extends SliverPersistentHeaderDelegate {
                             child: Container(
                               constraints: const BoxConstraints(minWidth: 16),
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                              decoration: const BoxDecoration(color: Color(0xFF1D4ED8), shape: BoxShape.circle),
+                              decoration: const BoxDecoration(color: AppColors.blue600, shape: BoxShape.circle),
                               child: Center(
                                 child: Text(
                                   itemCount > 99 ? '99+' : '$itemCount',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 9,
+                                    fontSize: 11,
                                   ),
                                 ),
                               ),
@@ -2206,10 +2264,10 @@ class _StickyCartBarDelegate extends SliverPersistentHeaderDelegate {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDC2626),
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.cta,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 6, offset: const Offset(0, 2)),
+                          BoxShadow(color: AppColors.ink900.withValues(alpha: 0.1), blurRadius: 6, offset: const Offset(0, 2)),
                         ],
                       ),
                       child: Row(
@@ -2315,7 +2373,7 @@ class _FilterSheetState extends State<_FilterSheet> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
       // Make the sheet keyboard-safe and scrollable.
       child: SafeArea(
@@ -2335,7 +2393,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     height: 4,
                     decoration: BoxDecoration(
                       color: theme.colorScheme.outlineVariant,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                   ),
                 ),
@@ -2378,7 +2436,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                         label: Text(order.label),
                         selected: _sortOrder == order,
                         onSelected: (_) => setState(() => _sortOrder = order),
-                        selectedColor: const Color(0xFFDC2626),
+                        selectedColor: AppColors.cta,
                         labelStyle: TextStyle(
                           color: _sortOrder == order ? Colors.white : null,
                           fontWeight: _sortOrder == order ? FontWeight.bold : null,
@@ -2408,11 +2466,11 @@ class _FilterSheetState extends State<_FilterSheet> {
                         ChoiceChip(
                           label: Text(rating == 0 ? 'Any' : '${rating.toStringAsFixed(1)}+'),
                           avatar: rating > 0
-                              ? const Icon(Icons.star, size: 14, color: Color(0xFFF59E0B))
+                              ? const Icon(Icons.star, size: 14, color: AppColors.amber500)
                               : null,
                           selected: _minRating == rating,
                           onSelected: (_) => setState(() => _minRating = rating),
-                          selectedColor: const Color(0xFFDC2626),
+                          selectedColor: AppColors.cta,
                           labelStyle: TextStyle(
                             color: _minRating == rating ? Colors.white : null,
                             fontWeight: _minRating == rating ? FontWeight.bold : null,
@@ -2450,7 +2508,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   min: _priceMin,
                   max: _priceMax,
                   divisions: 30,
-                  activeColor: const Color(0xFFDC2626),
+                  activeColor: AppColors.cta,
                   labels: RangeLabels(
                     'Rs. ${_priceRange.start.round()}',
                     _priceRange.end >= _priceMax
@@ -2471,9 +2529,9 @@ class _FilterSheetState extends State<_FilterSheet> {
                     child: FilledButton(
                       onPressed: _apply,
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFDC2626),
+                        backgroundColor: AppColors.cta,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
                       ),
                       child: const Text(
                         'Apply',

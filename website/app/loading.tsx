@@ -13,16 +13,16 @@ export default function RootLoading() {
         <div className="absolute -inset-4 bg-red/10 rounded-full blur-xl animate-pulse pointer-events-none" />
 
         {/* Logo Frame */}
-        <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white border border-[#E4E2DD] shadow-md flex items-center justify-center overflow-hidden">
+        <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-md bg-white border border-ink-200 shadow-2 flex items-center justify-center overflow-hidden">
           <img
             src="/favicon.webp"
             alt="Speedy Meals"
-            className="w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-lg"
+            className="w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-md"
           />
         </div>
 
         {/* Micro-Progress Bar (Zero-weight pure CSS) */}
-        <div className="w-24 sm:w-32 h-1 bg-[#F0EEEB] rounded-full overflow-hidden mt-4 relative">
+        <div className="w-24 sm:w-32 h-1 bg-ink-100 rounded-xs overflow-hidden mt-4 relative">
           <div className="absolute inset-y-0 w-1/2 bg-red rounded-full animate-loader-slide" />
         </div>
       </div>

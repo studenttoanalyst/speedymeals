@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.modules.admin import service
+from app.modules.admin import rider_notifications, service
 from app.modules.admin.schemas import (
     AdminOrderDetailResponseSchema,
     AdminOrderSummaryResponseSchema,
@@ -156,7 +156,9 @@ def update_rider_approval(
     db: Session = Depends(get_db),
 ):
     """Step 3 — approve/reject a rider's onboarding documents."""
-    return service.update_rider_approval(db, rider_id, payload.approval_status)
+    rider = service.update_rider_approval(db, rider_id, payload.approval_status)
+    rider_notifications.notify_rider_approval(rider_id, payload.approval_status)
+    return rider
 
 
 @router.patch("/riders/{rider_id}/status", response_model=RiderAdminResponseSchema)
@@ -167,7 +169,9 @@ def set_rider_status(
     db: Session = Depends(get_db),
 ):
     """Step 3 — deactivate/reactivate a rider (e.g. fraud, violations) or toggle online/offline."""
-    return service.set_rider_status(db, rider_id, payload.is_active, payload.is_online)
+    rider = service.set_rider_status(db, rider_id, payload.is_active, payload.is_online)
+    rider_notifications.notify_rider_status(rider_id, payload.is_active, payload.is_online)
+    return rider
 
 
 @router.patch("/riders/{rider_id}/commission", response_model=RiderAdminResponseSchema)
@@ -202,7 +206,7 @@ def update_rider_kit(
 ):
     """Staff records kit deposit and handover for a rider."""
     from app.platform.wallet_payment import service as wallet_service
-    return wallet_service.record_kit_completion(
+    rider = wallet_service.record_kit_completion(
         db, rider_id, current_user.id,
         payload.kit_deposit_paid, payload.kit_shirts_issued, payload.kit_box_issued,
         shirt_serial_number=payload.shirt_serial_number,
@@ -210,6 +214,8 @@ def update_rider_kit(
         box_serial_number=payload.box_serial_number,
         helmet_serial_number=payload.helmet_serial_number,
     )
+    rider_notifications.notify_rider_kit(rider_id, rider.kit_completed)
+    return rider
 
 
 # --- Step 4: order management ---

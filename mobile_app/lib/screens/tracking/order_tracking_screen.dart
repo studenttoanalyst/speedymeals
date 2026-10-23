@@ -15,6 +15,7 @@ import '../../features/maps/maps.dart';
 import '../../services/live_location_socket.dart';
 import '../../widgets/gst_note.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../core/theme/app_tokens.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Live tracking view model (real backend data, no mock values)
@@ -523,7 +524,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8FF),
+      backgroundColor: AppColors.canvas,
       body: Stack(
         children: [
           // ── Main scrollable content ──────────────────────────────────────
@@ -534,13 +535,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
                 if (_error != null)
                   Container(
                     width: double.infinity,
-                    color: const Color(0xFFFEF3C7),
+                    color: AppColors.amber100,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 8),
                     child: Row(
                       children: const [
                         Icon(Icons.cloud_off_rounded,
-                            size: 16, color: Color(0xFFB45309)),
+                            size: 16, color: AppColors.amber700),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -548,7 +549,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF92400E),
+                              color: AppColors.amber800,
                             ),
                           ),
                         ),
@@ -611,7 +612,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
               child: AnimatedBuilder(
                 animation: _drawerSlide,
                 builder: (context, _) => Container(
-                  color: Colors.black.withValues(
+                  color: AppColors.ink900.withValues(
                     alpha: 0.4 * _drawerSlide.value,
                   ),
                 ),
@@ -656,10 +657,10 @@ class _AppBar extends StatelessWidget {
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAF8FF).withValues(alpha: 0.9),
+        color: AppColors.canvas.withValues(alpha: 0.9),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.ink900.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 1),
           ),
@@ -670,7 +671,7 @@ class _AppBar extends StatelessWidget {
           // Back button
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
-            color: const Color(0xFF131B2E),
+            color: AppColors.ink900,
             onPressed: onBack,
           ),
           const Expanded(
@@ -679,7 +680,7 @@ class _AppBar extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF131B2E),
+                color: AppColors.ink900,
                 letterSpacing: -0.005 * 18,
               ),
             ),
@@ -692,7 +693,7 @@ class _AppBar extends StatelessWidget {
               height: 32,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFDC2626),
+                color: AppColors.cta,
               ),
               child: const Icon(Icons.person, color: Colors.white, size: 18),
             ),
@@ -733,7 +734,7 @@ class _EtaBar extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.03 * 11,
-                        color: Color(0xFF1D4ED8),
+                        color: AppColors.blue600,
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -748,7 +749,7 @@ class _EtaBar extends StatelessWidget {
                             height: 7,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Color(0xFFDC2626),
+                              color: AppColors.cta,
                             ),
                           ),
                         );
@@ -767,7 +768,7 @@ class _EtaBar extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFFDC2626),
+                          color: AppColors.cta,
                           letterSpacing: -0.01 * 22,
                         ),
                       ),
@@ -780,7 +781,7 @@ class _EtaBar extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF5C403C),
+                          color: AppColors.ink600,
                         ),
                       ),
                     ],
@@ -798,7 +799,7 @@ class _EtaBar extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF5C403C),
+                  color: AppColors.ink600,
                   letterSpacing: 0.02 * 11,
                 ),
               ),
@@ -810,7 +811,7 @@ class _EtaBar extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF131B2E),
+                  color: AppColors.ink900,
                 ),
               ),
             ],
@@ -894,7 +895,7 @@ class _MapView extends StatelessWidget {
         Polyline(
           polylineId: PolylineId('route_${view.orderId}'),
           points: routePoints,
-          color: const Color(0xFF1D4ED8),
+          color: AppColors.blue600,
           width: 5,
         ),
     };
@@ -931,7 +932,7 @@ class _MapView extends StatelessWidget {
                       return Container(
                         width: double.infinity,
                         height: 288,
-                        color: const Color(0xFFE2E7FF),
+                        color: AppColors.ink200,
                         child: CustomPaint(painter: _MapGridPainter()),
                       );
                     },
@@ -942,7 +943,7 @@ class _MapView extends StatelessWidget {
           // Frosted overlay (only over a real map)
           if (hasRealLocation)
             Container(
-              color: const Color(0xFFFAF8FF).withValues(alpha: 0.18),
+              color: AppColors.canvas.withValues(alpha: 0.18),
             ),
 
           // Rider mascot pin — only while a real rider fix exists (the live
@@ -967,11 +968,11 @@ class _MapView extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFB70011),
-                        borderRadius: BorderRadius.circular(999),
+                        color: AppColors.red700,
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.18),
+                            color: AppColors.ink900.withValues(alpha: 0.18),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -992,10 +993,10 @@ class _MapView extends StatelessWidget {
                           Text(
                             view.riderName ?? 'Rider',
                             style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
-                              letterSpacing: 0.02,
+                              letterSpacing: 0.02 * 11,
                             ),
                           ),
                         ],
@@ -1011,7 +1012,7 @@ class _MapView extends StatelessWidget {
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: AppColors.ink900.withValues(alpha: 0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),
@@ -1019,7 +1020,7 @@ class _MapView extends StatelessWidget {
                       ),
                       child: const Icon(
                         Icons.directions_bike_rounded,
-                        color: Color(0xFFDC2626),
+                        color: AppColors.cta,
                         size: 26,
                       ),
                     ),
@@ -1040,10 +1041,10 @@ class _MapView extends StatelessWidget {
                       horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.94),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: AppColors.ink900.withValues(alpha: 0.1),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -1052,14 +1053,14 @@ class _MapView extends StatelessWidget {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.location_off_rounded, size: 13, color: Color(0xFFB45309)),
+                      Icon(Icons.location_off_rounded, size: 13, color: AppColors.amber700),
                       SizedBox(width: 5),
                       Text(
                         'Rider location is currently unavailable.',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF92400E),
+                          color: AppColors.amber800,
                         ),
                       ),
                     ],
@@ -1080,10 +1081,10 @@ class _MapView extends StatelessWidget {
                       horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: AppColors.ink900.withValues(alpha: 0.1),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -1096,7 +1097,7 @@ class _MapView extends StatelessWidget {
                         const Icon(
                           Icons.check_circle_outline_rounded,
                           size: 13,
-                          color: Color(0xFF16A34A),
+                          color: AppColors.green600,
                         ),
                         const SizedBox(width: 6),
                         const Text(
@@ -1104,7 +1105,7 @@ class _MapView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF16A34A),
+                            color: AppColors.green600,
                           ),
                         ),
                       ] else if (view.status == OrderStatus.preparing) ...[
@@ -1119,7 +1120,7 @@ class _MapView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF5C403C),
+                            color: AppColors.ink600,
                           ),
                         ),
                       ] else ...[
@@ -1134,7 +1135,7 @@ class _MapView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF5C403C),
+                            color: AppColors.ink600,
                           ),
                         ),
                       ],
@@ -1173,7 +1174,7 @@ class _MapGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFB7C4FF).withValues(alpha: 0.3)
+      ..color = AppColors.blue200.withValues(alpha: 0.3)
       ..strokeWidth = 1;
 
     const spacing = 32.0;
@@ -1216,26 +1217,26 @@ class _LocationUnavailable extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 288,
-      color: const Color(0xFFE2E7FF),
+      color: AppColors.ink200,
       child: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.location_off_rounded,
-                size: 36, color: Color(0xFFB45309)),
+                size: 36, color: AppColors.amber700),
             SizedBox(height: 8),
             Text(
               'Location unavailable',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF92400E),
+                color: AppColors.amber800,
               ),
             ),
             SizedBox(height: 4),
             Text(
               'Waiting for the restaurant and delivery location.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
+              style: TextStyle(fontSize: 12, color: AppColors.amber800),
             ),
           ],
         ),
@@ -1259,16 +1260,16 @@ class _MapControlButton extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppColors.ink900.withValues(alpha: 0.1),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Icon(icon, size: 20, color: const Color(0xFF131B2E)),
+        child: Icon(icon, size: 20, color: AppColors.ink900),
       ),
     );
   }
@@ -1359,19 +1360,19 @@ class _OrderProgressCard extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   color: isCancelled
-                      ? const Color(0xFFFEE2E2)
+                      ? AppColors.red100
                       : isTerminal
-                          ? const Color(0xFFDCFCE7)
-                          : const Color(0xFFFFDAD6),
-                  borderRadius: BorderRadius.circular(999),
+                          ? AppColors.green50
+                          : AppColors.red100,
+                  borderRadius: BorderRadius.circular(AppRadius.xs),
                 ),
                 child: Icon(
                   headerIcon,
                   color: isCancelled
-                      ? const Color(0xFFDC2626)
+                      ? AppColors.cta
                       : isTerminal
-                          ? const Color(0xFF16A34A)
-                          : const Color(0xFFDC2626),
+                          ? AppColors.green600
+                          : AppColors.cta,
                   size: 18,
                 ),
               ),
@@ -1385,14 +1386,14 @@ class _OrderProgressCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF131B2E),
+                        color: AppColors.ink900,
                       ),
                     ),
                     Text(
                       headerSubtitle,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF5C403C),
+                        color: AppColors.ink600,
                       ),
                     ),
                   ],
@@ -1403,15 +1404,15 @@ class _OrderProgressCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDCE1FF),
-                    borderRadius: BorderRadius.circular(999),
+                    color: AppColors.blue100,
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                   ),
                   child: const Text(
                     'Live GPS',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF001551),
+                      color: AppColors.blue900,
                       letterSpacing: 0.03 * 11,
                     ),
                   ),
@@ -1462,8 +1463,8 @@ class _HorizontalStepper extends StatelessWidget {
                 child: Container(
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE2E7FF),
-                    borderRadius: BorderRadius.circular(999),
+                    color: AppColors.ink200,
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
                   ),
                 ),
               ),
@@ -1479,8 +1480,8 @@ class _HorizontalStepper extends StatelessWidget {
                         width:
                             constraints.maxWidth * progressFraction,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1D4ED8),
-                          borderRadius: BorderRadius.circular(999),
+                          color: AppColors.blue600,
+                          borderRadius: BorderRadius.circular(AppRadius.xs),
                         ),
                       ),
                     ],
@@ -1525,15 +1526,15 @@ class _HorizontalStepper extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: isActive
                       ? FontWeight.w800
                       : (isCompleted ? FontWeight.w600 : FontWeight.w500),
                   color: isActive
-                      ? const Color(0xFFDC2626)
+                      ? AppColors.cta
                       : (isCompleted
-                          ? const Color(0xFF131B2E)
-                          : const Color(0xFF5C403C)),
+                          ? AppColors.ink900
+                          : AppColors.ink600),
                 ),
               ),
             );
@@ -1552,7 +1553,7 @@ class _CompletedStepDot extends StatelessWidget {
       height: 24,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Color(0xFF1D4ED8),
+        color: AppColors.blue600,
       ),
       child: const Icon(Icons.check_rounded, color: Colors.white, size: 14),
     );
@@ -1571,10 +1572,10 @@ class _ActiveStepDot extends StatelessWidget {
       height: 28,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Color(0xFFDC2626),
+        color: AppColors.cta,
         boxShadow: [
           BoxShadow(
-            color: Color(0x44DC2626),
+            color: Color(0x44C92F24),
             blurRadius: 6,
             offset: Offset(0, 2),
           ),
@@ -1597,9 +1598,9 @@ class _PendingStepDot extends StatelessWidget {
       height: 24,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Color(0xFFDAE2FD),
+        color: AppColors.ink200,
       ),
-      child: Icon(icon, color: const Color(0xFF5C403C), size: 13),
+      child: Icon(icon, color: AppColors.ink600, size: 13),
     );
   }
 }
@@ -1634,7 +1635,7 @@ class _RiderCard extends StatelessWidget {
                 width: 24,
                 height: 24,
                 child: Icon(Icons.soup_kitchen_rounded,
-                    color: Color(0xFFDC2626), size: 20),
+                    color: AppColors.cta, size: 20),
               ),
               SizedBox(width: 14),
               Expanded(
@@ -1646,13 +1647,13 @@ class _RiderCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF131B2E),
+                        color: AppColors.ink900,
                       ),
                     ),
                     SizedBox(height: 2),
                     Text(
                       'A rider will be assigned once your meal is ready for pickup.',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF5C403C)),
+                      style: TextStyle(fontSize: 12, color: AppColors.ink600),
                     ),
                   ],
                 ),
@@ -1680,13 +1681,13 @@ class _RiderCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF131B2E),
+                      color: AppColors.ink900,
                     ),
                   ),
                   SizedBox(height: 2),
                   Text(
                     'We will attach the nearest available rider to your order.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF5C403C)),
+                    style: TextStyle(fontSize: 12, color: AppColors.ink600),
                   ),
                 ],
               ),
@@ -1711,15 +1712,15 @@ class _RiderCard extends StatelessWidget {
                     height: 56,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFFEAEDFF),
+                      color: AppColors.ink100,
                       border: Border.all(
-                        color: const Color(0xFFDC2626),
+                        color: AppColors.cta,
                         width: 2,
                       ),
                     ),
                     child: const Icon(
                       Icons.person_rounded,
-                      color: Color(0xFFDC2626),
+                      color: AppColors.cta,
                       size: 32,
                     ),
                   ),
@@ -1731,7 +1732,7 @@ class _RiderCard extends StatelessWidget {
                       height: 20,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFFDC2626),
+                        color: AppColors.cta,
                       ),
                       child: const Icon(Icons.verified_rounded,
                           color: Colors.white, size: 12),
@@ -1754,7 +1755,7 @@ class _RiderCard extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF131B2E),
+                              color: AppColors.ink900,
                             ),
                           ),
                         ),
@@ -1763,20 +1764,20 @@ class _RiderCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFDCFCE7),
-                            borderRadius: BorderRadius.circular(4),
+                            color: AppColors.green50,
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
                           ),
                           child: const Row(
                             children: [
                               Icon(Icons.verified_rounded,
-                                  color: Color(0xFF166534), size: 12),
+                                  color: AppColors.green800, size: 12),
                               SizedBox(width: 2),
                               Text(
                                 'Assigned',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF14532D),
+                                  color: AppColors.green900,
                                 ),
                               ),
                             ],
@@ -1792,7 +1793,7 @@ class _RiderCard extends StatelessWidget {
                       view.riderPhone ?? 'Delivery rider',
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF5C403C),
+                        color: AppColors.ink600,
                       ),
                     ),
                   ],
@@ -1809,9 +1810,9 @@ class _RiderCard extends StatelessWidget {
                 child: _ActionButton(
                   icon: Icons.call_rounded,
                   label: 'Call Rider',
-                  iconColor: const Color(0xFF1D4ED8),
-                  backgroundColor: const Color(0xFFDCE1FF),
-                  textColor: const Color(0xFF001551),
+                  iconColor: AppColors.blue600,
+                  backgroundColor: AppColors.blue100,
+                  textColor: AppColors.blue900,
                   onTap: () {},
                 ),
               ),
@@ -1820,9 +1821,9 @@ class _RiderCard extends StatelessWidget {
                 child: _ActionButton(
                   icon: Icons.chat_bubble_rounded,
                   label: 'Chat Rider',
-                  iconColor: const Color(0xFFDC2626),
-                  backgroundColor: const Color(0xFFE2E7FF),
-                  textColor: const Color(0xFF131B2E),
+                  iconColor: AppColors.cta,
+                  backgroundColor: AppColors.ink200,
+                  textColor: AppColors.ink900,
                   onTap: onChatTap,
                 ),
               ),
@@ -1859,7 +1860,7 @@ class _ActionButton extends StatelessWidget {
         height: 44,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1900,8 +1901,8 @@ class _OrderItemsCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFFF2F3FF),
-            borderRadius: BorderRadius.circular(14),
+            color: AppColors.ink50,
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1914,7 +1915,7 @@ class _OrderItemsCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF131B2E),
+                      color: AppColors.ink900,
                     ),
                   ),
                   GestureDetector(
@@ -1926,7 +1927,7 @@ class _OrderItemsCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1D4ED8),
+                          color: AppColors.blue600,
                         ),
                       ),
                     ),
@@ -1939,7 +1940,7 @@ class _OrderItemsCard extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 6),
                   child: Text(
                     'No items on this order.',
-                    style: TextStyle(fontSize: 13, color: Color(0xFF5C403C)),
+                    style: TextStyle(fontSize: 13, color: AppColors.ink600),
                   ),
                 )
               else
@@ -1952,16 +1953,16 @@ class _OrderItemsCard extends StatelessWidget {
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEAEDFF),
-                            borderRadius: BorderRadius.circular(4),
+                            color: AppColors.ink100,
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
                           ),
                           child: Center(
                             child: Text(
                               '${item.quantity}x',
                               style: const TextStyle(
-                                fontSize: 10,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF131B2E),
+                                color: AppColors.ink900,
                               ),
                             ),
                           ),
@@ -1972,7 +1973,7 @@ class _OrderItemsCard extends StatelessWidget {
                             item.name,
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF131B2E),
+                              color: AppColors.ink900,
                             ),
                           ),
                         ),
@@ -1981,7 +1982,7 @@ class _OrderItemsCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF131B2E),
+                            color: AppColors.ink900,
                             letterSpacing: -0.01 * 16,
                           ),
                         ),
@@ -2001,11 +2002,11 @@ class _OrderItemsCard extends StatelessWidget {
             width: double.infinity,
             height: 50,
             decoration: BoxDecoration(
-              color: const Color(0xFFDC2626),
-              borderRadius: BorderRadius.circular(14),
+              color: AppColors.cta,
+              borderRadius: BorderRadius.circular(AppRadius.md),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+                  color: AppColors.cta.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -2050,7 +2051,7 @@ void _showReceipt(BuildContext context, TrackingView view) {
       maxChildSize: 0.95,
       expand: false,
       builder: (context, scrollController) => ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
         child: _ReceiptSheet(view: view, scrollController: scrollController),
       ),
     ),
@@ -2083,10 +2084,10 @@ class _ReceiptSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const receiptBg = Color(0xFFFAFAFA);
-    const dashColor = Color(0xFFD1D5DB);
-    const labelColor = Color(0xFF6B7280);
-    const valueColor = Color(0xFF111827);
+    const receiptBg = AppColors.ink50;
+    const dashColor = AppColors.ink300;
+    const labelColor = AppColors.ink500;
+    const valueColor = AppColors.ink900;
 
     return Scaffold(
       backgroundColor: receiptBg,
@@ -2101,8 +2102,8 @@ class _ReceiptSheet extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFD1D5DB),
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.ink300,
+                borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
             ),
           ),
@@ -2115,7 +2116,7 @@ class _ReceiptSheet extends StatelessWidget {
                 height: 52,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                 ),
                 child: const Icon(Icons.receipt_long_rounded,
                     color: Colors.white, size: 28),
@@ -2126,7 +2127,7 @@ class _ReceiptSheet extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -2167,14 +2168,14 @@ class _ReceiptSheet extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF9CA3AF),
+                    color: AppColors.ink400,
                     letterSpacing: 0.8,
                   )),
               Text('AMOUNT',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF9CA3AF),
+                    color: AppColors.ink400,
                     letterSpacing: 0.8,
                   )),
             ],
@@ -2287,7 +2288,7 @@ class _ReceiptSheet extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                 ),
               ),
             ],
@@ -2303,7 +2304,7 @@ class _ReceiptSheet extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFDC2626),
+              color: AppColors.cta,
             ),
           ),
         ],
@@ -2445,7 +2446,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Thank you for your feedback! 🎉'),
-          backgroundColor: Color(0xFF1D4ED8),
+          backgroundColor: AppColors.blue600,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -2459,7 +2460,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('This order has already been rated.'),
-            backgroundColor: Color(0xFF1D4ED8),
+            backgroundColor: AppColors.blue600,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2467,7 +2468,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error.message),
-            backgroundColor: const Color(0xFFDC2626),
+            backgroundColor: AppColors.cta,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2511,10 +2512,10 @@ class _RatingDrawerState extends State<_RatingDrawer> {
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
         boxShadow: [
           BoxShadow(
-            color: Color(0x33000000),
+            color: Color(0x3315171A),
             blurRadius: 20,
             offset: Offset(0, -4),
           ),
@@ -2539,7 +2540,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                   height: 5,
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDAE2FD),
+                    color: AppColors.ink200,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -2555,10 +2556,10 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                     height: 64,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFFFFDAD6),
+                      color: AppColors.red100,
                     ),
                     child: const Icon(Icons.favorite_rounded,
-                        color: Color(0xFFB70011), size: 32),
+                        color: AppColors.red700, size: 32),
                   ),
                   const SizedBox(height: 10),
                   const Text(
@@ -2567,7 +2568,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF131B2E),
+                      color: AppColors.ink900,
                       letterSpacing: -0.015 * 22,
                     ),
                   ),
@@ -2577,7 +2578,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF5C403C),
+                      color: AppColors.ink600,
                     ),
                   ),
                 ],
@@ -2589,8 +2590,8 @@ class _RatingDrawerState extends State<_RatingDrawer> {
             _RatingSection(
               title: 'Food Quality & Freshness',
               ratingLabel: _foodLabels[_foodRating - 1],
-              labelColor: const Color(0xFFDC2626),
-              starColor: const Color(0xFF7F4F00),
+              labelColor: AppColors.cta,
+              starColor: AppColors.tan700,
               currentRating: _foodRating,
               onRatingChanged: (r) => setState(() => _foodRating = r),
             ),
@@ -2601,8 +2602,8 @@ class _RatingDrawerState extends State<_RatingDrawer> {
               title:
                   "Rider ${widget.view.riderName?.split(' ').first ?? 'delivery'} Speed",
               ratingLabel: _speedLabels[_speedRating - 1],
-              labelColor: const Color(0xFF1D4ED8),
-              starColor: const Color(0xFF1D4ED8),
+              labelColor: AppColors.blue600,
+              starColor: AppColors.blue600,
               currentRating: _speedRating,
               onRatingChanged: (r) => setState(() => _speedRating = r),
             ),
@@ -2617,7 +2618,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF5C403C),
+                    color: AppColors.ink600,
                     letterSpacing: 0.03 * 11,
                   ),
                 ),
@@ -2642,9 +2643,9 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                             horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
                           color: selected
-                              ? const Color(0xFFDC2626)
-                              : const Color(0xFFE2E7FF),
-                          borderRadius: BorderRadius.circular(999),
+                              ? AppColors.cta
+                              : AppColors.ink200,
+                          borderRadius: BorderRadius.circular(AppRadius.xs),
                         ),
                         child: Text(
                           tag,
@@ -2653,7 +2654,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                             fontWeight: FontWeight.w700,
                             color: selected
                                 ? Colors.white
-                                : const Color(0xFF131B2E),
+                                : AppColors.ink900,
                           ),
                         ),
                       ),
@@ -2673,7 +2674,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF5C403C),
+                    color: AppColors.ink600,
                     letterSpacing: 0.03 * 11,
                   ),
                 ),
@@ -2685,18 +2686,18 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                   enabled: !_alreadyRated && !_isSubmitting,
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF131B2E),
+                    color: AppColors.ink900,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Tell us more about your experience (optional)...',
                     hintStyle: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF94A3B8),
+                      color: AppColors.ink400,
                     ),
                     filled: true,
-                    fillColor: const Color(0xFFF2F3FF),
+                    fillColor: AppColors.ink50,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                       borderSide: BorderSide.none,
                     ),
                     contentPadding: const EdgeInsets.all(14),
@@ -2711,8 +2712,8 @@ class _RatingDrawerState extends State<_RatingDrawer> {
               Container(
                 height: 50,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1D4ED8),
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.blue600,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -2737,14 +2738,14 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                   height: 50,
                   decoration: BoxDecoration(
                     color: _isSubmitting
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFFDC2626),
-                    borderRadius: BorderRadius.circular(14),
+                        ? AppColors.ink400
+                        : AppColors.cta,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     boxShadow: [
                       BoxShadow(
                         color: (_isSubmitting
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFFDC2626))
+                                ? AppColors.ink400
+                                : AppColors.cta)
                             .withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
@@ -2790,7 +2791,7 @@ class _RatingDrawerState extends State<_RatingDrawer> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF5C403C),
+                      color: AppColors.ink600,
                     ),
                   ),
                 ),
@@ -2825,8 +2826,8 @@ class _RatingSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F3FF),
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.ink50,
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2840,7 +2841,7 @@ class _RatingSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF131B2E),
+                    color: AppColors.ink900,
                   ),
                 ),
               ),
@@ -2865,7 +2866,7 @@ class _RatingSection extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Icon(
                     filled ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: filled ? starColor : const Color(0xFFDAE2FD),
+                    color: filled ? starColor : AppColors.ink200,
                     size: 36,
                   ),
                 ),
@@ -2894,10 +2895,10 @@ class _CardShell extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.ink900.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -2929,9 +2930,9 @@ class _TrackingPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8FF),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAF8FF),
+        backgroundColor: AppColors.canvas,
         elevation: 0,
         automaticallyImplyLeading: false,
         title: const Text('Order tracking'),
@@ -2949,7 +2950,7 @@ class _TrackingPlaceholder extends StatelessWidget {
                           ? Icons.wifi_off_rounded
                           : Icons.error_outline_rounded,
                       size: 52,
-                      color: const Color(0xFFDC2626),
+                      color: AppColors.cta,
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -2958,7 +2959,7 @@ class _TrackingPlaceholder extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF131B2E),
+                        color: AppColors.ink900,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -2968,7 +2969,7 @@ class _TrackingPlaceholder extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF5C403C),
+                        color: AppColors.ink600,
                       ),
                     ),
                     const SizedBox(height: 20),

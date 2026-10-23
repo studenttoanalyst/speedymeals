@@ -105,12 +105,12 @@ export default function AdminPromotionsPage() {
       key: 'banner',
       title: 'Campaign Banner',
       render: (p) => (
-        <div className="relative w-28 h-12 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+        <div className="relative w-28 h-12 rounded-md overflow-hidden bg-ink-100 border border-ink-200 shrink-0">
           {p.banner_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={p.banner_url} alt={p.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
+            <div className="w-full h-full flex items-center justify-center text-2xs text-ink-400">
               No Banner
             </div>
           )}
@@ -123,10 +123,10 @@ export default function AdminPromotionsPage() {
       sortable: true,
       render: (p) => (
         <div>
-          <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+          <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
             {p.code}
           </span>
-          <div className="font-semibold text-slate-900 text-xs mt-1">{p.title}</div>
+          <div className="font-semibold text-ink-900 text-xs mt-1">{p.title}</div>
         </div>
       ),
     },
@@ -134,9 +134,9 @@ export default function AdminPromotionsPage() {
       key: 'discount',
       title: 'Discount Value',
       render: (p) => (
-        <div className="text-xs font-mono font-bold text-slate-800">
+        <div className="text-xs font-mono font-bold text-ink-800">
           {p.discount_type === 'percentage' ? `${p.discount_value}% OFF` : `-${formatPKR(p.discount_value)}`}
-          <div className="text-[10px] text-slate-400 font-normal">
+          <div className="text-2xs text-ink-400 font-normal">
             Min Order: {formatPKR(p.min_order_value)}
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function AdminPromotionsPage() {
       align: 'center',
       sortable: true,
       render: (p) => (
-        <span className="font-mono font-semibold text-xs text-slate-800 px-2 py-0.5 rounded-md bg-slate-100">
+        <span className="font-mono font-semibold text-xs text-ink-800 px-2 py-0.5 rounded-md bg-ink-100">
           {p.usage_count} uses
         </span>
       ),
@@ -157,7 +157,7 @@ export default function AdminPromotionsPage() {
       key: 'valid_until',
       title: 'Expiration',
       render: (p) => (
-        <span className="text-xs text-slate-500 font-mono">
+        <span className="text-xs text-ink-500 font-mono">
           {new Date(p.valid_until).toLocaleDateString()}
         </span>
       ),
@@ -170,13 +170,13 @@ export default function AdminPromotionsPage() {
         <button
           onClick={() => handleToggle(p)}
           className={`text-xs font-semibold flex items-center gap-1.5 transition-colors ml-auto cursor-pointer ${
-            p.is_active ? 'text-emerald-700' : 'text-slate-400'
+            p.is_active ? 'text-green-700' : 'text-ink-400'
           }`}
         >
           {p.is_active ? (
-            <ToggleRight size={22} weight="fill" className="text-emerald-600" />
+            <ToggleRight size={22} weight="fill" className="text-green-600" />
           ) : (
-            <ToggleLeft size={22} weight="fill" className="text-slate-300" />
+            <ToggleLeft size={22} weight="fill" className="text-ink-300" />
           )}
           <span>{p.is_active ? 'Active' : 'Paused'}</span>
         </button>
@@ -185,7 +185,7 @@ export default function AdminPromotionsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Offers & Discounts"
         onRefresh={() => {
@@ -196,7 +196,7 @@ export default function AdminPromotionsPage() {
         actions={
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-ink-900 hover:bg-ink-800 text-white rounded-sm text-xs font-semibold shadow-1 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus size={15} weight="bold" />
             <span>Create Campaign</span>
@@ -206,20 +206,20 @@ export default function AdminPromotionsPage() {
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
         {/* Active Banner Showcase */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3">
+        <div className="bg-white border border-ink-200 rounded-md p-5 shadow-1 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Megaphone size={16} weight="bold" className="text-slate-700" />
+            <h3 className="text-sm font-bold text-ink-900 flex items-center gap-2">
+              <Megaphone size={16} weight="bold" className="text-ink-700" />
               Live Customer App Carousel Banners
             </h3>
-            <span className="text-xs text-slate-400">Dimensions: 1200×400px (3:1)</span>
+            <span className="text-xs text-ink-400">Dimensions: 1200×400px (3:1)</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {promotions.map((promo) => (
               <div
                 key={promo.id}
-                className="relative aspect-[3/1] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group shadow-xs"
+                className="relative aspect-[3/1] rounded-md overflow-hidden bg-ink-100 border border-ink-200 group shadow-1"
               >
                 {promo.banner_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -229,10 +229,10 @@ export default function AdminPromotionsPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-slate-800" />
+                  <div className="w-full h-full bg-ink-800" />
                 )}
-                <div className="absolute inset-0 bg-linear-to-t from-slate-900/70 via-slate-900/20 to-transparent p-3 flex flex-col justify-end">
-                  <div className="font-mono text-[10px] font-bold text-rose-300">
+                <div className="absolute inset-0 bg-linear-to-t from-ink-900/70 via-ink-900/20 to-transparent p-3 flex flex-col justify-end">
+                  <div className="font-mono text-2xs font-bold text-red-300">
                     CODE: {promo.code}
                   </div>
                   <div className="text-xs font-bold text-white leading-tight">
@@ -260,18 +260,18 @@ export default function AdminPromotionsPage() {
 
       {/* CREATE PROMO CAMPAIGN MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-ink-100 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Create Marketing Promotion</h3>
-                <p className="text-xs text-slate-400">
+                <h3 className="text-base font-bold text-ink-900">Create Marketing Promotion</h3>
+                <p className="text-xs text-ink-400">
                   Upload customer app carousel banner and configure coupon discount rules.
                 </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-ink-400 hover:text-ink-600 rounded-sm"
               >
                 <X size={18} weight="bold" />
               </button>
@@ -289,45 +289,45 @@ export default function AdminPromotionsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Voucher Code</label>
+                  <label className="font-semibold text-ink-700">Voucher Code</label>
                   <input
                     type="text"
                     required
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                     placeholder="e.g. SPEEDY50"
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold uppercase"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono font-bold uppercase"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Campaign Title</label>
+                  <label className="font-semibold text-ink-700">Campaign Title</label>
                   <input
                     type="text"
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="50% Weekend Feast"
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Discount Type</label>
+                  <label className="font-semibold text-ink-700">Discount Type</label>
                   <select
                     value={formData.discount_type}
                     onChange={(e) =>
                       setFormData({ ...formData, discount_type: e.target.value as 'percentage' | 'flat' })
                     }
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                   >
                     <option value="percentage">Percentage (%)</option>
                     <option value="flat">Flat PKR Off</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Value</label>
+                  <label className="font-semibold text-ink-700">Value</label>
                   <input
                     type="number"
                     required
@@ -335,11 +335,11 @@ export default function AdminPromotionsPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, discount_value: parseFloat(e.target.value) || 0 })
                     }
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono font-bold"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Min Order (PKR)</label>
+                  <label className="font-semibold text-ink-700">Min Order (PKR)</label>
                   <input
                     type="number"
                     required
@@ -347,22 +347,22 @@ export default function AdminPromotionsPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, min_order_value: parseFloat(e.target.value) || 0 })
                     }
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 font-mono"
+                    className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs"
+                  className="px-5 py-2 text-xs font-semibold bg-ink-900 hover:bg-ink-800 text-white rounded-sm shadow-1"
                 >
                   Launch Campaign
                 </button>

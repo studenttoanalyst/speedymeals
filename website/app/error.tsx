@@ -15,27 +15,27 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50 text-slate-800">
-      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center">
-        <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center mx-auto mb-4 font-bold text-xl">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-ink-50 text-ink-800">
+      <div className="w-full max-w-md bg-white border border-ink-200 rounded-md p-8 shadow-1 text-center">
+        <div className="w-12 h-12 bg-red-50 text-red-600 rounded-md flex items-center justify-center mx-auto mb-4 font-bold text-xl">
           !
         </div>
-        <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-2">
+        <h2 className="text-xl font-bold tracking-tight text-ink-900 mb-2">
           Something went wrong
         </h2>
-        <p className="text-xs text-slate-500 mb-6">
+        <p className="text-xs text-ink-500 mb-6">
           An unexpected error occurred while loading this page. Our team has been notified.
         </p>
         <div className="flex flex-col gap-2">
           <button
             onClick={() => reset()}
-            className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+            className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-sm text-xs transition-colors cursor-pointer"
           >
             Try again
           </button>
           <Link
             href="/"
-            className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold rounded-xl text-xs transition-colors"
+            className="w-full py-2.5 border border-ink-200 hover:bg-ink-50 text-ink-600 font-semibold rounded-md text-xs transition-colors"
           >
             Return to Home
           </Link>

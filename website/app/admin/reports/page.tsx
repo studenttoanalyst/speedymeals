@@ -61,8 +61,8 @@ export default function AdminReportsPage() {
       title: 'Restaurant Partner',
       sortable: true,
       render: (r) => (
-        <div className="font-bold text-slate-900 text-xs flex items-center gap-2">
-          <Storefront size={15} className="text-rose-600" />
+        <div className="font-bold text-ink-900 text-xs flex items-center gap-2">
+          <Storefront size={15} className="text-red-600" />
           <span>{r.restaurant_name}</span>
         </div>
       ),
@@ -73,7 +73,7 @@ export default function AdminReportsPage() {
       align: 'center',
       sortable: true,
       render: (r) => (
-        <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-800">
+        <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-ink-100 text-ink-800">
           {r.order_count}
         </span>
       ),
@@ -84,7 +84,7 @@ export default function AdminReportsPage() {
       align: 'right',
       sortable: true,
       render: (r) => (
-        <span className="font-mono font-bold text-xs text-slate-900">
+        <span className="font-mono font-bold text-xs text-ink-900">
           {formatPKR(r.revenue)}
         </span>
       ),
@@ -94,7 +94,7 @@ export default function AdminReportsPage() {
       title: 'Platform Fee (10%)',
       align: 'right',
       render: (r) => (
-        <span className="font-mono font-semibold text-xs text-emerald-700">
+        <span className="font-mono font-semibold text-xs text-green-700">
           {formatPKR(r.revenue * 0.1)}
         </span>
       ),
@@ -107,8 +107,8 @@ export default function AdminReportsPage() {
       title: 'Rider Name',
       sortable: true,
       render: (d) => (
-        <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
-          <Bicycle size={15} className="text-slate-500" />
+        <div className="flex items-center gap-2 font-bold text-ink-900 text-xs">
+          <Bicycle size={15} className="text-ink-500" />
           <span>{d.rider_name}</span>
         </div>
       ),
@@ -119,7 +119,7 @@ export default function AdminReportsPage() {
       align: 'right',
       sortable: true,
       render: (d) => (
-        <span className="font-mono text-xs text-slate-800">
+        <span className="font-mono text-xs text-ink-800">
           {formatPKR(d.expected_amount)}
         </span>
       ),
@@ -130,7 +130,7 @@ export default function AdminReportsPage() {
       align: 'right',
       sortable: true,
       render: (d) => (
-        <span className="font-mono text-xs text-slate-800">
+        <span className="font-mono text-xs text-ink-800">
           {formatPKR(d.amount_submitted)}
         </span>
       ),
@@ -141,7 +141,7 @@ export default function AdminReportsPage() {
       align: 'right',
       sortable: true,
       render: (d) => (
-        <span className="font-mono text-xs font-bold text-rose-600">
+        <span className="font-mono text-xs font-bold text-red-600">
           {formatPKR(d.discrepancy)}
         </span>
       ),
@@ -150,7 +150,7 @@ export default function AdminReportsPage() {
       key: 'created_at',
       title: 'Logged At',
       render: (d) => (
-        <span className="text-xs text-slate-500 font-mono">
+        <span className="text-xs text-ink-500 font-mono">
           {new Date(d.created_at).toLocaleDateString()}
         </span>
       ),
@@ -158,7 +158,7 @@ export default function AdminReportsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Platform Business Intelligence & Audit Reports"
         onRefresh={() => {
@@ -168,24 +168,24 @@ export default function AdminReportsPage() {
         isRefreshing={isRefreshing}
         actions={
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 text-xs">
+            <div className="flex items-center gap-1.5 bg-white border border-ink-200 rounded-md p-1 text-xs">
               <input
                 type="date"
                 value={periodStart}
                 onChange={(e) => setPeriodStart(e.target.value)}
-                className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-mono"
+                className="px-2 py-0.5 bg-ink-50 border border-ink-200 rounded-sm text-ink-800 font-mono"
               />
-              <span className="text-slate-400">→</span>
+              <span className="text-ink-400">→</span>
               <input
                 type="date"
                 value={periodEnd}
                 onChange={(e) => setPeriodEnd(e.target.value)}
-                className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-mono"
+                className="px-2 py-0.5 bg-ink-50 border border-ink-200 rounded-sm text-ink-800 font-mono"
               />
             </div>
             <button
               onClick={() => window.print()}
-              className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-semibold bg-white border border-ink-200 text-ink-700 hover:bg-ink-50 rounded-sm shadow-1 flex items-center gap-1.5"
             >
               <DownloadSimple size={14} weight="bold" />
               <span>Export BI</span>
@@ -196,20 +196,20 @@ export default function AdminReportsPage() {
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6 print:p-0 print:max-w-none print:space-y-4">
         {/* Document Header (Clean Print Version) */}
-        <div className="hidden print:block pb-4 border-b-2 border-slate-900">
+        <div className="hidden print:block pb-4 border-b-2 border-ink-900">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-bold font-mono tracking-widest text-rose-600 uppercase">
+              <div className="text-xs font-bold font-mono tracking-widest text-red-600 uppercase">
                 SpeedyMeals Administration Center
               </div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+              <h1 className="text-xl font-bold text-ink-900 tracking-tight mt-0.5">
                 Platform Business Intelligence & Audit Reports
               </h1>
-              <p className="text-xs text-slate-500 font-mono mt-1">
+              <p className="text-xs text-ink-500 font-mono mt-1">
                 Audit Period: {periodStart} to {periodEnd}
               </p>
             </div>
-            <div className="text-right text-[11px] font-mono text-slate-400">
+            <div className="text-right text-2xs font-mono text-ink-400">
               Export Date: {new Date().toLocaleDateString()}
             </div>
           </div>
@@ -256,8 +256,8 @@ export default function AdminReportsPage() {
 
         {/* Top Restaurant Partners */}
         <div className="space-y-3">
-          <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-            <Storefront size={16} weight="bold" className="text-rose-600" />
+          <h2 className="text-sm font-bold text-ink-900 tracking-tight flex items-center gap-1.5">
+            <Storefront size={16} weight="bold" className="text-red-600" />
             Top Performing Restaurant Partners
           </h2>
           <DataTable<TopRestaurant>
@@ -272,11 +272,11 @@ export default function AdminReportsPage() {
         {/* Rider Cash Float Discrepancy Audits */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-              <ShieldWarning size={16} weight="bold" className="text-rose-600" />
+            <h2 className="text-sm font-bold text-ink-900 tracking-tight flex items-center gap-1.5">
+              <ShieldWarning size={16} weight="bold" className="text-red-600" />
               Cash-on-Delivery (COD) Deposit Discrepancy Log
             </h2>
-            <span className="text-xs text-slate-400">Audit verification queue</span>
+            <span className="text-xs text-ink-400">Audit verification queue</span>
           </div>
 
           <DataTable<CashDiscrepancy>

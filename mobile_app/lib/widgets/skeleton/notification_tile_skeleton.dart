@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skeleton_loading.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Skeleton placeholder matching [_NotificationTile] in NotificationsScreen.
 class NotificationTileSkeleton extends StatelessWidget {
@@ -17,7 +18,7 @@ class NotificationTileSkeleton extends StatelessWidget {
             SkeletonBox(
               width: 42,
               height: 42,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             const SizedBox(width: 12),
             const Expanded(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skeleton_loading.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Shimmer wrapper customized for the Rider Portal's dark theme (#0F172A).
 class RiderSkeletonLoading extends StatelessWidget {
@@ -10,8 +11,8 @@ class RiderSkeletonLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SkeletonLoading(
-      baseColor: const Color(0xFF1E293B),
-      highlightColor: const Color(0xFF334155),
+      baseColor: AppColors.ink800,
+      highlightColor: AppColors.ink700,
       child: child,
     );
   }
@@ -34,7 +35,7 @@ class RiderDashboardSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 80,
-              borderRadius: BorderRadius.all(Radius.circular(20)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 24),
 
@@ -48,14 +49,14 @@ class RiderDashboardSkeleton extends StatelessWidget {
                 Expanded(
                   child: SkeletonBox(
                     height: 96,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
                   ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
                   child: SkeletonBox(
                     height: 96,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
                   ),
                 ),
               ],
@@ -66,14 +67,14 @@ class RiderDashboardSkeleton extends StatelessWidget {
                 Expanded(
                   child: SkeletonBox(
                     height: 96,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
                   ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
                   child: SkeletonBox(
                     height: 96,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
                   ),
                 ),
               ],
@@ -88,13 +89,13 @@ class RiderDashboardSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 130,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 12),
             const SkeletonBox(
               width: double.infinity,
               height: 130,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
           ],
         ),
@@ -120,7 +121,7 @@ class RiderWalletSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 130,
-              borderRadius: BorderRadius.all(Radius.circular(20)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 16),
 
@@ -130,14 +131,14 @@ class RiderWalletSkeleton extends StatelessWidget {
                 Expanded(
                   child: SkeletonBox(
                     height: 85,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
                   ),
                 ),
                 SizedBox(width: 12),
                 Expanded(
                   child: SkeletonBox(
                     height: 85,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
                   ),
                 ),
               ],
@@ -148,7 +149,7 @@ class RiderWalletSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 85,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 24),
 
@@ -156,13 +157,13 @@ class RiderWalletSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 50,
-              borderRadius: BorderRadius.all(Radius.circular(14)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 12),
             const SkeletonBox(
               width: double.infinity,
               height: 50,
-              borderRadius: BorderRadius.all(Radius.circular(14)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 20),
 
@@ -194,7 +195,7 @@ class RiderDocumentsSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 72,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 20),
 
@@ -208,7 +209,7 @@ class RiderDocumentsSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 48,
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 20),
 
@@ -216,19 +217,19 @@ class RiderDocumentsSkeleton extends StatelessWidget {
             const SkeletonBox(
               width: double.infinity,
               height: 100,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 12),
             const SkeletonBox(
               width: double.infinity,
               height: 100,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
             const SizedBox(height: 12),
             const SkeletonBox(
               width: double.infinity,
               height: 100,
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
             ),
           ],
         ),

@@ -52,19 +52,19 @@ export function NetworkStatusBanner() {
       className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-[92vw] sm:max-w-md w-full px-4 pointer-events-none"
     >
       <div
-        className={`pointer-events-auto flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-full border shadow-xl backdrop-blur-md transition-all duration-300 font-mono text-xs ${
+        className={`pointer-events-auto flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xs border shadow-3 backdrop-blur-md transition-all duration-300 font-mono text-xs ${
           isOffline
-            ? 'bg-[#15171A]/95 text-white border-amber-500/40'
-            : 'bg-[#15171A]/95 text-white border-emerald-500/40'
+            ? 'bg-ink-900/95 text-white border-amber-500/40'
+            : 'bg-ink-900/95 text-white border-green-500/40'
         }`}
       >
         <div className="flex items-center space-x-2 min-w-0">
           <span
             className={`w-2 h-2 rounded-full shrink-0 ${
-              isOffline ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'
+              isOffline ? 'bg-amber-400 animate-pulse' : 'bg-green-400'
             }`}
           />
-          <span className="truncate text-[11px] sm:text-xs">
+          <span className="truncate text-2xs sm:text-xs">
             {isOffline
               ? 'Weak network · Reconnecting to Speedy Meals...'
               : 'Network restored · Back online'}
@@ -75,7 +75,7 @@ export function NetworkStatusBanner() {
           <button
             type="button"
             onClick={handleManualRetry}
-            className="px-2.5 py-1 bg-white/10 hover:bg-white/20 active:bg-white/30 text-[10px] uppercase tracking-wider font-bold rounded-full transition-colors shrink-0 cursor-pointer"
+            className="px-2.5 py-1 bg-white/10 hover:bg-white/20 active:bg-white/30 text-2xs uppercase tracking-wider font-bold rounded-sm transition-colors shrink-0 cursor-pointer"
           >
             Retry
           </button>

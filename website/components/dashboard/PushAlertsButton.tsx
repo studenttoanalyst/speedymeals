@@ -79,18 +79,18 @@ export function PushAlertsButton() {
   if (state === 'unsupported' || state === 'unconfigured') return null;
 
   const base =
-    'flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-all duration-100 select-none';
+    'flex items-center gap-1.5 px-2.5 py-1 rounded-xs border text-2xs font-medium transition-all duration-100 select-none';
 
   return (
     <>
       {state === 'on' ? (
-        <span className={`${base} border-emerald-200 bg-emerald-50 text-emerald-700`} title="Order alerts are on for this browser">
+        <span className={`${base} border-green-200 bg-green-50 text-green-700`} title="Order alerts are on for this browser">
           <BellRinging size={13} weight="bold" />
           <span className="hidden md:inline">Alerts on</span>
         </span>
       ) : state === 'blocked' ? (
         <span
-          className={`${base} border-slate-200 bg-slate-50 text-slate-500`}
+          className={`${base} border-ink-200 bg-ink-50 text-ink-500`}
           title="Notifications are blocked. Allow them for this site in your browser settings, then reload."
         >
           <BellSlash size={13} weight="bold" />
@@ -101,7 +101,7 @@ export function PushAlertsButton() {
           type="button"
           onClick={handleEnable}
           disabled={busy}
-          className={`${base} border-slate-200 bg-white text-slate-700 hover:bg-slate-50 cursor-pointer active:scale-95 disabled:opacity-50`}
+          className={`${base} border-ink-200 bg-white text-ink-700 hover:bg-ink-50 cursor-pointer active:scale-95 disabled:opacity-50`}
           title="Get a sound and notification when new orders arrive"
         >
           <Bell size={13} weight="bold" />
@@ -112,10 +112,10 @@ export function PushAlertsButton() {
       {toast && (
         <div
           role="status"
-          className="fixed top-4 right-4 z-50 max-w-xs rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg print:hidden"
+          className="fixed top-4 right-4 z-50 max-w-xs rounded-md border border-ink-200 bg-white px-4 py-3 shadow-2 print:hidden"
         >
-          <p className="text-sm font-semibold text-slate-900">{toast.title}</p>
-          {toast.body && <p className="mt-0.5 text-xs text-slate-600">{toast.body}</p>}
+          <p className="text-sm font-semibold text-ink-900">{toast.title}</p>
+          {toast.body && <p className="mt-0.5 text-xs text-ink-600">{toast.body}</p>}
         </div>
       )}
     </>

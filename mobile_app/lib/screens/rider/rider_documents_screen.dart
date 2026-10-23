@@ -5,6 +5,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/models/rider_models.dart';
 import '../../data/repositories/rider_repository.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Rider document upload screen — lets the rider upload CNIC, license,
 /// and vehicle photos required for onboarding approval.
@@ -24,12 +25,12 @@ class RiderDocumentsScreen extends StatefulWidget {
 }
 
 class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
-  static const Color _bg = Color(0xFF0F172A);
-  static const Color _card = Color(0xFF1E293B);
-  static const Color _border = Color(0xFF334155);
-  static const Color _green = Color(0xFF10B981);
-  static const Color _red = Color(0xFFDC2626);
-  static const Color _blue = Color(0xFF3B82F6);
+  static const Color _bg = AppColors.ink900;
+  static const Color _card = AppColors.ink800;
+  static const Color _border = AppColors.ink700;
+  static const Color _green = AppColors.green600;
+  static const Color _red = AppColors.cta;
+  static const Color _blue = AppColors.blue500;
 
   final RiderRepository _repository = RiderRepository();
 
@@ -231,7 +232,7 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
               const SizedBox(height: 8),
               Text(
                 failure.message,
-                style: const TextStyle(color: Color(0xFF94A3B8)),
+                style: const TextStyle(color: AppColors.ink400),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -275,7 +276,7 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
               'Upload clear photos of each document. JPG/PNG only, max 5 MB.',
               style: TextStyle(
                 fontSize: 13,
-                color: const Color(0xFF94A3B8),
+                color: AppColors.ink400,
                 height: 1.4,
               ),
             ),
@@ -334,8 +335,8 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E3A8A).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.blue900.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(
                   color: _blue.withValues(alpha: 0.3),
                 ),
@@ -352,7 +353,7 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
                           : 'All three documents are required before your account can be approved for deliveries. Upload clear, readable photos.',
                       style: const TextStyle(
                         fontSize: 12.5,
-                        color: Color(0xFFCBD5E1),
+                        color: AppColors.ink300,
                         height: 1.4,
                       ),
                     ),
@@ -373,7 +374,7 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: _green.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(color: _green.withValues(alpha: 0.4)),
         ),
         child: Row(
@@ -396,13 +397,13 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
     }
 
     final isRejected = profile.isRejected;
-    final color = isRejected ? _red : const Color(0xFFF59E0B);
+    final color = isRejected ? _red : AppColors.amber500;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
@@ -422,7 +423,7 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
                   : 'Your account is pending approval. Upload all documents and an administrator will review them.',
               style: const TextStyle(
                 fontSize: 12.5,
-                color: Color(0xFFCBD5E1),
+                color: AppColors.ink300,
                 height: 1.4,
               ),
             ),
@@ -461,7 +462,7 @@ class _RiderDocumentsScreenState extends State<RiderDocumentsScreen> {
         ),
         const SizedBox(height: 8),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
           child: LinearProgressIndicator(
             value: count / 3,
             backgroundColor: _border,
@@ -510,7 +511,7 @@ class _DocumentCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
           color: isUploaded ? green.withValues(alpha: 0.5) : borderColor,
         ),
@@ -524,7 +525,7 @@ class _DocumentCard extends StatelessWidget {
               color: isUploaded
                   ? green.withValues(alpha: 0.15)
                   : blue.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Icon(
               icon,
@@ -552,7 +553,7 @@ class _DocumentCard extends StatelessWidget {
                   subtitle,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF94A3B8),
+                    color: AppColors.ink400,
                   ),
                 ),
               ],
@@ -571,7 +572,7 @@ class _DocumentCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: green.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -600,7 +601,7 @@ class _DocumentCard extends StatelessWidget {
                   vertical: 8,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
               icon: const Icon(Icons.upload_rounded, size: 16),

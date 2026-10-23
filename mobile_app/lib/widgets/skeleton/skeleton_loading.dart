@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Reusable shimmer-based skeleton loading container.
 ///
@@ -71,7 +72,7 @@ class SkeletonBox extends StatelessWidget {
         color: isDark
             ? theme.colorScheme.surfaceContainerHighest
             : theme.colorScheme.surfaceContainerLowest,
-        borderRadius: borderRadius ?? BorderRadius.circular(8),
+        borderRadius: borderRadius ?? BorderRadius.circular(AppRadius.md),
       ),
     );
   }
@@ -98,7 +99,7 @@ class SkeletonLine extends StatelessWidget {
       width: width,
       height: height,
       margin: margin,
-      borderRadius: borderRadius ?? BorderRadius.circular(6),
+      borderRadius: borderRadius ?? BorderRadius.circular(AppRadius.md),
     );
   }
 }

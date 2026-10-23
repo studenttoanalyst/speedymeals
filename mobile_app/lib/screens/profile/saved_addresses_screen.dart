@@ -7,6 +7,7 @@ import '../../data/repositories/user_repository.dart';
 import '../../features/address/address.dart';
 import '../../widgets/location_disclosure.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Manage the customer's saved delivery addresses
 /// (`GET/POST/PUT/DELETE /users/me/addresses`).
@@ -25,7 +26,7 @@ class SavedAddressesScreen extends StatefulWidget {
 }
 
 class _SavedAddressesScreenState extends State<SavedAddressesScreen> {
-  static const Color _brandRed = Color(0xFFDC2626);
+  static const Color _brandRed = AppColors.cta;
 
   final UserRepository _userRepository = UserRepository();
 
@@ -114,7 +115,7 @@ class _SavedAddressesScreenState extends State<SavedAddressesScreen> {
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
       builder: (context) => const _AddAddressSheet(),
     );
@@ -295,7 +296,7 @@ class _AddressTile extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Icon(Icons.location_on_rounded, color: theme.colorScheme.primary),
             ),
@@ -320,14 +321,14 @@ class _AddressTile extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF10B981),
-                            borderRadius: BorderRadius.circular(999),
+                            color: AppColors.green600,
+                            borderRadius: BorderRadius.circular(AppRadius.xs),
                           ),
                           child: const Text(
                             'Default',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -400,7 +401,7 @@ class _AddAddressSheet extends StatefulWidget {
 }
 
 class _AddAddressSheetState extends State<_AddAddressSheet> {
-  static const Color _brandRed = Color(0xFFDC2626);
+  static const Color _brandRed = AppColors.cta;
 
   final _formKey = GlobalKey<FormState>();
   final _labelController = TextEditingController();
@@ -622,7 +623,7 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
                   style: FilledButton.styleFrom(
                     backgroundColor: _brandRed,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                   ),
                   child: const Text(

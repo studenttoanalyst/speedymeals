@@ -109,11 +109,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
   return (
     <footer
       id="main-footer"
-      className="relative z-20 bg-[#15171A] text-white border-t border-[#2D3139]"
+      className="relative z-20 bg-ink-900 text-white border-t border-ink-800"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-12">
         {/* Responsive Grid: Mobile: SpeedyMeals & Bio above, Company & Get Started side-by-side, Contact below. Desktop: 4 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-8 pb-16 border-b border-[#2D3139]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-8 pb-16 border-b border-ink-800">
           {/* Section 1: Speedy Meals Brand & Bio (Full width on mobile/tablet, 4 columns on desktop) */}
           <div className="col-span-1 lg:col-span-4 space-y-4">
             <div className="flex items-center space-x-2.5 sm:space-x-3">
@@ -134,7 +134,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
               <span>&ldquo;Fast &amp; safe to you.&rdquo;</span>
             </div>
 
-            <p className="text-xs text-[#A0A4AB] leading-relaxed max-w-sm font-sans">
+            <p className="text-xs text-ink-400 leading-relaxed max-w-sm font-sans">
               A high-velocity, fair-split delivery and logistics platform engineered specifically
               for South Asia and the Middle East.
             </p>
@@ -144,7 +144,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
           <div className="col-span-1 lg:col-span-5 grid grid-cols-2 gap-6 sm:gap-8">
             {/* Col 2A: Company */}
             <div className="space-y-4">
-              <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
+              <div className="font-sans text-xs uppercase tracking-wider text-ink-400 font-bold">
                 COMPANY
               </div>
               <ul className="space-y-2.5 text-xs font-sans">
@@ -152,7 +152,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   <button
                     type="button"
                     onClick={() => handleScrollTo('overview')}
-                    className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
+                    className="text-ink-400 hover:text-white transition-colors cursor-pointer text-left"
                   >
                     Overview
                   </button>
@@ -161,7 +161,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   <button
                     type="button"
                     onClick={() => handleScrollTo('services')}
-                    className="text-[#A0A4AB] hover:text-white transition-colors cursor-pointer text-left"
+                    className="text-ink-400 hover:text-white transition-colors cursor-pointer text-left"
                   >
                     Services
                   </button>
@@ -169,7 +169,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <li>
                   <Link
                     href="/about"
-                    className="text-[#A0A4AB] hover:text-white transition-colors flex items-center space-x-1"
+                    className="text-ink-400 hover:text-white transition-colors flex items-center space-x-1"
                   >
                     <span>About Us</span>
                     <ArrowUpRight size={10} weight="bold" className="shrink-0" />
@@ -178,7 +178,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <li>
                   <Link
                     href="/terms"
-                    className="text-[#A0A4AB] hover:text-white transition-colors flex items-center space-x-1"
+                    className="text-ink-400 hover:text-white transition-colors flex items-center space-x-1"
                   >
                     <span>Terms &amp; Conditions</span>
                     <ArrowUpRight size={10} weight="bold" className="shrink-0" />
@@ -187,7 +187,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 <li>
                   <Link
                     href="/privacy"
-                    className="text-[#A0A4AB] hover:text-white transition-colors flex items-center space-x-1"
+                    className="text-ink-400 hover:text-white transition-colors flex items-center space-x-1"
                   >
                     <span>Privacy Policy</span>
                     <ArrowUpRight size={10} weight="bold" className="shrink-0" />
@@ -198,7 +198,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
 
             {/* Col 2B: Get Started */}
             <div className="space-y-4">
-              <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
+              <div className="font-sans text-xs uppercase tracking-wider text-ink-400 font-bold">
                 GET STARTED
               </div>
               <ul className="space-y-2.5 text-xs font-sans">
@@ -206,7 +206,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   <button
                     type="button"
                     onClick={() => handleScrollTo('partner', 'rider')}
-                    className="text-[#A0A4AB] hover:text-red transition-colors cursor-pointer flex items-center space-x-1.5"
+                    className="text-ink-400 hover:text-red transition-colors cursor-pointer flex items-center space-x-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-red inline-block" />
                     <span>Deliver with SpeedyMeals</span>
@@ -216,26 +216,26 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   <button
                     type="button"
                     onClick={() => handleScrollTo('partner', 'restaurant')}
-                    className="text-[#A0A4AB] hover:text-blue transition-colors cursor-pointer flex items-center space-x-1.5"
+                    className="text-ink-400 hover:text-blue transition-colors cursor-pointer flex items-center space-x-1.5"
                   >
                     <span className="w-1.5 h-1.5 bg-blue inline-block" />
                     <span>List your restaurant</span>
                   </button>
                 </li>
                 <li>
-                  <div className="text-[#5B5F66] flex items-center space-x-1.5 cursor-not-allowed">
-                    <span className="w-1.5 h-1.5 bg-[#5B5F66] inline-block" />
+                  <div className="text-ink-600 flex items-center space-x-1.5 cursor-not-allowed">
+                    <span className="w-1.5 h-1.5 bg-ink-600 inline-block" />
                     <span>Customer App</span>
-                    <span className="text-[10px] text-amber-500 font-bold ml-1 font-sans tracking-wide">
+                    <span className="text-2xs text-amber-500 font-bold ml-1 font-sans tracking-wide">
                       ⋯ COMING SOON
                     </span>
                   </div>
                 </li>
-                <li className="pt-2 mt-2 border-t border-[#2D3139]">
+                <li className="pt-2 mt-2 border-t border-ink-800">
                   <Link
                     id="footer-link-restaurant"
                     href="/restaurant"
-                    className="text-[#A0A4AB] hover:text-blue transition-colors flex items-center space-x-1.5"
+                    className="text-ink-400 hover:text-blue transition-colors flex items-center space-x-1.5"
                   >
                     <span>Merchant Portal</span>
                     <ArrowUpRight size={12} weight="bold" className="shrink-0" />
@@ -245,7 +245,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                   <Link
                     id="footer-link-admin"
                     href="/admin"
-                    className="text-[#A0A4AB] hover:text-red transition-colors flex items-center space-x-1.5"
+                    className="text-ink-400 hover:text-red transition-colors flex items-center space-x-1.5"
                   >
                     <span>Admin Console</span>
                     <ArrowUpRight size={12} weight="bold" className="shrink-0" />
@@ -257,19 +257,19 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
 
           {/* Section 3: Contact (Below on mobile, 3 cols on desktop) */}
           <div className="col-span-1 lg:col-span-3 space-y-4">
-            <div className="font-sans text-xs uppercase tracking-wider text-[#8C9099] font-bold">
+            <div className="font-sans text-xs uppercase tracking-wider text-ink-400 font-bold">
               CONTACT
             </div>
             <div className="space-y-2 text-xs font-sans">
-              <div className="text-[#A0A4AB]">Serving South Asia &amp; the Middle East</div>
+              <div className="text-ink-400">Serving South Asia &amp; the Middle East</div>
               <div>
                 <a
                   href="https://wa.me/923161177202"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-[#25D366] transition-colors inline-flex items-center space-x-1.5"
+                  className="text-white hover:text-social-whatsapp transition-colors inline-flex items-center space-x-1.5"
                 >
-                  <WhatsappIcon size={13} className="text-[#25D366] shrink-0" />
+                  <WhatsappIcon size={13} className="text-social-whatsapp shrink-0" />
                   <span>Help line: +92 316 11 77 202</span>
                 </a>
               </div>
@@ -299,7 +299,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
                 title="Chat on WhatsApp"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] transition-colors duration-150"
+                className="w-9 h-9 border border-ink-800 bg-ink-850 text-white flex items-center justify-center hover:bg-social-whatsapp hover:border-social-whatsapp transition-colors duration-150"
               >
                 <WhatsappIcon size={16} />
               </a>
@@ -310,7 +310,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 rel="noopener noreferrer"
                 aria-label="Facebook"
                 title="Follow us on Facebook"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#1877F2] hover:border-[#1877F2] transition-colors duration-150"
+                className="w-9 h-9 border border-ink-800 bg-ink-850 text-white flex items-center justify-center hover:bg-social-facebook hover:border-social-facebook transition-colors duration-150"
               >
                 <FacebookIcon size={16} />
               </a>
@@ -321,7 +321,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 rel="noopener noreferrer"
                 aria-label="Instagram"
                 title="Follow us on Instagram"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#E4405F] hover:border-[#E4405F] transition-colors duration-150"
+                className="w-9 h-9 border border-ink-800 bg-ink-850 text-white flex items-center justify-center hover:bg-social-instagram hover:border-social-instagram transition-colors duration-150"
               >
                 <InstagramLogo size={16} weight="bold" />
               </a>
@@ -332,7 +332,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
                 title="Connect on LinkedIn"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#0A66C2] hover:border-[#0A66C2] transition-colors duration-150"
+                className="w-9 h-9 border border-ink-800 bg-ink-850 text-white flex items-center justify-center hover:bg-social-linkedin hover:border-social-linkedin transition-colors duration-150"
               >
                 <LinkedinLogo size={16} weight="bold" />
               </a>
@@ -341,7 +341,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                 href="https://www.tiktok.com/@speedy.meals4"
                 aria-label="TikTok"
                 title="Follow us on TikTok"
-                className="w-9 h-9 border border-[#2D3139] bg-[#1E2126] text-white flex items-center justify-center hover:bg-[#000000] hover:border-[#EE1D52] hover:text-[#00F2FE] transition-colors duration-150"
+                className="w-9 h-9 border border-ink-800 bg-ink-850 text-white flex items-center justify-center hover:bg-black hover:border-social-tiktok hover:text-social-tiktok-cyan transition-colors duration-150"
               >
                 <TiktokIcon size={16} />
               </a>
@@ -350,13 +350,13 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         </div>
 
         {/* Regulatory Registration Section: Sleek black hollowed boxes */}
-        <div className="py-6 border-b border-[#2D3139] flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#A0A4AB]">
+        <div className="py-6 border-b border-ink-800 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-ink-400">
           <div className="flex items-center space-x-2">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75" />
-              <span className="relative inline-flex h-2 w-2 bg-[#10B981]" />
+              <span className="animate-ping absolute inline-flex h-full w-full bg-green-500 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 bg-green-500" />
             </span>
-            <span className="text-white font-bold uppercase tracking-widest text-[11px] sm:text-xs">
+            <span className="text-white font-bold uppercase tracking-widest text-2xs sm:text-xs">
               REGISTERED WITH:
             </span>
           </div>
@@ -383,7 +383,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                       setActiveTooltipId(tile.id);
                     }}
                     onBlur={() => setActiveTooltipId(null)}
-                    className="flex items-center justify-center bg-[#1A1D23] px-3.5 sm:px-4 py-2 border border-[#2D3139] hover:border-[#4B515D] focus:border-brand focus:ring-1 focus:ring-brand focus:outline-hidden transition-colors h-12 sm:h-14 min-w-[76px] shadow-xs cursor-pointer rounded-xs"
+                    className="flex items-center justify-center bg-ink-850 px-3.5 sm:px-4 py-2 border border-ink-800 hover:border-ink-600 focus:border-brand focus:ring-1 focus:ring-brand focus:outline-hidden transition-colors h-12 sm:h-14 min-w-[76px] shadow-1 cursor-pointer rounded-xs"
                   >
                     <Image
                       src={tile.src}
@@ -408,11 +408,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
                         : 'opacity-0 translate-y-1 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:visible'
                     }`}
                   >
-                    <div className="relative bg-[#0F1115] text-[#F3F4F6] text-[11px] font-medium px-3 py-1.5 rounded-lg border border-[#3A3F4A] shadow-xl whitespace-normal w-max max-w-[220px] sm:max-w-[280px] text-center leading-snug">
+                    <div className="relative bg-ink-950 text-ink-100 text-2xs font-medium px-3 py-1.5 rounded-md border border-ink-700 shadow-3 whitespace-normal w-max max-w-[220px] sm:max-w-[280px] text-center leading-snug">
                       {tile.name}
                       {/* Arrow */}
                       <span
-                        className={`absolute top-full -mt-[1px] border-4 border-transparent border-t-[#3A3F4A] ${
+                        className={`absolute top-full -mt-[1px] border-4 border-transparent border-t-ink-700 ${
                           isRightAligned
                             ? 'right-6 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
                             : 'left-1/2 -translate-x-1/2'
@@ -427,14 +427,14 @@ export const Footer: React.FC<FooterProps> = ({ onSelectPersona }) => {
         </div>
 
         {/* Bottom bar (hairline top-border) */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-[#CBD0D8]">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-xs text-ink-300">
           <div>&copy; 2026 DiscoverTheTech. All rights reserved.</div>
           <div className="flex items-center space-x-4">
-            <Link href="/privacy" className="hover:underline text-[#CBD0D8] hover:text-white transition-colors">
+            <Link href="/privacy" className="hover:underline text-ink-300 hover:text-white transition-colors">
               Privacy Policy
             </Link>
             <span>&middot;</span>
-            <Link href="/terms" className="hover:underline text-[#CBD0D8] hover:text-white transition-colors">
+            <Link href="/terms" className="hover:underline text-ink-300 hover:text-white transition-colors">
               Terms of Use
             </Link>
           </div>

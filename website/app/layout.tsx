@@ -48,7 +48,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.webp" type="image/webp" />
       </head>
-      <body className="font-sans selection:bg-[#E23A2E] selection:text-white">
+      <body className="font-sans selection:bg-red-500 selection:text-white">
         {children}
         <NetworkStatusBanner />
       </body>

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../services/auth_service.dart';
 import 'customer_signup_screen.dart';
 import 'otp_verification_screen.dart';
 import '../../widgets/legal_links.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../core/input/input_formatters.dart';
 
 /// Customer Login Screen matching Stitch design (`speedy_meals_customer_login`).
 class CustomerLoginScreen extends StatefulWidget {
@@ -61,10 +62,10 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
     } finally {
@@ -81,7 +82,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.ink50,
       body: SafeArea(
         child: Column(
           children: [
@@ -94,17 +95,17 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                   // Back Button
                   InkWell(
                     onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     child: Container(
                       width: 40,
                       height: 40,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFF1F5F9),
+                        color: AppColors.ink100,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.arrow_back_rounded,
-                        color: Color(0xFF334155),
+                        color: AppColors.ink700,
                         size: 20,
                       ),
                     ),
@@ -115,9 +116,9 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFFEE2E2)),
+                      color: AppColors.red50,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(color: AppColors.red100),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -125,7 +126,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                         Icon(
                           Icons.soup_kitchen_rounded,
                           size: 14,
-                          color: Color(0xFFDC2626),
+                          color: AppColors.cta,
                         ),
                         SizedBox(width: 6),
                         Text(
@@ -133,7 +134,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFFDC2626),
+                            color: AppColors.cta,
                           ),
                         ),
                       ],
@@ -167,7 +168,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                         style: theme.textTheme.displayLarge?.copyWith(
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
+                          color: AppColors.ink900,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -177,7 +178,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF64748B),
+                          color: AppColors.ink500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -197,7 +198,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF334155),
+                              color: AppColors.ink700,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -207,11 +208,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                             autofillHints: const [
                               AutofillHints.telephoneNumber,
                             ],
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[0-9\s\-()+ ]'),
-                              ),
-                            ],
+                            inputFormatters: const [PkMobileInputFormatter()],
                             decoration:
                                 _inputDecoration(
                               hint: '300 1234567',
@@ -221,7 +218,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                               prefixStyle: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF334155),
+                                color: AppColors.ink700,
                               ),
                             ),
                             validator: (value) {
@@ -244,7 +241,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                             style: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF94A3B8),
+                              color: AppColors.ink400,
                             ),
                           ),
                         ],
@@ -269,9 +266,9 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                                   height: 24,
                                   child: Checkbox(
                                     value: _rememberMe,
-                                    activeColor: const Color(0xFFDC2626),
+                                    activeColor: AppColors.cta,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: BorderRadius.circular(AppRadius.xs),
                                     ),
                                     onChanged: (val) {
                                       setState(() {
@@ -286,7 +283,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF475569),
+                                    color: AppColors.ink600,
                                   ),
                                 ),
                               ],
@@ -297,7 +294,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                               Icon(
                                 Icons.shield_outlined,
                                 size: 14,
-                                color: Color(0xFF10B981),
+                                color: AppColors.green600,
                               ),
                               SizedBox(width: 4),
                               Text(
@@ -305,7 +302,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF10B981),
+                                  color: AppColors.green600,
                                 ),
                               ),
                             ],
@@ -322,13 +319,13 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleContinue,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFDC2626),
-                            disabledBackgroundColor: const Color(0xFFCBD5E1),
+                            backgroundColor: AppColors.cta,
+                            disabledBackgroundColor: AppColors.ink300,
                             elevation: _isLoading ? 0 : 4,
                             shadowColor:
-                                const Color(0xFFDC2626).withValues(alpha: 0.35),
+                                AppColors.cta.withValues(alpha: 0.35),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
                             ),
                           ),
                           child: _isLoading
@@ -378,7 +375,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
               decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
-                  top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
+                  top: BorderSide(color: AppColors.ink100, width: 1),
                 ),
               ),
               child: Row(
@@ -389,7 +386,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      color: AppColors.ink500,
                     ),
                   ),
                   GestureDetector(
@@ -408,14 +405,14 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFFDC2626),
+                            color: AppColors.cta,
                           ),
                         ),
                         SizedBox(width: 2),
                         Icon(
                           Icons.chevron_right_rounded,
                           size: 16,
-                          color: Color(0xFFDC2626),
+                          color: AppColors.cta,
                         ),
                       ],
                     ),
@@ -441,11 +438,11 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.ink100, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFDC2626).withValues(alpha: 0.1),
+                    color: AppColors.cta.withValues(alpha: 0.1),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -464,7 +461,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -482,7 +479,7 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w800,
-            color: Color(0xFFDC2626),
+            color: AppColors.cta,
             letterSpacing: 2.0,
           ),
         ),
@@ -500,28 +497,28 @@ class _CustomerLoginScreenState extends State<CustomerLoginScreen> {
       hintStyle: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w400,
-        color: Color(0xFF94A3B8),
+        color: AppColors.ink400,
       ),
-      prefixIcon: Icon(prefixIcon, color: const Color(0xFF94A3B8), size: 20),
+      prefixIcon: Icon(prefixIcon, color: AppColors.ink400, size: 20),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626), width: 2),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta),
       ),
     );
   }

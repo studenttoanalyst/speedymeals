@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { tokens } from '@/lib/design-tokens';
 
 export interface Permission {
   id: string;
@@ -137,7 +138,7 @@ const FALLBACK_ROLES: AdminRole[] = [
     name: 'Superadmin',
     slug: 'superadmin',
     icon: 'Crown',
-    color: '#0F172A',
+    color: tokens.ink900,
     is_system: true,
     created_at: new Date().toISOString(),
     permissions: FALLBACK_PERMISSIONS,
@@ -148,7 +149,7 @@ const FALLBACK_ROLES: AdminRole[] = [
     name: 'Support',
     slug: 'support',
     icon: 'Headset',
-    color: '#2563EB',
+    color: tokens.blue600,
     is_system: true,
     created_at: new Date().toISOString(),
     permissions: FALLBACK_PERMISSIONS.filter((p) => [
@@ -178,7 +179,7 @@ const FALLBACK_ACCOUNTS: AdminAccount[] = [
     role_id: 'role-superadmin',
     role_name: 'Superadmin',
     role_icon: 'Crown',
-    role_color: '#0F172A',
+    role_color: tokens.ink900,
     is_active: true,
     must_change_password: false,
     created_at: new Date().toISOString(),

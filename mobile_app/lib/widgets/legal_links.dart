@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/theme/app_tokens.dart';
 
 /// Reusable utility for launching verified legal and policy URLs.
 class LegalUtils {
@@ -38,9 +39,9 @@ class LegalUtils {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: const Color(0xFFDC2626),
+        backgroundColor: AppColors.cta,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
       ),
     );
   }
@@ -61,8 +62,8 @@ class LegalConsentText extends StatefulWidget {
   const LegalConsentText({
     super.key,
     this.prefix = 'By continuing you agree to our ',
-    this.linkColor = const Color(0xFFDC2626),
-    this.textColor = const Color(0xFF64748B),
+    this.linkColor = AppColors.cta,
+    this.textColor = AppColors.ink500,
     this.fontSize = 11.5,
     this.textAlign = TextAlign.center,
   });

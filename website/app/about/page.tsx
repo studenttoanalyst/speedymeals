@@ -25,7 +25,7 @@ import { Footer } from '@/components/home/Footer';
 
 export default function AboutPage() {
   return (
-    <div className="relative min-h-screen bg-[#FFFFFF] text-[#15171A] overflow-x-hidden selection:bg-[#E23A2E] selection:text-white">
+    <div className="relative min-h-screen bg-white text-ink-900 overflow-x-hidden selection:bg-red-500 selection:text-white">
       {/* Sticky Snap Navbar */}
       <Navbar />
 
@@ -49,7 +49,7 @@ export default function AboutPage() {
         <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24 overflow-hidden">
           <div className="max-w-4xl">
             {/* Breadcrumb & Mono Eyebrow */}
-            <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-[#5B5F66] mb-4">
+            <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-ink-600 mb-4">
               <Link href="/" className="hover:text-red transition-colors">
                 HOME
               </Link>
@@ -59,7 +59,7 @@ export default function AboutPage() {
 
             <div className="inline-flex items-center space-x-2 px-3 py-1 bg-paper border border-line mb-6">
               <span className="w-2 h-2 bg-red inline-block" />
-              <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink">
+              <span className="font-mono text-2xs font-bold uppercase tracking-widest text-ink">
                 ESTABLISHED IN 2023 · SOUTH ASIA &amp; MIDDLE EAST
               </span>
             </div>
@@ -78,24 +78,24 @@ export default function AboutPage() {
           {/* Key Facts Data Strip */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 border-y border-line py-6 font-mono">
             <div>
-              <div className="text-xs text-[#8C9099] uppercase">FOUNDING YEAR</div>
+              <div className="text-xs text-ink-500 uppercase">FOUNDING YEAR</div>
               <div className="text-2xl font-bold text-ink mt-1">2023</div>
-              <div className="text-[11px] text-[#5B5F66]">Incorporated Network</div>
+              <div className="text-2xs text-ink-600">Incorporated Network</div>
             </div>
             <div>
-              <div className="text-xs text-[#8C9099] uppercase">MERCHANT RATE</div>
+              <div className="text-xs text-ink-500 uppercase">MERCHANT RATE</div>
               <div className="text-2xl font-bold text-blue mt-1">10% Flat</div>
-              <div className="text-[11px] text-[#5B5F66]">Zero advertising taxes</div>
+              <div className="text-2xs text-ink-600">Zero advertising taxes</div>
             </div>
             <div>
-              <div className="text-xs text-[#8C9099] uppercase">COURIER COMMISSION</div>
+              <div className="text-xs text-ink-500 uppercase">COURIER COMMISSION</div>
               <div className="text-2xl font-bold text-red mt-1">10% Only</div>
-              <div className="text-[11px] text-[#5B5F66]">Riders retain 90% of delivery fare</div>
+              <div className="text-2xs text-ink-600">Riders retain 90% of delivery fare</div>
             </div>
             <div>
-              <div className="text-xs text-[#8C9099] uppercase">LOGISTICS ALLIANCE</div>
+              <div className="text-xs text-ink-500 uppercase">LOGISTICS ALLIANCE</div>
               <div className="text-2xl font-bold text-tan mt-1">Pakistan Post</div>
-              <div className="text-[11px] text-[#5B5F66]">National infrastructure</div>
+              <div className="text-2xs text-ink-600">National infrastructure</div>
             </div>
           </div>
         </section>
@@ -122,7 +122,7 @@ export default function AboutPage() {
           {/* 2-Column Vision & Mission Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Vision Card */}
-            <div className="relative p-8 sm:p-10 bg-paper border border-line shadow-xs flex flex-col justify-between group hover:border-blue transition-colors duration-200">
+            <div className="relative p-8 sm:p-10 bg-paper border border-line shadow-1 flex flex-col justify-between group hover:border-blue transition-colors duration-200">
               <div className="absolute top-0 left-0 right-0 h-1 bg-blue" />
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -143,7 +143,7 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="pt-6 border-t border-line font-mono text-xs text-[#5B5F66] space-y-2">
+              <div className="pt-6 border-t border-line font-mono text-xs text-ink-600 space-y-2">
                 <div className="flex items-center space-x-2">
                   <span className="w-1.5 h-1.5 bg-blue" />
                   <span>Unifying food, express parcels, and neighborhood commerce</span>
@@ -156,7 +156,7 @@ export default function AboutPage() {
             </div>
 
             {/* Mission Card */}
-            <div className="relative p-8 sm:p-10 bg-paper border border-line shadow-xs flex flex-col justify-between group hover:border-red transition-colors duration-200">
+            <div className="relative p-8 sm:p-10 bg-paper border border-line shadow-1 flex flex-col justify-between group hover:border-red transition-colors duration-200">
               <div className="absolute top-0 left-0 right-0 h-1 bg-red" />
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -177,7 +177,7 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="pt-6 border-t border-line font-mono text-xs text-[#5B5F66] space-y-2">
+              <div className="pt-6 border-t border-line font-mono text-xs text-ink-600 space-y-2">
                 <div className="flex items-center space-x-2">
                   <span className="w-1.5 h-1.5 bg-red" />
                   <span>Permanent 10% flat merchant rate with zero hidden ad bidding</span>
@@ -214,7 +214,7 @@ export default function AboutPage() {
             </div>
 
             <div className="lg:col-span-7 space-y-4">
-              <div className="p-6 sm:p-8 bg-paper border border-line shadow-xs">
+              <div className="p-6 sm:p-8 bg-paper border border-line shadow-1">
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-8 h-8 bg-red/10 text-red flex items-center justify-center font-bold font-mono">
                     01
@@ -228,7 +228,7 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="p-6 sm:p-8 bg-paper border border-line shadow-xs">
+              <div className="p-6 sm:p-8 bg-paper border border-line shadow-1">
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-8 h-8 bg-blue/10 text-blue flex items-center justify-center font-bold font-mono">
                     02
@@ -242,7 +242,7 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="p-6 sm:p-8 bg-paper border border-line shadow-xs">
+              <div className="p-6 sm:p-8 bg-paper border border-line shadow-1">
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-8 h-8 bg-tan/20 text-tan flex items-center justify-center font-bold font-mono">
                     03
@@ -260,17 +260,17 @@ export default function AboutPage() {
         </section>
 
         {/* Strategic Logistics Alliance: Pakistan Post */}
-        <section className="bg-[#15171A] text-white py-16 sm:py-20 mb-20">
+        <section className="bg-ink-900 text-white py-16 sm:py-20 mb-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-4 flex flex-col items-start">
-                <div className="p-4 bg-[#1E2228] border border-[#2D3139] mb-4">
+                <div className="p-4 bg-ink-850 border border-ink-800 mb-4">
                   <Image
                     src="/assets/pakistan-post.webp"
                     alt="Pakistan Post Emblem"
                     width={80}
                     height={80}
-                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xs shadow-md"
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xs shadow-2"
                   />
                 </div>
                 <div className="font-mono text-xs uppercase tracking-widest text-tan font-bold mb-1">
@@ -279,12 +279,12 @@ export default function AboutPage() {
                 <h3 className="font-heading font-extrabold text-xl sm:text-2xl uppercase tracking-tight text-white mb-2">
                   PARTNERED WITH PAKISTAN POST
                 </h3>
-                <p className="text-xs font-mono text-[#8C9099]">
+                <p className="text-xs font-mono text-ink-500">
                   Official National Postal &amp; Regional Logistics Integration
                 </p>
               </div>
 
-              <div className="lg:col-span-8 space-y-4 font-sans text-sm text-[#A0A4AB] leading-relaxed">
+              <div className="lg:col-span-8 space-y-4 font-sans text-sm text-ink-500 leading-relaxed">
                 <p>
                   Rather than duplicating costly logistical redundancies, SpeedyMeals integrates with national physical infrastructure. Through our strategic alliance with <strong>Pakistan Post</strong>, we leverage established regional distribution hubs, postal sort facilities, and municipal connectivity across all major urban centers.
                 </p>
@@ -293,15 +293,15 @@ export default function AboutPage() {
                 </p>
                 <div className="pt-2 flex flex-wrap items-center gap-6 font-mono text-xs text-white">
                   <div className="flex items-center space-x-2">
-                    <CheckCircle size={16} weight="bold" className="text-[#10B981]" />
+                    <CheckCircle size={16} weight="bold" className="text-green-600" />
                     <span>Cross-District Hub Routing</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle size={16} weight="bold" className="text-[#10B981]" />
+                    <CheckCircle size={16} weight="bold" className="text-green-600" />
                     <span>Real-Time Telemetry Relay</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle size={16} weight="bold" className="text-[#10B981]" />
+                    <CheckCircle size={16} weight="bold" className="text-green-600" />
                     <span>Nationwide Parcel Scalability</span>
                   </div>
                 </div>
@@ -326,7 +326,7 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Pakistan Zone */}
-            <div className="p-5 sm:p-8 bg-paper border-t-4 border-t-red border-x border-b border-line shadow-xs">
+            <div className="p-5 sm:p-8 bg-paper border-t-4 border-t-red border-x border-b border-line shadow-1">
               <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 mb-4">
                 <div className="flex items-center space-x-2 min-w-0">
                   <span className="text-xl shrink-0">🇵🇰</span>
@@ -334,7 +334,7 @@ export default function AboutPage() {
                     Pakistan Operational Grid
                   </span>
                 </div>
-                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 font-bold uppercase shrink-0 w-fit">
+                <span className="font-mono text-2xs px-2 py-0.5 bg-green-500/10 text-green-600 border border-green-500/30 font-bold uppercase shrink-0 w-fit">
                   ACTIVE &amp; EXPANDING
                 </span>
               </div>
@@ -362,7 +362,7 @@ export default function AboutPage() {
             </div>
 
             {/* Saudi Arabia Zone */}
-            <div className="p-5 sm:p-8 bg-paper border-t-4 border-t-tan border-x border-b border-line shadow-xs">
+            <div className="p-5 sm:p-8 bg-paper border-t-4 border-t-tan border-x border-b border-line shadow-1">
               <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 mb-4">
                 <div className="flex items-center space-x-2 min-w-0">
                   <span className="text-xl shrink-0">🇸🇦</span>
@@ -370,7 +370,7 @@ export default function AboutPage() {
                     Kingdom of Saudi Arabia (KSA)
                   </span>
                 </div>
-                <span className="font-mono text-[10px] px-2 py-0.5 bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 font-bold uppercase shrink-0 w-fit">
+                <span className="font-mono text-2xs px-2 py-0.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 font-bold uppercase shrink-0 w-fit">
                   DEPLOYMENT ONBOARDING
                 </span>
               </div>
@@ -401,7 +401,7 @@ export default function AboutPage() {
 
         {/* Legal, Governance & Rights */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-          <div className="p-8 sm:p-10 bg-[#FAF9F5] border border-line">
+          <div className="p-8 sm:p-10 bg-ink-50 border border-line">
             <div className="flex items-center space-x-3 mb-4">
               <Scales size={24} weight="bold" className="text-ink" />
               <h3 className="font-heading font-extrabold text-lg sm:text-xl uppercase tracking-tight text-ink">

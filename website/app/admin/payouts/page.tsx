@@ -98,12 +98,12 @@ export default function AdminPayoutsPage() {
       sortable: true,
       render: (p) => (
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
+          <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
             <Bicycle size={16} weight="bold" />
           </div>
           <div>
-            <div className="font-bold text-slate-900 text-xs">{p.rider_name}</div>
-            <div className="text-[11px] text-slate-400 font-mono">
+            <div className="font-bold text-ink-900 text-xs">{p.rider_name}</div>
+            <div className="text-2xs text-ink-400 font-mono">
               Cycle: {p.period_start} → {p.period_end}
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function AdminPayoutsPage() {
       align: 'right',
       sortable: true,
       render: (p) => (
-        <span className="font-mono text-xs font-semibold text-slate-900">
+        <span className="font-mono text-xs font-semibold text-ink-900">
           {formatPKR(p.total_earning)}
         </span>
       ),
@@ -138,7 +138,7 @@ export default function AdminPayoutsPage() {
       align: 'right',
       sortable: true,
       render: (p) => (
-        <span className="font-mono text-xs font-bold text-emerald-700">
+        <span className="font-mono text-xs font-bold text-green-700">
           {formatPKR(p.net_payout ?? p.total_earning)}
         </span>
       ),
@@ -157,7 +157,7 @@ export default function AdminPayoutsPage() {
           return (
             <button
               onClick={() => setMarkPaidTarget(p)}
-              className="px-2.5 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs flex items-center gap-1 ml-auto"
+              className="px-2.5 py-1 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white rounded-sm shadow-1 flex items-center gap-1 ml-auto"
             >
               <Check size={12} weight="bold" />
               <span>Mark Paid</span>
@@ -165,7 +165,7 @@ export default function AdminPayoutsPage() {
           );
         }
         return (
-          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full ring-1 ring-emerald-200">
+          <span className="text-2xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-xs ring-1 ring-green-200">
             Disbursed
           </span>
         );
@@ -174,7 +174,7 @@ export default function AdminPayoutsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Rider Payouts & Cash Reconciliation"
         onRefresh={() => {
@@ -185,7 +185,7 @@ export default function AdminPayoutsPage() {
         actions={
           <button
             onClick={() => setGenerateModalOpen(true)}
-            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-ink-900 hover:bg-ink-800 text-white rounded-sm text-xs font-semibold shadow-1 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus size={14} weight="bold" />
             <span>Generate Rider Payouts</span>
@@ -246,48 +246,48 @@ export default function AdminPayoutsPage() {
 
       {/* GENERATE MODAL */}
       {generateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
-            <h3 className="text-base font-bold text-slate-900">Run Rider Payout Batch</h3>
-            <p className="text-xs text-slate-500">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95">
+            <h3 className="text-base font-bold text-ink-900">Run Rider Payout Batch</h3>
+            <p className="text-xs text-ink-500">
               Aggregates all rider deliveries and offsets against cash-on-delivery collected.
             </p>
 
             <form onSubmit={handleGenerate} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Period Start</label>
+                <label className="font-semibold text-ink-700">Period Start</label>
                 <input
                   type="date"
                   required
                   value={period.period_start}
                   onChange={(e) => setPeriod({ ...period, period_start: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-800"
+                  className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-800"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Period End</label>
+                <label className="font-semibold text-ink-700">Period End</label>
                 <input
                   type="date"
                   required
                   value={period.period_end}
                   onChange={(e) => setPeriod({ ...period, period_end: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-800"
+                  className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-800"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setGenerateModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isGenerating}
-                  className="px-4 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold bg-ink-900 hover:bg-ink-800 text-white rounded-sm shadow-1 transition-colors cursor-pointer"
                 >
                   {isGenerating ? 'Calculating...' : 'Run Payouts'}
                 </button>
@@ -299,25 +299,25 @@ export default function AdminPayoutsPage() {
 
       {/* MARK PAID CONFIRM */}
       {markPaidTarget && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95 text-xs">
-            <h3 className="text-base font-bold text-slate-900">Confirm Rider Transfer</h3>
-            <p className="text-slate-500">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95 text-xs">
+            <h3 className="text-base font-bold text-ink-900">Confirm Rider Transfer</h3>
+            <p className="text-ink-500">
               Disburse <strong>{formatPKR(markPaidTarget.net_payout ?? markPaidTarget.total_earning)}</strong> to {markPaidTarget.rider_name}.
             </p>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-ink-100">
               <button
                 type="button"
                 onClick={() => setMarkPaidTarget(null)}
-                className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="px-4 py-2 font-semibold text-ink-600 hover:bg-ink-100 rounded-sm"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleMarkPaid}
-                className="px-4 py-2 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs"
+                className="px-4 py-2 font-semibold bg-green-600 hover:bg-green-700 text-white rounded-sm shadow-1"
               >
                 Mark as Disbursed
               </button>

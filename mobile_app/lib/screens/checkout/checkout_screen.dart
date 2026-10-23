@@ -10,6 +10,7 @@ import '../../data/repositories/user_repository.dart';
 import '../../services/cart_service.dart';
 import '../../widgets/gst_note.dart';
 import '../tracking/order_tracking_screen.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Checkout screen — delivery address, order lines, payment method and totals.
 ///
@@ -144,7 +145,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               'Prices changed while you were checking out. Please review the '
               'updated total and place your order again.',
             ),
-            backgroundColor: Color(0xFFDC2626),
+            backgroundColor: AppColors.cta,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -165,7 +166,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               'Online payment is currently unavailable. '
               'Please choose Cash on Delivery.',
             ),
-            backgroundColor: Color(0xFFDC2626),
+            backgroundColor: AppColors.cta,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -186,7 +187,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ? 'Online payment failed. Choose Cash on Delivery and try again.'
                 : message,
           ),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -205,7 +206,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -244,7 +245,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 title: Text(address.displayTitle),
                 subtitle: Text(address.displaySubtitle),
                 trailing: address.id == _address.id
-                    ? const Icon(Icons.check_circle, color: Color(0xFF1D4ED8))
+                    ? const Icon(Icons.check_circle, color: AppColors.blue600)
                     : null,
                 onTap: () => Navigator.of(context).pop(address),
               ),
@@ -298,7 +299,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             Row(
                               children: [
                                 const Icon(Icons.location_on,
-                                    color: Color(0xFF1D4ED8), size: 20),
+                                    color: AppColors.blue600, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Delivery Address',
@@ -312,7 +313,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.surfaceContainerLow,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(AppRadius.md),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +322,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     children: [
                                       const Icon(Icons.home,
                                           size: 16,
-                                          color: Color(0xFF5C403C)),
+                                          color: AppColors.ink600),
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
@@ -336,7 +337,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w700,
-                                            color: Color(0xFF1D4ED8),
+                                            color: AppColors.blue600,
                                           ),
                                         ),
                                     ],
@@ -454,7 +455,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 color: theme.colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: AppColors.ink900.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
@@ -518,7 +519,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -595,9 +596,9 @@ class _PreviewErrorBlock extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFEE2E2)),
+        color: AppColors.red50,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.red100),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -606,13 +607,13 @@ class _PreviewErrorBlock extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Icon(Icons.error_outline_rounded,
-                  size: 18, color: Color(0xFFDC2626)),
+                  size: 18, color: AppColors.cta),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   error.message,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF991B1B),
+                    color: AppColors.red800,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -662,7 +663,7 @@ class _OrderItemCard extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: (imageUrl != null && imageUrl!.isNotEmpty)
                   ? Image.network(
@@ -670,12 +671,12 @@ class _OrderItemCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => const Center(
                         child: Icon(Icons.restaurant,
-                            size: 32, color: Color(0xFF5C403C)),
+                            size: 32, color: AppColors.ink600),
                       ),
                     )
                   : const Center(
                       child: Icon(Icons.restaurant,
-                          size: 32, color: Color(0xFF5C403C)),
+                          size: 32, color: AppColors.ink600),
                     ),
             ),
             const SizedBox(width: 12),
@@ -737,7 +738,7 @@ class _PaymentMethodCard extends StatelessWidget {
           : theme.colorScheme.surfaceContainerLowest,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -749,7 +750,7 @@ class _PaymentMethodCard extends StatelessWidget {
                   color: isSelected
                       ? theme.colorScheme.primaryContainer
                       : theme.colorScheme.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(
                   icon,
@@ -782,7 +783,7 @@ class _PaymentMethodCard extends StatelessWidget {
               if (isSelected)
                 const Icon(
                   Icons.check_circle,
-                  color: Color(0xFF1D4ED8),
+                  color: AppColors.blue600,
                   size: 24,
                 ),
             ],

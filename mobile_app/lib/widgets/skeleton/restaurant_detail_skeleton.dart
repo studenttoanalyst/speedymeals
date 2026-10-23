@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skeleton_loading.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Full-page skeleton matching [RestaurantDetailScreen] loading state.
 class RestaurantDetailSkeleton extends StatelessWidget {
@@ -37,7 +38,7 @@ class RestaurantDetailSkeleton extends StatelessWidget {
                             SkeletonBox(
                               width: 54,
                               height: 54,
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                             const SizedBox(width: 12),
                             const Expanded(
@@ -59,19 +60,19 @@ class RestaurantDetailSkeleton extends StatelessWidget {
                             SkeletonBox(
                               width: 60,
                               height: 26,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                             const SizedBox(width: 8),
                             SkeletonBox(
                               width: 85,
                               height: 26,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                             const SizedBox(width: 8),
                             SkeletonBox(
                               width: 75,
                               height: 26,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                           ],
                         ),
@@ -94,7 +95,7 @@ class RestaurantDetailSkeleton extends StatelessWidget {
                 itemBuilder: (context, index) => SkeletonBox(
                   width: index == 0 ? 80 : 95,
                   height: 34,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
               ),
             ),
@@ -158,7 +159,7 @@ class _MenuItemSkeletonCard extends StatelessWidget {
             SkeletonBox(
               width: 96,
               height: 96,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ],
         ),

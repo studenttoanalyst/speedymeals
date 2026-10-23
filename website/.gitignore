@@ -8,3 +8,5 @@ out/
 .turbo/
 
 patches
+# Local-only synthetic dashboard data (see lib/dev/useDevSeedOrders.ts)
+public/dev-seed/

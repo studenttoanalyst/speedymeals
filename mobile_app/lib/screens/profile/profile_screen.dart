@@ -10,6 +10,7 @@ import '../notifications/notifications_screen.dart';
 import '../orders/order_history_screen.dart';
 import 'edit_profile_screen.dart';
 import 'saved_addresses_screen.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// User profile / account hub.
 ///
@@ -111,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         title: const Text('Log out?'),
         content: const Text(
@@ -166,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         title: const Text('Delete account?'),
         content: const Text(
@@ -212,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
           ),
         );
@@ -229,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
           ),
         );
@@ -244,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           content: Text('$feature is coming soon.'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
         ),
       );
@@ -295,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _ProfileMenuTile(
                     icon: Icons.receipt_long_rounded,
-                    iconColor: const Color(0xFFDC2626),
+                    iconColor: AppColors.cta,
                     title: 'My Orders',
                     subtitle: 'Track and review your order history',
                     onTap: _openOrders,
@@ -303,7 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const _MenuDivider(),
                   _ProfileMenuTile(
                     icon: Icons.location_on_rounded,
-                    iconColor: const Color(0xFF1D4ED8),
+                    iconColor: AppColors.blue600,
                     title: 'Saved Addresses',
                     subtitle: _addresses.isEmpty
                         ? 'Add a delivery location'
@@ -313,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const _MenuDivider(),
                   _ProfileMenuTile(
                     icon: Icons.credit_card_rounded,
-                    iconColor: const Color(0xFFF59E0B),
+                    iconColor: AppColors.amber500,
                     title: 'Payment Methods',
                     // There is no stored-payment backend: payment is chosen per
                     // order (Cash on Delivery or the Digital demo), so there is
@@ -330,7 +331,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _ProfileMenuTile(
                     icon: Icons.settings_rounded,
-                    iconColor: const Color(0xFF10B981),
+                    iconColor: AppColors.green600,
                     title: 'App Settings & Notifications',
                     subtitle: 'Alerts, promos and app preferences',
                     onTap: () => Navigator.of(context).push(
@@ -348,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _ProfileMenuTile(
                     icon: Icons.description_outlined,
-                    iconColor: const Color(0xFF64748B),
+                    iconColor: AppColors.ink500,
                     title: 'Terms & Conditions',
                     subtitle: 'Read our terms of service',
                     onTap: () => LegalUtils.openTerms(context),
@@ -356,7 +357,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const _MenuDivider(),
                   _ProfileMenuTile(
                     icon: Icons.privacy_tip_outlined,
-                    iconColor: const Color(0xFF64748B),
+                    iconColor: AppColors.ink500,
                     title: 'Privacy Policy',
                     subtitle: 'How we handle your data',
                     onTap: () => LegalUtils.openPrivacy(context),
@@ -383,7 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // possible outside the app. Opens the hosted deletion page.
                   _ProfileMenuTile(
                     icon: Icons.open_in_new_rounded,
-                    iconColor: const Color(0xFF64748B),
+                    iconColor: AppColors.ink500,
                     title: 'Delete account on the web',
                     subtitle: AppConstants.deleteAccountUrl,
                     onTap: () => LegalUtils.openDeleteAccount(context),
@@ -415,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     textStyle: const TextStyle(
                       fontSize: 15,
@@ -523,7 +524,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primaryContainer
                               .withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(AppRadius.xs),
                         ),
                         child: Text(
                           roleLabel,
@@ -672,7 +673,7 @@ class _ProfileMenuTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Icon(icon, size: 20, color: iconColor),
             ),

@@ -4,6 +4,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/models/user_models.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../services/auth_service.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Edit the signed-in customer's profile (`PUT /users/me`).
 ///
@@ -26,7 +27,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  static const Color _brandRed = Color(0xFFDC2626);
+  static const Color _brandRed = AppColors.cta;
 
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
@@ -76,7 +77,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profile updated'),
-          backgroundColor: Color(0xFF10B981),
+          backgroundColor: AppColors.green600,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -156,9 +157,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFFEE2E2)),
+                      color: AppColors.red50,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(color: AppColors.red100),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             style: const TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF991B1B),
+                              color: AppColors.red800,
                             ),
                           ),
                         ),
@@ -187,7 +188,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: FilledButton.styleFrom(
                       backgroundColor: _brandRed,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                     ),
                     child: _isSaving

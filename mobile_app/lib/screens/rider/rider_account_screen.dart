@@ -5,6 +5,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/models/deletion_models.dart';
 import '../../data/repositories/rider_repository.dart';
 import '../../widgets/legal_links.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Rider account screen: request an account deletion, follow its status, and
 /// cancel it while the rider is still allowed to.
@@ -39,14 +40,14 @@ class RiderAccountScreen extends StatefulWidget {
 }
 
 class _RiderAccountScreenState extends State<RiderAccountScreen> {
-  static const Color _bg = Color(0xFF0F172A);
-  static const Color _card = Color(0xFF1E293B);
-  static const Color _border = Color(0xFF334155);
-  static const Color _green = Color(0xFF10B981);
-  static const Color _red = Color(0xFFDC2626);
-  static const Color _amber = Color(0xFFF59E0B);
-  static const Color _blue = Color(0xFF3B82F6);
-  static const Color _muted = Color(0xFF94A3B8);
+  static const Color _bg = AppColors.ink900;
+  static const Color _card = AppColors.ink800;
+  static const Color _border = AppColors.ink700;
+  static const Color _green = AppColors.green600;
+  static const Color _red = AppColors.cta;
+  static const Color _amber = AppColors.amber500;
+  static const Color _blue = AppColors.blue500;
+  static const Color _muted = AppColors.ink400;
 
   late final RiderRepository _repository;
 
@@ -90,7 +91,7 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
         title: const Text('Request account deletion?'),
         content: const Text(RiderAccountScreen.deletionDialogCopy),
         actions: [
@@ -134,7 +135,7 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
         title: const Text('Cancel deletion request?'),
         content: const Text(
           'Your account becomes active again and keeps working as before. '
@@ -182,7 +183,7 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
         SnackBar(
           content: Text(text),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
   }
@@ -196,7 +197,7 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
           content: Text(text),
           backgroundColor: _red,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
   }
@@ -336,7 +337,7 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: chipColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppRadius.xs),
                   border: Border.all(color: chipColor),
                 ),
                 child: Text(
@@ -376,7 +377,7 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: _amber.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(color: _amber.withValues(alpha: 0.5)),
               ),
               child: Column(
@@ -533,7 +534,7 @@ class _RiderAccountScreenState extends State<RiderAccountScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: _border),
       ),
       child: child,

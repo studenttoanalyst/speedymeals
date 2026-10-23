@@ -8,6 +8,7 @@ import { ArrowRight } from '@phosphor-icons/react';
 import { HeroBannerCarousel } from './HeroBannerCarousel';
 import { BannerSlide } from '@/lib/banners';
 import { useViewportPopover } from '@/hooks/useViewportPopover';
+import { tokens } from '@/lib/design-tokens';
 
 const COVERED_COUNTRIES = [
   {
@@ -124,9 +125,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   // FAST · FAIR · GLOBAL color cycle states (using WCAG AA accessible red #C92F24)
   const taglineWords = [
-    { text: 'FAST.', colors: ['#15171A', '#C92F24', '#1E5FA8'] },
-    { text: 'FAIR.', colors: ['#C92F24', '#1E5FA8', '#15171A'] },
-    { text: 'GLOBAL.', colors: ['#1E5FA8', '#15171A', '#C92F24'] },
+    { text: 'FAST.', colors: [tokens.ink900, tokens.red600, tokens.blue600] },
+    { text: 'FAIR.', colors: [tokens.red600, tokens.blue600, tokens.ink900] },
+    { text: 'GLOBAL.', colors: [tokens.blue600, tokens.ink900, tokens.red600] },
   ];
   const [colorIndex, setColorIndex] = useState(0);
   useEffect(() => {
@@ -159,11 +160,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           className="flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 gap-y-1 px-2 text-center mb-2 sm:mb-2.5"
         >
           <span className="w-2.5 h-2.5 bg-red inline-block shrink-0 rounded-none" />
-          <span className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.22em] font-bold text-red-accessible whitespace-nowrap">
+          <span className="font-mono text-2xs sm:text-xs uppercase tracking-[0.22em] font-bold text-red-accessible whitespace-nowrap">
             FAST & SAFE TO YOU
           </span>
           <div className="h-px w-6 sm:w-12 bg-line shrink-0" />
-          <span className="font-mono text-[9.5px] sm:text-[11.5px] text-ink-soft tracking-[0.18em] uppercase whitespace-nowrap">
+          <span className="font-mono text-2xs sm:text-xs text-ink-soft tracking-[0.18em] uppercase whitespace-nowrap">
             SOUTH ASIA & MIDDLE EAST NETWORK
           </span>
         </div>
@@ -326,21 +327,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       {/* 4. Bottom: WE ARE HERE country locations strip */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 w-full shrink-0 py-4 md:py-5">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
-          <div className="relative flex items-center flex-wrap justify-center sm:justify-start gap-y-1 gap-x-2 font-mono text-[9px] sm:text-[11px]">
+          <div className="relative flex items-center flex-wrap justify-center sm:justify-start gap-y-1 gap-x-2 font-mono text-2xs sm:text-2xs">
             <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75 rounded-none" />
-              <span className="relative inline-flex h-2 w-2 bg-[#10B981] rounded-none" />
+              <span className="animate-ping absolute inline-flex h-full w-full bg-green-500 opacity-75 rounded-none" />
+              <span className="relative inline-flex h-2 w-2 bg-green-500 rounded-none" />
             </span>
             <span className="text-ink-soft uppercase tracking-wider font-bold shrink-0">WE ARE HERE:</span>
             <div className="flex items-center flex-wrap gap-y-1 gap-x-1.5 sm:gap-x-2">
               {COVERED_COUNTRIES.map((item, idx) => {
                 const isActive = activeCountry === item.code;
                 const hoverClass = item.isActive
-                  ? 'hover:text-[#10B981] hover:decoration-[#10B981]'
-                  : 'hover:text-[#F59E0B] hover:decoration-[#F59E0B]';
+                  ? 'hover:text-green-600 hover:decoration-green-500'
+                  : 'hover:text-amber-700 hover:decoration-amber-500';
                 const activeColorClass = item.isActive
-                  ? 'text-[#10B981] decoration-[#10B981]'
-                  : 'text-[#F59E0B] decoration-[#F59E0B]';
+                  ? 'text-green-600 decoration-green-500'
+                  : 'text-amber-700 decoration-amber-500';
 
                 return (
                   <div key={item.code} className="relative flex items-center">
@@ -359,7 +360,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                           setActiveCountry((prev) => (prev === item.code ? null : prev));
                         }
                       }}
-                      className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider transition-colors duration-150 cursor-pointer underline underline-offset-4 decoration-1 active:scale-95 transition-transform duration-100 ease-out select-none ${
+                      className={`font-mono text-2xs sm:text-2xs font-semibold tracking-wider transition-colors duration-150 cursor-pointer underline underline-offset-4 decoration-1 active:scale-95 transition-transform duration-100 ease-out select-none ${
                         isActive ? activeColorClass : `text-ink ${hoverClass}`
                       }`}
                       aria-label={`Coverage info for ${item.name}`}
@@ -400,11 +401,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               }}
               className="z-50 pointer-events-none"
             >
-              <div className="relative bg-[#16181D]/95 backdrop-blur-xl border border-white/10 px-2.5 py-1.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_16px_40px_-6px_rgba(0,0,0,0.5)] flex items-center space-x-2 rounded-lg">
+              <div className="relative bg-ink-900/95 backdrop-blur-xl border border-white/10 px-2.5 py-1.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_16px_40px_-6px_rgba(0,0,0,0.5)] flex items-center space-x-2 rounded-md">
                 {/* Arrow pointer */}
                 <span
                   style={{ left: `${position.arrowLeft}px` }}
-                  className={`absolute w-2 h-2 rotate-45 bg-[#16181D]/95 pointer-events-none -translate-x-1/2 ${
+                  className={`absolute w-2 h-2 rotate-45 bg-ink-900/95 pointer-events-none -translate-x-1/2 ${
                     position.placement === 'top'
                       ? '-bottom-1 border-r border-b border-white/10'
                       : '-top-1 border-l border-t border-white/10'
@@ -413,15 +414,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
                 {/* Country status indicator */}
                 {activeCountryItem.isActive ? (
-                  <span className="w-1.5 h-1.5 bg-[#10B981] shrink-0 inline-block rounded-full shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
+                  <span className="w-1.5 h-1.5 bg-green-500 shrink-0 inline-block rounded-full shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
                 ) : (
-                  <span className="w-1.5 h-1.5 bg-[#F59E0B] shrink-0 inline-block animate-pulse rounded-full shadow-[0_0_6px_rgba(245,158,11,0.6)]" />
+                  <span className="w-1.5 h-1.5 bg-amber-500 shrink-0 inline-block animate-pulse rounded-full shadow-[0_0_6px_rgba(245,158,11,0.6)]" />
                 )}
 
                 {/* Cities marquee */}
                 <div className="min-w-0 overflow-hidden relative w-full flex">
                   <div
-                    className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white"
+                    className="animate-marquee flex items-center space-x-2 whitespace-nowrap text-2xs sm:text-2xs font-mono uppercase tracking-wider text-white"
                     style={{
                       animationDuration: `${Math.max(
                         activeCountryItem.isActive ? 12 : 10,
@@ -432,7 +433,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     {[...activeCountryItem.cities, ...activeCountryItem.cities].map((cityOrCountry, cIdx) => (
                       <span key={`${cityOrCountry}-${cIdx}`} className="inline-flex items-center space-x-2">
                         <span className="text-white font-semibold">{cityOrCountry}</span>
-                        <span className="text-[#8C9099]">·</span>
+                        <span className="text-ink-500">·</span>
                       </span>
                     ))}
                   </div>

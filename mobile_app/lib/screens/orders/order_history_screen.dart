@@ -8,6 +8,7 @@ import '../../services/cart_service.dart';
 import '../cart/cart_screen.dart';
 import '../tracking/order_tracking_screen.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// The customer's order history (`GET /orders`, newest first).
 ///
@@ -93,7 +94,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
             content: Text(
               '${result.skippedCount} item(s) no longer available and were skipped.',
             ),
-            backgroundColor: const Color(0xFFF59E0B),
+            backgroundColor: AppColors.amber500,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -101,7 +102,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Items added to your cart!'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: AppColors.green600,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -116,7 +117,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -269,7 +270,7 @@ class _OrderHistoryTile extends StatelessWidget {
       margin: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
@@ -279,7 +280,7 @@ class _OrderHistoryTile extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(
                   isDelivered ? Icons.check_circle_outline_rounded : Icons.delivery_dining_rounded,
@@ -339,7 +340,7 @@ class _OrderHistoryTile extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(AppRadius.md),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,

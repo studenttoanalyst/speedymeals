@@ -54,23 +54,23 @@ export default function AdminChangeInitialPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50/70">
-      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm p-8">
-        <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-100">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-ink-50/70">
+      <div className="w-full max-w-md bg-white border border-ink-200 rounded-md shadow-1 p-8">
+        <div className="flex items-center justify-between pb-6 mb-6 border-b border-ink-100">
           <div>
-            <div className="font-bold text-xl tracking-tight text-slate-900">
-              SPEEDY<span className="text-rose-600">MEALS</span>
+            <div className="font-bold text-xl tracking-tight text-ink-900">
+              SPEEDY<span className="text-red-600">MEALS</span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-ink-400 mt-0.5">
               Set Your New Password
             </p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center">
             <ShieldCheck size={22} weight="bold" />
           </div>
         </div>
 
-        <div className="mb-6 p-3 rounded-xl border border-amber-200 bg-amber-50/80 text-amber-800 text-xs">
+        <div className="mb-6 p-3 rounded-md border border-amber-200 bg-amber-50/80 text-amber-800 text-xs">
           <p className="font-semibold mb-1">First Login Notice</p>
           <p className="text-amber-700 leading-relaxed">
             Your account was created with a temporary password. Please choose your own secret password before continuing to the admin portal.
@@ -78,40 +78,40 @@ export default function AdminChangeInitialPasswordPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs flex items-start gap-2">
+          <div className="mb-6 p-3 rounded-md border border-red-200 bg-red-50 text-red-700 text-xs flex items-start gap-2">
             <WarningCircle size={16} weight="bold" className="shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {isSuccess ? (
-          <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-center space-y-2">
-            <CheckCircle size={32} weight="bold" className="mx-auto text-emerald-600 animate-bounce" />
+          <div className="p-4 rounded-md border border-green-200 bg-green-50 text-green-800 text-center space-y-2">
+            <CheckCircle size={32} weight="bold" className="mx-auto text-green-600 animate-bounce" />
             <h3 className="font-bold text-sm">Password Saved Successfully!</h3>
-            <p className="text-xs text-emerald-700">
+            <p className="text-xs text-green-700">
               Taking you to your admin dashboard...
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-ink-700 mb-1">
                 Current Temporary Password
               </label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
                 <input
                   type={showCurrent ? 'text' : 'password'}
                   required
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="Enter temporary password"
-                  className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-mono"
+                  className="w-full pl-9 pr-10 py-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrent((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-hidden cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 focus:outline-hidden cursor-pointer"
                 >
                   {showCurrent ? <EyeSlash size={16} /> : <Eye size={16} />}
                 </button>
@@ -119,23 +119,23 @@ export default function AdminChangeInitialPasswordPage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-ink-700 mb-1">
                 New Password
               </label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
                 <input
                   type={showNew ? 'text' : 'password'}
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Minimum 8 characters"
-                  className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-mono"
+                  className="w-full pl-9 pr-10 py-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-hidden cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 focus:outline-hidden cursor-pointer"
                 >
                   {showNew ? <EyeSlash size={16} /> : <Eye size={16} />}
                 </button>
@@ -143,18 +143,18 @@ export default function AdminChangeInitialPasswordPage() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-ink-700 mb-1">
                 Type New Password Again
               </label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
                 <input
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat new password"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-mono"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all font-mono"
                 />
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function AdminChangeInitialPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-sm shadow-1 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               <span>{isLoading ? 'Saving Password...' : 'Save Password & Continue'}</span>
               <ArrowRight size={14} weight="bold" />
@@ -170,10 +170,10 @@ export default function AdminChangeInitialPasswordPage() {
           </form>
         )}
 
-        <div className="mt-6 pt-4 border-t border-slate-100 text-center">
+        <div className="mt-6 pt-4 border-t border-ink-100 text-center">
           <Link
             href="/admin/login"
-            className="text-xs text-slate-400 hover:text-slate-700 transition-colors"
+            className="text-xs text-ink-400 hover:text-ink-700 transition-colors"
           >
             Cancel and return to login
           </Link>

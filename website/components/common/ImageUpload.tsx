@@ -130,10 +130,10 @@ export function ImageUpload({
     <div className={`space-y-2 ${className}`}>
       {label && (
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-semibold text-slate-700 tracking-tight">
+          <label className="block text-xs font-semibold text-ink-700 tracking-tight">
             {label}
           </label>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-2xs text-ink-400">
             {hint || aspectConfig.rec}
           </span>
         </div>
@@ -145,12 +145,12 @@ export function ImageUpload({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`relative overflow-hidden rounded-xl border-2 transition-all duration-200 cursor-pointer ${aspectConfig.class} ${
+        className={`relative overflow-hidden rounded-md border-2 transition-all duration-200 cursor-pointer ${aspectConfig.class} ${
           isDragging
-            ? 'border-rose-500 bg-rose-50/40 ring-4 ring-rose-500/10'
+            ? 'border-red-500 bg-red-50/40 ring-4 ring-red-500/10'
             : value
-            ? 'border-slate-200 bg-white hover:border-slate-300 shadow-xs'
-            : 'border-dashed border-slate-300 bg-slate-50/60 hover:bg-slate-50 hover:border-slate-400'
+            ? 'border-ink-200 bg-white hover:border-ink-300 shadow-1'
+            : 'border-dashed border-ink-300 bg-ink-50/60 hover:bg-ink-50 hover:border-ink-400'
         } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
       >
         <input
@@ -164,7 +164,7 @@ export function ImageUpload({
 
         {value ? (
           /* Image Preview Mode */
-          <div className="relative w-full h-full group flex items-center justify-center bg-slate-900/5">
+          <div className="relative w-full h-full group flex items-center justify-center bg-ink-900/5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={value}
@@ -173,14 +173,14 @@ export function ImageUpload({
             />
 
             {/* Hover overlay with actions */}
-            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            <div className="absolute inset-0 bg-ink-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="px-3 py-1.5 bg-white text-slate-700 text-xs font-medium rounded-lg shadow hover:bg-slate-50 flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 bg-white text-ink-700 text-xs font-medium rounded-sm shadow-1 hover:bg-ink-50 flex items-center gap-1.5 transition-colors"
               >
                 <UploadSimple size={14} weight="bold" />
                 Change Image
@@ -188,7 +188,7 @@ export function ImageUpload({
               <button
                 type="button"
                 onClick={handleRemove}
-                className="p-1.5 bg-rose-600 text-white text-xs font-medium rounded-lg shadow hover:bg-rose-700 flex items-center justify-center transition-colors"
+                className="p-1.5 bg-red-600 text-white text-xs font-medium rounded-sm shadow-1 hover:bg-red-700 flex items-center justify-center transition-colors"
                 title="Remove Image"
               >
                 <X size={14} weight="bold" />
@@ -196,7 +196,7 @@ export function ImageUpload({
             </div>
 
             {/* Badge Indicator */}
-            <div className="absolute top-2.5 right-2.5 bg-emerald-500/90 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 backdrop-blur-xs shadow-xs">
+            <div className="absolute top-2.5 right-2.5 bg-green-500/90 text-white text-2xs font-semibold px-2 py-0.5 rounded-xs flex items-center gap-1 backdrop-blur-xs shadow-1">
               <CheckCircle size={12} weight="bold" />
               Uploaded
             </div>
@@ -206,18 +206,18 @@ export function ImageUpload({
           <div className="w-full h-full p-4 flex flex-col items-center justify-center text-center select-none min-h-[140px]">
             {isUploading ? (
               <div className="flex flex-col items-center gap-2">
-                <div className="w-8 h-8 rounded-full border-2 border-rose-500 border-t-transparent animate-spin" />
-                <span className="text-xs text-slate-600 font-medium">Processing image...</span>
+                <div className="w-8 h-8 rounded-full border-2 border-red-500 border-t-transparent animate-spin" />
+                <span className="text-xs text-ink-600 font-medium">Processing image...</span>
               </div>
             ) : (
               <>
-                <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-full bg-ink-100 text-ink-500 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
                   <ImageIcon size={20} weight="regular" />
                 </div>
-                <div className="text-xs font-medium text-slate-700 mb-0.5">
-                  <span className="text-rose-600 font-semibold hover:underline">Click to upload</span> or drag and drop
+                <div className="text-xs font-medium text-ink-700 mb-0.5">
+                  <span className="text-red-600 font-semibold hover:underline">Click to upload</span> or drag and drop
                 </div>
-                <div className="text-[11px] text-slate-400 max-w-[220px]">
+                <div className="text-2xs text-ink-400 max-w-[220px]">
                   PNG, JPG, or WebP (max. {maxSizeMB}MB)
                 </div>
               </>
@@ -227,7 +227,7 @@ export function ImageUpload({
       </div>
 
       {errorMessage && (
-        <div className="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-red-600 font-medium">
           <Warning size={14} weight="bold" />
           <span>{errorMessage}</span>
         </div>

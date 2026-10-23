@@ -44,9 +44,9 @@ export function Topbar({
   }, [checkHealth]);
 
   return (
-    <header className="h-16 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl saturate-180 px-6 flex items-center justify-between sticky top-0 z-20 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] print:hidden">
+    <header className="h-16 border-b border-ink-200/80 bg-white/80 backdrop-blur-xl saturate-180 px-6 flex items-center justify-between sticky top-0 z-20 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] print:hidden">
       <div>
-        <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+        <h1 className="text-lg font-bold text-ink-900 tracking-tight flex items-center gap-2">
           {title}
         </h1>
       </div>
@@ -60,11 +60,11 @@ export function Topbar({
           type="button"
           onClick={() => checkHealth()}
           title="Click to recheck server connection"
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-medium text-slate-600 transition-all duration-100 cursor-pointer active:scale-95 select-none"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-ink-200 bg-ink-50 hover:bg-ink-100 text-2xs font-medium text-ink-600 transition-all duration-100 cursor-pointer active:scale-95 select-none"
         >
           {backendStatus === 'connected' ? (
             <>
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="w-2 h-2 rounded-full bg-green-500" />
               <span>Server Connected</span>
             </>
           ) : backendStatus === 'checking' ? (
@@ -74,7 +74,7 @@ export function Topbar({
             </>
           ) : (
             <>
-              <span className="w-2 h-2 rounded-full bg-slate-400" />
+              <span className="w-2 h-2 rounded-full bg-ink-400" />
               <span>Offline Mode (Local Data)</span>
             </>
           )}
@@ -88,16 +88,16 @@ export function Topbar({
             }}
             disabled={isRefreshing}
             title="Refresh Data"
-            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-100 disabled:opacity-40 cursor-pointer active:scale-90 select-none"
+            className="p-2 rounded-sm border border-ink-200 bg-white text-ink-600 hover:text-ink-900 hover:bg-ink-50 transition-all duration-100 disabled:opacity-40 cursor-pointer active:scale-90 select-none"
           >
-            <ArrowClockwise size={15} weight="bold" className={isRefreshing ? 'animate-spin text-slate-700' : ''} />
+            <ArrowClockwise size={15} weight="bold" className={isRefreshing ? 'animate-spin text-ink-700' : ''} />
           </button>
         ) : (
           <button
             type="button"
             onClick={() => checkHealth()}
             title="Recheck Server Connection"
-            className="p-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-100 cursor-pointer active:scale-90 select-none"
+            className="p-2 rounded-sm border border-ink-200 bg-white text-ink-600 hover:text-ink-900 hover:bg-ink-50 transition-all duration-100 cursor-pointer active:scale-90 select-none"
           >
             <ArrowClockwise size={15} weight="bold" />
           </button>

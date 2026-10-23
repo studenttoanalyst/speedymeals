@@ -33,7 +33,6 @@ import {
   getRestaurantOrder,
   updateRestaurantOrderStatus,
 } from '@/lib/api/restaurant';
-import { loginRestaurant } from '@/lib/auth';
 import { RestaurantOrderDetail, RestaurantOrderSummary } from '@/types/restaurant';
 
 export default function RestaurantOrdersPage() {
@@ -57,18 +56,8 @@ export default function RestaurantOrdersPage() {
       const data = await listRestaurantOrders();
       setOrders(data);
     } catch (err: any) {
+      // 401s are handled by apiClient (token refresh, then redirect to login).
       console.error('Failed to load restaurant orders', err);
-      const errMsg = String(err?.message || '').toLowerCase();
-      if (err?.status === 401 || errMsg.includes('token') || errMsg.includes('expired')) {
-        try {
-          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
-          await loginRestaurant({ email, password: 'Partner@123' });
-          const retryData = await listRestaurantOrders();
-          setOrders(retryData);
-        } catch (loginErr) {
-          console.error('Session auto-recovery failed', loginErr);
-        }
-      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -126,21 +115,6 @@ export default function RestaurantOrdersPage() {
         return;
       }
 
-      // If error is 401 / expired token, transparently mint a fresh token and retry immediately
-      if (err?.status === 401 || errMsg.includes('token') || errMsg.includes('expired')) {
-        try {
-          const email = localStorage.getItem('sm_remembered_restaurant_email') || 'karachibiryani@speedymeals.com';
-          await loginRestaurant({ email, password: 'Partner@123' });
-          await updateRestaurantOrderStatus(orderId, newStatus);
-          if (selectedOrder && selectedOrder.id === orderId) {
-            setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
-          }
-          await fetchOrders();
-          return;
-        } catch (retryErr: any) {
-          console.error('Auto-recovery retry failed:', retryErr);
-        }
-      }
       const msg = err?.message || 'Failed to update order status';
       setStatusError(msg);
       setTimeout(() => setStatusError(null), 5000);
@@ -227,13 +201,13 @@ export default function RestaurantOrdersPage() {
       key: 'id',
       title: 'Order ID',
       sortable: true,
-      render: (o) => <span className="font-mono font-medium text-slate-800">#{o.id.slice(0, 8)}</span>,
+      render: (o) => <span className="font-mono font-medium text-ink-800">#{o.id.slice(0, 8)}</span>,
     },
     {
       key: 'customer_name',
       title: 'Customer',
       sortable: true,
-      render: (o) => <div className="font-medium text-slate-900">{o.customer_name}</div>,
+      render: (o) => <div className="font-medium text-ink-900">{o.customer_name}</div>,
     },
     {
       key: 'status',
@@ -245,10 +219,10 @@ export default function RestaurantOrdersPage() {
       title: 'Payment',
       render: (o) => (
         <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+          className={`text-2xs font-semibold px-2 py-0.5 rounded-md ${
             o.payment_method === 'COD'
               ? 'bg-amber-50 text-amber-800 border border-amber-200'
-              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : 'bg-green-50 text-green-800 border border-green-200'
           }`}
         >
           {o.payment_method}
@@ -260,7 +234,7 @@ export default function RestaurantOrdersPage() {
       title: 'Total',
       align: 'right',
       sortable: true,
-      render: (o) => <span className="font-mono font-semibold text-slate-900">{formatPKR(o.total_amount)}</span>,
+      render: (o) => <span className="font-mono font-semibold text-ink-900">{formatPKR(o.total_amount)}</span>,
     },
     {
       key: 'actions',
@@ -272,7 +246,7 @@ export default function RestaurantOrdersPage() {
             e.stopPropagation();
             handleOpenDetail(o.id);
           }}
-          className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs"
+          className="px-2.5 py-1 text-xs font-semibold bg-white border border-ink-200 hover:bg-ink-50 text-ink-700 rounded-sm shadow-1"
         >
           View Ticket
         </button>
@@ -281,7 +255,7 @@ export default function RestaurantOrdersPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Kitchen Dispatch Terminal"
         onRefresh={() => {
@@ -298,10 +272,10 @@ export default function RestaurantOrdersPage() {
                 setSoundEnabled(next);
                 setChimeEnabled(next);
               }}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-sm border transition-colors flex items-center gap-1.5 ${
                 soundEnabled
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                  : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                  ? 'bg-green-50 border-green-200 text-green-700'
+                  : 'bg-white border-ink-200 text-ink-500 hover:bg-ink-50'
               }`}
             >
               {soundEnabled ? <SpeakerHigh size={15} weight="bold" /> : <SpeakerSlash size={15} />}
@@ -309,25 +283,25 @@ export default function RestaurantOrdersPage() {
             </button>
 
             {/* View Mode Toggle */}
-            <div className="relative flex items-center p-0.5 rounded-lg border border-slate-200 bg-white shadow-2xs">
+            <div className="relative flex items-center p-0.5 rounded-md border border-ink-200 bg-white shadow-1">
               {(['kanban', 'table'] as const).map((mode) => {
                 const isActive = viewMode === mode;
                 return (
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
-                    className="relative p-1.5 rounded-md text-xs transition-colors cursor-pointer active:scale-95 select-none"
+                    className="relative p-1.5 rounded-sm text-xs transition-colors cursor-pointer active:scale-95 select-none"
                     title={mode === 'kanban' ? 'Kanban Board View' : 'Dense List View'}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="orders-viewmode-pill"
-                        className="absolute inset-0 rounded-md bg-slate-900 shadow-xs"
+                        className="absolute inset-0 rounded-md bg-ink-900 shadow-1"
                         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                       />
                     )}
                     <span className={`relative z-10 flex items-center justify-center ${
-                      isActive ? 'text-white' : 'text-slate-500 hover:text-slate-800'
+                      isActive ? 'text-white' : 'text-ink-500 hover:text-ink-800'
                     }`}>
                       {mode === 'kanban' ? <SquaresFour size={16} weight="bold" /> : <ListDashes size={16} weight="bold" />}
                     </span>
@@ -341,14 +315,14 @@ export default function RestaurantOrdersPage() {
 
       <div className="p-6 max-w-7xl mx-auto w-full flex-1 flex flex-col">
         {statusError && (
-          <div className="mb-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800 flex items-center justify-between shadow-2xs animate-in fade-in">
+          <div className="mb-4 p-3.5 bg-red-50 border border-red-200 rounded-md text-xs font-semibold text-red-800 flex items-center justify-between shadow-1 animate-in fade-in">
             <div className="flex items-center gap-2">
-              <Warning size={16} className="text-rose-600 shrink-0" weight="bold" />
+              <Warning size={16} className="text-red-600 shrink-0" weight="bold" />
               <span>{statusError}</span>
               {(statusError.toLowerCase().includes('token') || statusError.toLowerCase().includes('expired') || statusError.toLowerCase().includes('authenticated')) && (
                 <Link
                   href="/restaurant/login?expired=true"
-                  className="ml-2 px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-[11px] transition-colors inline-block"
+                  className="ml-2 px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white font-bold rounded-sm text-2xs transition-colors inline-block"
                 >
                   Log In Again →
                 </Link>
@@ -356,7 +330,7 @@ export default function RestaurantOrdersPage() {
             </div>
             <button
               onClick={() => setStatusError(null)}
-              className="text-rose-500 hover:text-rose-800 font-bold px-2 py-0.5 rounded cursor-pointer"
+              className="text-red-500 hover:text-red-800 font-bold px-2 py-0.5 rounded-sm cursor-pointer"
             >
               Dismiss
             </button>
@@ -364,34 +338,34 @@ export default function RestaurantOrdersPage() {
         )}
 
         {/* Hotkey Operator Command Bar */}
-        <div className="mb-4 px-3.5 py-2 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-600">
+        <div className="mb-4 px-3.5 py-2 rounded-md bg-white border border-ink-200 shadow-1 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-ink-600">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
+            <span className="font-semibold text-ink-400 uppercase tracking-wider text-2xs">
               Hotkeys:
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px]">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">A</kbd>
+            <span className="inline-flex items-center gap-1 text-2xs">
+              <kbd className="px-1.5 py-0.5 bg-ink-100 border border-ink-300 rounded text-ink-800 font-bold shadow-1">A</kbd>
               <span>Accept Next Ticket</span>
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px]">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">P</kbd>
+            <span className="inline-flex items-center gap-1 text-2xs">
+              <kbd className="px-1.5 py-0.5 bg-ink-100 border border-ink-300 rounded text-ink-800 font-bold shadow-1">P</kbd>
               <span>Prep Ready</span>
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px]">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">/</kbd>
+            <span className="inline-flex items-center gap-1 text-2xs">
+              <kbd className="px-1.5 py-0.5 bg-ink-100 border border-ink-300 rounded text-ink-800 font-bold shadow-1">/</kbd>
               <span>Search</span>
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px]">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">K</kbd>
+            <span className="inline-flex items-center gap-1 text-2xs">
+              <kbd className="px-1.5 py-0.5 bg-ink-100 border border-ink-300 rounded text-ink-800 font-bold shadow-1">K</kbd>
               <span>Toggle Board</span>
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px]">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-slate-800 font-bold shadow-2xs">Esc</kbd>
+            <span className="inline-flex items-center gap-1 text-2xs">
+              <kbd className="px-1.5 py-0.5 bg-ink-100 border border-ink-300 rounded text-ink-800 font-bold shadow-1">Esc</kbd>
               <span>Close</span>
             </span>
           </div>
 
-          <div className="text-[11px] text-slate-500 font-medium">
+          <div className="text-2xs text-ink-500 font-medium">
             <span className="text-amber-600 font-bold">{placedOrders.length}</span> New Incoming · <span className="text-blue-600 font-bold">{prepOrders.length}</span> In Kitchen
           </div>
         </div>
@@ -414,15 +388,15 @@ export default function RestaurantOrdersPage() {
           /* KANBAN BOARD VIEW */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-start">
             {/* Column 1: New / Placed */}
-            <div className="bg-slate-100/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
+            <div className="bg-ink-100/70 border border-ink-200 rounded-md p-3.5 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-ink-800">
                     New Incoming
                   </h3>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-xs bg-amber-100 text-amber-800">
                   {placedOrders.length}
                 </span>
               </div>
@@ -432,25 +406,25 @@ export default function RestaurantOrdersPage() {
                   <div
                     key={o.id}
                     onClick={() => handleOpenDetail(o.id)}
-                    className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs space-y-3 cursor-pointer hover:border-slate-300 transition-all"
+                    className="p-4 bg-white border border-ink-200 rounded-md shadow-1 space-y-3 cursor-pointer hover:border-ink-300 transition-all"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-[11px] font-mono font-medium text-slate-500">
+                        <span className="text-2xs font-mono font-medium text-ink-500">
                           #{o.id.slice(0, 8)}
                         </span>
-                        <div className="text-sm font-bold text-slate-900 mt-0.5">
+                        <div className="text-sm font-bold text-ink-900 mt-0.5">
                           {o.customer_name}
                         </div>
                       </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                      <span className="text-2xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
                         {o.payment_method}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                      <span className="font-mono font-bold text-slate-900">{formatPKR(o.total_amount)}</span>
-                      <span className="text-[11px] text-slate-400">Just now</span>
+                    <div className="flex items-center justify-between text-xs text-ink-500 pt-1 border-t border-ink-100">
+                      <span className="font-mono font-bold text-ink-900">{formatPKR(o.total_amount)}</span>
+                      <span className="text-2xs text-ink-400">Just now</span>
                     </div>
 
                     {/* Quick Accept/Reject Actions */}
@@ -461,7 +435,7 @@ export default function RestaurantOrdersPage() {
                           e.stopPropagation();
                           setRejectModalOrder(o);
                         }}
-                        className="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg transition-colors text-center cursor-pointer"
+                        className="py-1.5 px-2 bg-ink-100 hover:bg-ink-200 text-ink-600 text-xs font-semibold rounded-sm transition-colors text-center cursor-pointer"
                       >
                         Reject
                       </button>
@@ -471,7 +445,7 @@ export default function RestaurantOrdersPage() {
                           e.stopPropagation();
                           setAcceptModalOrder(o);
                         }}
-                        className="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors text-center cursor-pointer"
+                        className="py-1.5 px-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-sm shadow-1 transition-colors text-center cursor-pointer"
                       >
                         Accept
                       </button>
@@ -479,21 +453,21 @@ export default function RestaurantOrdersPage() {
                   </div>
                 ))}
                 {placedOrders.length === 0 && (
-                  <div className="text-center py-8 text-xs text-slate-400">No new incoming orders</div>
+                  <div className="text-center py-8 text-xs text-ink-400">No new incoming orders</div>
                 )}
               </div>
             </div>
 
             {/* Column 2: In Preparation */}
-            <div className="bg-slate-100/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
+            <div className="bg-ink-100/70 border border-ink-200 rounded-md p-3.5 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-ink-800">
                     In Kitchen Prep
                   </h3>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-xs bg-amber-100 text-amber-800">
                   {prepOrders.length}
                 </span>
               </div>
@@ -503,26 +477,26 @@ export default function RestaurantOrdersPage() {
                   <div
                     key={o.id}
                     onClick={() => handleOpenDetail(o.id)}
-                    className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs space-y-3 cursor-pointer hover:border-slate-300 transition-all"
+                    className="p-4 bg-white border border-ink-200 rounded-md shadow-1 space-y-3 cursor-pointer hover:border-ink-300 transition-all"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-[11px] font-mono font-medium text-slate-500">
+                        <span className="text-2xs font-mono font-medium text-ink-500">
                           #{o.id.slice(0, 8)}
                         </span>
-                        <div className="text-sm font-bold text-slate-900 mt-0.5">
+                        <div className="text-sm font-bold text-ink-900 mt-0.5">
                           {o.customer_name}
                         </div>
                       </div>
-                      <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full ring-1 ring-amber-200 flex items-center gap-1">
+                      <span className="text-2xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-xs ring-1 ring-amber-200 flex items-center gap-1">
                         <Clock size={12} weight="bold" />
                         14m left
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                      <span className="font-mono font-bold text-slate-900">{formatPKR(o.total_amount)}</span>
-                      <span className="text-[11px] text-slate-400">Prep in progress</span>
+                    <div className="flex items-center justify-between text-xs text-ink-500 pt-1 border-t border-ink-100">
+                      <span className="font-mono font-bold text-ink-900">{formatPKR(o.total_amount)}</span>
+                      <span className="text-2xs text-ink-400">Prep in progress</span>
                     </div>
 
                     <button
@@ -531,7 +505,7 @@ export default function RestaurantOrdersPage() {
                         e.stopPropagation();
                         handleUpdateStatus(o.id, 'Ready for Pickup');
                       }}
-                      className="w-full py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                      className="w-full py-1.5 px-3 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-sm shadow-1 transition-colors flex items-center justify-center gap-1.5"
                     >
                       <Check size={14} weight="bold" />
                       Mark Ready for Pickup
@@ -539,21 +513,21 @@ export default function RestaurantOrdersPage() {
                   </div>
                 ))}
                 {prepOrders.length === 0 && (
-                  <div className="text-center py-8 text-xs text-slate-400">Kitchen is idle</div>
+                  <div className="text-center py-8 text-xs text-ink-400">Kitchen is idle</div>
                 )}
               </div>
             </div>
 
             {/* Column 3: Ready for Pickup (Rider Handover) */}
-            <div className="bg-slate-100/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
+            <div className="bg-ink-100/70 border border-ink-200 rounded-md p-3.5 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-ink-800">
                     Ready for Pickup
                   </h3>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-xs bg-blue-100 text-blue-800">
                   {readyOrders.length}
                 </span>
               </div>
@@ -563,52 +537,52 @@ export default function RestaurantOrdersPage() {
                   <div
                     key={o.id}
                     onClick={() => handleOpenDetail(o.id)}
-                    className="p-4 bg-white border border-blue-200 rounded-xl shadow-xs space-y-3 cursor-pointer hover:border-blue-300 transition-all"
+                    className="p-4 bg-white border border-blue-200 rounded-md shadow-1 space-y-3 cursor-pointer hover:border-blue-300 transition-all"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-[11px] font-mono font-medium text-slate-500">
+                        <span className="text-2xs font-mono font-medium text-ink-500">
                           #{o.id.slice(0, 8)}
                         </span>
-                        <div className="text-sm font-bold text-slate-900 mt-0.5">
+                        <div className="text-sm font-bold text-ink-900 mt-0.5">
                           {o.customer_name}
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-200">
+                      <span className="text-2xs font-bold px-2 py-0.5 rounded-xs bg-blue-50 text-blue-700 ring-1 ring-blue-200">
                         Bagged
                       </span>
                     </div>
 
-                    <div className="p-2.5 bg-blue-50/50 rounded-lg text-xs text-blue-900 flex items-center gap-2 border border-blue-100">
+                    <div className="p-2.5 bg-blue-50/50 rounded-md text-xs text-blue-900 flex items-center gap-2 border border-blue-100">
                       <Bicycle size={16} weight="bold" className="text-blue-600 shrink-0" />
                       <div className="truncate">
                         <div className="font-semibold truncate">Rider Assigned: Tariq M.</div>
-                        <div className="text-[10px] text-blue-600">Arriving in ~4 mins</div>
+                        <div className="text-2xs text-blue-600">Arriving in ~4 mins</div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                      <span className="font-mono font-bold text-slate-900">{formatPKR(o.total_amount)}</span>
-                      <span className="text-[11px] text-slate-400">Waiting rider</span>
+                    <div className="flex items-center justify-between text-xs text-ink-500 pt-1 border-t border-ink-100">
+                      <span className="font-mono font-bold text-ink-900">{formatPKR(o.total_amount)}</span>
+                      <span className="text-2xs text-ink-400">Waiting rider</span>
                     </div>
                   </div>
                 ))}
                 {readyOrders.length === 0 && (
-                  <div className="text-center py-8 text-xs text-slate-400">No packaged orders waiting</div>
+                  <div className="text-center py-8 text-xs text-ink-400">No packaged orders waiting</div>
                 )}
               </div>
             </div>
 
             {/* Column 4: Completed / Dispatched */}
-            <div className="bg-slate-100/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
+            <div className="bg-ink-100/70 border border-ink-200 rounded-md p-3.5 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  <span className="w-2.5 h-2.5 rounded-full bg-ink-400" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-ink-800">
                     Delivered / Past
                   </h3>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-xs bg-ink-200 text-ink-700">
                   {completedOrders.length}
                 </span>
               </div>
@@ -618,16 +592,16 @@ export default function RestaurantOrdersPage() {
                   <div
                     key={o.id}
                     onClick={() => handleOpenDetail(o.id)}
-                    className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs space-y-2 cursor-pointer hover:border-slate-300 transition-all opacity-85"
+                    className="p-3.5 bg-white border border-ink-200 rounded-md shadow-1 space-y-2 cursor-pointer hover:border-ink-300 transition-all opacity-85"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-mono text-slate-500">#{o.id.slice(0, 8)}</span>
+                      <span className="text-2xs font-mono text-ink-500">#{o.id.slice(0, 8)}</span>
                       <StatusBadge status={o.status} size="sm" />
                     </div>
-                    <div className="text-xs font-bold text-slate-800 truncate">{o.customer_name}</div>
-                    <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-100">
-                      <span className="font-mono font-medium text-slate-700">{formatPKR(o.total_amount)}</span>
-                      <span className="text-[10px]">Settled</span>
+                    <div className="text-xs font-bold text-ink-800 truncate">{o.customer_name}</div>
+                    <div className="flex items-center justify-between text-xs text-ink-400 pt-1 border-t border-ink-100">
+                      <span className="font-mono font-medium text-ink-700">{formatPKR(o.total_amount)}</span>
+                      <span className="text-2xs">Settled</span>
                     </div>
                   </div>
                 ))}
@@ -639,36 +613,36 @@ export default function RestaurantOrdersPage() {
 
       {/* DETAIL SLIDEOVER / MODAL */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex justify-end animate-in fade-in">
-          <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex justify-end animate-in fade-in">
+          <div className="w-full max-w-md bg-white h-full shadow-3 flex flex-col justify-between overflow-y-auto">
             <div className="p-6 space-y-5">
               {/* Drawer Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center justify-between border-b border-ink-100 pb-4">
                 <div>
-                  <span className="text-xs font-mono font-bold text-rose-600">
+                  <span className="text-xs font-mono font-bold text-red-600">
                     #{selectedOrder.id.slice(0, 8)}
                   </span>
-                  <h2 className="text-base font-bold text-slate-900">Order Ticket Details</h2>
+                  <h2 className="text-base font-bold text-ink-900">Order Ticket Details</h2>
                 </div>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                  className="p-2 rounded-sm text-ink-400 hover:text-ink-600 hover:bg-ink-100"
                 >
                   <X size={18} weight="bold" />
                 </button>
               </div>
 
               {/* Status & Payment Header */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-4 rounded-md bg-ink-50 border border-ink-200 flex items-center justify-between">
                 <div>
-                  <div className="text-xs text-slate-400">Current Order State</div>
+                  <div className="text-xs text-ink-400">Current Order State</div>
                   <div className="mt-1">
                     <StatusBadge status={selectedOrder.status} />
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-slate-400">Payment Type</div>
-                  <div className="text-xs font-bold text-slate-800 mt-1">
+                  <div className="text-xs text-ink-400">Payment Type</div>
+                  <div className="text-xs font-bold text-ink-800 mt-1">
                     {selectedOrder.payment_method}
                   </div>
                 </div>
@@ -676,22 +650,22 @@ export default function RestaurantOrdersPage() {
 
               {/* Customer Contact */}
               <div className="space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-ink-400">
                   Customer & Delivery
                 </h3>
-                <div className="p-3.5 rounded-xl border border-slate-200 space-y-1.5 text-xs text-slate-700">
-                  <div className="flex items-center gap-2 font-semibold text-slate-900">
-                    <User size={14} className="text-slate-400" />
+                <div className="p-3.5 rounded-md border border-ink-200 space-y-1.5 text-xs text-ink-700">
+                  <div className="flex items-center gap-2 font-semibold text-ink-900">
+                    <User size={14} className="text-ink-400" />
                     <span>{selectedOrder.customer_name}</span>
                   </div>
                   {selectedOrder.delivery_address && (
-                    <div className="flex items-start gap-2 text-slate-500 pt-1">
-                      <MapPin size={14} className="text-slate-400 shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-2 text-ink-500 pt-1">
+                      <MapPin size={14} className="text-ink-400 shrink-0 mt-0.5" />
                       <span>{selectedOrder.delivery_address.full_address}</span>
                     </div>
                   )}
                   {selectedOrder.special_instructions && (
-                    <div className="p-2 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 font-medium text-[11px] mt-2">
+                    <div className="p-2 rounded-md bg-amber-50 text-amber-900 border border-amber-200 font-medium text-2xs mt-2">
                       <strong>Special Request:</strong> {selectedOrder.special_instructions}
                     </div>
                   )}
@@ -700,24 +674,24 @@ export default function RestaurantOrdersPage() {
 
               {/* Itemized Food Ticket */}
               <div className="space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-ink-400">
                   Ordered Items
                 </h3>
-                <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+                <div className="divide-y divide-ink-100 border border-ink-200 rounded-md overflow-hidden">
                   {selectedOrder.items.map((item, idx) => (
                     <div key={idx} className="p-3 bg-white flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-5 h-5 rounded-md bg-rose-50 text-rose-700 font-bold text-[11px] flex items-center justify-center">
+                        <span className="w-5 h-5 rounded-md bg-red-50 text-red-700 font-bold text-2xs flex items-center justify-center">
                           {item.quantity}x
                         </span>
                         <div>
-                          <div className="font-semibold text-slate-900">{item.name}</div>
+                          <div className="font-semibold text-ink-900">{item.name}</div>
                           {item.selected_variant && (
-                            <div className="text-[11px] text-slate-400">{item.selected_variant}</div>
+                            <div className="text-2xs text-ink-400">{item.selected_variant}</div>
                           )}
                         </div>
                       </div>
-                      <span className="font-mono font-medium text-slate-800">
+                      <span className="font-mono font-medium text-ink-800">
                         {formatPKR(item.price_at_order * item.quantity)}
                       </span>
                     </div>
@@ -726,26 +700,26 @@ export default function RestaurantOrdersPage() {
               </div>
 
               {/* Money Breakdown */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-slate-600">
+              <div className="p-4 rounded-md bg-ink-50 border border-ink-200 space-y-2 text-xs">
+                <div className="flex items-center justify-between text-ink-600">
                   <span>Food Subtotal</span>
                   <span className="font-mono">{formatPKR(selectedOrder.food_subtotal)}</span>
                 </div>
                 {(selectedOrder.gst_amount ?? 0) > 0 && (
-                  <div className="flex items-center justify-between text-slate-600">
+                  <div className="flex items-center justify-between text-ink-600">
                     <span>
                       GST ({selectedOrder.gst_rate}%) {selectedOrder.prices_include_gst ? '(included in prices)' : '(added to bill)'}
                     </span>
                     <span className="font-mono">{formatPKR(selectedOrder.gst_amount ?? 0)}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between text-rose-600">
+                <div className="flex items-center justify-between text-red-600">
                   <span>Platform Commission ({selectedOrder.commission_rate ?? (selectedOrder.net_subtotal && selectedOrder.commission_amount ? Math.round((selectedOrder.commission_amount / selectedOrder.net_subtotal) * 100) : (selectedOrder.food_subtotal && selectedOrder.commission_amount ? Math.round((selectedOrder.commission_amount / selectedOrder.food_subtotal) * 100) : 10))}%)</span>
                   <span className="font-mono">−{formatPKR(selectedOrder.commission_amount)}</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
+                <div className="flex items-center justify-between text-ink-900 font-bold pt-2 border-t border-ink-200 text-sm">
                   <span>Your Net Payable</span>
-                  <span className="font-mono text-emerald-700">
+                  <span className="font-mono text-green-700">
                     {formatPKR(selectedOrder.restaurant_payable)}
                   </span>
                 </div>
@@ -753,11 +727,11 @@ export default function RestaurantOrdersPage() {
             </div>
 
             {/* Drawer Actions */}
-            <div className="p-5 border-t border-slate-200 bg-white flex items-center gap-3">
+            <div className="p-5 border-t border-ink-200 bg-white flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 text-xs font-semibold"
+                className="p-2 rounded-sm border border-ink-200 hover:bg-ink-50 text-ink-700 flex items-center gap-1.5 text-xs font-semibold"
               >
                 <Printer size={15} />
                 <span>Print</span>
@@ -771,7 +745,7 @@ export default function RestaurantOrdersPage() {
                     setSelectedOrder(null);
                     setAcceptModalOrder(orders.find((o) => o.id === current.id) || null);
                   }}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer"
+                  className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-sm text-xs font-semibold shadow-1 cursor-pointer"
                 >
                   Accept Order
                 </button>
@@ -783,7 +757,7 @@ export default function RestaurantOrdersPage() {
                   onClick={async () => {
                     await handleUpdateStatus(selectedOrder.id, 'Ready for Pickup');
                   }}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-sm text-xs font-semibold shadow-1 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Check size={14} weight="bold" />
                   Mark Ready for Pickup
@@ -796,27 +770,27 @@ export default function RestaurantOrdersPage() {
 
       {/* ACCEPT MODAL WITH PREP TIME ESTIMATOR */}
       {acceptModalOrder && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95">
             <div>
-              <h3 className="text-base font-bold text-slate-900">Accept Order & Set Prep Time</h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <h3 className="text-base font-bold text-ink-900">Accept Order & Set Prep Time</h3>
+              <p className="text-xs text-ink-500 mt-1">
                 Order #{acceptModalOrder.id.slice(0, 8)} · {acceptModalOrder.customer_name}
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-700">Estimated Cooking / Prep Time</label>
+              <label className="text-xs font-semibold text-ink-700">Estimated Cooking / Prep Time</label>
               <div className="grid grid-cols-3 gap-2">
                 {[15, 25, 35].map((mins) => (
                   <button
                     key={mins}
                     type="button"
                     onClick={() => setPrepMinutes(mins)}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-sm border text-xs font-bold transition-all cursor-pointer ${
                       prepMinutes === mins
-                        ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
-                        : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                        ? 'border-ink-900 bg-ink-900 text-white shadow-1'
+                        : 'border-ink-200 text-ink-700 hover:bg-ink-50'
                     }`}
                   >
                     {mins} mins
@@ -825,18 +799,18 @@ export default function RestaurantOrdersPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-ink-100">
               <button
                 type="button"
                 onClick={() => setAcceptModalOrder(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleAcceptSubmit}
-                className="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white rounded-sm shadow-1 cursor-pointer"
               >
                 Confirm & Start Kitchen
               </button>
@@ -847,26 +821,26 @@ export default function RestaurantOrdersPage() {
 
       {/* REJECT MODAL WITH REASON */}
       {rejectModalOrder && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
                 <Warning size={20} weight="bold" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Decline Order</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-base font-bold text-ink-900">Decline Order</h3>
+                <p className="text-xs text-ink-500">
                   Order #{rejectModalOrder.id.slice(0, 8)}
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-700">Reason for Declining</label>
+              <label className="text-xs font-semibold text-ink-700">Reason for Declining</label>
               <select
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                className="w-full p-2 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-800 focus:ring-2 focus:ring-rose-500/20"
+                className="w-full p-2 text-xs rounded-sm border border-ink-200 bg-ink-50 text-ink-800 focus:ring-2 focus:ring-blue-600/20"
               >
                 <option value="Kitchen at maximum capacity">Kitchen at maximum capacity</option>
                 <option value="Key ingredient out of stock">Key ingredient out of stock</option>
@@ -875,18 +849,18 @@ export default function RestaurantOrdersPage() {
               </select>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-ink-100">
               <button
                 type="button"
                 onClick={() => setRejectModalOrder(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm"
               >
                 Go Back
               </button>
               <button
                 type="button"
                 onClick={handleRejectSubmit}
-                className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs"
+                className="px-4 py-2 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-sm shadow-1"
               >
                 Decline & Refund
               </button>

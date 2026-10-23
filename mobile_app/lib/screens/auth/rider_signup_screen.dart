@@ -1,12 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../data/repositories/auth_repository.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/legal_links.dart';
 import 'otp_verification_screen.dart';
 import 'rider_login_screen.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../core/input/input_formatters.dart';
 
 /// Delivery Rider Sign Up Screen matching clean design system & Stitch guidelines.
 class RiderSignUpScreen extends StatefulWidget {
@@ -66,9 +67,9 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Please accept the Terms & Conditions and Privacy Policy.'),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
       return;
@@ -116,9 +117,9 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
     } catch (_) {
@@ -126,9 +127,9 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('An unexpected error occurred. Please try again.'),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
     } finally {
@@ -145,7 +146,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.ink50,
       body: SafeArea(
         child: Column(
           children: [
@@ -157,17 +158,17 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                 children: [
                   InkWell(
                     onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     child: Container(
                       width: 40,
                       height: 40,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFF1F5F9),
+                        color: AppColors.ink100,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.arrow_back_rounded,
-                        color: Color(0xFF334155),
+                        color: AppColors.ink700,
                         size: 20,
                       ),
                     ),
@@ -178,9 +179,9 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFDBEAFE)),
+                      color: AppColors.blue50,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(color: AppColors.blue100),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -188,7 +189,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                         Icon(
                           Icons.delivery_dining_rounded,
                           size: 16,
-                          color: Color(0xFF1D4ED8),
+                          color: AppColors.blue600,
                         ),
                         SizedBox(width: 6),
                         Text(
@@ -196,7 +197,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1D4ED8),
+                            color: AppColors.blue600,
                           ),
                         ),
                       ],
@@ -229,7 +230,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                         style: theme.textTheme.displayLarge?.copyWith(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
+                          color: AppColors.ink900,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -239,7 +240,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF64748B),
+                          color: AppColors.ink500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -323,8 +324,8 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.ink100,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,7 +333,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                             Icon(
                               Icons.verified_user_outlined,
                               size: 16,
-                              color: Color(0xFF64748B),
+                              color: AppColors.ink500,
                             ),
                             SizedBox(width: 8),
                             Expanded(
@@ -342,7 +343,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF64748B),
+                                  color: AppColors.ink500,
                                   height: 1.4,
                                 ),
                               ),
@@ -362,9 +363,9 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                             height: 24,
                             child: Checkbox(
                               value: _agreeToTerms,
-                              activeColor: const Color(0xFFDC2626),
+                              activeColor: AppColors.cta,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(AppRadius.xs),
                               ),
                               onChanged: (val) {
                                 setState(() {
@@ -379,14 +380,14 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                               text: TextSpan(
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF64748B),
+                                  color: AppColors.ink500,
                                 ),
                                 children: [
                                   const TextSpan(text: 'I agree to the '),
                                   TextSpan(
                                     text: 'Terms & Conditions',
                                     style: const TextStyle(
-                                      color: Color(0xFFDC2626),
+                                      color: AppColors.cta,
                                       fontWeight: FontWeight.w700,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -396,7 +397,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                                   TextSpan(
                                     text: 'Privacy Policy',
                                     style: const TextStyle(
-                                      color: Color(0xFFDC2626),
+                                      color: AppColors.cta,
                                       fontWeight: FontWeight.w700,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -418,13 +419,13 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleRiderRegister,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFDC2626),
-                            disabledBackgroundColor: const Color(0xFFCBD5E1),
+                            backgroundColor: AppColors.cta,
+                            disabledBackgroundColor: AppColors.ink300,
                             elevation: _isLoading ? 0 : 4,
                             shadowColor:
-                                const Color(0xFFDC2626).withValues(alpha: 0.35),
+                                AppColors.cta.withValues(alpha: 0.35),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
                             ),
                           ),
                           child: _isLoading
@@ -472,7 +473,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
               decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
-                  top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
+                  top: BorderSide(color: AppColors.ink100, width: 1),
                 ),
               ),
               child: Row(
@@ -483,7 +484,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      color: AppColors.ink500,
                     ),
                   ),
                   GestureDetector(
@@ -500,7 +501,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFDC2626),
+                        color: AppColors.cta,
                       ),
                     ),
                   ),
@@ -524,10 +525,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
         TextFormField(
           controller: _cnicController,
           keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9\-]')),
-            LengthLimitingTextInputFormatter(15),
-          ],
+          inputFormatters: const [CnicInputFormatter()],
           decoration: _inputDecoration(
             hint: '42101-1234567-8',
             prefixIcon: Icons.badge_outlined,
@@ -557,6 +555,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
         TextFormField(
           controller: _phoneController,
           keyboardType: TextInputType.phone,
+          inputFormatters: const [PkMobileInputFormatter()],
           decoration: _inputDecoration(
             hint: '300 1234567',
             prefixIcon: Icons.phone_iphone_rounded,
@@ -565,7 +564,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
             prefixStyle: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF334155),
+              color: AppColors.ink700,
             ),
           ),
           validator: (val) {
@@ -624,6 +623,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
         TextFormField(
           controller: _vehicleRegistrationController,
           textCapitalization: TextCapitalization.characters,
+          inputFormatters: const [VehicleRegistrationInputFormatter()],
           decoration: _inputDecoration(
             hint: 'ABC-1234',
             prefixIcon: Icons.pin_outlined,
@@ -645,11 +645,11 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.ink100, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.ink900.withValues(alpha: 0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -668,7 +668,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
               child: Container(
                 padding: const EdgeInsets.all(5),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -684,9 +684,9 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
         const Text(
           'SPEEDY MEALS FLEET',
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.w800,
-            color: Color(0xFFDC2626),
+            color: AppColors.cta,
             letterSpacing: 2.0,
           ),
         ),
@@ -702,7 +702,7 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF334155),
+          color: AppColors.ink700,
         ),
       ),
     );
@@ -718,28 +718,28 @@ class _RiderSignUpScreenState extends State<RiderSignUpScreen> {
       hintStyle: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w400,
-        color: Color(0xFF94A3B8),
+        color: AppColors.ink400,
       ),
-      prefixIcon: Icon(prefixIcon, color: const Color(0xFF94A3B8), size: 18),
+      prefixIcon: Icon(prefixIcon, color: AppColors.ink400, size: 18),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626), width: 2),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta),
       ),
     );
   }

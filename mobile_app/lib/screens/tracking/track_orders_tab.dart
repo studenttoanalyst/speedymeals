@@ -6,6 +6,7 @@ import '../../data/models/order_models.dart';
 import '../../data/repositories/order_repository.dart';
 import 'order_tracking_screen.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// The app's "Track" tab.
 ///
@@ -280,7 +281,7 @@ class _OrderHistoryTile extends StatelessWidget {
       margin: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
@@ -290,7 +291,7 @@ class _OrderHistoryTile extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(
                   isDelivered

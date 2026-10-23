@@ -227,10 +227,10 @@ export default function AdminStaffAccountsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-ink-900">
             Admin Staff Directory
           </h1>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 ring-1 ring-rose-200">
+          <span className="px-2.5 py-0.5 rounded-xs text-xs font-semibold bg-red-50 text-red-700 ring-1 ring-red-200">
             Staff Accounts
           </span>
         </div>
@@ -239,13 +239,13 @@ export default function AdminStaffAccountsPage() {
           <button
             onClick={loadData}
             title="Refresh Directory"
-            className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+            className="p-2.5 rounded-sm border border-ink-200 hover:bg-ink-50 text-ink-600 transition-colors cursor-pointer"
           >
             <ArrowClockwise size={16} />
           </button>
           <button
             onClick={handleOpenProvisionModal}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm bg-ink-900 hover:bg-ink-800 text-white font-medium text-xs shadow-1 transition-colors cursor-pointer"
           >
             <UserPlus size={16} weight="bold" />
             <span>Add Staff Member</span>
@@ -255,12 +255,12 @@ export default function AdminStaffAccountsPage() {
 
       {/* Notifications */}
       {successMessage && (
-        <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs flex items-center justify-between animate-fade-in">
+        <div className="p-3.5 rounded-md border border-green-200 bg-green-50 text-green-800 text-xs flex items-center justify-between animate-fade-in">
           <div className="flex items-center gap-2">
-            <Check size={16} weight="bold" className="text-emerald-600" />
+            <Check size={16} weight="bold" className="text-green-600" />
             <span>{successMessage}</span>
           </div>
-          <button onClick={() => setSuccessMessage(null)} className="text-emerald-600 hover:text-emerald-800 cursor-pointer">
+          <button onClick={() => setSuccessMessage(null)} className="text-green-600 hover:text-green-800 cursor-pointer">
             <X size={14} />
           </button>
         </div>
@@ -269,26 +269,26 @@ export default function AdminStaffAccountsPage() {
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="relative max-w-sm w-full">
-          <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, email, or role..."
-            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 shadow-2xs font-medium"
+            className="w-full pl-9 pr-3 py-2 bg-white border border-ink-200 rounded-sm text-xs text-ink-800 placeholder:text-ink-400 focus:outline-hidden focus:ring-2 focus:ring-ink-900/10 focus:border-ink-400 shadow-1 font-medium"
           />
         </div>
 
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-ink-400">
           Showing <strong>{filteredAccounts.length}</strong> staff members
         </div>
       </div>
 
       {/* Staff Roster Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-ink-200 rounded-md shadow-1 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-800 uppercase tracking-wider font-bold text-[11px]">
+            <thead className="bg-ink-50 border-b border-ink-200 text-ink-800 uppercase tracking-wider font-bold text-2xs">
               <tr>
                 <th className="py-3.5 px-4">Staff Name</th>
                 <th className="py-3.5 px-4">Email Address</th>
@@ -298,16 +298,16 @@ export default function AdminStaffAccountsPage() {
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-ink-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500 font-medium">
+                  <td colSpan={6} className="py-12 text-center text-ink-500 font-medium">
                     Loading staff accounts...
                   </td>
                 </tr>
               ) : filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500 font-medium">
+                  <td colSpan={6} className="py-12 text-center text-ink-500 font-medium">
                     No staff accounts found.
                   </td>
                 </tr>
@@ -321,19 +321,19 @@ export default function AdminStaffAccountsPage() {
                   const RoleSymbol = getRoleSymbolIcon(admin.role_icon);
 
                   return (
-                    <tr key={admin.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={admin.id} className="hover:bg-ink-50/70 transition-colors">
                       {/* Name & Avatar */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                          <div className="w-8 h-8 rounded-full bg-ink-900 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-1">
                             {initial}
                           </div>
                           <div>
-                            <div className="font-bold text-slate-900 text-xs">
+                            <div className="font-bold text-ink-900 text-xs">
                               {fullName}
                             </div>
                             {admin.phone && (
-                              <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1 mt-0.5">
+                              <div className="text-2xs text-ink-600 font-medium flex items-center gap-1 mt-0.5">
                                 <Phone size={11} />
                                 <span>{admin.phone}</span>
                               </div>
@@ -344,14 +344,14 @@ export default function AdminStaffAccountsPage() {
 
                       {/* Corporate Email */}
                       <td className="py-3.5 px-4">
-                        <span className="font-mono text-slate-900 text-xs font-semibold">
+                        <span className="font-mono text-ink-900 text-xs font-semibold">
                           {admin.email}
                         </span>
                       </td>
 
                       {/* Role Pill with Profile Symbol */}
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-2xs">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-ink-900 text-white shadow-1">
                           <RoleSymbol size={13} weight="bold" />
                           <span>{admin.role_name || 'Standard'}</span>
                         </span>
@@ -360,11 +360,11 @@ export default function AdminStaffAccountsPage() {
                       {/* Active / Suspended */}
                       <td className="py-3.5 px-4">
                         {admin.is_active ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xs text-2xs font-bold bg-green-50 text-green-800 border border-green-300">
                             Active
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-300">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xs text-2xs font-bold bg-red-50 text-red-800 border border-red-300">
                             Suspended
                           </span>
                         )}
@@ -373,12 +373,12 @@ export default function AdminStaffAccountsPage() {
                       {/* Credential State */}
                       <td className="py-3.5 px-4">
                         {admin.must_change_password ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xs text-2xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
                             <LockKey size={12} weight="bold" />
                             Must Change Password
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xs text-2xs font-semibold bg-ink-100 text-ink-700 border border-ink-200">
                             Password Active
                           </span>
                         )}
@@ -393,7 +393,7 @@ export default function AdminStaffAccountsPage() {
                               setTargetRoleId(admin.role_id || (roles[0]?.id ?? ''));
                             }}
                             title="Change Staff Role"
-                            className="p-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                            className="p-1.5 rounded-sm border border-ink-300 bg-white hover:bg-ink-100 text-ink-700 text-xs font-semibold transition-colors cursor-pointer shadow-1"
                           >
                             <ShieldCheck size={15} weight="bold" />
                           </button>
@@ -403,17 +403,17 @@ export default function AdminStaffAccountsPage() {
                               setNewTempPasswordResult(null);
                             }}
                             title="Reset Password"
-                            className="p-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                            className="p-1.5 rounded-sm border border-ink-300 bg-white hover:bg-ink-100 text-ink-700 text-xs font-semibold transition-colors cursor-pointer shadow-1"
                           >
                             <Key size={15} weight="bold" />
                           </button>
                           <button
                             onClick={() => handleToggleActiveStatus(admin)}
                             title={admin.is_active ? 'Deactivate Account' : 'Activate Account'}
-                            className={`p-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer shadow-2xs ${
+                            className={`p-1.5 rounded-sm border text-xs font-semibold transition-colors cursor-pointer shadow-1 ${
                               admin.is_active
-                                ? 'border-rose-300 bg-white hover:bg-rose-50 text-rose-700'
-                                : 'border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-700'
+                                ? 'border-red-300 bg-white hover:bg-red-50 text-red-700'
+                                : 'border-green-300 bg-white hover:bg-green-50 text-green-700'
                             }`}
                           >
                             <LockKey size={15} weight="bold" />
@@ -431,27 +431,27 @@ export default function AdminStaffAccountsPage() {
 
       {/* Provisioning Modal */}
       {isProvisionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white rounded-lg shadow-3 border border-ink-200 p-6 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-ink-100">
               <div>
-                <h3 className="font-bold text-base text-slate-900">
+                <h3 className="font-bold text-base text-ink-900">
                   Add New Staff Member
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-ink-400 mt-0.5">
                   Creates their office work email and temporary login password.
                 </p>
               </div>
               <button
                 onClick={() => setIsProvisionModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="p-1 rounded-sm text-ink-400 hover:text-ink-600 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             {errorMessage && (
-              <div className="p-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs flex items-center gap-2">
+              <div className="p-3 rounded-md border border-red-200 bg-red-50 text-red-700 text-xs flex items-center gap-2">
                 <WarningCircle size={16} weight="bold" className="shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -460,7 +460,7 @@ export default function AdminStaffAccountsPage() {
             <form onSubmit={handleProvisionSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-semibold text-ink-700 mb-1">
                     First Name *
                   </label>
                   <input
@@ -469,11 +469,11 @@ export default function AdminStaffAccountsPage() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="e.g. Tariq"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium"
+                    className="w-full px-3 py-2 border border-ink-200 rounded-sm bg-ink-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-semibold text-ink-700 mb-1">
                     Last Name *
                   </label>
                   <input
@@ -482,29 +482,29 @@ export default function AdminStaffAccountsPage() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="e.g. Mehmood"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium"
+                    className="w-full px-3 py-2 border border-ink-200 rounded-sm bg-ink-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 font-medium"
                   />
                 </div>
               </div>
 
               {/* Corporate Email Live Preview */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-3 rounded-md bg-ink-50 border border-ink-200 flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-[11px] font-semibold text-slate-500 block">
+                  <span className="text-2xs font-semibold text-ink-500 block">
                     Staff Work Email:
                   </span>
-                  <span className="font-mono text-slate-800 font-bold text-xs">
+                  <span className="font-mono text-ink-800 font-bold text-xs">
                     {corporateEmailPreview}
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                <span className="text-2xs text-ink-400 uppercase tracking-wider font-semibold">
                   @speedymealservices.com
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-semibold text-ink-700 mb-1">
                     Mobile Phone Number
                   </label>
                   <input
@@ -512,11 +512,11 @@ export default function AdminStaffAccountsPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+92 300 1234567"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium"
+                    className="w-full px-3 py-2 border border-ink-200 rounded-sm bg-ink-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-semibold text-ink-700 mb-1">
                     Personal Email (for recovery)
                   </label>
                   <input
@@ -524,20 +524,20 @@ export default function AdminStaffAccountsPage() {
                     value={personalEmail}
                     onChange={(e) => setPersonalEmail(e.target.value)}
                     placeholder="tariq@gmail.com"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium"
+                    className="w-full px-3 py-2 border border-ink-200 rounded-sm bg-ink-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 font-medium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-ink-700 mb-1">
                   Assign Role *
                 </label>
                 <select
                   required
                   value={selectedRoleId}
                   onChange={(e) => setSelectedRoleId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium"
+                  className="w-full px-3 py-2 border border-ink-200 rounded-sm bg-ink-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 font-medium"
                 >
                   {roles.map((r) => (
                     <option key={r.id} value={r.id}>
@@ -547,22 +547,22 @@ export default function AdminStaffAccountsPage() {
                 </select>
               </div>
 
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] leading-relaxed">
+              <div className="p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-2xs leading-relaxed">
                 <strong>Temporary Password:</strong> A secure temporary password will be created. The staff member will be asked to choose their own secret password when they first log in.
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setIsProvisionModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer"
+                  className="px-4 py-2 border border-ink-200 rounded-sm text-ink-600 hover:bg-ink-50 font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2 bg-ink-900 hover:bg-ink-800 text-white rounded-sm font-semibold shadow-1 disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? 'Creating...' : 'Create Staff Account'}
                 </button>
@@ -574,54 +574,54 @@ export default function AdminStaffAccountsPage() {
 
       {/* One-Time Credentials Success Modal */}
       {provisionedResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-3 border border-ink-200 p-6 space-y-5">
             <div className="text-center space-y-1">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center mx-auto">
                 <CheckCircle size={32} weight="bold" />
               </div>
-              <h3 className="font-bold text-base text-slate-900">
+              <h3 className="font-bold text-base text-ink-900">
                 Staff Account Created!
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-ink-500">
                 Share this login information with the staff member:
               </p>
             </div>
 
-            <div className="p-4 bg-slate-900 rounded-2xl text-white space-y-3 font-mono text-xs">
+            <div className="p-4 bg-ink-900 rounded-md text-white space-y-3 font-mono text-xs">
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-sans font-semibold">
+                <span className="text-ink-400 block text-2xs uppercase font-sans font-semibold">
                   Staff Work Email
                 </span>
-                <span className="text-emerald-400 font-bold select-all">
+                <span className="text-green-400 font-bold select-all">
                   {provisionedResult.email}
                 </span>
               </div>
 
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-sans font-semibold">
+                <span className="text-ink-400 block text-2xs uppercase font-sans font-semibold">
                   Temporary Password
                 </span>
                 <div className="flex items-center justify-between gap-2 mt-0.5">
-                  <span className="text-emerald-400 font-bold tracking-wider text-sm select-all">
+                  <span className="text-green-400 font-bold tracking-wider text-sm select-all">
                     {provisionedResult.temporary_password}
                   </span>
                   <button
                     onClick={() => copyToClipboard(provisionedResult.temporary_password, 'password')}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                    className="p-1.5 rounded-sm bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white transition-colors cursor-pointer"
                     title="Copy Temporary Password"
                   >
-                    {hasCopiedPassword ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    {hasCopiedPassword ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
                   </button>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 font-sans">
+              <div className="pt-2 border-t border-ink-800 text-2xs text-ink-400 font-sans">
                 Assigned Role: <strong>{provisionedResult.role_name}</strong>
               </div>
             </div>
 
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-700 leading-normal">
+            <div className="p-3 bg-ink-50 border border-ink-200 rounded-md text-2xs text-ink-700 leading-normal">
               <strong>First Login Notice:</strong> When {provisionedResult.first_name} logs in with this temporary password, the system will ask them to choose their own personal password right away.
             </div>
 
@@ -634,16 +634,16 @@ export default function AdminStaffAccountsPage() {
                     'all'
                   )
                 }
-                className="flex-1 py-2.5 border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 border border-ink-200 rounded-sm text-ink-700 hover:bg-ink-50 font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
-                {hasCopiedAll ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                {hasCopiedAll ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
                 <span>{hasCopiedAll ? 'Copied Summary!' : 'Copy Summary'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setProvisionedResult(null)}
-                className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+                className="flex-1 py-2.5 bg-ink-900 hover:bg-ink-800 text-white rounded-sm font-semibold text-xs shadow-1 transition-colors cursor-pointer"
               >
                 Done
               </button>
@@ -654,24 +654,24 @@ export default function AdminStaffAccountsPage() {
 
       {/* Role Reassignment Modal */}
       {assigningAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-4">
-            <h3 className="font-bold text-base text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-3 border border-ink-200 p-6 space-y-4">
+            <h3 className="font-bold text-base text-ink-900">
               Change Staff Role
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-ink-500">
               Select a new role for{' '}
               <strong>{assigningAdmin.first_name || assigningAdmin.email}</strong>. This will log them out of open sessions so the new permissions take effect immediately.
             </p>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1 text-xs">
+              <label className="block font-semibold text-ink-700 mb-1 text-xs">
                 Select New Role
               </label>
               <select
                 value={targetRoleId}
                 onChange={(e) => setTargetRoleId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-medium focus:bg-white"
+                className="w-full px-3 py-2 border border-ink-200 rounded-sm bg-ink-50 text-xs font-medium focus:bg-white"
               >
                 {roles.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -681,11 +681,11 @@ export default function AdminStaffAccountsPage() {
               </select>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 text-xs">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-ink-100 text-xs">
               <button
                 type="button"
                 onClick={() => setAssigningAdmin(null)}
-                className="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer"
+                className="px-4 py-2 border border-ink-200 rounded-sm text-ink-600 hover:bg-ink-50 font-semibold cursor-pointer"
               >
                 Cancel
               </button>
@@ -693,7 +693,7 @@ export default function AdminStaffAccountsPage() {
                 type="button"
                 disabled={isAssigning}
                 onClick={handleAssignRoleSubmit}
-                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-ink-900 hover:bg-ink-800 text-white rounded-sm font-semibold shadow-1 disabled:opacity-50 cursor-pointer"
               >
                 {isAssigning ? 'Updating Role...' : 'Save Role'}
               </button>
@@ -704,24 +704,24 @@ export default function AdminStaffAccountsPage() {
 
       {/* Password Reset Modal */}
       {resettingAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-4">
-            <h3 className="font-bold text-base text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-3 border border-ink-200 p-6 space-y-4">
+            <h3 className="font-bold text-base text-ink-900">
               Reset Staff Password
             </h3>
 
             {newTempPasswordResult ? (
               <div className="space-y-4">
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-ink-600">
                   A new temporary password has been created for{' '}
                   <strong>{resettingAdmin.email}</strong>.
                 </p>
 
-                <div className="p-4 bg-slate-900 rounded-xl font-mono text-center space-y-1">
-                  <span className="text-[10px] text-slate-400 block uppercase font-sans">
+                <div className="p-4 bg-ink-900 rounded-md font-mono text-center space-y-1">
+                  <span className="text-2xs text-ink-400 block uppercase font-sans">
                     New Temporary Password
                   </span>
-                  <div className="text-emerald-400 font-bold text-base tracking-wider select-all">
+                  <div className="text-green-400 font-bold text-base tracking-wider select-all">
                     {newTempPasswordResult}
                   </div>
                 </div>
@@ -732,7 +732,7 @@ export default function AdminStaffAccountsPage() {
                       setResettingAdmin(null);
                       setNewTempPasswordResult(null);
                     }}
-                    className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold text-xs cursor-pointer"
+                    className="px-5 py-2 bg-ink-900 hover:bg-ink-800 text-white rounded-sm font-semibold text-xs cursor-pointer"
                   >
                     Close
                   </button>
@@ -740,16 +740,16 @@ export default function AdminStaffAccountsPage() {
               </div>
             ) : (
               <div className="space-y-4 text-xs">
-                <p className="text-slate-600 leading-relaxed">
+                <p className="text-ink-600 leading-relaxed">
                   Are you sure you want to create a new temporary password for{' '}
                   <strong>{resettingAdmin.email}</strong>? They will be logged out of all devices and asked to set a new password when they log in next.
                 </p>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-ink-100">
                   <button
                     type="button"
                     onClick={() => setResettingAdmin(null)}
-                    className="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer"
+                    className="px-4 py-2 border border-ink-200 rounded-sm text-ink-600 hover:bg-ink-50 font-semibold cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -757,7 +757,7 @@ export default function AdminStaffAccountsPage() {
                     type="button"
                     disabled={isResetting}
                     onClick={handleResetPasswordSubmit}
-                    className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-xs disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 bg-ink-900 hover:bg-ink-800 text-white rounded-sm font-semibold shadow-1 disabled:opacity-50 cursor-pointer"
                   >
                     {isResetting ? 'Resetting...' : 'Create Temporary Password'}
                   </button>

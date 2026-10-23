@@ -7,6 +7,7 @@ import '../../data/models/catalog_models.dart';
 import '../../services/cart_service.dart';
 import '../cart/cart_screen.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Restaurant & Menu Detail Screen matching the Stitch UI design.
 ///
@@ -138,7 +139,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.message),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -150,9 +151,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       SnackBar(
         content: Text('${item.name} added to cart!'),
         duration: const Duration(seconds: 1),
-        backgroundColor: const Color(0xFFDC2626),
+        backgroundColor: AppColors.cta,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
       ),
     );
   }
@@ -165,9 +166,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
     if (_isLoadingMenu && categories.isEmpty) {
       return Scaffold(
-        backgroundColor: const Color(0xFFFAF8FF),
+        backgroundColor: AppColors.canvas,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFFAF8FF),
+          backgroundColor: AppColors.canvas,
           elevation: 0,
           title: Text(restaurant.name),
         ),
@@ -177,9 +178,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
     if (_menuError != null && categories.isEmpty) {
       return Scaffold(
-        backgroundColor: const Color(0xFFFAF8FF),
+        backgroundColor: AppColors.canvas,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFFAF8FF),
+          backgroundColor: AppColors.canvas,
           elevation: 0,
           title: Text(restaurant.name),
         ),
@@ -190,14 +191,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.error_outline_rounded,
-                    size: 52, color: Color(0xFFDC2626)),
+                    size: 52, color: AppColors.cta),
                 const SizedBox(height: 16),
                 const Text(
                   'Could not load the menu',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF131B2E),
+                    color: AppColors.ink900,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -206,7 +207,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF5C403C),
+                    color: AppColors.ink600,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -226,17 +227,17 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         : null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF8FF),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAF8FF).withValues(alpha: 0.95),
+        backgroundColor: AppColors.canvas.withValues(alpha: 0.95),
         elevation: 0,
         scrolledUnderElevation: 1,
-        shadowColor: Colors.black.withValues(alpha: 0.08),
+        shadowColor: AppColors.ink900.withValues(alpha: 0.08),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
             size: 20,
-            color: Color(0xFF131B2E),
+            color: AppColors.ink900,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -244,7 +245,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           restaurant.name,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF131B2E),
+            color: AppColors.ink900,
             fontSize: 17,
           ),
           overflow: TextOverflow.ellipsis,
@@ -254,7 +255,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: CircleAvatar(
               radius: 16,
-              backgroundColor: const Color(0xFFDC2626).withValues(alpha: 0.1),
+              backgroundColor: AppColors.cta.withValues(alpha: 0.1),
               child: ClipOval(
                 child: Image.asset(
                   'assets/images/new logo.png',
@@ -269,7 +270,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     errorBuilder: (c, e, s) => const Icon(
                       Icons.fastfood,
                       size: 18,
-                      color: Color(0xFFDC2626),
+                      color: AppColors.cta,
                     ),
                   ),
                 ),
@@ -282,7 +283,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         children: [
           RefreshIndicator(
             onRefresh: _loadMenu,
-            color: const Color(0xFFDC2626),
+            color: AppColors.cta,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.only(bottom: _cartCount > 0 ? 90 : 32),
@@ -338,11 +339,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           return Container(
             width: width,
             height: height,
-            color: const Color(0xFFEAEDFF),
+            color: AppColors.ink100,
             child: const Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Color(0xFFDC2626),
+                color: AppColors.cta,
               ),
             ),
           );
@@ -350,11 +351,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         errorBuilder: (context, error, stackTrace) => Container(
           width: width,
           height: height,
-          color: const Color(0xFFEAEDFF),
+          color: AppColors.ink100,
           child: const Icon(
             Icons.restaurant,
             size: 32,
-            color: Color(0xFF5C403C),
+            color: AppColors.ink600,
           ),
         ),
       );
@@ -372,11 +373,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           errorBuilder: (c, e, s) => Container(
             width: width,
             height: height,
-            color: const Color(0xFFEAEDFF),
+            color: AppColors.ink100,
             child: const Icon(
               Icons.restaurant,
               size: 32,
-              color: Color(0xFF5C403C),
+              color: AppColors.ink600,
             ),
           ),
         ),
@@ -400,9 +401,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withValues(alpha: 0.3),
+                  AppColors.ink900.withValues(alpha: 0.3),
                   Colors.transparent,
-                  Colors.black.withValues(alpha: 0.6),
+                  AppColors.ink900.withValues(alpha: 0.6),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -419,7 +420,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               children: [
                 _buildIconButton(
                   icon: _isFavorite ? Icons.favorite : Icons.favorite_border,
-                  iconColor: _isFavorite ? const Color(0xFFDC2626) : const Color(0xFF131B2E),
+                  iconColor: _isFavorite ? AppColors.cta : AppColors.ink900,
                   onTap: () {
                     setState(() {
                       _isFavorite = !_isFavorite;
@@ -429,7 +430,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 const SizedBox(width: 8),
                 _buildIconButton(
                   icon: Icons.share,
-                  iconColor: const Color(0xFF131B2E),
+                  iconColor: AppColors.ink900,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -455,11 +456,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDC2626),
-                      borderRadius: BorderRadius.circular(20),
+                      color: AppColors.cta,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
+                          color: AppColors.ink900.withValues(alpha: 0.15),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -486,10 +487,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: AppColors.ink900.withValues(alpha: 0.1),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -498,12 +499,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.timer, color: Color(0xFFDC2626), size: 14),
+                      const Icon(Icons.timer, color: AppColors.cta, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         restaurant.deliveryTime,
                         style: const TextStyle(
-                          color: Color(0xFF131B2E),
+                          color: AppColors.ink900,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                         ),
@@ -534,7 +535,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
+              color: AppColors.ink900.withValues(alpha: 0.15),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -556,10 +557,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: AppColors.ink900.withValues(alpha: 0.08),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -573,14 +574,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     child: Container(
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEF2F2),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFFEE2E2)),
+                        color: AppColors.red50,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        border: Border.all(color: AppColors.red100),
                       ),
                       child: _buildImageWidget(
                         restaurant.logoAsset,
@@ -605,7 +606,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                               style: const TextStyle(
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF131B2E),
+                                color: AppColors.ink900,
                                 letterSpacing: -0.3,
                               ),
                             ),
@@ -615,15 +616,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE2E7FF),
-                                borderRadius: BorderRadius.circular(4),
+                                color: AppColors.ink200,
+                                borderRadius: BorderRadius.circular(AppRadius.sm),
                               ),
                               child: Text(
                                 restaurant.categoryTag,
                                 style: const TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF131B2E),
+                                  color: AppColors.ink900,
                                 ),
                               ),
                             ),
@@ -634,7 +635,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                           restaurant.tagline,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF5C403C),
+                            color: AppColors.ink600,
                             fontWeight: FontWeight.w400,
                           ),
                           maxLines: 1,
@@ -658,20 +659,20 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFDDB8),
-                        borderRadius: BorderRadius.circular(20),
+                        color: AppColors.amber100,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, color: Color(0xFF7F4F00), size: 14),
+                          const Icon(Icons.star, color: AppColors.tan700, size: 14),
                           const SizedBox(width: 3),
                           Text(
                             restaurant.rating.toString(),
                             style: const TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF2A1700),
+                              color: AppColors.ink900,
                             ),
                           ),
                           // Omitted when the backend has a rating but no
@@ -681,8 +682,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                             Text(
                               '(${restaurant.reviewCount})',
                               style: const TextStyle(
-                                fontSize: 10.5,
-                                color: Color(0xFF653E00),
+                                fontSize: 11,
+                                color: AppColors.amber800,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -697,15 +698,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDCE1FF),
-                        borderRadius: BorderRadius.circular(20),
+                        color: AppColors.blue100,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
                             Icons.two_wheeler,
-                            color: Color(0xFF001551),
+                            color: AppColors.blue900,
                             size: 14,
                           ),
                           const SizedBox(width: 4),
@@ -714,7 +715,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                             style: const TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF001551),
+                              color: AppColors.blue900,
                             ),
                           ),
                         ],
@@ -728,15 +729,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2E7FF),
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppColors.ink200,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
                               Icons.schedule,
-                              color: Color(0xFFDC2626),
+                              color: AppColors.cta,
                               size: 14,
                             ),
                             const SizedBox(width: 4),
@@ -745,7 +746,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                               style: const TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF131B2E),
+                                color: AppColors.ink900,
                               ),
                             ),
                           ],
@@ -786,12 +787,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF283044) : const Color(0xFFEAEDFF),
-                  borderRadius: BorderRadius.circular(20),
+                  color: isSelected ? AppColors.ink800 : AppColors.ink100,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: AppColors.ink900.withValues(alpha: 0.1),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -803,7 +804,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected ? const Color(0xFFEEF0FF) : const Color(0xFF131B2E),
+                    color: isSelected ? AppColors.ink50 : AppColors.ink900,
                   ),
                 ),
               ),
@@ -831,14 +832,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF131B2E),
+                  color: AppColors.ink900,
                 ),
               ),
               Text(
                 '${category.items.length} Items',
                 style: const TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF5C403C),
+                  color: AppColors.ink600,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -868,10 +869,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.ink900.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -894,14 +895,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                         height: 14,
                         decoration: BoxDecoration(
                           color: _getTagBgColor(item.tagType),
-                          borderRadius: BorderRadius.circular(3),
+                          borderRadius: BorderRadius.circular(AppRadius.xs),
                         ),
                         child: Center(
                           child: Container(
                             width: 6,
                             height: 6,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFDC2626),
+                              color: AppColors.cta,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -911,7 +912,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       Text(
                         item.tag!,
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w800,
                           color: _getTagTextColor(item.tagType),
                           letterSpacing: 0.3,
@@ -928,7 +929,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF131B2E),
+                    color: AppColors.ink900,
                     height: 1.2,
                   ),
                 ),
@@ -940,7 +941,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   item.description,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF5C403C),
+                    color: AppColors.ink600,
                     height: 1.35,
                   ),
                   maxLines: 2,
@@ -957,13 +958,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       style: const TextStyle(
                         fontSize: 16.5,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF131B2E),
+                        color: AppColors.ink900,
                       ),
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFDC2626),
+                        backgroundColor: AppColors.cta,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(
@@ -972,7 +973,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                         ),
                         minimumSize: const Size(0, 34),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                       ),
                       onPressed: () => _addToCart(item),
@@ -1000,11 +1001,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                   child: Container(
                     width: 90,
                     height: 90,
-                    color: const Color(0xFFEAEDFF),
+                    color: AppColors.ink100,
                     child: _buildImageWidget(
                       item.imageUrl,
                       width: 90,
@@ -1027,10 +1028,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: AppColors.ink900.withValues(alpha: 0.1),
                             blurRadius: 3,
                           ),
                         ],
@@ -1038,9 +1039,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       child: Text(
                         '${item.rating} ★',
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF131B2E),
+                          color: AppColors.ink900,
                         ),
                       ),
                     ),
@@ -1056,26 +1057,26 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   Color _getTagBgColor(String? type) {
     switch (type) {
       case 'must_try':
-        return const Color(0xFFFFDAD6);
+        return AppColors.red100;
       case 'spicy':
-        return const Color(0xFFFFDAD6);
+        return AppColors.red100;
       case 'signature':
-        return const Color(0xFFFFE2B8);
+        return AppColors.amber100;
       default:
-        return const Color(0xFFE2E7FF);
+        return AppColors.ink200;
     }
   }
 
   Color _getTagTextColor(String? type) {
     switch (type) {
       case 'must_try':
-        return const Color(0xFFDC2626);
+        return AppColors.cta;
       case 'spicy':
-        return const Color(0xFF1D4ED8);
+        return AppColors.blue600;
       case 'signature':
-        return const Color(0xFF7F4F00);
+        return AppColors.tan700;
       default:
-        return const Color(0xFF131B2E);
+        return AppColors.ink900;
     }
   }
 
@@ -1102,11 +1103,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF283044),
-        borderRadius: BorderRadius.circular(18),
+        color: AppColors.ink800,
+        borderRadius: BorderRadius.circular(AppRadius.md),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
+            color: AppColors.ink900.withValues(alpha: 0.25),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -1123,8 +1124,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDC2626),
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.cta,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Center(
                     child: Text(
@@ -1158,7 +1159,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       Text(
                         '$_cartCount ${_cartCount == 1 ? 'Item' : 'Items'} • Speedy Delivery',
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 11,
                           color: Colors.white.withValues(alpha: 0.75),
                         ),
                         maxLines: 1,
@@ -1176,13 +1177,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           // Right Side: View Basket Action Button
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFDC2626),
+              backgroundColor: AppColors.cta,
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               minimumSize: const Size(0, 42),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
             ),
             onPressed: () {

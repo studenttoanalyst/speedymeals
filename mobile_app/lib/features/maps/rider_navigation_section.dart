@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/rider_models.dart';
 import 'rider_navigation_service.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Navigation section widget embedded in the rider assignment view.
 ///
@@ -69,7 +70,7 @@ class _RiderNavigationSectionState extends State<RiderNavigationSection> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.errorMessage!),
-            backgroundColor: const Color(0xFFDC2626),
+            backgroundColor: AppColors.cta,
           ),
         );
       }
@@ -102,9 +103,9 @@ class _RiderNavigationSectionState extends State<RiderNavigationSection> {
         Container(
           height: 38,
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFF334155)),
+            color: AppColors.ink900,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: AppColors.ink700),
           ),
           child: Row(
             children: [
@@ -158,10 +159,10 @@ class _RiderNavigationSectionState extends State<RiderNavigationSection> {
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: isRestaurant ? const Color(0xFF2563EB) : const Color(0xFF059669),
+              backgroundColor: isRestaurant ? AppColors.blue600 : AppColors.green600,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
             ),
           )
         else
@@ -169,16 +170,16 @@ class _RiderNavigationSectionState extends State<RiderNavigationSection> {
             key: const Key('navigation_unavailable_message'),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF475569)),
+              color: AppColors.ink800,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.ink600),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
                   Icons.location_off_rounded,
-                  color: Color(0xFF94A3B8),
+                  color: AppColors.ink400,
                   size: 16,
                 ),
                 const SizedBox(width: 8),
@@ -187,7 +188,7 @@ class _RiderNavigationSectionState extends State<RiderNavigationSection> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFFCBD5E1),
+                    color: AppColors.ink300,
                   ),
                 ),
               ],
@@ -218,8 +219,8 @@ class _DestinationTab extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF334155) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? AppColors.ink700 : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
@@ -228,7 +229,7 @@ class _DestinationTab extends StatelessWidget {
             Icon(
               icon,
               size: 14,
-              color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+              color: isSelected ? Colors.white : AppColors.ink400,
             ),
             const SizedBox(width: 6),
             Text(
@@ -236,7 +237,7 @@ class _DestinationTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                color: isSelected ? Colors.white : AppColors.ink400,
               ),
             ),
           ],

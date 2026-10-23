@@ -35,7 +35,7 @@ export function EmptyState({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="px-4 py-2 text-xs font-mono font-semibold bg-red text-paper hover:bg-[#C92A2E] transition-colors"
+          className="px-4 py-2 text-xs font-mono font-semibold bg-red text-paper hover:bg-red-600 transition-colors"
           style={{ borderRadius: '0px' }}
         >
           {actionLabel}

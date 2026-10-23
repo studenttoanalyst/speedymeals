@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { isInKitchen, isNewOrder } from '@/lib/orders/status';
+import { hourlyThroughput, HOURLY_PERIODS } from '@/lib/orders/hourly';
+import { useDevSeedOrders } from '@/lib/dev/useDevSeedOrders';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -23,7 +25,7 @@ import { Topbar } from '@/components/dashboard/Topbar';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { DataTable, Column } from '@/components/dashboard/DataTable';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
-import { FlowingVelocityChart } from '@/components/charts/FlowingVelocityChart';
+import ProgressMetricCard from '@/components/ui/progress-metric-card';
 import {
   listRestaurantOrders,
   getRestaurantMetrics,
@@ -92,6 +94,12 @@ export default function RestaurantDashboardPage() {
     return `PKR ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  const seedOrders = useDevSeedOrders('restaurant');
+  const throughput = useMemo(
+    () => hourlyThroughput([...orders, ...seedOrders]),
+    [orders, seedOrders],
+  );
+
   // Top selling dishes for Level 2 context
   const popularDishes = menuItems.filter((i) => i.is_popular || i.is_available).slice(0, 3);
 
@@ -102,7 +110,7 @@ export default function RestaurantDashboardPage() {
       title: 'Order ID',
       sortable: true,
       render: (o) => (
-        <span className="font-mono text-slate-800 font-medium">
+        <span className="font-mono text-ink-800 font-medium">
           #{o.id.slice(0, 8)}
         </span>
       ),
@@ -112,7 +120,7 @@ export default function RestaurantDashboardPage() {
       title: 'Customer',
       sortable: true,
       render: (o) => (
-        <div className="font-medium text-slate-900">{o.customer_name}</div>
+        <div className="font-medium text-ink-900">{o.customer_name}</div>
       ),
     },
     {
@@ -125,10 +133,10 @@ export default function RestaurantDashboardPage() {
       title: 'Payment',
       render: (o) => (
         <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+          className={`text-2xs font-semibold px-2 py-0.5 rounded-md ${
             o.payment_method === 'COD'
               ? 'bg-amber-50 text-amber-800 border border-amber-200'
-              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : 'bg-green-50 text-green-800 border border-green-200'
           }`}
         >
           {o.payment_method}
@@ -141,7 +149,7 @@ export default function RestaurantDashboardPage() {
       align: 'right',
       sortable: true,
       render: (o) => (
-        <span className="font-mono font-semibold text-slate-900">
+        <span className="font-mono font-semibold text-ink-900">
           {formatPKR(o.total_amount)}
         </span>
       ),
@@ -158,7 +166,7 @@ export default function RestaurantDashboardPage() {
                 e.stopPropagation();
                 handleAdvanceStatus(o.id, o.status);
               }}
-              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
+              className="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-sm shadow-1 transition-colors cursor-pointer"
             >
               Accept (20m)
             </button>
@@ -171,7 +179,7 @@ export default function RestaurantDashboardPage() {
                 e.stopPropagation();
                 handleAdvanceStatus(o.id, o.status);
               }}
-              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1 ml-auto cursor-pointer"
+              className="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-sm shadow-1 transition-colors flex items-center gap-1 ml-auto cursor-pointer"
             >
               <Check size={12} weight="bold" />
               Ready for Pickup
@@ -181,7 +189,7 @@ export default function RestaurantDashboardPage() {
         return (
           <Link
             href={`/restaurant/orders/${o.id}`}
-            className="text-xs text-slate-500 hover:text-slate-800 font-medium inline-flex items-center gap-1"
+            className="text-xs text-ink-500 hover:text-ink-800 font-medium inline-flex items-center gap-1"
           >
             <Eye size={13} />
             Ticket
@@ -192,7 +200,7 @@ export default function RestaurantDashboardPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="Merchant Dashboard"
         onRefresh={() => {
@@ -204,14 +212,14 @@ export default function RestaurantDashboardPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/restaurant/orders"
-              className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-semibold bg-white border border-ink-200 text-ink-700 hover:bg-ink-50 rounded-sm shadow-1 transition-colors flex items-center gap-1.5"
             >
-              <Receipt size={14} weight="bold" className="text-slate-600" />
+              <Receipt size={14} weight="bold" className="text-ink-600" />
               <span>All Orders</span>
             </Link>
             <Link
               href="/restaurant/menu"
-              className="px-3 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold bg-ink-900 hover:bg-ink-800 text-white rounded-sm shadow-1 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Plus size={14} weight="bold" />
               <span>Add Dish</span>
@@ -223,8 +231,8 @@ export default function RestaurantDashboardPage() {
       <div className="p-6 space-y-6 max-w-7xl mx-auto w-full">
         {/* Toast Alert */}
         {actionSuccess && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-in fade-in">
-            <CheckCircle size={16} weight="bold" className="text-emerald-600" />
+          <div className="p-3 bg-green-50 border border-green-200 rounded-md text-xs font-semibold text-green-800 flex items-center gap-2 animate-in fade-in">
+            <CheckCircle size={16} weight="bold" className="text-green-600" />
             <span>{actionSuccess}</span>
           </div>
         )}
@@ -270,36 +278,31 @@ export default function RestaurantDashboardPage() {
 
         {/* LEVEL 2: Contextual Trends & Top Selling Dishes */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Rush Hour Flowing Velocity Chart */}
+          {/* Kitchen order throughput, last 24 completed hours */}
           <div className="lg:col-span-2">
-            <FlowingVelocityChart
-              title="Hourly Kitchen Order Throughput & Rush Windows"
-              subtitle="Real-time prep velocity: Lunch peak (12:00 - 15:00) vs Dinner peak (19:00 - 23:00)"
-              data={[
-                { time: '12:00', orders: 18, gmv: 21600, prepTimeMinutes: 14, slaPercent: 99.2 },
-                { time: '13:00', orders: 36, gmv: 43200, peak: true, prepTimeMinutes: 17, slaPercent: 98.6 },
-                { time: '14:00', orders: 28, gmv: 33600, peak: true, prepTimeMinutes: 16, slaPercent: 98.9 },
-                { time: '15:00', orders: 12, gmv: 14400, prepTimeMinutes: 13, slaPercent: 100 },
-                { time: '18:00', orders: 16, gmv: 19200, prepTimeMinutes: 14, slaPercent: 99.4 },
-                { time: '19:00', orders: 32, gmv: 38400, prepTimeMinutes: 16, slaPercent: 98.7 },
-                { time: '20:00', orders: 54, gmv: 64800, peak: true, prepTimeMinutes: 19, slaPercent: 98.2 },
-                { time: '21:00', orders: 44, gmv: 52800, peak: true, prepTimeMinutes: 18, slaPercent: 98.5 },
-                { time: '22:00', orders: 22, gmv: 26400, prepTimeMinutes: 15, slaPercent: 99.1 },
-              ]}
+            <ProgressMetricCard
+              title="Kitchen orders per hour"
+              unit="orders"
+              data={throughput.series}
+              period="Last 24 hours"
+              periodOptions={HOURLY_PERIODS}
+              delta={String(throughput.currentHourCount)}
+              deltaLabel={`so far this hour (${throughput.currentHourLabel})`}
+              loading={isLoading}
             />
           </div>
 
           {/* Top Selling Dishes with Images */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
+          <div className="bg-white border border-ink-200 rounded-md p-5 shadow-1 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                  <Fire size={16} weight="bold" className="text-rose-600" />
+                <h2 className="text-sm font-bold text-ink-900 tracking-tight flex items-center gap-1.5">
+                  <Fire size={16} weight="bold" className="text-red-600" />
                   Top Performing Dishes Today
                 </h2>
                 <Link
                   href="/restaurant/menu"
-                  className="text-xs font-semibold text-rose-600 hover:underline"
+                  className="text-xs font-semibold text-red-600 hover:underline"
                 >
                   View Menu
                 </Link>
@@ -307,7 +310,7 @@ export default function RestaurantDashboardPage() {
 
               <div className="space-y-3">
                 {popularDishes.length === 0 ? (
-                  <div className="p-6 text-center text-slate-400 text-xs">
+                  <div className="p-6 text-center text-ink-400 text-xs">
                     No menu items found. Add dishes to track top performers.
                   </div>
                 ) : (
@@ -316,9 +319,9 @@ export default function RestaurantDashboardPage() {
                     return (
                       <div
                         key={dish.id}
-                        className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                        className="flex items-center gap-3 p-2.5 rounded-md border border-ink-100 bg-ink-50/50 hover:bg-ink-50 transition-colors"
                       >
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-ink-100 shrink-0 border border-ink-200 flex items-center justify-center">
                           {photo ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -327,24 +330,24 @@ export default function RestaurantDashboardPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <ForkKnife size={20} className="text-slate-400" />
+                            <ForkKnife size={20} className="text-ink-400" />
                           )}
-                          <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-slate-900/80 text-white text-[9px] font-bold flex items-center justify-center">
+                          <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-ink-900/80 text-white text-2xs font-bold flex items-center justify-center">
                             #{idx + 1}
                           </div>
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xs font-semibold text-slate-900 truncate">
+                          <h3 className="text-xs font-semibold text-ink-900 truncate">
                             {dish.name}
                           </h3>
-                          <div className="text-[11px] text-slate-400 font-mono">
+                          <div className="text-2xs text-ink-400 font-mono">
                             {formatPKR(dish.price)} · {dish.category || 'Special'}
                           </div>
                         </div>
 
                         <div className="text-right shrink-0">
-                          <span className="text-xs font-semibold text-slate-600 font-mono">
+                          <span className="text-xs font-semibold text-ink-600 font-mono">
                             {dish.is_popular ? 'Featured' : 'Active'}
                           </span>
                         </div>
@@ -355,9 +358,9 @@ export default function RestaurantDashboardPage() {
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <div className="mt-4 pt-3 border-t border-ink-100 flex items-center justify-between text-xs text-ink-500">
               <span>Menu Item Health</span>
-              <span className="font-semibold text-emerald-600">All Top Dishes In Stock</span>
+              <span className="font-semibold text-green-600">All Top Dishes In Stock</span>
             </div>
           </div>
         </div>
@@ -366,16 +369,16 @@ export default function RestaurantDashboardPage() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+              <h2 className="text-sm font-bold text-ink-900 tracking-tight">
                 Live Kitchen Dispatch Queue
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-ink-400">
                 Orders requiring immediate kitchen prep, packaging, or rider handover.
               </p>
             </div>
             <Link
               href="/restaurant/orders"
-              className="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1"
+              className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1"
             >
               <span>View Full Kitchen Kanban Board</span>
               <ArrowRight size={13} weight="bold" />

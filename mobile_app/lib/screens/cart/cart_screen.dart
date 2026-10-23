@@ -10,6 +10,7 @@ import '../../services/cart_service.dart';
 import '../checkout/checkout_screen.dart';
 import '../../widgets/gst_note.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Cart screen backed by the backend's per-restaurant Redis cart.
 ///
@@ -141,7 +142,7 @@ class _CartScreenState extends State<CartScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Add a delivery address before checking out.'),
-          backgroundColor: Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -388,7 +389,7 @@ class _CartBody extends StatelessWidget {
             color: theme.colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: AppColors.ink900.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
@@ -442,7 +443,7 @@ class _CartBody extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -566,9 +567,9 @@ class _CartWarningBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFDE68A)),
+        color: AppColors.amber100,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.amber200),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,7 +577,7 @@ class _CartWarningBanner extends StatelessWidget {
           const Icon(
             Icons.warning_amber_rounded,
             size: 18,
-            color: Color(0xFFB45309),
+            color: AppColors.amber700,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -585,7 +586,7 @@ class _CartWarningBanner extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF92400E),
+                color: AppColors.amber800,
               ),
             ),
           ),
@@ -619,7 +620,7 @@ class _CartLineTile extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: (line.imageUrl != null && line.imageUrl!.isNotEmpty)
@@ -692,7 +693,7 @@ class _CartLineTile extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

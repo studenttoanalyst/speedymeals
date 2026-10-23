@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skeleton_loading.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Skeleton placeholder for the CartScreen when cart data is asynchronously loading.
 class CartScreenSkeleton extends StatelessWidget {
@@ -35,7 +36,7 @@ class CartScreenSkeleton extends StatelessWidget {
               color: theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
+                  color: AppColors.ink900.withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),
@@ -78,7 +79,7 @@ class CartScreenSkeleton extends StatelessWidget {
                   const SkeletonBox(
                     width: double.infinity,
                     height: 48,
-                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
                   ),
                 ],
               ),
@@ -105,7 +106,7 @@ class _CartItemSkeletonTile extends StatelessWidget {
             SkeletonBox(
               width: 56,
               height: 56,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             const SizedBox(width: 12),
             const Expanded(
@@ -124,7 +125,7 @@ class _CartItemSkeletonTile extends StatelessWidget {
             SkeletonBox(
               width: 80,
               height: 32,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ],
         ),

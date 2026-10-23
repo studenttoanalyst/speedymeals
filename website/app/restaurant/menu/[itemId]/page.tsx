@@ -80,8 +80,8 @@ export default function RestaurantMenuItemDetailPage({
               <span
                 className={`font-mono text-xs font-semibold px-2.5 py-1 border ${
                   item.is_available
-                    ? 'bg-[#EBF7EE] text-[#1E7E34] border-[#BCE4C7]'
-                    : 'bg-[#FDF0EE] text-[#C92A2A] border-[#F5C2BC]'
+                    ? 'bg-green-50 text-green-600 border-green-200'
+                    : 'bg-red-50 text-red-600 border-red-200'
                 }`}
                 style={{ borderRadius: '0px' }}
               >

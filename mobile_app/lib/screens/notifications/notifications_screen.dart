@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/notification_service.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Notifications feed reached from the dashboard bell icon.
 ///
@@ -76,7 +77,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   padding: const EdgeInsets.only(right: 20),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.error,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: const Icon(Icons.delete_outline, color: Colors.white),
                 ),
@@ -143,19 +144,19 @@ class _NotificationTile extends StatelessWidget {
       case AppNotificationType.order:
         return (
           icon: Icons.delivery_dining_rounded,
-          color: const Color(0xFF1D4ED8),
+          color: AppColors.blue600,
           label: 'Order',
         );
       case AppNotificationType.promo:
         return (
           icon: Icons.local_offer_rounded,
-          color: const Color(0xFFF59E0B),
+          color: AppColors.amber500,
           label: 'Promo',
         );
       case AppNotificationType.alert:
         return (
           icon: Icons.campaign_rounded,
-          color: const Color(0xFFDC2626),
+          color: AppColors.cta,
           label: 'Alert',
         );
     }
@@ -170,9 +171,9 @@ class _NotificationTile extends StatelessWidget {
       color: notification.isRead
           ? theme.colorScheme.surfaceContainerLowest
           : theme.colorScheme.primaryContainer.withValues(alpha: 0.14),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: () => NotificationService.instance.markAsRead(notification.id),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -184,7 +185,7 @@ class _NotificationTile extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   color: style.color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(style.icon, color: style.color, size: 22),
               ),
@@ -212,7 +213,7 @@ class _NotificationTile extends StatelessWidget {
                             height: 8,
                             margin: const EdgeInsets.only(left: 6),
                             decoration: const BoxDecoration(
-                              color: Color(0xFFDC2626),
+                              color: AppColors.cta,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -236,7 +237,7 @@ class _NotificationTile extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: style.color.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
                           child: Text(
                             style.label,

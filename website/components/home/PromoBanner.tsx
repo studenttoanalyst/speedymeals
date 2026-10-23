@@ -90,18 +90,18 @@ export const PromoBanner: React.FC = () => {
   return (
     <div
       aria-label="Speedy Meals Promotions and Guarantees"
-      className="group relative z-10 w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] py-2.5 sm:py-3 bg-gradient-to-r from-[#DF3226] via-[#E23A2E] to-[#D3281C] text-white border-y border-[#C9251A] overflow-hidden select-none shadow-sm"
+      className="group relative z-10 w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] py-2.5 sm:py-3 bg-gradient-to-r from-red-500 via-red-500 to-red-600 text-white border-y border-red-600 overflow-hidden select-none shadow-1"
     >
       {/* Edge gradient dissolves matching rose red background */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-[#DF3226] to-transparent z-20" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-[#D3281C] to-transparent z-20" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-red-500 to-transparent z-20" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-red-600 to-transparent z-20" />
 
       {/* Continuous rolling promotion tape - pauses gracefully on hover */}
       <div className="animate-marquee group-hover:[animation-play-state:paused] flex items-center flex-nowrap shrink-0 space-x-4 sm:space-x-5">
         {tickerItems.map((offer, idx) => (
           <div
             key={`${offer.id}-${idx}`}
-            className="inline-flex items-center space-x-2.5 px-3.5 sm:px-4 py-1.5 bg-white/12 hover:bg-white/22 border border-white/25 rounded-full shrink-0 backdrop-blur-md shadow-xs transition-all duration-200 cursor-default hover:scale-[1.02]"
+            className="inline-flex items-center space-x-2.5 px-3.5 sm:px-4 py-1.5 bg-white/12 hover:bg-white/22 border border-white/25 rounded-full shrink-0 backdrop-blur-md shadow-1 transition-all duration-200 cursor-default hover:scale-[1.02]"
           >
             {/* Icon circle */}
             <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
@@ -109,7 +109,7 @@ export const PromoBanner: React.FC = () => {
             </div>
 
             {/* Badge pill */}
-            <span className="font-mono text-[9.5px] font-bold uppercase tracking-wider text-white/90 bg-black/20 px-2 py-0.5 rounded-full">
+            <span className="font-mono text-2xs font-bold uppercase tracking-wider text-white/90 bg-black/20 px-2 py-0.5 rounded-xs">
               {offer.badge}
             </span>
 
@@ -122,7 +122,7 @@ export const PromoBanner: React.FC = () => {
             <span className="w-1 h-1 rounded-full bg-white/40 shrink-0" />
 
             {/* Subtitle */}
-            <span className="text-[11.5px] sm:text-xs text-white/90 font-sans font-medium whitespace-nowrap">
+            <span className="text-xs sm:text-xs text-white/90 font-sans font-medium whitespace-nowrap">
               {offer.subtitle}
             </span>
           </div>

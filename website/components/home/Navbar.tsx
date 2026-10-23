@@ -208,7 +208,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                   onClick={() => handleNavClick(item.id as 'overview' | 'services' | 'partner' | 'about')}
                   className={`nav-pill relative px-3.5 py-2 font-sans font-medium text-sm tracking-wide transition-all duration-150 cursor-pointer active:scale-[0.96] select-none ${
                     (item.id === 'about' && isAboutPage) || (!isAboutPage && activeSection === item.id)
-                      ? 'text-black font-bold bg-white/70 shadow-xs'
+                      ? 'text-black font-bold bg-white/70 shadow-1'
                       : 'text-ink-soft hover:text-ink hover:bg-black/[0.04]'
                   }`}
                 >
@@ -224,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-cta-early-access"
             type="button"
             onClick={() => handleNavClick('partner', 'customer')}
-            className="nav-pill px-4 py-2 text-xs font-sans font-bold tracking-wide uppercase bg-[#C7A874] text-[#15171A] hover:bg-[#B3935B] transition-all duration-150 flex items-center space-x-1.5 cursor-pointer shadow-xs active:scale-95 select-none"
+            className="nav-pill px-4 py-2 text-xs font-sans font-bold tracking-wide uppercase bg-tan-400 text-ink-900 hover:bg-tan-700 transition-all duration-150 flex items-center space-x-1.5 cursor-pointer shadow-1 active:scale-95 select-none"
           >
             <span>Get VIP access</span>
             <ArrowRight size={13} weight="bold" />
@@ -237,16 +237,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
               type="button"
               onClick={() => setPortalsOpen((prev) => !prev)}
               className={`nav-pill px-3 py-2 text-xs font-sans font-semibold tracking-wide uppercase transition-all duration-150 flex items-center space-x-1.5 cursor-pointer active:scale-95 select-none ${sessionRole === 'admin'
-                ? 'border border-ink bg-ink text-white hover:bg-black shadow-xs'
+                ? 'border border-ink bg-ink text-white hover:bg-black shadow-1'
                 : sessionRole === 'restaurant'
-                  ? 'border border-blue bg-blue text-white hover:bg-[#155ab6] shadow-xs'
-                  : 'border border-black/10 bg-white/80 backdrop-blur-md text-ink hover:border-black/20 hover:bg-white/95 shadow-xs'
+                  ? 'border border-blue bg-blue text-white hover:bg-blue-600 shadow-1'
+                  : 'border border-black/10 bg-white/80 backdrop-blur-md text-ink hover:border-black/20 hover:bg-white/95 shadow-1'
                 }`}
             >
               {sessionRole ? (
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full bg-[#10B981] opacity-75 rounded-full" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]" />
+                  <span className="animate-ping absolute inline-flex h-full w-full bg-green-500 opacity-75 rounded-full" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                 </span>
               ) : (
                 <Key size={13} weight="bold" className="text-red" />
@@ -279,10 +279,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                     mass: 0.8,
                   }}
                   style={{ transformOrigin: 'top right' }}
-                  className="absolute right-0 top-full mt-2 w-56 apple-glass-panel py-2 z-50 rounded-2xl overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-56 apple-glass-panel py-2 z-50 rounded-lg overflow-hidden"
                 >
                   <div className="px-3 pb-2 mb-1 border-b border-black/5">
-                    <span className="font-sans text-[10px] uppercase tracking-wider text-ink-soft font-bold">
+                    <span className="font-sans text-2xs uppercase tracking-wider text-ink-soft font-bold">
                       SpeedyMeals Portals
                     </span>
                   </div>
@@ -300,7 +300,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                       </span>
                     </div>
                     {sessionRole === 'restaurant' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
                     )}
                   </Link>
 
@@ -317,7 +317,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                       </span>
                     </div>
                     {sessionRole === 'admin' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
                     )}
                   </Link>
 
@@ -348,7 +348,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
             id="nav-mobile-toggle"
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="nav-pill p-2.5 apple-glass-pill text-ink hover:bg-white transition-all duration-150 cursor-pointer flex items-center justify-center active:scale-90 select-none shadow-xs"
+            className="nav-pill p-2.5 apple-glass-pill text-ink hover:bg-white transition-all duration-150 cursor-pointer flex items-center justify-center active:scale-90 select-none shadow-1"
             aria-label="Toggle navigation"
           >
             {mobileMenuOpen ? <X size={20} weight="bold" /> : <List size={20} weight="bold" />}
@@ -378,7 +378,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                 id="mobile-link-services"
                 type="button"
                 onClick={() => handleNavClick('services')}
-                className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-lg active:scale-[0.98] ${activeSection === 'services'
+                className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-sm active:scale-[0.98] ${activeSection === 'services'
                   ? 'bg-tan/20 text-black font-bold'
                   : 'text-ink hover:bg-paper-off'
                   }`}
@@ -390,7 +390,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                 id="mobile-link-registration"
                 type="button"
                 onClick={() => handleNavClick('partner')}
-                className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-lg active:scale-[0.98] ${activeSection === 'partner'
+                className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-sm active:scale-[0.98] ${activeSection === 'partner'
                   ? 'bg-tan/20 text-black font-bold'
                   : 'text-ink hover:bg-paper-off'
                   }`}
@@ -402,7 +402,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                 id="mobile-link-about"
                 type="button"
                 onClick={() => handleNavClick('about')}
-                className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-lg active:scale-[0.98] ${isAboutPage
+                className={`text-left py-3 px-3 border-b border-line flex justify-between items-center transition-colors rounded-sm active:scale-[0.98] ${isAboutPage
                   ? 'bg-tan/20 text-black font-bold'
                   : 'text-ink hover:bg-paper-off'
                   }`}
@@ -416,7 +416,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                   id="mobile-link-early-access"
                   type="button"
                   onClick={() => handleNavClick('partner', 'customer')}
-                  className="w-full py-3 px-4 bg-[#C7A874] text-[#15171A] font-sans font-bold uppercase tracking-wide rounded-lg flex justify-center items-center space-x-2 active:scale-95 transition-transform"
+                  className="w-full py-3 px-4 bg-tan-400 text-ink-900 font-sans font-bold uppercase tracking-wide rounded-sm flex justify-center items-center space-x-2 active:scale-95 transition-transform"
                 >
                   <span>Get VIP access</span>
                   <ArrowRight size={13} weight="bold" />
@@ -434,7 +434,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                   <Storefront size={16} weight="bold" />
                   <span>Merchant Portal</span>
                 </div>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 border border-blue/30 bg-blue/10 text-blue">
+                <span className="text-2xs font-bold px-1.5 py-0.5 border border-blue/30 bg-blue/10 text-blue">
                   {sessionRole === 'restaurant' ? 'DASHBOARD' : 'LOGIN'}
                 </span>
               </Link>
@@ -449,7 +449,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                   <ShieldCheck size={16} weight="bold" />
                   <span>Admin Console</span>
                 </div>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 border border-red/30 bg-red/10 text-red">
+                <span className="text-2xs font-bold px-1.5 py-0.5 border border-red/30 bg-red/10 text-red">
                   {sessionRole === 'admin' ? 'DASHBOARD' : 'LOGIN'}
                 </span>
               </Link>
@@ -489,7 +489,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPersona }) => {
                 id="mobile-cta-customer"
                 type="button"
                 onClick={() => handleNavClick('partner', 'customer')}
-                className="nav-pill w-full py-2.5 text-center border border-tan text-[#A8874E] hover:bg-tan hover:text-ink transition-colors active:scale-95"
+                className="nav-pill w-full py-2.5 text-center border border-tan text-tan-700 hover:bg-tan hover:text-ink transition-colors active:scale-95"
               >
                 Customer
               </button>

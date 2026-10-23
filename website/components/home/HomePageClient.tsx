@@ -15,7 +15,7 @@ const PartnerSection = dynamic(
   () => import('@/components/home/PartnerSection').then((mod) => mod.PartnerSection),
   {
     loading: () => (
-      <div id="partner" className="py-24 max-w-7xl mx-auto px-4 text-center text-[#5B5F66]">
+      <div id="partner" className="py-24 max-w-7xl mx-auto px-4 text-center text-ink-600">
         <div className="w-8 h-8 mx-auto mb-4 border-2 border-red border-t-transparent rounded-full animate-spin" />
         <p className="font-sans text-xs uppercase tracking-wider">Loading partnership registration...</p>
       </div>
@@ -46,7 +46,7 @@ export function HomePageClient({ slides }: HomePageClientProps) {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#FFFFFF] text-[#15171A] overflow-x-hidden selection:bg-[#E23A2E] selection:text-white">
+    <div className="relative min-h-screen bg-white text-ink-900 overflow-x-hidden selection:bg-red-500 selection:text-white">
       {/* Sticky Snap Navbar */}
       <Navbar onSelectPersona={handleSelectPersona} />
 

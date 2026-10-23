@@ -31,7 +31,7 @@ export const HighlightedText: React.FC<HighlightedTextProps> = ({ text, query, c
             return (
               <mark
                 key={i}
-                className="find-match bg-[#FEF08A] text-ink font-semibold rounded-xs px-0.5 transition-all duration-150 inline"
+                className="find-match bg-amber-200 text-ink font-semibold rounded-xs px-0.5 transition-all duration-150 inline"
               >
                 {seg}
               </mark>

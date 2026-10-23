@@ -718,11 +718,24 @@ def test_kit_not_completed_without_enough_shirts(db_session):
     admin_id = uuid.uuid4()
 
     result = service.update_rider_kit(
+        db_session, rider.id, admin_id, True, 0, True
+    )
+
+    assert result.kit_shirts_issued == 0
+    assert result.kit_completed is False
+
+
+def test_kit_completed_with_one_shirt(db_session):
+    """Minimum is one shirt (KIT_MIN_SHIRTS)."""
+    rider = _make_admin_rider(db_session, approval_status="approved")
+    admin_id = uuid.uuid4()
+
+    result = service.update_rider_kit(
         db_session, rider.id, admin_id, True, 1, True
     )
 
     assert result.kit_shirts_issued == 1
-    assert result.kit_completed is False
+    assert result.kit_completed is True
 
 
 def test_kit_not_completed_without_box(db_session):

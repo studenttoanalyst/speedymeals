@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skeleton_loading.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Skeleton placeholder matching [_RestaurantCard] in DashboardScreen.
 class RestaurantCardSkeleton extends StatelessWidget {
@@ -29,7 +30,7 @@ class RestaurantCardSkeleton extends StatelessWidget {
                   child: SkeletonBox(
                     width: 72,
                     height: 22,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                 ),
               ],
@@ -51,7 +52,7 @@ class RestaurantCardSkeleton extends StatelessWidget {
                     SkeletonBox(
                       width: 38,
                       height: 18,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                   ],
                 ),

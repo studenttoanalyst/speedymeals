@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skeleton_loading.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Skeleton placeholder matching [_OrderHistoryTile] in OrderHistoryScreen.
 class OrderTileSkeleton extends StatelessWidget {
@@ -17,7 +18,7 @@ class OrderTileSkeleton extends StatelessWidget {
             SkeletonBox(
               width: 44,
               height: 44,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             const SizedBox(width: 12),
             // Middle details (Restaurant name, order ID & date, status & payment)
@@ -43,7 +44,7 @@ class OrderTileSkeleton extends StatelessWidget {
                 SkeletonBox(
                   width: 76,
                   height: 24,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
               ],
             ),

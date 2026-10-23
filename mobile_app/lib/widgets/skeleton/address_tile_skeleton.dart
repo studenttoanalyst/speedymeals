@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'skeleton_loading.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Skeleton placeholder matching [_AddressTile] in SavedAddressesScreen.
 class AddressTileSkeleton extends StatelessWidget {
@@ -17,7 +18,7 @@ class AddressTileSkeleton extends StatelessWidget {
             SkeletonBox(
               width: 42,
               height: 42,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -31,7 +32,7 @@ class AddressTileSkeleton extends StatelessWidget {
                       SkeletonBox(
                         width: 50,
                         height: 18,
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
                     ],
                   ),
@@ -43,13 +44,13 @@ class AddressTileSkeleton extends StatelessWidget {
                       SkeletonBox(
                         width: 95,
                         height: 24,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
                       const Spacer(),
                       SkeletonBox(
                         width: 28,
                         height: 28,
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
                     ],
                   ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'customer_signup_screen.dart';
 import 'rider_signup_screen.dart';
 import '../../widgets/legal_links.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Enum representing the user's chosen registration type/role.
 enum RegistrationType {
@@ -57,7 +58,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
     final isEnabled = _selectedRole != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.ink50,
       body: SafeArea(
         child: Stack(
           children: [
@@ -70,7 +71,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                 height: 240,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFDC2626).withValues(alpha: 0.08),
+                  color: AppColors.cta.withValues(alpha: 0.08),
                 ),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
@@ -94,17 +95,17 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                             Navigator.pop(context);
                           }
                         },
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                         child: Container(
                           width: 36,
                           height: 36,
                           decoration: const BoxDecoration(
-                            color: Color(0xFFF1F5F9),
+                            color: AppColors.ink100,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.chevron_left_rounded,
-                            color: Color(0xFF334155),
+                            color: AppColors.ink700,
                             size: 22,
                           ),
                         ),
@@ -112,9 +113,9 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                       const Text(
                         'STEP 1 OF 2',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF94A3B8),
+                          color: AppColors.ink400,
                           letterSpacing: 1.2,
                         ),
                       ),
@@ -144,7 +145,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           style: theme.textTheme.displayLarge?.copyWith(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF0F172A),
+                            color: AppColors.ink900,
                             letterSpacing: -0.5,
                           ),
                           textAlign: TextAlign.center,
@@ -155,7 +156,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           style: theme.textTheme.bodyLarge?.copyWith(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF64748B),
+                            color: AppColors.ink500,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -167,14 +168,14 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           type: RegistrationType.customer,
                           title: 'Customer',
                           badgeText: 'Popular',
-                          badgeBgColor: const Color(0xFFFEE2E2),
-                          badgeTextColor: const Color(0xFFDC2626),
+                          badgeBgColor: AppColors.red100,
+                          badgeTextColor: AppColors.cta,
                           description:
                               'Order food and get it delivered to your doorstep',
                           icon: Icons.soup_kitchen_rounded,
                           featurePills: [
                             const _FeaturePill(
-                              dotColor: Color(0xFF10B981),
+                              dotColor: AppColors.green600,
                               text: '15–25m delivery',
                             ),
                             const _FeaturePill(
@@ -190,14 +191,14 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           type: RegistrationType.rider,
                           title: 'Delivery Rider',
                           badgeText: 'Earn Daily',
-                          badgeBgColor: const Color(0xFFEFF6FF),
-                          badgeTextColor: const Color(0xFF1D4ED8),
+                          badgeBgColor: AppColors.blue50,
+                          badgeTextColor: AppColors.blue600,
                           description:
                               'Deliver orders and earn with SpeedyMeals',
                           icon: Icons.delivery_dining_rounded,
                           featurePills: [
                             const _FeaturePill(
-                              dotColor: Color(0xFFF59E0B),
+                              dotColor: AppColors.amber500,
                               text: 'Flexible hours',
                             ),
                             const _FeaturePill(
@@ -215,7 +216,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                             Icon(
                               Icons.verified_user_outlined,
                               size: 13,
-                              color: Color(0xFF94A3B8),
+                              color: AppColors.ink400,
                             ),
                             SizedBox(width: 5),
                             Flexible(
@@ -224,7 +225,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF94A3B8),
+                                  color: AppColors.ink400,
                                 ),
                               ),
                             ),
@@ -244,7 +245,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     border: Border(
-                      top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
+                      top: BorderSide(color: AppColors.ink100, width: 1),
                     ),
                   ),
                   child: Column(
@@ -257,11 +258,11 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(AppRadius.md),
                             boxShadow: isEnabled
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFFDC2626)
+                                      color: AppColors.cta
                                           .withValues(alpha: 0.3),
                                       blurRadius: 16,
                                       offset: const Offset(0, 6),
@@ -272,12 +273,12 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           child: ElevatedButton(
                             onPressed: isEnabled ? _onContinue : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFDC2626),
-                              disabledBackgroundColor: const Color(0xFFCBD5E1),
-                              disabledForegroundColor: const Color(0xFF94A3B8),
+                              backgroundColor: AppColors.cta,
+                              disabledBackgroundColor: AppColors.ink300,
+                              disabledForegroundColor: AppColors.ink400,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(AppRadius.sm),
                               ),
                             ),
                             child: Row(
@@ -290,7 +291,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                                     fontWeight: FontWeight.w700,
                                     color: isEnabled
                                         ? Colors.white
-                                        : const Color(0xFF94A3B8),
+                                        : AppColors.ink400,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -299,7 +300,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                                   size: 18,
                                   color: isEnabled
                                       ? Colors.white
-                                      : const Color(0xFF94A3B8),
+                                      : AppColors.ink400,
                                 ),
                               ],
                             ),
@@ -332,11 +333,11 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.ink100, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.ink900.withValues(alpha: 0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 3),
                   ),
@@ -355,7 +356,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -371,9 +372,9 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
         const Text(
           'SPEEDY MEALS',
           style: TextStyle(
-            fontSize: 9.5,
+            fontSize: 11,
             fontWeight: FontWeight.w800,
-            color: Color(0xFFDC2626),
+            color: AppColors.cta,
             letterSpacing: 1.8,
           ),
         ),
@@ -400,22 +401,22 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
             color:
-                isSelected ? const Color(0xFFDC2626) : const Color(0xFFE2E8F0),
+                isSelected ? AppColors.cta : AppColors.ink200,
             width: isSelected ? 2 : 1.5,
           ),
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: const Color(0xFFDC2626).withValues(alpha: 0.12),
+                color: AppColors.cta.withValues(alpha: 0.12),
                 blurRadius: 14,
                 offset: const Offset(0, 4),
               )
             else
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
+                color: AppColors.ink900.withValues(alpha: 0.02),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -434,11 +435,11 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isSelected
-                      ? const Color(0xFFDC2626)
+                      ? AppColors.cta
                       : Colors.transparent,
                   border: isSelected
                       ? null
-                      : Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
+                      : Border.all(color: AppColors.ink300, width: 1.5),
                 ),
                 child: isSelected
                     ? const Icon(
@@ -460,16 +461,16 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                   height: 44,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFFFEF2F2)
-                        : const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
+                        ? AppColors.red50
+                        : AppColors.ink100,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Icon(
                     icon,
                     size: 22,
                     color: isSelected
-                        ? const Color(0xFFDC2626)
-                        : const Color(0xFF475569),
+                        ? AppColors.cta
+                        : AppColors.ink600,
                   ),
                 ),
 
@@ -489,7 +490,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                               style: const TextStyle(
                                 fontSize: 15.5,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A),
+                                color: AppColors.ink900,
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -500,12 +501,12 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: badgeBgColor,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(AppRadius.md),
                               ),
                               child: Text(
                                 badgeText,
                                 style: TextStyle(
-                                  fontSize: 9.5,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   color: badgeTextColor,
                                 ),
@@ -521,7 +522,7 @@ class _RegisterAsScreenState extends State<RegisterAsScreen> {
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF64748B),
+                            color: AppColors.ink500,
                             height: 1.25,
                           ),
                         ),
@@ -561,8 +562,8 @@ class _FeaturePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(5),
+        color: AppColors.ink100,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -581,9 +582,9 @@ class _FeaturePill extends StatelessWidget {
           Text(
             text,
             style: const TextStyle(
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF475569),
+              color: AppColors.ink600,
             ),
           ),
         ],

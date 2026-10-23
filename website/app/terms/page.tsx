@@ -76,11 +76,11 @@ export default function TermsAndConditionsPage() {
     matches.forEach((el, idx) => {
       if (idx === targetIndex) {
         el.classList.add('bg-red', 'text-white', 'font-bold', 'ring-2', 'ring-red-400');
-        el.classList.remove('bg-[#FEF08A]', 'text-ink');
+        el.classList.remove('bg-amber-200', 'text-ink');
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
         el.classList.remove('bg-red', 'text-white', 'font-bold', 'ring-2', 'ring-red-400');
-        el.classList.add('bg-[#FEF08A]', 'text-ink');
+        el.classList.add('bg-amber-200', 'text-ink');
       }
     });
   };
@@ -134,7 +134,7 @@ export default function TermsAndConditionsPage() {
       setActiveMatchIndex(0);
       document.querySelectorAll<HTMLElement>('.find-match-active').forEach(el => {
         el.classList.remove('find-match-active', 'bg-red', 'text-white', 'ring-2', 'ring-red-400', 'font-bold');
-        el.classList.add('bg-[#FEF08A]', 'text-ink');
+        el.classList.add('bg-amber-200', 'text-ink');
       });
       return;
     }
@@ -154,7 +154,7 @@ export default function TermsAndConditionsPage() {
   }, [searchQuery]);
 
   return (
-    <div className="relative min-h-screen bg-[#F8F9FA] text-[#15171A] selection:bg-[#E23A2E] selection:text-white font-sans overflow-x-hidden">
+    <div className="relative min-h-screen bg-ink-50 text-ink-900 selection:bg-red-500 selection:text-white font-sans overflow-x-hidden">
       {/* Fixed Ambient Transparent SpeedyMeals Favicon Watermark (Persistent viewport-centered background watermark) */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
         <Image
@@ -181,8 +181,8 @@ export default function TermsAndConditionsPage() {
                 SPEEDY MEALS
               </span>
             </Link>
-            <span className="text-[#8C9099] font-mono text-xs hidden sm:inline">/</span>
-            <span className="font-mono text-xs text-[#5B5F66] uppercase tracking-wider hidden sm:inline">
+            <span className="text-ink-500 font-mono text-xs hidden sm:inline">/</span>
+            <span className="font-mono text-xs text-ink-600 uppercase tracking-wider hidden sm:inline">
               LEGAL &amp; COMPLIANCE
             </span>
           </div>
@@ -209,8 +209,8 @@ export default function TermsAndConditionsPage() {
               >
                 {copiedDocLink ? (
                   <>
-                    <Check size={13} className="text-[#10B981]" weight="bold" />
-                    <span className="text-[#10B981] font-bold">COPIED</span>
+                    <Check size={13} className="text-green-600" weight="bold" />
+                    <span className="text-green-600 font-bold">COPIED</span>
                   </>
                 ) : (
                   <>
@@ -231,22 +231,22 @@ export default function TermsAndConditionsPage() {
         </div>
 
         {/* Mobile Sticky Quick Jump & Find Toolbar */}
-        <div className="lg:hidden border-t border-line/60 bg-[#F1F3F5] px-4 py-2 flex flex-col gap-2">
+        <div className="lg:hidden border-t border-line/60 bg-ink-100 px-4 py-2 flex flex-col gap-2">
           {/* Mobile IDE Find Toolbar */}
-          <div className="flex items-center space-x-1.5 bg-white border border-line px-2.5 py-1.5 shadow-xs">
-            <MagnifyingGlass size={14} weight="bold" className="text-[#8C9099] shrink-0" />
+          <div className="flex items-center space-x-1.5 bg-white border border-line px-2.5 py-1.5 shadow-1">
+            <MagnifyingGlass size={14} weight="bold" className="text-ink-500 shrink-0" />
             <input
               type="text"
               placeholder="Find in document (e.g. D3.2, COD)..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full bg-transparent text-xs font-mono text-ink placeholder-[#8C9099] focus:outline-none"
+              className="w-full bg-transparent text-xs font-mono text-ink placeholder-ink-500 focus:outline-none"
             />
             {searchQuery.trim() && (
               <div className="flex items-center space-x-1 shrink-0">
                 <span
-                  className={`font-mono text-[10px] px-1.5 py-0.5 border ${
+                  className={`font-mono text-2xs px-1.5 py-0.5 border ${
                     totalMatches > 0
                       ? 'bg-paper-off border-line text-ink font-bold'
                       : 'bg-red/10 border-red/30 text-red font-bold'
@@ -273,7 +273,7 @@ export default function TermsAndConditionsPage() {
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="p-0.5 text-[#8C9099] cursor-pointer"
+                  className="p-0.5 text-ink-500 cursor-pointer"
                 >
                   <X size={12} weight="bold" />
                 </button>
@@ -282,7 +282,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="flex items-center justify-between gap-2">
-            <label htmlFor="mobile-sec-jump" className="font-mono text-[10px] text-[#5B5F66] uppercase font-bold shrink-0">
+            <label htmlFor="mobile-sec-jump" className="font-mono text-2xs text-ink-600 uppercase font-bold shrink-0">
               JUMP:
             </label>
             <select
@@ -311,12 +311,12 @@ export default function TermsAndConditionsPage() {
           <aside className="hidden lg:block lg:col-span-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 border-r border-line/60 print:hidden">
             <div className="space-y-6">
               {/* IDE-Style Find Toolbar */}
-              <div className="bg-white border-2 border-line focus-within:border-red shadow-xs p-2 transition-all space-y-1.5">
+              <div className="bg-white border-2 border-line focus-within:border-red shadow-1 p-2 transition-all space-y-1.5">
                 <div className="flex items-center space-x-1.5">
                   <MagnifyingGlass
                     size={15}
                     weight="bold"
-                    className="text-[#8C9099] shrink-0"
+                    className="text-ink-500 shrink-0"
                   />
                   <input
                     ref={searchInputRef}
@@ -325,12 +325,12 @@ export default function TermsAndConditionsPage() {
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="w-full bg-transparent text-xs font-mono text-ink placeholder-[#8C9099] focus:outline-none"
+                    className="w-full bg-transparent text-xs font-mono text-ink placeholder-ink-500 focus:outline-none"
                   />
                   {searchQuery.trim() && (
                     <div className="flex items-center space-x-1 shrink-0">
                       <span
-                        className={`font-mono text-[10px] px-1.5 py-0.5 border ${
+                        className={`font-mono text-2xs px-1.5 py-0.5 border ${
                           totalMatches > 0
                             ? 'bg-paper-off border-line text-ink font-bold'
                             : 'bg-red/10 border-red/30 text-red font-bold'
@@ -360,7 +360,7 @@ export default function TermsAndConditionsPage() {
                         type="button"
                         onClick={() => setSearchQuery('')}
                         title="Clear find (Esc)"
-                        className="p-1 text-[#8C9099] hover:text-red transition-colors cursor-pointer"
+                        className="p-1 text-ink-500 hover:text-red transition-colors cursor-pointer"
                       >
                         <X size={12} weight="bold" />
                       </button>
@@ -369,7 +369,7 @@ export default function TermsAndConditionsPage() {
                 </div>
 
                 {searchQuery.trim() && (
-                  <div className="pt-1.5 border-t border-line/60 flex items-center justify-between text-[10px] font-mono text-[#8C9099]">
+                  <div className="pt-1.5 border-t border-line/60 flex items-center justify-between text-2xs font-mono text-ink-500">
                     <span>
                       {totalMatches > 0
                         ? 'Press Enter for next, Shift+Enter for prev'
@@ -381,10 +381,10 @@ export default function TermsAndConditionsPage() {
               </div>
 
               {/* Quick Links Table of Contents (Opaque card with overflow-hidden clips background blobs) */}
-              <div className="space-y-3 bg-white p-4 border border-line shadow-xs overflow-hidden">
-                <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold flex items-center justify-between pb-1 border-b border-line">
+              <div className="space-y-3 bg-white p-4 border border-line shadow-1 overflow-hidden">
+                <div className="font-mono text-xs uppercase tracking-widest text-ink-500 font-bold flex items-center justify-between pb-1 border-b border-line">
                   <span>TABLE OF CONTENTS</span>
-                  <span className="text-[10px] text-red font-mono font-bold">UNABRIDGED</span>
+                  <span className="text-2xs text-red font-mono font-bold">UNABRIDGED</span>
                 </div>
 
                 <nav className="space-y-1 text-xs font-mono">
@@ -397,8 +397,8 @@ export default function TermsAndConditionsPage() {
                         onClick={() => scrollToSection(part.id)}
                         className={`w-full text-left py-2 px-2.5 transition-all flex items-center justify-between group cursor-pointer ${
                           isActive
-                            ? 'bg-red text-white font-bold shadow-xs'
-                            : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
+                            ? 'bg-red text-white font-bold shadow-1'
+                            : 'text-ink-600 hover:bg-paper-off hover:text-ink'
                         }`}
                       >
                         <span className="truncate">{part.title}</span>
@@ -413,7 +413,7 @@ export default function TermsAndConditionsPage() {
                     );
                   })}
 
-                  <div className="pt-2 pb-1 border-t border-line/60 my-1 font-mono text-[10px] text-[#8C9099] uppercase tracking-wider font-bold">
+                  <div className="pt-2 pb-1 border-t border-line/60 my-1 font-mono text-2xs text-ink-500 uppercase tracking-wider font-bold">
                     SCHEDULES &amp; STATUTES
                   </div>
 
@@ -423,7 +423,7 @@ export default function TermsAndConditionsPage() {
                     className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono group cursor-pointer ${
                       activeSectionId === 'sched-1'
                         ? 'bg-blue text-white font-bold'
-                        : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
+                        : 'text-ink-600 hover:bg-paper-off hover:text-ink'
                     }`}
                   >
                     <span className="truncate">SCHEDULE 1 - RATES &amp; LIMITS</span>
@@ -441,7 +441,7 @@ export default function TermsAndConditionsPage() {
                     className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono group cursor-pointer ${
                       activeSectionId === 'sched-2'
                         ? 'bg-tan text-ink font-bold'
-                        : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
+                        : 'text-ink-600 hover:bg-paper-off hover:text-ink'
                     }`}
                   >
                     <span className="truncate">SCHEDULE 2 - FAILED ORDERS</span>
@@ -458,8 +458,8 @@ export default function TermsAndConditionsPage() {
                     onClick={() => scrollToSection('sec-compliance')}
                     className={`w-full text-left py-2 px-2.5 transition-colors flex items-center justify-between font-mono group cursor-pointer ${
                       activeSectionId === 'sec-compliance'
-                        ? 'bg-[#10B981] text-white font-bold'
-                        : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
+                        ? 'bg-green-500 text-white font-bold'
+                        : 'text-ink-600 hover:bg-paper-off hover:text-ink'
                     }`}
                   >
                     <span className="truncate">STATUTORY COMPLIANCE</span>
@@ -474,15 +474,15 @@ export default function TermsAndConditionsPage() {
               </div>
 
               {/* Regulatory & Jurisdiction Card */}
-              <div className="p-4 bg-white border border-line text-xs font-mono space-y-2.5 shadow-xs">
+              <div className="p-4 bg-white border border-line text-xs font-mono space-y-2.5 shadow-1">
                 <div className="flex items-center space-x-2 text-ink font-bold">
                   <Scales size={16} weight="bold" className="text-red shrink-0" />
                   <span>LEGAL JURISDICTION</span>
                 </div>
-                <p className="text-[#5B5F66] text-[11px] leading-relaxed">
+                <p className="text-ink-600 text-2xs leading-relaxed">
                   Governed exclusively by the statutory laws of the Islamic Republic of Pakistan. Dispute settlement subject to the exclusive jurisdiction of the Courts of Karachi.
                 </p>
-                <div className="pt-2 border-t border-line flex flex-col space-y-1 text-[10px] text-[#8C9099]">
+                <div className="pt-2 border-t border-line flex flex-col space-y-1 text-2xs text-ink-500">
                   <div className="flex items-center space-x-1.5">
                     <Buildings size={12} weight="bold" className="text-ink-soft shrink-0" />
                     <span>Entity: Speedy Meals Delivery Services</span>
@@ -499,7 +499,7 @@ export default function TermsAndConditionsPage() {
           {/* Right Main Content Area */}
           <div className="lg:col-span-8 space-y-12">
             {/* Executive Document Metadata Card */}
-            <div className="bg-white border border-line p-6 sm:p-8 shadow-xs">
+            <div className="bg-white border border-line p-6 sm:p-8 shadow-1">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-line">
                 <div className="inline-flex items-center space-x-2">
                   <span className="w-2 h-2 rounded-full bg-red animate-pulse" />
@@ -507,7 +507,7 @@ export default function TermsAndConditionsPage() {
                     OFFICIAL LEGAL SPECIFICATION
                   </span>
                 </div>
-                <div className="flex items-center space-x-2 text-xs font-mono text-[#8C9099]">
+                <div className="flex items-center space-x-2 text-xs font-mono text-ink-500">
                   <span>Version 1.0</span>
                   <span>&middot;</span>
                   <span>Effective 2026</span>
@@ -519,7 +519,7 @@ export default function TermsAndConditionsPage() {
               </h1>
 
               {/* Pre-launch Notice Box */}
-              <div className="mb-6 p-3.5 bg-paper-off border-l-4 border-l-blue text-xs font-mono text-[#4B515D] leading-relaxed space-y-1">
+              <div className="mb-6 p-3.5 bg-paper-off border-l-4 border-l-blue text-xs font-mono text-ink-600 leading-relaxed space-y-1">
                 <div className="font-bold text-ink uppercase flex items-center space-x-1.5">
                   <ShieldCheck size={14} className="text-blue" weight="bold" />
                   <span>BINDING LEGAL INSTRUMENT</span>
@@ -532,7 +532,7 @@ export default function TermsAndConditionsPage() {
                 </p>
               </div>
 
-              <div className="space-y-3 font-sans text-sm text-[#4B515D] leading-relaxed">
+              <div className="space-y-3 font-sans text-sm text-ink-600 leading-relaxed">
                 {termsData.meta.preamble.map((p, idx) => (
                   <p key={idx} className={idx === 3 ? 'font-mono text-xs font-bold text-ink pt-2 uppercase tracking-wide' : ''}>
                     <HighlightedText text={p} query={searchQuery} crossLinks={true} />
@@ -542,32 +542,32 @@ export default function TermsAndConditionsPage() {
 
               {/* Key Stakeholder Highlights Strip */}
               <div className="mt-8 pt-6 border-t border-line grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-                <div className="p-3.5 bg-[#F8F9FA] border border-line">
+                <div className="p-3.5 bg-ink-50 border border-line">
                   <div className="flex items-center space-x-1.5 text-red font-bold mb-1.5">
                     <Bicycle size={16} weight="bold" />
                     <span>RIDERS</span>
                   </div>
-                  <div className="text-[11px] text-[#5B5F66] leading-relaxed">
+                  <div className="text-2xs text-ink-600 leading-relaxed">
                     <HighlightedText text="90% retained customer delivery fare with 10% platform commission. Transparent weekly payouts (Clause D3/D4)." query={searchQuery} />
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-[#F8F9FA] border border-line">
+                <div className="p-3.5 bg-ink-50 border border-line">
                   <div className="flex items-center space-x-1.5 text-blue font-bold mb-1.5">
                     <Storefront size={16} weight="bold" />
                     <span>RESTAURANTS</span>
                   </div>
-                  <div className="text-[11px] text-[#5B5F66] leading-relaxed">
+                  <div className="text-2xs text-ink-600 leading-relaxed">
                     <HighlightedText text="Flat 10% platform commission. Zero signup fees, weekly automated settlements every Monday (Clause E5)." query={searchQuery} />
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-[#F8F9FA] border border-line">
-                  <div className="flex items-center space-x-1.5 text-[#10B981] font-bold mb-1.5">
+                <div className="p-3.5 bg-ink-50 border border-line">
+                  <div className="flex items-center space-x-1.5 text-green-600 font-bold mb-1.5">
                     <Users size={16} weight="bold" />
                     <span>CUSTOMERS</span>
                   </div>
-                  <div className="text-[11px] text-[#5B5F66] leading-relaxed">
+                  <div className="text-2xs text-ink-600 leading-relaxed">
                     <HighlightedText text="Zero hidden markups on restaurant menu prices. Transparent distance-based delivery fee calculations (Clause C3)." query={searchQuery} />
                   </div>
                 </div>
@@ -578,16 +578,16 @@ export default function TermsAndConditionsPage() {
             {termsData.parts.map(part => (
               <section key={part.id} id={part.id} className="space-y-6 scroll-mt-24">
                 {/* Part Header */}
-                <div className="p-4 sm:p-5 bg-[#15171A] text-white border-l-4 border-l-red shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="p-4 sm:p-5 bg-ink-900 text-white border-l-4 border-l-red shadow-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <h2 className="font-display text-base sm:text-lg uppercase tracking-tight text-white">
                       <HighlightedText text={part.title} query={searchQuery} />
                     </h2>
-                    <p className="font-mono text-xs text-[#A0A4AB] mt-0.5">
+                    <p className="font-mono text-xs text-ink-500 mt-0.5">
                       <HighlightedText text={part.scope} query={searchQuery} />
                     </p>
                   </div>
-                  <span className="font-mono text-[10px] text-[#8C9099] uppercase tracking-wider self-start sm:self-center bg-[#25282F] px-2.5 py-1 border border-[#32363F]">
+                  <span className="font-mono text-2xs text-ink-500 uppercase tracking-wider self-start sm:self-center bg-ink-800 px-2.5 py-1 border border-ink-700">
                     {part.sections.length} Sections
                   </span>
                 </div>
@@ -598,7 +598,7 @@ export default function TermsAndConditionsPage() {
                     <article
                       key={sec.id}
                       id={sec.id}
-                      className="bg-white border border-line p-5 sm:p-7 shadow-xs hover:border-[#8C9099] transition-colors scroll-mt-24"
+                      className="bg-white border border-line p-5 sm:p-7 shadow-1 hover:border-ink-500 transition-colors scroll-mt-24"
                     >
                       {/* Section Title */}
                       <div className="flex items-baseline space-x-3 mb-4 pb-2.5 border-b border-line">
@@ -611,7 +611,7 @@ export default function TermsAndConditionsPage() {
                       </div>
 
                       {/* Clauses */}
-                      <div className="space-y-3.5 font-sans text-xs sm:text-sm text-[#2D3139] leading-relaxed">
+                      <div className="space-y-3.5 font-sans text-xs sm:text-sm text-ink-800 leading-relaxed">
                         {sec.clauses.map((clause, cIdx) => {
                           const clauseSlug = clause.num ? clause.num.toLowerCase().replace(/[^a-z0-9]/g, '-') : '';
                           const isCopied = copiedClause === clause.num;
@@ -631,17 +631,17 @@ export default function TermsAndConditionsPage() {
                                      type="button"
                                      onClick={() => handleCopyClause(clause.num)}
                                      title={`Copy link to clause ${clause.num}`}
-                                     className="opacity-0 group-hover:opacity-100 text-[#8C9099] hover:text-red transition-opacity cursor-pointer p-0.5"
+                                     className="opacity-0 group-hover:opacity-100 text-ink-500 hover:text-red transition-opacity cursor-pointer p-0.5"
                                    >
                                     {isCopied ? (
-                                      <Check size={11} className="text-[#10B981]" weight="bold" />
+                                      <Check size={11} className="text-green-600" weight="bold" />
                                     ) : (
                                       <LinkSimple size={11} weight="bold" />
                                     )}
                                   </button>
                                 </div>
                               )}
-                              <div className="flex-1 text-[#373C46]">
+                              <div className="flex-1 text-ink-700">
                                 <HighlightedText text={clause.text} query={searchQuery} crossLinks={true} />
                               </div>
                             </div>
@@ -656,24 +656,24 @@ export default function TermsAndConditionsPage() {
 
             {/* SCHEDULE 1: KEY RATES AND LIMITS */}
             <section id="sched-1" className="space-y-4 scroll-mt-24">
-              <div className="p-4 sm:p-5 bg-[#15171A] text-white border-l-4 border-l-blue shadow-xs">
+              <div className="p-4 sm:p-5 bg-ink-900 text-white border-l-4 border-l-blue shadow-1">
                 <h2 className="font-display text-base sm:text-lg uppercase tracking-tight text-white">
                   <HighlightedText text={termsData.schedule1.title} query={searchQuery} />
                 </h2>
-                <p className="font-mono text-xs text-[#A0A4AB] mt-0.5">
+                <p className="font-mono text-xs text-ink-500 mt-0.5">
                   <HighlightedText text={termsData.schedule1.intro} query={searchQuery} />
                 </p>
               </div>
 
-              <div className="bg-white border border-line shadow-xs overflow-x-auto">
+              <div className="bg-white border border-line shadow-1 overflow-x-auto">
                 <table className="w-full text-left font-mono text-xs border-collapse">
                   <thead>
-                    <tr className="bg-paper-off border-b border-line text-[#15171A] uppercase tracking-wider text-[11px]">
+                    <tr className="bg-paper-off border-b border-line text-ink-900 uppercase tracking-wider text-2xs">
                       <th className="py-3 px-4 sm:px-6 font-bold">Item / Parameter</th>
                       <th className="py-3 px-4 sm:px-6 font-bold text-right sm:text-left">Standard Value</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line text-[#373C46]">
+                  <tbody className="divide-y divide-line text-ink-700">
                     {termsData.schedule1.rows.map((row, rIdx) => (
                       <tr key={rIdx} className="hover:bg-paper-off/50 transition-colors">
                         <td className="py-2.5 px-4 sm:px-6 font-medium text-ink">
@@ -691,38 +691,38 @@ export default function TermsAndConditionsPage() {
 
             {/* SCHEDULE 2: FAILED ORDER ALLOCATION */}
             <section id="sched-2" className="space-y-4 scroll-mt-24">
-              <div className="p-4 sm:p-5 bg-[#15171A] text-white border-l-4 border-l-tan shadow-xs">
+              <div className="p-4 sm:p-5 bg-ink-900 text-white border-l-4 border-l-tan shadow-1">
                 <h2 className="font-display text-base sm:text-lg uppercase tracking-tight text-white">
                   <HighlightedText text={termsData.schedule2.title} query={searchQuery} />
                 </h2>
-                <p className="font-mono text-xs text-[#A0A4AB] mt-0.5">
+                <p className="font-mono text-xs text-ink-500 mt-0.5">
                   <HighlightedText text={termsData.schedule2.intro} query={searchQuery} />
                 </p>
               </div>
 
-              <div className="bg-white border border-line shadow-xs overflow-x-auto">
+              <div className="bg-white border border-line shadow-1 overflow-x-auto">
                 <table className="w-full text-left font-mono text-xs border-collapse min-w-[600px]">
                   <thead>
-                    <tr className="bg-paper-off border-b border-line text-[#15171A] uppercase tracking-wider text-[11px]">
+                    <tr className="bg-paper-off border-b border-line text-ink-900 uppercase tracking-wider text-2xs">
                       <th className="py-3 px-4 font-bold w-2/5">Cause of Failure</th>
                       <th className="py-3 px-3 font-bold">Customer Impact</th>
                       <th className="py-3 px-3 font-bold">Restaurant Partner</th>
                       <th className="py-3 px-3 font-bold">Rider Share</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line text-[#373C46]">
+                  <tbody className="divide-y divide-line text-ink-700">
                     {termsData.schedule2.rows.map((row, rIdx) => (
                       <tr key={rIdx} className="hover:bg-paper-off/50 transition-colors">
                         <td className="py-3 px-4 font-semibold text-ink text-xs">
                           <HighlightedText text={row.cause} query={searchQuery} />
                         </td>
-                        <td className="py-3 px-3 text-[11px] text-[#4B515D]">
+                        <td className="py-3 px-3 text-2xs text-ink-600">
                           <HighlightedText text={row.customer} query={searchQuery} />
                         </td>
-                        <td className="py-3 px-3 text-[11px] text-[#4B515D]">
+                        <td className="py-3 px-3 text-2xs text-ink-600">
                           <HighlightedText text={row.restaurant} query={searchQuery} />
                         </td>
-                        <td className="py-3 px-3 text-[11px] text-[#4B515D]">
+                        <td className="py-3 px-3 text-2xs text-ink-600">
                           <HighlightedText text={row.rider} query={searchQuery} />
                         </td>
                       </tr>
@@ -734,33 +734,33 @@ export default function TermsAndConditionsPage() {
 
             {/* STATUTORY COMPLIANCE (PAKISTANI LAW) */}
             <section id="sec-compliance" className="space-y-4 scroll-mt-24">
-              <div className="p-4 sm:p-5 bg-[#15171A] text-white border-l-4 border-l-[#10B981] shadow-xs flex items-center justify-between">
+              <div className="p-4 sm:p-5 bg-ink-900 text-white border-l-4 border-l-green-500 shadow-1 flex items-center justify-between">
                 <div>
                   <h2 className="font-display text-base sm:text-lg uppercase tracking-tight text-white flex items-center space-x-2">
-                    <ShieldCheck size={20} weight="bold" className="text-[#10B981]" />
+                    <ShieldCheck size={20} weight="bold" className="text-green-600" />
                     <span>
                       <HighlightedText text={termsData.compliance.title} query={searchQuery} />
                     </span>
                   </h2>
-                  <p className="font-mono text-xs text-[#A0A4AB] mt-0.5">
+                  <p className="font-mono text-xs text-ink-500 mt-0.5">
                     <HighlightedText text={termsData.compliance.intro} query={searchQuery} />
                   </p>
                 </div>
-                <span className="font-mono text-[10px] text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/30 px-2.5 py-1 uppercase font-bold hidden sm:inline">
+                <span className="font-mono text-2xs text-green-600 bg-green-500/10 border border-green-500/30 px-2.5 py-1 uppercase font-bold hidden sm:inline">
                   MANDATORY
                 </span>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
                 {termsData.compliance.items.map((item, iIdx) => (
-                  <div key={iIdx} className="bg-white border border-line p-4 sm:p-5 shadow-xs">
+                  <div key={iIdx} className="bg-white border border-line p-4 sm:p-5 shadow-1">
                     <div className="flex items-center space-x-2 font-mono text-xs font-bold text-ink uppercase mb-2">
-                      <span className="w-1.5 h-1.5 bg-[#10B981] inline-block" />
+                      <span className="w-1.5 h-1.5 bg-green-500 inline-block" />
                       <span>
                         <HighlightedText text={item.title} query={searchQuery} />
                       </span>
                     </div>
-                    <p className="font-sans text-xs sm:text-sm text-[#4B515D] leading-relaxed">
+                    <p className="font-sans text-xs sm:text-sm text-ink-600 leading-relaxed">
                       <HighlightedText text={item.text} query={searchQuery} />
                     </p>
                   </div>
@@ -770,7 +770,7 @@ export default function TermsAndConditionsPage() {
 
             {/* Bottom Actions & Support Contact */}
             <div className="pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs print:hidden">
-              <div className="text-[#5B5F66]">
+              <div className="text-ink-600">
                 Questions regarding these terms? Contact Legal Counsel:{' '}
                 <a
                   href="mailto:support@speedymealservices.com"

@@ -44,9 +44,9 @@ export default function AdminLayout({
   if (!isAuthorized) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper-off">
-        <div className="flex flex-col items-center gap-3 text-slate-500">
-          <Spinner size={28} className="animate-spin text-slate-700" />
-          <p className="text-xs font-medium tracking-wide text-slate-500">Loading staff dashboard...</p>
+        <div className="flex flex-col items-center gap-3 text-ink-500">
+          <Spinner size={28} className="animate-spin text-ink-700" />
+          <p className="text-xs font-medium tracking-wide text-ink-500">Loading staff dashboard...</p>
         </div>
       </div>
     );

@@ -49,23 +49,23 @@ export default function FeaturedCrmDemoSection() {
 
   const integrations = [
     { name: "Salesforce", subtitle: "Enterprise CRM platform", icon: Building2, color: "text-blue-500" },
-    { name: "HubSpot CRM", subtitle: "Inbound marketing & sales", icon: Globe, color: "text-orange-500" },
-    { name: "Zoho CRM", subtitle: "Affordable CRM solution", icon: Briefcase, color: "text-emerald-500" },
+    { name: "HubSpot CRM", subtitle: "Inbound marketing & sales", icon: Globe, color: "text-amber-600" },
+    { name: "Zoho CRM", subtitle: "Affordable CRM solution", icon: Briefcase, color: "text-green-500" },
     { name: "Pipedrive", subtitle: "Sales pipeline management", icon: Layers, color: "text-amber-500" },
-    { name: "Freshsales", subtitle: "Freshworks sales CRM", icon: Sparkles, color: "text-cyan-500" },
-    { name: "Dynamics 365", subtitle: "Microsoft business suite", icon: ShieldCheck, color: "text-indigo-500" },
-    { name: "Copper CRM", subtitle: "Google Workspace CRM", icon: Zap, color: "text-rose-500" },
-    { name: "Insightly", subtitle: "Project & CRM management", icon: BarChart3, color: "text-violet-500" },
+    { name: "Freshsales", subtitle: "Freshworks sales CRM", icon: Sparkles, color: "text-blue-400" },
+    { name: "Dynamics 365", subtitle: "Microsoft business suite", icon: ShieldCheck, color: "text-blue-500" },
+    { name: "Copper CRM", subtitle: "Google Workspace CRM", icon: Zap, color: "text-red-500" },
+    { name: "Insightly", subtitle: "Project & CRM management", icon: BarChart3, color: "text-blue-500" },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 bg-white text-black dark:bg-zinc-900 dark:text-white">
+    <div className="max-w-7xl mx-auto px-4 py-8 bg-white text-black dark:bg-ink-900 dark:text-white">
       {/* Header */}
       <header className="text-left py-10">
-        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
+        <span className="text-xs font-semibold px-3 py-1 rounded-xs bg-red-50 text-red-700 border border-red-200 uppercase tracking-wider">
           Platform Architecture & Capabilities
         </span>
-        <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-ink-900 dark:text-ink-50">
           Empowering teams <br />with intelligent delivery workflows.
         </h1>
       </header>
@@ -73,8 +73,8 @@ export default function FeaturedCrmDemoSection() {
       {/* Templates Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
         {/* Main video/image card */}
-        <Card className="lg:col-span-2 bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/80 p-2 overflow-hidden relative mb-4 lg:mb-0 flex flex-col min-h-[420px] rounded-2xl">
-          <CardContent className="p-0 relative flex-grow group overflow-hidden rounded-xl">
+        <Card className="lg:col-span-2 bg-ink-100 dark:bg-ink-800/80 border border-ink-200 dark:border-ink-700/80 p-2 overflow-hidden relative mb-4 lg:mb-0 flex flex-col min-h-[420px] rounded-md">
+          <CardContent className="p-0 relative flex-grow group overflow-hidden rounded-md">
             {isPlaying ? (
               <video
                 src="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/crm(1)(1)(1).mp4"
@@ -82,7 +82,7 @@ export default function FeaturedCrmDemoSection() {
                 muted
                 loop
                 playsInline
-                className="w-full h-full object-cover rounded-xl"
+                className="w-full h-full object-cover rounded-md"
               />
             ) : (
               <>
@@ -92,12 +92,12 @@ export default function FeaturedCrmDemoSection() {
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80"
                     alt="Platform Analytics & Operations"
-                    className="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-102"
+                    className="w-full h-full object-cover rounded-md transition-transform duration-500 group-hover:scale-102"
                     unoptimized
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-xl" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-md" />
                   <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <span className="text-xs font-medium uppercase tracking-wider text-rose-300">Live Telemetry Preview</span>
+                    <span className="text-xs font-medium uppercase tracking-wider text-red-300">Live Telemetry Preview</span>
                     <h3 className="text-lg font-bold">Intelligent Dispatch & Zone Analytics</h3>
                     <p className="text-xs text-white/80">Real-time Karachi order dispatching and courier float supervision</p>
                   </div>
@@ -109,8 +109,8 @@ export default function FeaturedCrmDemoSection() {
                   aria-label="Play CRM walkthrough"
                   className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white/90 text-zinc-900 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                    <PlayCircle className="w-10 h-10 text-rose-600" />
+                  <div className="w-16 h-16 rounded-full bg-white/90 text-ink-900 flex items-center justify-center shadow-3 group-hover:scale-110 transition-transform">
+                    <PlayCircle className="w-10 h-10 text-red-600" />
                   </div>
                 </button>
               </>
@@ -125,22 +125,22 @@ export default function FeaturedCrmDemoSection() {
             return (
               <div
                 key={i}
-                className="flex flex-col border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl p-3.5 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer transition-all"
+                className="flex flex-col border border-ink-200 dark:border-ink-800 bg-ink-50 dark:bg-ink-800/40 rounded-md p-3.5 hover:shadow-2 hover:border-ink-300 dark:hover:border-ink-700 cursor-pointer transition-all"
               >
                 {/* Header Icon + Card thumbnail */}
                 <div className="flex items-center justify-between mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-md bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-400">0{i + 1}</span>
+                  <span className="text-2xs font-mono text-ink-400">0{i + 1}</span>
                 </div>
 
                 {/* Title + Subtitle */}
                 <div className="mt-1 flex-1 flex flex-col justify-between">
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
+                  <h3 className="text-sm font-semibold text-ink-900 dark:text-ink-100 mb-1">
                     {feature.title}
                   </h3>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-xs text-ink-600 dark:text-ink-400 leading-relaxed">
                     {feature.subtitle}
                   </p>
                 </div>
@@ -151,12 +151,12 @@ export default function FeaturedCrmDemoSection() {
       </section>
 
       {/* Integration / Ecosystem Row */}
-      <section className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
+      <section className="mt-12 pt-8 border-t border-ink-200 dark:border-ink-800">
         <div className="text-left mb-4">
-          <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
+          <h2 className="text-sm font-bold text-ink-900 dark:text-ink-100 uppercase tracking-wider">
             Connected Ecosystem Integrations
           </h2>
-          <p className="text-xs text-zinc-500">Supported enterprise services and data pipelines</p>
+          <p className="text-xs text-ink-500">Supported enterprise services and data pipelines</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
@@ -165,16 +165,16 @@ export default function FeaturedCrmDemoSection() {
             return (
               <div
                 key={integration.name}
-                className="p-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl transition"
+                className="p-3 flex items-center gap-3 bg-ink-50 dark:bg-ink-800/50 hover:bg-ink-100 dark:hover:bg-ink-800 border border-ink-200 dark:border-ink-800 rounded-md transition"
               >
-                <div className={`w-9 h-9 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0 ${integration.color}`}>
+                <div className={`w-9 h-9 rounded-md bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-700 flex items-center justify-center shrink-0 ${integration.color}`}>
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="truncate">
-                  <div className="font-medium text-zinc-900 dark:text-zinc-100 text-xs truncate">
+                  <div className="font-medium text-ink-900 dark:text-ink-100 text-xs truncate">
                     {integration.name}
                   </div>
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                  <div className="text-2xs text-ink-500 dark:text-ink-400 truncate">
                     {integration.subtitle}
                   </div>
                 </div>
@@ -185,8 +185,8 @@ export default function FeaturedCrmDemoSection() {
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-10 mt-6 border-t border-zinc-100 dark:border-zinc-800">
-        <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+      <footer className="text-center py-10 mt-6 border-t border-ink-100 dark:border-ink-800">
+        <span className="text-xs font-medium text-ink-500 dark:text-ink-400">
           Powered by SpeedyMeals High-Frequency Event Architecture
         </span>
       </footer>

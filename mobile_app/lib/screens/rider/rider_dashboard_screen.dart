@@ -7,6 +7,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/models/rider_models.dart';
 import '../../data/repositories/rider_repository.dart';
 import '../../services/auth_service.dart';
+import '../../services/push_service.dart';
 import '../auth/register_as_screen.dart';
 import 'rider_account_screen.dart';
 import 'rider_documents_screen.dart';
@@ -15,6 +16,7 @@ import '../../features/maps/maps.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../widgets/location_disclosure.dart';
 import '../../widgets/skeleton/skeleton.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Delivery Rider dashboard — the rider's real workspace.
 ///
@@ -36,24 +38,42 @@ class RiderDashboardScreen extends StatefulWidget {
   final RiderLocationPublisher? locationPublisher;
   final RiderRepository? repository;
 
+  /// Fallback poll for admin-side changes (approval, kit, online status) when
+  /// push is unavailable. Null disables polling (tests).
+  final Duration? refreshInterval;
+
+  /// Push `data` events; defaults to [PushService.dataEvents].
+  final Stream<Map<String, String>>? pushEvents;
+
   const RiderDashboardScreen({
     super.key,
     this.navigationService = const RiderNavigationService(),
     this.locationService,
     this.locationPublisher,
     this.repository,
+    this.refreshInterval = const Duration(seconds: 30),
+    this.pushEvents,
   });
 
   @override
   State<RiderDashboardScreen> createState() => _RiderDashboardScreenState();
 }
 
-class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
-  static const Color _bg = Color(0xFF0F172A);
-  static const Color _card = Color(0xFF1E293B);
-  static const Color _border = Color(0xFF334155);
-  static const Color _green = Color(0xFF10B981);
-  static const Color _red = Color(0xFFDC2626);
+class _RiderDashboardScreenState extends State<RiderDashboardScreen>
+    with WidgetsBindingObserver {
+  /// Push event types that mean "your rider data changed — refetch".
+  static const _refreshEvents = {'rider_account', 'rider_assignment', 'rider_offer_expired', 'wallet_low'};
+
+  StreamSubscription<Map<String, String>>? _pushSub;
+  Timer? _refreshTimer;
+  bool _inForeground = true;
+  bool _silentLoadInFlight = false;
+
+  static const Color _bg = AppColors.ink900;
+  static const Color _card = AppColors.ink800;
+  static const Color _border = AppColors.ink700;
+  static const Color _green = AppColors.green600;
+  static const Color _red = AppColors.cta;
 
   late final RiderRepository _repository;
 
@@ -121,10 +141,33 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
       _ownsPublisher = true;
     }
     _load();
+
+    // Live sync: admin approval, kit verification and admin online/offline
+    // arrive as a push (instant); app-resume and a light poll cover devices
+    // without push.
+    WidgetsBinding.instance.addObserver(this);
+    _pushSub = (widget.pushEvents ?? PushService.instance.dataEvents).listen((data) {
+      if (_refreshEvents.contains(data['type'])) _load(silent: true);
+    });
+    final interval = widget.refreshInterval;
+    if (interval != null) {
+      _refreshTimer = Timer.periodic(interval, (_) {
+        if (_inForeground) _load(silent: true);
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _inForeground = state == AppLifecycleState.resumed;
+    if (_inForeground) _load(silent: true);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pushSub?.cancel();
+    _refreshTimer?.cancel();
     _locationTimer?.cancel();
     _positionMarkerSub?.cancel();
     _positionMarkerSub = null;
@@ -135,11 +178,19 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     super.dispose();
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+  /// Loads profile, assignments and earnings. A [silent] load (push, poll,
+  /// app resume) keeps the current screen: no spinner, and a failed refresh
+  /// leaves the last good data instead of showing an error page.
+  Future<void> _load({bool silent = false}) async {
+    if (silent) {
+      if (_isLoading || _silentLoadInFlight) return;
+      _silentLoadInFlight = true;
+    } else {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
 
     try {
       final profile = await _repository.profile();
@@ -161,11 +212,13 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
       await _syncActiveDeliveryTracking();
 
     } on ApiException catch (error) {
-      if (!mounted) return;
+      if (!mounted || silent) return;
       setState(() {
         _error = error;
         _isLoading = false;
       });
+    } finally {
+      if (silent) _silentLoadInFlight = false;
     }
   }
 
@@ -498,7 +551,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                   ),
                   Text(
                     _profile?.displayName ?? AuthService.instance.currentUser?.displayName ?? 'Rider',
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                    style: const TextStyle(fontSize: 12, color: AppColors.ink400),
                   ),
                 ],
               ),
@@ -525,7 +578,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 ),
               ),
               backgroundColor: _bg,
-              selectedColor: const Color(0xFF064E3B),
+              selectedColor: AppColors.green900,
               side: BorderSide(color: online ? _green : Colors.white24),
             ),
           ),
@@ -588,7 +641,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
               const SizedBox(height: 8),
               Text(
                 failure.message,
-                style: const TextStyle(color: Color(0xFF94A3B8)),
+                style: const TextStyle(color: AppColors.ink400),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -640,7 +693,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: online ? _green : const Color(0xFF94A3B8),
+                    color: online ? _green : AppColors.ink400,
                   ),
                 ),
               ],
@@ -664,14 +717,14 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   Widget _buildApprovalBanner(RiderProfile profile) {
     final isRejected = profile.isRejected;
-    final color = isRejected ? _red : const Color(0xFFF59E0B);
+    final color = isRejected ? _red : AppColors.amber500;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
@@ -696,7 +749,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                   isRejected
                       ? 'Your documents were not approved. Contact support to resolve this.'
                       : 'An administrator is reviewing your documents. You cannot accept deliveries until you are approved.',
-                  style: const TextStyle(fontSize: 12.5, color: Color(0xFFCBD5E1), height: 1.4),
+                  style: const TextStyle(fontSize: 12.5, color: AppColors.ink300, height: 1.4),
                 ),
               ],
             ),
@@ -719,14 +772,14 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E3A8A).withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.4)),
+          color: AppColors.blue900.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: AppColors.blue500.withValues(alpha: 0.4)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.upload_file_rounded, color: Color(0xFF60A5FA)),
+            const Icon(Icons.upload_file_rounded, color: AppColors.blueOnDark),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -740,12 +793,12 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                   Text(
                     '${profile.uploadedDocumentCount} of 3 uploaded (CNIC, license, vehicle). '
                     'Tap to upload the remaining documents.',
-                    style: const TextStyle(fontSize: 12.5, color: Color(0xFFCBD5E1), height: 1.4),
+                    style: const TextStyle(fontSize: 12.5, color: AppColors.ink300, height: 1.4),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: Color(0xFF60A5FA)),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.blueOnDark),
           ],
         ),
       ),
@@ -759,14 +812,14 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF78350F).withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+        color: AppColors.amber900.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.amber500.withValues(alpha: 0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.inventory_2_rounded, color: Color(0xFFFBBF24)),
+          const Icon(Icons.inventory_2_rounded, color: AppColors.amber400),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -782,9 +835,9 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                   // (`wallet_payment/service.py`: KIT_DEPOSIT_AMOUNT = 5000) —
                   // keep in sync manually; no endpoint exposes it.
                   depositPaid
-                      ? 'Rs. 5,000 security deposit received. Please collect your official uniform shirts (min. 2) and insulated delivery box from the hub to activate online deliveries.'
+                      ? 'Rs. 5,000 security deposit received. Please collect your official uniform shirt and insulated delivery box from the hub to activate online deliveries.'
                       : 'To go online and receive orders, submit the Rs. 5,000 refundable security deposit and collect your kit (uniform & delivery box) at any SpeedyMeals outlet.',
-                  style: const TextStyle(fontSize: 12.5, color: Color(0xFFCBD5E1), height: 1.4),
+                  style: const TextStyle(fontSize: 12.5, color: AppColors.ink300, height: 1.4),
                 ),
               ],
             ),
@@ -801,13 +854,13 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: online
-              ? [const Color(0xFF065F46), const Color(0xFF047857)]
+              ? [AppColors.green800, AppColors.green700]
               : [_border, _card],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: AppColors.ink900.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -842,8 +895,8 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                     key: const Key('rider_location_status_indicator'),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(6),
+                      color: AppColors.ink900.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -855,7 +908,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                           size: 12,
                           color: _resolvedLocationStatus == 'Location sharing active'
                               ? _green
-                              : const Color(0xFFF59E0B),
+                              : AppColors.amber500,
                         ),
                         const SizedBox(width: 5),
                         Text(
@@ -905,7 +958,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 value: wallet?.earningsLabel ?? '—',
                 subtext: 'Delivery earnings',
                 icon: Icons.payments_rounded,
-                accentColor: const Color(0xFF3B82F6),
+                accentColor: AppColors.blue500,
                 cardColor: _card,
                 borderColor: _border,
               ),
@@ -921,7 +974,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 value: wallet?.pendingCashLabel ?? '—',
                 subtext: 'Collected COD to submit',
                 icon: Icons.point_of_sale_rounded,
-                accentColor: const Color(0xFFF59E0B),
+                accentColor: AppColors.amber500,
                 cardColor: _card,
                 borderColor: _border,
               ),
@@ -933,7 +986,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 value: '$completed',
                 subtext: 'In your recent history',
                 icon: Icons.check_circle_rounded,
-                accentColor: const Color(0xFFEC4899),
+                accentColor: AppColors.red400,
                 cardColor: _card,
                 borderColor: _border,
               ),
@@ -952,12 +1005,12 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: _card,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(color: _border),
           ),
           child: const Column(
             children: [
-              Icon(Icons.inbox_rounded, color: Color(0xFF94A3B8), size: 36),
+              Icon(Icons.inbox_rounded, color: AppColors.ink400, size: 36),
               SizedBox(height: 10),
               Text(
                 'No deliveries assigned',
@@ -967,7 +1020,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
               Text(
                 'Orders are assigned automatically to the nearest online rider. '
                 'Stay online with a valid location to receive them.',
-                style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8), height: 1.4),
+                style: TextStyle(fontSize: 12, color: AppColors.ink400, height: 1.4),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1008,7 +1061,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: _card,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(color: _border),
             ),
             child: Row(
@@ -1026,7 +1079,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                       const SizedBox(height: 2),
                       Text(
                         assignment.displayRestaurantName,
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                        style: const TextStyle(fontSize: 12, color: AppColors.ink400),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1070,7 +1123,7 @@ class _MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: borderColor),
       ),
       child: Column(
@@ -1083,9 +1136,9 @@ class _MetricCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF94A3B8),
+                    color: AppColors.ink400,
                     letterSpacing: 0.8,
                   ),
                   maxLines: 1,
@@ -1151,7 +1204,7 @@ class _AssignmentCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: borderColor),
       ),
       child: Column(
@@ -1164,7 +1217,7 @@ class _AssignmentCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: borderColor,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Text(
                   '#${assignment.shortId}',
@@ -1180,23 +1233,23 @@ class _AssignmentCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(Icons.local_shipping_rounded, color: Color(0xFF94A3B8), size: 14),
+              const Icon(Icons.local_shipping_rounded, color: AppColors.ink400, size: 14),
               const SizedBox(width: 6),
               Text(
                 assignment.status.shortLabel,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFFCBD5E1)),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink300),
               ),
               if (assignment.requiresCashCollection) ...[
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(6),
+                    color: AppColors.amber500.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Text(
                     'Collect ${assignment.totalLabel}',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFF59E0B)),
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.amber500),
                   ),
                 ),
               ],
@@ -1205,7 +1258,7 @@ class _AssignmentCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.storefront_rounded, color: Color(0xFFDC2626), size: 16),
+              const Icon(Icons.storefront_rounded, color: AppColors.cta, size: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -1220,12 +1273,12 @@ class _AssignmentCard extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.location_on_rounded, color: Color(0xFF3B82F6), size: 16),
+              const Icon(Icons.location_on_rounded, color: AppColors.blue500, size: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   assignment.deliveryAddressLabel,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFFCBD5E1)),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.ink300),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1247,7 +1300,7 @@ class _AssignmentCard extends StatelessWidget {
             children: [
               Text(
                 assignment.distanceLabel,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF94A3B8)),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.ink400),
               ),
               if (isBusy)
                 const SizedBox(
@@ -1322,7 +1375,7 @@ class _AssignmentCard extends StatelessWidget {
             : riderLocation ?? MapView.defaultCoordinates;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: SizedBox(
         height: 130,
         width: double.infinity,
@@ -1342,7 +1395,7 @@ class _AssignmentCard extends StatelessWidget {
     if (!canAct) {
       return const Text(
         'Approval required',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFFF59E0B)),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.amber500),
       );
     }
 
@@ -1354,9 +1407,9 @@ class _AssignmentCard extends StatelessWidget {
           OutlinedButton(
             onPressed: onReject,
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFCBD5E1),
+              foregroundColor: AppColors.ink300,
               side: BorderSide(color: borderColor),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
             ),
             child: const Text('Reject'),
           ),
@@ -1366,7 +1419,7 @@ class _AssignmentCard extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: accentRed,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
             ),
             child: const Text('Accept'),
           ),
@@ -1380,9 +1433,9 @@ class _AssignmentCard extends StatelessWidget {
       return ElevatedButton(
         onPressed: () => onAdvance(next),
         style: ElevatedButton.styleFrom(
-          backgroundColor: next == RiderAction.delivered ? accentGreen : const Color(0xFF3B82F6),
+          backgroundColor: next == RiderAction.delivered ? accentGreen : AppColors.blue500,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
         child: Text(next.label),
       );
@@ -1390,7 +1443,7 @@ class _AssignmentCard extends StatelessWidget {
 
     return Text(
       assignment.status.customerLabel,
-      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF94A3B8)),
+      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.ink400),
     );
   }
 }

@@ -69,11 +69,11 @@ export default function PrivacyPolicyPage() {
     matches.forEach((el, idx) => {
       if (idx === targetIndex) {
         el.classList.add('bg-red', 'text-white', 'font-bold', 'ring-2', 'ring-red-400');
-        el.classList.remove('bg-[#FEF08A]', 'text-ink');
+        el.classList.remove('bg-amber-200', 'text-ink');
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
         el.classList.remove('bg-red', 'text-white', 'font-bold', 'ring-2', 'ring-red-400');
-        el.classList.add('bg-[#FEF08A]', 'text-ink');
+        el.classList.add('bg-amber-200', 'text-ink');
       }
     });
   };
@@ -127,7 +127,7 @@ export default function PrivacyPolicyPage() {
       setActiveMatchIndex(0);
       document.querySelectorAll<HTMLElement>('.find-match-active').forEach(el => {
         el.classList.remove('find-match-active', 'bg-red', 'text-white', 'ring-2', 'ring-red-400', 'font-bold');
-        el.classList.add('bg-[#FEF08A]', 'text-ink');
+        el.classList.add('bg-amber-200', 'text-ink');
       });
       return;
     }
@@ -147,7 +147,7 @@ export default function PrivacyPolicyPage() {
   }, [searchQuery]);
 
   return (
-    <div className="relative min-h-screen bg-[#F8F9FA] text-[#15171A] selection:bg-[#E23A2E] selection:text-white font-sans overflow-x-hidden">
+    <div className="relative min-h-screen bg-ink-50 text-ink-900 selection:bg-red-500 selection:text-white font-sans overflow-x-hidden">
       {/* Fixed Ambient Transparent SpeedyMeals Favicon Watermark (Persistent viewport-centered background watermark) */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
         <Image
@@ -174,8 +174,8 @@ export default function PrivacyPolicyPage() {
                 SPEEDY MEALS
               </span>
             </Link>
-            <span className="text-[#8C9099] font-mono text-xs hidden sm:inline">/</span>
-            <span className="font-mono text-xs text-[#5B5F66] uppercase tracking-wider hidden sm:inline">
+            <span className="text-ink-500 font-mono text-xs hidden sm:inline">/</span>
+            <span className="font-mono text-xs text-ink-600 uppercase tracking-wider hidden sm:inline">
               DATA PRIVACY &amp; SECURITY
             </span>
           </div>
@@ -202,8 +202,8 @@ export default function PrivacyPolicyPage() {
               >
                 {copiedDocLink ? (
                   <>
-                    <Check size={13} className="text-[#10B981]" weight="bold" />
-                    <span className="text-[#10B981] font-bold">COPIED</span>
+                    <Check size={13} className="text-green-600" weight="bold" />
+                    <span className="text-green-600 font-bold">COPIED</span>
                   </>
                 ) : (
                   <>
@@ -224,22 +224,22 @@ export default function PrivacyPolicyPage() {
         </div>
 
         {/* Mobile Sticky Quick Jump & Find Toolbar */}
-        <div className="lg:hidden border-t border-line/60 bg-[#F1F3F5] px-4 py-2 flex flex-col gap-2">
+        <div className="lg:hidden border-t border-line/60 bg-ink-100 px-4 py-2 flex flex-col gap-2">
           {/* Mobile IDE Find Toolbar */}
-          <div className="flex items-center space-x-1.5 bg-white border border-line px-2.5 py-1.5 shadow-xs">
-            <MagnifyingGlass size={14} weight="bold" className="text-[#8C9099] shrink-0" />
+          <div className="flex items-center space-x-1.5 bg-white border border-line px-2.5 py-1.5 shadow-1">
+            <MagnifyingGlass size={14} weight="bold" className="text-ink-500 shrink-0" />
             <input
               type="text"
               placeholder="Find in policy (e.g. delete, cookies)..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full bg-transparent text-xs font-mono text-ink placeholder-[#8C9099] focus:outline-none"
+              className="w-full bg-transparent text-xs font-mono text-ink placeholder-ink-500 focus:outline-none"
             />
             {searchQuery.trim() && (
               <div className="flex items-center space-x-1 shrink-0">
                 <span
-                  className={`font-mono text-[10px] px-1.5 py-0.5 border ${totalMatches > 0
+                  className={`font-mono text-2xs px-1.5 py-0.5 border ${totalMatches > 0
                       ? 'bg-paper-off border-line text-ink font-bold'
                       : 'bg-red/10 border-red/30 text-red font-bold'
                     }`}
@@ -265,7 +265,7 @@ export default function PrivacyPolicyPage() {
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="p-0.5 text-[#8C9099] cursor-pointer"
+                  className="p-0.5 text-ink-500 cursor-pointer"
                 >
                   <X size={12} weight="bold" />
                 </button>
@@ -274,7 +274,7 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className="flex items-center justify-between gap-2">
-            <label htmlFor="mobile-sec-jump-privacy" className="font-mono text-[10px] text-[#5B5F66] uppercase font-bold shrink-0">
+            <label htmlFor="mobile-sec-jump-privacy" className="font-mono text-2xs text-ink-600 uppercase font-bold shrink-0">
               JUMP:
             </label>
             <select
@@ -300,12 +300,12 @@ export default function PrivacyPolicyPage() {
           <aside className="hidden lg:block lg:col-span-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 border-r border-line/60 print:hidden">
             <div className="space-y-6">
               {/* IDE-Style Find Toolbar */}
-              <div className="bg-white border-2 border-line focus-within:border-red shadow-xs p-2 transition-all space-y-1.5">
+              <div className="bg-white border-2 border-line focus-within:border-red shadow-1 p-2 transition-all space-y-1.5">
                 <div className="flex items-center space-x-1.5">
                   <MagnifyingGlass
                     size={15}
                     weight="bold"
-                    className="text-[#8C9099] shrink-0"
+                    className="text-ink-500 shrink-0"
                   />
                   <input
                     ref={searchInputRef}
@@ -314,12 +314,12 @@ export default function PrivacyPolicyPage() {
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="w-full bg-transparent text-xs font-mono text-ink placeholder-[#8C9099] focus:outline-none"
+                    className="w-full bg-transparent text-xs font-mono text-ink placeholder-ink-500 focus:outline-none"
                   />
                   {searchQuery.trim() && (
                     <div className="flex items-center space-x-1 shrink-0">
                       <span
-                        className={`font-mono text-[10px] px-1.5 py-0.5 border ${totalMatches > 0
+                        className={`font-mono text-2xs px-1.5 py-0.5 border ${totalMatches > 0
                             ? 'bg-paper-off border-line text-ink font-bold'
                             : 'bg-red/10 border-red/30 text-red font-bold'
                           }`}
@@ -348,7 +348,7 @@ export default function PrivacyPolicyPage() {
                         type="button"
                         onClick={() => setSearchQuery('')}
                         title="Clear find (Esc)"
-                        className="p-1 text-[#8C9099] hover:text-red transition-colors cursor-pointer"
+                        className="p-1 text-ink-500 hover:text-red transition-colors cursor-pointer"
                       >
                         <X size={12} weight="bold" />
                       </button>
@@ -357,7 +357,7 @@ export default function PrivacyPolicyPage() {
                 </div>
 
                 {searchQuery.trim() && (
-                  <div className="pt-1.5 border-t border-line/60 flex items-center justify-between text-[10px] font-mono text-[#8C9099]">
+                  <div className="pt-1.5 border-t border-line/60 flex items-center justify-between text-2xs font-mono text-ink-500">
                     <span>
                       {totalMatches > 0
                         ? 'Press Enter for next, Shift+Enter for prev'
@@ -369,10 +369,10 @@ export default function PrivacyPolicyPage() {
               </div>
 
               {/* Table of Contents (Opaque card with overflow-hidden clips background blobs) */}
-              <div className="space-y-3 bg-white p-4 border border-line shadow-xs overflow-hidden">
-                <div className="font-mono text-xs uppercase tracking-widest text-[#8C9099] font-bold flex items-center justify-between pb-1 border-b border-line">
+              <div className="space-y-3 bg-white p-4 border border-line shadow-1 overflow-hidden">
+                <div className="font-mono text-xs uppercase tracking-widest text-ink-500 font-bold flex items-center justify-between pb-1 border-b border-line">
                   <span>POLICY SECTIONS</span>
-                  <span className="text-[10px] text-[#10B981] font-mono font-bold">{privacyData.sections.length} SECTIONS</span>
+                  <span className="text-2xs text-green-600 font-mono font-bold">{privacyData.sections.length} SECTIONS</span>
                 </div>
 
                 <nav className="space-y-0.5 text-xs font-mono max-h-[420px] overflow-y-auto pr-1">
@@ -384,11 +384,11 @@ export default function PrivacyPolicyPage() {
                         type="button"
                         onClick={() => scrollToSection(sec.id)}
                         className={`w-full text-left py-1.5 px-2 transition-all flex items-center space-x-2 group cursor-pointer ${isActive
-                            ? 'bg-ink text-white font-bold shadow-xs'
-                            : 'text-[#5B5F66] hover:bg-paper-off hover:text-ink'
+                            ? 'bg-ink text-white font-bold shadow-1'
+                            : 'text-ink-600 hover:bg-paper-off hover:text-ink'
                           }`}
                       >
-                        <span className={`text-[10px] font-bold shrink-0 ${isActive ? 'text-red' : 'text-[#8C9099]'}`}>
+                        <span className={`text-2xs font-bold shrink-0 ${isActive ? 'text-red' : 'text-ink-500'}`}>
                           {sec.num}.
                         </span>
                         <span className="truncate">{sec.title}</span>
@@ -399,15 +399,15 @@ export default function PrivacyPolicyPage() {
               </div>
 
               {/* Data Controller Card */}
-              <div className="p-4 bg-white border border-line text-xs font-mono space-y-2.5 shadow-xs">
+              <div className="p-4 bg-white border border-line text-xs font-mono space-y-2.5 shadow-1">
                 <div className="flex items-center space-x-2 text-ink font-bold">
                   <LockKey size={16} weight="bold" className="text-red shrink-0" />
                   <span>DATA CONTROLLER</span>
                 </div>
-                <p className="text-[#5B5F66] text-[11px] leading-relaxed">
+                <p className="text-ink-600 text-2xs leading-relaxed">
                   Speedy Meals Delivery Services, operating under DiscoverTheTech, is the data controller for personal information collected via our website and pre-launch onboarding channels.
                 </p>
-                <div className="pt-2 border-t border-line flex flex-col space-y-1 text-[10px] text-[#8C9099]">
+                <div className="pt-2 border-t border-line flex flex-col space-y-1 text-2xs text-ink-500">
                   <div className="flex items-center space-x-1.5">
                     <Scales size={12} weight="bold" className="text-ink-soft shrink-0" />
                     <span>Statutory Law: PECA 2016</span>
@@ -424,15 +424,15 @@ export default function PrivacyPolicyPage() {
           {/* Right Main Content Area */}
           <div className="lg:col-span-8 space-y-12">
             {/* Executive Document Metadata Card */}
-            <div className="bg-white border border-line p-6 sm:p-8 shadow-xs">
+            <div className="bg-white border border-line p-6 sm:p-8 shadow-1">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-line">
                 <div className="inline-flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                  <span className="font-mono text-xs uppercase tracking-widest text-[#10B981] font-bold">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="font-mono text-xs uppercase tracking-widest text-green-600 font-bold">
                     COMPREHENSIVE PRIVACY SPECIFICATION
                   </span>
                 </div>
-                <div className="flex items-center space-x-2 text-xs font-mono text-[#8C9099]">
+                <div className="flex items-center space-x-2 text-xs font-mono text-ink-500">
                   <span>Version 1.0</span>
                   <span>&middot;</span>
                   <span>Pre-Launch Phase 2026</span>
@@ -444,9 +444,9 @@ export default function PrivacyPolicyPage() {
               </h1>
 
               {/* Pre-launch Status Notice */}
-              <div className="mb-6 p-3.5 bg-paper-off border-l-4 border-l-[#10B981] text-xs font-mono text-[#4B515D] leading-relaxed space-y-1">
+              <div className="mb-6 p-3.5 bg-paper-off border-l-4 border-l-green-500 text-xs font-mono text-ink-600 leading-relaxed space-y-1">
                 <div className="font-bold text-ink uppercase flex items-center space-x-1.5">
-                  <ShieldCheck size={14} className="text-[#10B981]" weight="bold" />
+                  <ShieldCheck size={14} className="text-green-600" weight="bold" />
                   <span>TRANSPARENT PRE-LAUNCH DATA PRACTICES</span>
                 </div>
                 <p>
@@ -457,7 +457,7 @@ export default function PrivacyPolicyPage() {
                 </p>
               </div>
 
-              <div className="space-y-3 font-sans text-sm text-[#4B515D] leading-relaxed">
+              <div className="space-y-3 font-sans text-sm text-ink-600 leading-relaxed">
                 {privacyData.meta.intro.map((p, idx) => (
                   <p key={idx}>
                     <HighlightedText text={p} query={searchQuery} crossLinks={true} />
@@ -467,32 +467,32 @@ export default function PrivacyPolicyPage() {
 
               {/* Quick Privacy Commitments Strip */}
               <div className="mt-8 pt-6 border-t border-line grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-                <div className="p-3.5 bg-[#F8F9FA] border border-line">
+                <div className="p-3.5 bg-ink-50 border border-line">
                   <div className="flex items-center space-x-1.5 text-red font-bold mb-1.5">
                     <LockKey size={16} weight="bold" />
                     <span>NO DATA BROKERAGE</span>
                   </div>
-                  <div className="text-[11px] text-[#5B5F66] leading-relaxed">
+                  <div className="text-2xs text-ink-600 leading-relaxed">
                     <HighlightedText text="We never sell, lease, or monetize personal information to external advertisers or brokers." query={searchQuery} />
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-[#F8F9FA] border border-line">
+                <div className="p-3.5 bg-ink-50 border border-line">
                   <div className="flex items-center space-x-1.5 text-blue font-bold mb-1.5">
                     <Database size={16} weight="bold" />
                     <span>MINIMALIST ONBOARDING</span>
                   </div>
-                  <div className="text-[11px] text-[#5B5F66] leading-relaxed">
+                  <div className="text-2xs text-ink-600 leading-relaxed">
                     <HighlightedText text="No CNIC or identity documentation is requested during pre-launch registration." query={searchQuery} />
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-[#F8F9FA] border border-line">
-                  <div className="flex items-center space-x-1.5 text-[#10B981] font-bold mb-1.5">
+                <div className="p-3.5 bg-ink-50 border border-line">
+                  <div className="flex items-center space-x-1.5 text-green-600 font-bold mb-1.5">
                     <UserCheck size={16} weight="bold" />
                     <span>RIGHT TO ERASURE</span>
                   </div>
-                  <div className="text-[11px] text-[#5B5F66] leading-relaxed">
+                  <div className="text-2xs text-ink-600 leading-relaxed">
                     <HighlightedText text="You can request complete deletion of your registration data anytime by emailing support." query={searchQuery} />
                   </div>
                 </div>
@@ -508,12 +508,12 @@ export default function PrivacyPolicyPage() {
                   <article
                     key={sec.id}
                     id={sec.id}
-                    className="bg-white border border-line p-6 sm:p-8 shadow-xs hover:border-[#8C9099] transition-colors scroll-mt-24 group"
+                    className="bg-white border border-line p-6 sm:p-8 shadow-1 hover:border-ink-500 transition-colors scroll-mt-24 group"
                   >
                     {/* Section Header with copy button */}
                     <div className="flex items-center justify-between pb-3 mb-4 border-b border-line">
                       <div className="flex items-baseline space-x-2.5">
-                        <span className="font-mono text-xs font-bold text-white bg-[#15171A] px-2 py-0.5 shrink-0">
+                        <span className="font-mono text-xs font-bold text-white bg-ink-900 px-2 py-0.5 shrink-0">
                           § {sec.num}
                         </span>
                         <h2 className="font-display text-base sm:text-lg uppercase tracking-tight text-ink">
@@ -525,17 +525,17 @@ export default function PrivacyPolicyPage() {
                         type="button"
                         onClick={() => handleCopySection(sec.num)}
                         title={`Copy link to section ${sec.num}`}
-                        className="opacity-0 group-hover:opacity-100 text-[#8C9099] hover:text-red transition-opacity cursor-pointer p-1 text-xs font-mono flex items-center space-x-1"
+                        className="opacity-0 group-hover:opacity-100 text-ink-500 hover:text-red transition-opacity cursor-pointer p-1 text-xs font-mono flex items-center space-x-1"
                       >
                         {isCopied ? (
                           <>
-                            <Check size={12} className="text-[#10B981]" weight="bold" />
-                            <span className="text-[#10B981] font-bold text-[10px]">COPIED</span>
+                            <Check size={12} className="text-green-600" weight="bold" />
+                            <span className="text-green-600 font-bold text-2xs">COPIED</span>
                           </>
                         ) : (
                           <>
                             <LinkSimple size={12} weight="bold" />
-                            <span className="text-[10px] hidden sm:inline">COPY</span>
+                            <span className="text-2xs hidden sm:inline">COPY</span>
                           </>
                         )}
                       </button>
@@ -543,7 +543,7 @@ export default function PrivacyPolicyPage() {
 
                     {/* Paragraphs */}
                     {sec.paragraphs && sec.paragraphs.length > 0 && (
-                      <div className="space-y-3 font-sans text-xs sm:text-sm text-[#373C46] leading-relaxed mb-4">
+                      <div className="space-y-3 font-sans text-xs sm:text-sm text-ink-700 leading-relaxed mb-4">
                         {sec.paragraphs.map((p, pIdx) => (
                           <p key={pIdx}>
                             <HighlightedText text={p} query={searchQuery} crossLinks={true} />
@@ -555,9 +555,9 @@ export default function PrivacyPolicyPage() {
                     {/* QA Table / Plain Language FAQ (Section 2) */}
                     {sec.tableType === 'qa' && sec.qaTable && (
                       <div className="mt-4 border border-line overflow-hidden">
-                        <div className="bg-paper-off px-4 py-2 border-b border-line font-mono text-[11px] font-bold uppercase text-ink flex items-center justify-between">
+                        <div className="bg-paper-off px-4 py-2 border-b border-line font-mono text-2xs font-bold uppercase text-ink flex items-center justify-between">
                           <span>CORE PRIVACY SUMMARY</span>
-                          <span className="text-[#10B981]">AT A GLANCE</span>
+                          <span className="text-green-600">AT A GLANCE</span>
                         </div>
                         <div className="divide-y divide-line font-mono text-xs">
                           {sec.qaTable.map((row, rIdx) => (
@@ -568,7 +568,7 @@ export default function PrivacyPolicyPage() {
                                   <HighlightedText text={row.q} query={searchQuery} />
                                 </span>
                               </div>
-                              <div className="md:col-span-7 text-[#4B515D] font-sans text-xs sm:text-sm pl-3 md:pl-0">
+                              <div className="md:col-span-7 text-ink-600 font-sans text-xs sm:text-sm pl-3 md:pl-0">
                                 <HighlightedText text={row.a} query={searchQuery} />
                               </div>
                             </div>
@@ -583,12 +583,12 @@ export default function PrivacyPolicyPage() {
                         {sec.subsections.map((sub, sIdx) => (
                           <div key={sIdx} className="bg-paper-off p-4 border border-line">
                             <h3 className="font-mono text-xs font-bold uppercase text-ink mb-1.5 flex items-center space-x-2">
-                              <span className="w-1.5 h-1.5 bg-[#10B981] inline-block" />
+                              <span className="w-1.5 h-1.5 bg-green-500 inline-block" />
                               <span>
                                 <HighlightedText text={sub.title} query={searchQuery} />
                               </span>
                             </h3>
-                            <p className="font-sans text-xs sm:text-sm text-[#4B515D] leading-relaxed">
+                            <p className="font-sans text-xs sm:text-sm text-ink-600 leading-relaxed">
                               <HighlightedText text={sub.content} query={searchQuery} />
                             </p>
                           </div>
@@ -601,27 +601,27 @@ export default function PrivacyPolicyPage() {
             </div>
 
             {/* Official DPO & Support Contact Card */}
-            <div className="bg-[#15171A] text-white p-6 sm:p-8 border-l-4 border-l-[#10B981] shadow-xs space-y-4">
-              <div className="flex items-center space-x-2 font-mono text-xs uppercase tracking-widest text-[#10B981] font-bold">
+            <div className="bg-ink-900 text-white p-6 sm:p-8 border-l-4 border-l-green-500 shadow-1 space-y-4">
+              <div className="flex items-center space-x-2 font-mono text-xs uppercase tracking-widest text-green-600 font-bold">
                 <ShieldCheck size={18} weight="bold" />
                 <span>EXECUTIVE DATA PROTECTION CONTACT</span>
               </div>
               <h3 className="font-display text-xl sm:text-2xl uppercase tracking-tight text-white">
                 Exercise Your Privacy Rights
               </h3>
-              <p className="font-sans text-xs sm:text-sm text-[#A0A4AB] leading-relaxed">
+              <p className="font-sans text-xs sm:text-sm text-ink-500 leading-relaxed">
                 To submit a Subject Access Request (SAR), request account or registration data erasure, or report privacy inquiries, contact our Data Protection Officer:
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-2 font-mono text-xs">
                 <a
                   href="mailto:support@speedymealservices.com"
-                  className="inline-flex items-center space-x-2 px-4 py-2.5 bg-[#25282F] border border-[#3A3F4A] text-white hover:bg-white hover:text-ink transition-colors"
+                  className="inline-flex items-center space-x-2 px-4 py-2.5 bg-ink-800 border border-ink-700 text-white hover:bg-white hover:text-ink transition-colors"
                 >
                   <EnvelopeSimple size={15} weight="bold" className="text-red" />
                   <span>support@speedymealservices.com</span>
                 </a>
-                <div className="inline-flex items-center space-x-2 px-4 py-2.5 bg-[#25282F] border border-[#3A3F4A] text-[#A0A4AB]">
-                  <MapPin size={15} weight="bold" className="text-[#10B981]" />
+                <div className="inline-flex items-center space-x-2 px-4 py-2.5 bg-ink-800 border border-ink-700 text-ink-500">
+                  <MapPin size={15} weight="bold" className="text-green-600" />
                   <span>Jurisdiction: Karachi, Pakistan</span>
                 </div>
               </div>
@@ -629,7 +629,7 @@ export default function PrivacyPolicyPage() {
 
             {/* Bottom Actions */}
             <div className="pt-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs print:hidden">
-              <div className="text-[#5B5F66]">
+              <div className="text-ink-600">
                 Speedy Meals Delivery Services &middot; Operated by DiscoverTheTech
               </div>
               <button

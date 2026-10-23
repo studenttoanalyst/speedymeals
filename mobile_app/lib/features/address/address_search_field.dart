@@ -7,6 +7,7 @@ import '../../core/network/api_exception.dart';
 import '../../data/models/location_models.dart';
 import '../../data/repositories/location_repository.dart';
 import 'selected_location.dart';
+import '../../core/theme/app_tokens.dart';
 
 /// Reusable address autocomplete search field for Phase M2.
 ///
@@ -263,18 +264,18 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
               borderSide: const BorderSide(
                 color: SpeedyMealsColors.outlineVariant,
                 width: 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
               borderSide: const BorderSide(
                 color: SpeedyMealsColors.secondary,
                 width: 1.5,
@@ -293,10 +294,10 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
       margin: const EdgeInsets.only(top: 4),
       decoration: BoxDecoration(
         color: SpeedyMealsColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: AppColors.ink900.withValues(alpha: 0.12),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),

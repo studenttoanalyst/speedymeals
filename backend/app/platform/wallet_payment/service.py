@@ -48,6 +48,8 @@ from app.platform.wallet_payment.models import CashDeposit, Rider, RiderPayout, 
 
 # Wallet thresholds
 KIT_DEPOSIT_AMOUNT = 5000
+# Minimum uniform shirts for a complete kit (business rule, 2026-10-23: was 2).
+KIT_MIN_SHIRTS = 1
 WALLET_REMINDER_THRESHOLD = 100
 
 # Delivery-fee commission split (SpeedyMeals business model): the platform
@@ -457,7 +459,8 @@ def record_kit_completion(
     helmet_serial_number: str | None = None,
 ) -> Rider:
     """Admin records kit deposit and handover. Kit is considered completed
-    when deposit is paid, at least 2 shirts issued, and delivery box issued."""
+    when deposit is paid, at least KIT_MIN_SHIRTS shirts issued, and delivery
+    box issued."""
     rider = _get_rider_or_404(db, rider_id)
 
     rider.kit_deposit_paid = kit_deposit_paid
@@ -483,7 +486,7 @@ def record_kit_completion(
 
     rider.kit_completed = (
         rider.kit_deposit_paid
-        and rider.kit_shirts_issued >= 2
+        and rider.kit_shirts_issued >= KIT_MIN_SHIRTS
         and rider.kit_box_issued
     )
     db.add(rider)

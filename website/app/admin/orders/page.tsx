@@ -123,7 +123,7 @@ export default function AdminOrdersPage() {
       title: 'Order ID',
       sortable: true,
       render: (o) => (
-        <span className="font-mono text-xs font-semibold text-slate-900">
+        <span className="font-mono text-xs font-semibold text-ink-900">
           #{o.id.slice(0, 8)}
         </span>
       ),
@@ -132,14 +132,14 @@ export default function AdminOrdersPage() {
       key: 'restaurant_name',
       title: 'Restaurant Partner',
       sortable: true,
-      render: (o) => <div className="font-semibold text-slate-800 text-xs">{o.restaurant_name}</div>,
+      render: (o) => <div className="font-semibold text-ink-800 text-xs">{o.restaurant_name}</div>,
     },
     {
       key: 'rider_name',
       title: 'Rider',
       render: (o) => (
-        <div className="flex items-center gap-1.5 text-xs text-slate-600">
-          <Bicycle size={13} className="text-slate-400" />
+        <div className="flex items-center gap-1.5 text-xs text-ink-600">
+          <Bicycle size={13} className="text-ink-400" />
           <span>{o.rider_name || <span className="text-amber-600 italic">Unassigned</span>}</span>
         </div>
       ),
@@ -154,10 +154,10 @@ export default function AdminOrdersPage() {
       title: 'Method',
       render: (o) => (
         <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+          className={`text-2xs font-semibold px-2 py-0.5 rounded-md ${
             o.payment_method === 'COD'
               ? 'bg-amber-50 text-amber-800 border border-amber-200'
-              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : 'bg-green-50 text-green-800 border border-green-200'
           }`}
         >
           {o.payment_method}
@@ -170,7 +170,7 @@ export default function AdminOrdersPage() {
       align: 'right',
       sortable: true,
       render: (o) => (
-        <span className="font-mono font-bold text-slate-900 text-xs">
+        <span className="font-mono font-bold text-ink-900 text-xs">
           {formatPKR(o.total_amount)}
         </span>
       ),
@@ -185,7 +185,7 @@ export default function AdminOrdersPage() {
             e.stopPropagation();
             handleRowClick(o);
           }}
-          className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs cursor-pointer"
+          className="px-2.5 py-1 text-xs font-semibold bg-white border border-ink-200 hover:bg-ink-50 text-ink-700 rounded-sm shadow-1 cursor-pointer"
         >
           View Details
         </button>
@@ -194,7 +194,7 @@ export default function AdminOrdersPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50/50 min-h-screen">
+    <div className="flex-1 flex flex-col bg-ink-50/50 min-h-screen">
       <Topbar
         title="All Orders & Live Dispatch"
         onRefresh={() => {
@@ -229,35 +229,35 @@ export default function AdminOrdersPage() {
 
       {/* INSPECTION SLIDEOVER DRAWER */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex justify-end animate-in fade-in">
-          <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex justify-end animate-in fade-in">
+          <div className="w-full max-w-md bg-white h-full shadow-3 flex flex-col justify-between overflow-y-auto">
             <div className="p-6 space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center justify-between border-b border-ink-100 pb-3">
                 <div>
-                  <span className="font-mono text-xs font-bold text-slate-500">
+                  <span className="font-mono text-xs font-bold text-ink-500">
                     #{selectedOrder.id.slice(0, 8)}
                   </span>
-                  <h2 className="text-base font-bold text-slate-900">Order Details & Status</h2>
+                  <h2 className="text-base font-bold text-ink-900">Order Details & Status</h2>
                 </div>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+                  className="p-1.5 text-ink-400 hover:text-ink-600 rounded-sm"
                 >
                   <X size={18} weight="bold" />
                 </button>
               </div>
 
               {/* Status Pill */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-4 rounded-md bg-ink-50 border border-ink-200 flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] text-slate-400">Order Lifecycle State</div>
+                  <div className="text-2xs text-ink-400">Order Lifecycle State</div>
                   <div className="mt-1">
                     <StatusBadge status={selectedOrder.status} />
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[11px] text-slate-400">Payment</div>
-                  <div className="text-xs font-bold text-slate-800 mt-1">
+                  <div className="text-2xs text-ink-400">Payment</div>
+                  <div className="text-xs font-bold text-ink-800 mt-1">
                     {selectedOrder.payment_method}
                   </div>
                 </div>
@@ -265,36 +265,36 @@ export default function AdminOrdersPage() {
 
               {/* Stakeholders */}
               <div className="space-y-3">
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1 text-xs">
-                  <div className="flex items-center gap-2 font-bold text-slate-900">
-                    <Storefront size={14} className="text-slate-400" />
+                <div className="p-3.5 rounded-md border border-ink-200 bg-white space-y-1 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-ink-900">
+                    <Storefront size={14} className="text-ink-400" />
                     <span>Restaurant: {selectedOrder.restaurant_name}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-600 pt-1">
-                    <User size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-2 text-ink-600 pt-1">
+                    <User size={14} className="text-ink-400" />
                     <span>Customer: {selectedOrder.customer_name}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <Bicycle size={14} className="text-slate-400" />
+                  <div className="flex items-center gap-2 text-ink-600">
+                    <Bicycle size={14} className="text-ink-400" />
                     <span>Rider: {selectedOrder.rider_name || 'Unassigned'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Financial Split (Strict SpeedyMeals Rules) */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-                <div className="font-bold text-slate-700 pb-1 border-b border-slate-200">
+              <div className="p-4 rounded-md bg-ink-50 border border-ink-200 space-y-2 text-xs">
+                <div className="font-bold text-ink-700 pb-1 border-b border-ink-200">
                   Financial Settlement Split
                 </div>
-                <div className="flex items-center justify-between text-slate-600">
+                <div className="flex items-center justify-between text-ink-600">
                   <span>Gross Food Volume</span>
                   <span className="font-mono">{formatPKR(selectedOrder.food_subtotal)}</span>
                 </div>
-                <div className="flex items-center justify-between text-rose-600 font-semibold">
+                <div className="flex items-center justify-between text-red-600 font-semibold">
                   <span>Platform Commission (10%)</span>
                   <span className="font-mono">+{formatPKR(selectedOrder.commission_amount)}</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-600">
+                <div className="flex items-center justify-between text-ink-600">
                   <span>Restaurant Net Payable (90%)</span>
                   <span className="font-mono">{formatPKR(selectedOrder.restaurant_payable)}</span>
                 </div>
@@ -302,7 +302,7 @@ export default function AdminOrdersPage() {
                   <span>Rider Retained Fee (90%)</span>
                   <span className="font-mono">+{formatPKR(selectedOrder.rider_earning)}</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
+                <div className="flex items-center justify-between text-ink-900 font-bold pt-2 border-t border-ink-200 text-sm">
                   <span>Gross Customer Total</span>
                   <span className="font-mono">{formatPKR(selectedOrder.total_amount)}</span>
                 </div>
@@ -310,12 +310,12 @@ export default function AdminOrdersPage() {
 
               {/* Cancellation Banner */}
               {selectedOrder.status === 'Cancelled' && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-1">
+                <div className="p-3.5 bg-red-50 border border-red-200 rounded-md text-xs text-red-800 space-y-1">
                   <div className="font-bold flex items-center gap-1.5">
                     <Warning size={15} weight="bold" />
                     <span>Order Was Cancelled</span>
                   </div>
-                  <p className="text-[11px] text-rose-700">
+                  <p className="text-2xs text-red-700">
                     Reason: {selectedOrder.cancellation_reason || 'Administrative intervention'}
                   </p>
                 </div>
@@ -324,18 +324,18 @@ export default function AdminOrdersPage() {
 
             {/* Action Bar */}
             {selectedOrder.status !== 'Delivered' && selectedOrder.status !== 'Cancelled' && (
-              <div className="p-5 border-t border-slate-200 bg-white flex items-center gap-3">
+              <div className="p-5 border-t border-ink-200 bg-white flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setReassignModalOpen(true)}
-                  className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs cursor-pointer"
+                  className="flex-1 py-2 bg-ink-100 hover:bg-ink-200 text-ink-700 font-semibold rounded-sm text-xs cursor-pointer"
                 >
                   Reassign Rider
                 </button>
                 <button
                   type="button"
                   onClick={() => setCancelModalOpen(true)}
-                  className="flex-1 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-semibold rounded-lg text-xs border border-slate-200 transition-colors cursor-pointer"
+                  className="flex-1 py-2 bg-ink-100 hover:bg-red-50 hover:text-red-700 text-ink-700 font-semibold rounded-sm text-xs border border-ink-200 transition-colors cursor-pointer"
                 >
                   Cancel Order
                 </button>
@@ -347,17 +347,17 @@ export default function AdminOrdersPage() {
 
       {/* REASSIGN MODAL */}
       {reassignModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
-            <h3 className="text-base font-bold text-slate-900">Reassign Order Rider</h3>
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95">
+            <h3 className="text-base font-bold text-ink-900">Reassign Order Rider</h3>
             <form onSubmit={handleReassignRider} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Select Available Rider</label>
+                <label className="font-semibold text-ink-700">Select Available Rider</label>
                 <select
                   required
                   value={selectedRiderId}
                   onChange={(e) => setSelectedRiderId(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-800"
+                  className="w-full p-2.5 rounded-sm border border-ink-200 bg-ink-50 text-ink-800"
                 >
                   <option value="">Select rider...</option>
                   {availableRiders.map((r) => (
@@ -368,17 +368,17 @@ export default function AdminOrdersPage() {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setReassignModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold bg-ink-900 hover:bg-ink-800 text-white rounded-sm shadow-1 transition-colors cursor-pointer"
                 >
                   Confirm Reassign
                 </button>
@@ -390,33 +390,33 @@ export default function AdminOrdersPage() {
 
       {/* CANCEL MODAL */}
       {cancelModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
-            <h3 className="text-base font-bold text-slate-900">Cancel Order</h3>
+        <div className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-3 border border-ink-200 space-y-4 animate-in zoom-in-95">
+            <h3 className="text-base font-bold text-ink-900">Cancel Order</h3>
             <form onSubmit={handleCancelOrder} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Reason for Cancellation</label>
+                <label className="font-semibold text-ink-700">Reason for Cancellation</label>
                 <textarea
                   required
                   rows={3}
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Specify reason for cancelling this order..."
-                  className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900"
+                  className="w-full p-2 rounded-sm border border-ink-200 bg-ink-50 text-ink-900"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-ink-100">
                 <button
                   type="button"
                   onClick={() => setCancelModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-ink-600 hover:bg-ink-100 rounded-sm cursor-pointer"
                 >
                   Go Back
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-xs cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-sm shadow-1 cursor-pointer"
                 >
                   Cancel & Refund
                 </button>

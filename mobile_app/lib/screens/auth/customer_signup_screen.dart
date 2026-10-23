@@ -5,6 +5,8 @@ import '../../services/auth_service.dart';
 import '../../widgets/legal_links.dart';
 import 'customer_login_screen.dart';
 import 'otp_verification_screen.dart';
+import '../../core/theme/app_tokens.dart';
+import '../../core/input/input_formatters.dart';
 
 /// Customer Sign Up Screen matching Stitch design (`speedy_meals_customer_sign_up`).
 class CustomerSignUpScreen extends StatefulWidget {
@@ -52,9 +54,9 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Please accept the Terms of Service & Privacy Policy.'),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
       return;
@@ -96,9 +98,9 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
     } catch (_) {
@@ -106,9 +108,9 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('An unexpected error occurred. Please try again.'),
-          backgroundColor: const Color(0xFFDC2626),
+          backgroundColor: AppColors.cta,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
         ),
       );
     } finally {
@@ -125,7 +127,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.ink50,
       body: SafeArea(
         child: Column(
           children: [
@@ -137,17 +139,17 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                 children: [
                   InkWell(
                     onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     child: Container(
                       width: 40,
                       height: 40,
                       decoration: const BoxDecoration(
-                        color: Color(0xFFF1F5F9),
+                        color: AppColors.ink100,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.arrow_back_rounded,
-                        color: Color(0xFF334155),
+                        color: AppColors.ink700,
                         size: 20,
                       ),
                     ),
@@ -155,9 +157,9 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFFEE2E2)),
+                      color: AppColors.red50,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(color: AppColors.red100),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -165,7 +167,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                         Icon(
                           Icons.soup_kitchen_rounded,
                           size: 14,
-                          color: Color(0xFFDC2626),
+                          color: AppColors.cta,
                         ),
                         SizedBox(width: 6),
                         Text(
@@ -173,7 +175,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFFDC2626),
+                            color: AppColors.cta,
                           ),
                         ),
                       ],
@@ -205,7 +207,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                         style: theme.textTheme.displayLarge?.copyWith(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
+                          color: AppColors.ink900,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -215,7 +217,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF64748B),
+                          color: AppColors.ink500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -272,13 +274,18 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                       TextFormField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
+                        inputFormatters: const [PkMobileInputFormatter()],
                         decoration: _inputDecoration(
-                          hint: '+1 (555) 019-2834',
+                          hint: '300 1234567',
                           prefixIcon: Icons.phone_outlined,
-                        ),
+                        ).copyWith(prefixText: '+92 '),
                         validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
+                          final digits = (val ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                          if (digits.isEmpty) {
                             return 'Please enter your phone number';
+                          }
+                          if (digits.length < 10) {
+                            return 'Enter a complete number';
                           }
                           return null;
                         },
@@ -295,9 +302,9 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                             height: 24,
                             child: Checkbox(
                               value: _agreeToTerms,
-                              activeColor: const Color(0xFFDC2626),
+                              activeColor: AppColors.cta,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(AppRadius.xs),
                               ),
                               onChanged: (val) {
                                 setState(() {
@@ -312,14 +319,14 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                               text: TextSpan(
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF64748B),
+                                  color: AppColors.ink500,
                                 ),
                                 children: [
                                   const TextSpan(text: 'I agree to the '),
                                   TextSpan(
                                     text: 'Terms & Conditions',
                                     style: const TextStyle(
-                                      color: Color(0xFFDC2626),
+                                      color: AppColors.cta,
                                       fontWeight: FontWeight.w700,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -329,7 +336,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                                   TextSpan(
                                     text: 'Privacy Policy',
                                     style: const TextStyle(
-                                      color: Color(0xFFDC2626),
+                                      color: AppColors.cta,
                                       fontWeight: FontWeight.w700,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -351,13 +358,13 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleSignUp,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFDC2626),
-                            disabledBackgroundColor: const Color(0xFFCBD5E1),
+                            backgroundColor: AppColors.cta,
+                            disabledBackgroundColor: AppColors.ink300,
                             elevation: _isLoading ? 0 : 4,
                             shadowColor:
-                                const Color(0xFFDC2626).withValues(alpha: 0.35),
+                                AppColors.cta.withValues(alpha: 0.35),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(AppRadius.sm),
                             ),
                           ),
                           child: _isLoading
@@ -407,7 +414,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
               decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
-                  top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
+                  top: BorderSide(color: AppColors.ink100, width: 1),
                 ),
               ),
               child: Row(
@@ -418,7 +425,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      color: AppColors.ink500,
                     ),
                   ),
                   GestureDetector(
@@ -435,7 +442,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFDC2626),
+                        color: AppColors.cta,
                       ),
                     ),
                   ),
@@ -460,11 +467,11 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.ink100, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFDC2626).withValues(alpha: 0.1),
+                    color: AppColors.cta.withValues(alpha: 0.1),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -483,7 +490,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFDC2626),
+                  color: AppColors.cta,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -499,9 +506,9 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
         const Text(
           'SPEEDY MEALS',
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.w800,
-            color: Color(0xFFDC2626),
+            color: AppColors.cta,
             letterSpacing: 2.0,
           ),
         ),
@@ -517,7 +524,7 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF334155),
+          color: AppColors.ink700,
         ),
       ),
     );
@@ -533,28 +540,28 @@ class _CustomerSignUpScreenState extends State<CustomerSignUpScreen> {
       hintStyle: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w400,
-        color: Color(0xFF94A3B8),
+        color: AppColors.ink400,
       ),
-      prefixIcon: Icon(prefixIcon, color: const Color(0xFF94A3B8), size: 20),
+      prefixIcon: Icon(prefixIcon, color: AppColors.ink400, size: 20),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.ink200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626), width: 2),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFDC2626)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderSide: const BorderSide(color: AppColors.cta),
       ),
     );
   }

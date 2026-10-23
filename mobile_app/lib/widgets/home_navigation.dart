@@ -6,6 +6,7 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/tracking/track_orders_tab.dart';
 import '../services/auth_service.dart';
 import '../services/cart_service.dart';
+import '../core/theme/app_tokens.dart';
 
 /// Bottom navigation bar for the main app.
 class HomeNavigation extends StatefulWidget {
@@ -77,7 +78,7 @@ class _HomeNavigationState extends State<HomeNavigation> {
           color: theme.colorScheme.surfaceContainerLowest,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha:0.1),
+              color: AppColors.ink900.withValues(alpha:0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -182,7 +183,7 @@ class _NavItem extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isSelected
-                      ? const Color(0xFFDC2626)
+                      ? AppColors.cta
                       : Colors.transparent,
                 ),
                 child: Icon(
@@ -204,7 +205,7 @@ class _NavItem extends StatelessWidget {
                     ),
                     constraints: const BoxConstraints(minWidth: 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1D4ED8),
+                      color: AppColors.blue600,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(color: Colors.white, width: 1.5),
                     ),
@@ -213,7 +214,7 @@ class _NavItem extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 9,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -226,7 +227,7 @@ class _NavItem extends StatelessWidget {
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: isSelected
-                  ? const Color(0xFFDC2626)
+                  ? AppColors.cta
                   : theme.colorScheme.onSurfaceVariant,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),

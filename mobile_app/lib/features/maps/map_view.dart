@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../constants/colors.dart';
+import 'maps_platform.dart';
 
 /// Reusable Google Maps widget for SpeedyMeals mobile application.
 ///
@@ -195,6 +196,11 @@ class _MapViewState extends State<MapView> {
     if (_initializationError != null) {
       return _buildFallback(context, _initializationError);
     }
+    // Web without the Maps JS API (no MAPS_API_KEY): building GoogleMap would
+    // throw at render time, which the try/catch below cannot intercept.
+    if (!mapsAvailable) {
+      return _buildFallback(context, 'Google Maps is not configured for this build.');
+    }
 
     Widget mapWidget;
     try {
@@ -258,12 +264,18 @@ class _MapViewState extends State<MapView> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Map View',
+                'Map unavailable',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: SpeedyMealsColors.onSurface,
                 ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Search for your address above instead.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: SpeedyMealsColors.onSurfaceVariant),
               ),
               if (widget.markers.isNotEmpty) ...[
                 const SizedBox(height: 4),
